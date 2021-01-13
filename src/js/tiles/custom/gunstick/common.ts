@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 
+import { Dict, List, pipe, tuple } from "cnc-tskit";
+
 export interface DataTableItem {
     author:string;
     poemName:string;
@@ -36,6 +38,37 @@ export interface Data {
     table:{
         [k:string]:Array<DataTableItem>
     };
+}
+
+export type ChartData = {[verse:string]:Array<{x: number; y: number; z: number}>};
+
+
+export function transformDataForCharts(data:Data):ChartData {
+    return pipe(
+        data.countRY,
+        Dict.toEntries(),
+        List.map(([verse, counts]) => tuple(
+            verse,
+            pipe(
+                counts,
+                Dict.toEntries(),
+                List.sortedBy(([year,]) => parseInt(year)),
+                List.map(
+                    ([year, count]) => ({
+                        x: parseInt(year),
+                        y: count,
+                        z: 3
+                    })
+                )
+            )
+        )),
+        List.sortedBy(
+            ([verse, counts]) => List.foldl((acc, curr) => acc + curr.y, 0, counts),
+        ),
+        List.reverse(),
+        List.slice(0, 5),
+        Dict.fromEntries()
+    );
 }
 
 export function mkEmptyData():Data {

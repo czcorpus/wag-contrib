@@ -74,7 +74,8 @@ export class GunstickTile implements ITileProvider {
             initState: {
                 isBusy: isBusy,
                 data: mkEmptyData(),
-                error: null
+                error: null,
+                isAltViewMode: false
             }
         });
         this.label = appServices.importExternalMessage(conf.label || 'html__main_label');
@@ -119,7 +120,7 @@ export class GunstickTile implements ITileProvider {
     }
 
     supportsAltView():boolean {
-        return false;
+        return true;
     }
 
     exposeModel():StatelessModel<{}>|null {

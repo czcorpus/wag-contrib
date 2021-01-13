@@ -21,15 +21,16 @@ import { IAppServices } from '../../../appServices';
 import { Backlink } from '../../../page/tile';
 import { RecognizedQueries } from '../../../query';
 import { GunstickApi } from './api';
-import { Data, DataLoadedPayload, mkEmptyData } from './common';
+import { Data, DataLoadedPayload, mkEmptyData, ChartData } from './common';
 import { ActionName as GlobalActionName, Actions as GlobalActions } from '../../../models/actions';
-import { List } from 'cnc-tskit';
+import { Dict, List, pipe, tuple } from 'cnc-tskit';
 import { findCurrQueryMatch } from '../../../models/query';
 
 export interface GunstickModelState {
     isBusy:boolean;
     error:string;
     data:Data;
+    isAltViewMode:boolean;
 }
 
 export interface GunstickModelArgs {
@@ -103,6 +104,23 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
                     } else {
                         state.data = action.payload.data;
                     }
+                }
+            }
+        );
+
+        this.addActionHandler<GlobalActions.EnableAltViewMode>(
+            GlobalActionName.EnableAltViewMode,
+            (state, action) => {
+                if (action.payload.ident === this.tileId) {
+                    state.isAltViewMode = true;
+                }
+            }
+        );
+        this.addActionHandler<GlobalActions.DisableAltViewMode>(
+            GlobalActionName.DisableAltViewMode,
+            (state, action) => {
+                if (action.payload.ident === this.tileId) {
+                    state.isAltViewMode = false;
                 }
             }
         );

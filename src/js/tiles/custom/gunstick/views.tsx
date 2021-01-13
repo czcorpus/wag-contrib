@@ -18,16 +18,114 @@
 
 import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
 import * as React from 'react';
-import { Dict, List, pipe } from 'cnc-tskit';
+import { Dict, List, pipe, tuple } from 'cnc-tskit';
 import { Theme } from '../../../page/theme';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile';
 import { GlobalComponents } from '../../../views/global';
 import { GunstickModel, GunstickModelState } from './model';
+import { ScatterChart, CartesianGrid, XAxis, YAxis, ZAxis, Legend, Scatter, Tooltip,
+    ResponsiveContainer } from 'recharts';
+import { ChartData, Data, transformDataForCharts } from './common';
 
 
 export function init(dispatcher:IActionDispatcher, ut:ViewUtils<GlobalComponents>, theme:Theme, model:GunstickModel):TileComponent {
 
     const globalComponents = ut.getComponents();
+
+
+    const createColorMapping = (data:ChartData):(v:number|string)=>string => {
+        return theme.categoryPalette(pipe(
+            data,
+            Dict.toEntries(),
+            List.map(([verse,]) => verse)
+        ));
+    }
+
+    const rangeOf = (data:ChartData):[number, number] => {
+        const item = List.head(data[List.head(Dict.keys(data))]);
+        return pipe(
+            data,
+            Dict.toEntries(),
+            List.flatMap(([,counts]) => counts),
+            List.foldl(
+                ([min, max], curr) => {
+                    return tuple(
+                        Math.min(min, curr.x),
+                        Math.max(max, curr.x)
+                    )
+                },
+                tuple(item.x, item.x)
+            )
+        );
+    }
+
+
+    const Chart:React.FC<{
+        data:ChartData;
+        isMobile:boolean;
+        widthFract:number;
+
+    }> = (props) => {
+
+        const mapping = createColorMapping(props.data);
+        return (
+            <globalComponents.ResponsiveWrapper minWidth={props.isMobile ? undefined : 250}
+                                        widthFract={props.widthFract} render={(width:number, height:number) => (
+                <ScatterChart width={Math.max(100, width)} height={Math.max(350, height)} margin={{ top: 20, right: 20, bottom: 10, left: 10 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="x" name="year" type="number" unit="" domain ={rangeOf(props.data)} />
+                    <YAxis dataKey="y" name="count" unit="" type="number" />
+                    <ZAxis dataKey="z" range={[64, 144]}  />
+                    <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+                    <Legend />
+                    {pipe(
+                        props.data,
+                        Dict.toEntries(),
+                        List.map(
+                            ([verse, counts]) => (
+                                <Scatter key={`item:${verse}`} name={verse} data={counts} fill={mapping(verse)} />
+                            ),
+                        )
+                    )}
+                </ScatterChart>)} />
+        );
+    };
+
+
+    const Table:React.FC<{
+        data:Data;
+    }> = (props) => (
+        <div style={{maxHeight: '20em', overflowY: 'auto'}}>
+            <h2>nalezeno: {props.data.count}</h2>
+            <p>zobrazují se pouze nejfrekventovanější položky</p>
+            <dl>
+                {pipe(
+                    props.data.countRY,
+                    Dict.toEntries(),
+                    List.map(([rhyme, counts]) => (
+                        <React.Fragment key={`item:${rhyme}`}>
+                            <dt>{rhyme}</dt>
+                            <dd>
+                                <span>
+                                    {pipe(
+                                        counts,
+                                        Dict.toEntries(),
+                                        List.sortedBy(([year,]) => parseInt(year)),
+                                        List.map(([year, count]) => (
+                                            <React.Fragment key={`y:${year}`}>
+                                                <strong>{year}</strong>: {count}
+                                            </React.Fragment>
+                                        )),
+                                        List.join(i => <span key={`i:${i}`}>, </span>)
+                                    )}
+                                </span>
+                            </dd>
+                        </React.Fragment>
+                    ))
+                )}
+            </dl>
+        </div>
+    );
 
 
     // -------------------- <GunstickTileView /> -----------------------------------------------
@@ -38,18 +136,12 @@ export function init(dispatcher:IActionDispatcher, ut:ViewUtils<GlobalComponents
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}>
             <div className="GunstickTileView">
-                <dl>
-                    <dt>nalezeno</dt>
-                    <dt>{props.data.count}</dt>
-                    <dt>počty dokladů v jednotlivých letech</dt>
-                    <dd>
-                        {pipe(
-                            props.data.countRY,
-                            Dict.toEntries(),
-                            List.map(([rhyme, counts]) => <span>{rhyme}: {Dict.toEntries(counts).join(', ')}</span>)
-                        )}
-                    </dd>
-                </dl>
+                {props.isAltViewMode ?
+                    <Table data={props.data} /> :
+                    <Chart data={transformDataForCharts(props.data)}
+                            isMobile={props.isMobile}
+                            widthFract={props.widthFract} />
+                }
             </div>
         </globalComponents.TileWrapper>
     );
