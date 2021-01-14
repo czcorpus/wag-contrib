@@ -75,7 +75,6 @@ export function init(dispatcher:IActionDispatcher, ut:ViewUtils<GlobalComponents
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="x" name="year" type="number" unit="" domain ={rangeOf(props.data)} />
                     <YAxis dataKey="y" name="count" unit="" type="number" />
-                    <ZAxis dataKey="z" range={[64, 144]}  />
                     <Tooltip cursor={{ strokeDasharray: '3 3' }} />
                     <Legend />
                     {pipe(
