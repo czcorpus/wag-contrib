@@ -20,7 +20,7 @@ import { Dict, HTTP, List } from 'cnc-tskit';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { IApiServices } from '../../../appServices';
-import { cachedAjax$ } from '../../../page/ajax';
+import { cachedAjax$, ResponseType } from '../../../page/ajax';
 import { DataApi, HTTPHeaders, IAsyncKeyValueStore } from '../../../types';
 import { Data, DataTableItem } from './common';
 
@@ -32,6 +32,13 @@ export interface RequestArgs {
     y2?:number;
     end?:string;
     detail?:'true'|'false';
+}
+
+export interface KSPRequestArgs {
+    q:string;
+    unit:'word'|'lemma';
+    src:'all';
+    lang:'cz';
 }
 
 export interface RawDataTableItem {
@@ -78,6 +85,76 @@ export class GunstickApi implements DataApi<RequestArgs, Data> {
             this.apiURL,
             args
         ).pipe(
+            map(
+                resp => ({
+                    count: resp.count,
+                    countRY: Dict.map(
+                        item => Dict.map(
+                            count => parseInt(count),
+                            item
+                        ),
+                        resp.countRY
+                    ),
+                    dataSize: Dict.map(
+                        size => parseInt(size),
+                        resp.dataSize
+                    ),
+                    table: Dict.map(
+                        items => List.map<RawDataTableItem, DataTableItem>(
+                            v => ({...v, year: parseInt(v.year)}),
+                            items
+                        ),
+                        resp.table
+                    )
+                })
+            )
+        )
+
+    }
+}
+
+
+/**
+ * Currently, this is a raw and dirty adapter which extracts JSON data out of an HTML page.
+ */
+export class GunstickKspApi implements DataApi<KSPRequestArgs, Data> {
+
+    private readonly cache:IAsyncKeyValueStore;
+
+    private readonly apiURL:string;
+
+    private readonly customHeaders:HTTPHeaders;
+
+
+    constructor(cache:IAsyncKeyValueStore, apiURL:string, apiServices:IApiServices) {
+        this.apiURL = apiURL;
+        this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
+        this.cache = cache;
+    }
+
+    call(args:KSPRequestArgs):Observable<Data> {
+        return cachedAjax$<string>(this.cache)(
+            HTTP.Method.GET,
+            this.apiURL,
+            args,
+            {
+                responseType: ResponseType.TEXT
+            }
+        ).pipe(
+            map(
+                resp => {
+                    const srch = /var gunstick = (\{.+\});/.exec(resp);
+                    if (srch) {
+                        return JSON.parse(srch[1]) as HTTPResponse;
+                    }
+                    return {
+                        count: 0,
+                        countRY: {},
+                        dataSize: {},
+                        table: {}
+                    };
+                }
+            ),
             map(
                 resp => ({
                     count: resp.count,

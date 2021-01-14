@@ -57,7 +57,7 @@ export function transformDataForCharts(data:Data):ChartData {
                     ([year, count]) => ({
                         x: parseInt(year),
                         y: count,
-                        z: 3
+                        z: 2
                     })
                 )
             )

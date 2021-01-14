@@ -20,10 +20,10 @@ import { IActionQueue, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices';
 import { Backlink } from '../../../page/tile';
 import { RecognizedQueries } from '../../../query';
-import { GunstickApi } from './api';
-import { Data, DataLoadedPayload, mkEmptyData, ChartData } from './common';
+import { GunstickKspApi } from './api';
+import { Data, DataLoadedPayload, mkEmptyData } from './common';
 import { ActionName as GlobalActionName, Actions as GlobalActions } from '../../../models/actions';
-import { Dict, List, pipe, tuple } from 'cnc-tskit';
+import { List } from 'cnc-tskit';
 import { findCurrQueryMatch } from '../../../models/query';
 
 export interface GunstickModelState {
@@ -37,7 +37,7 @@ export interface GunstickModelArgs {
     dispatcher:IActionQueue;
     initState:GunstickModelState;
     tileId:number;
-    api:GunstickApi,
+    api:GunstickKspApi,
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
     backlink:Backlink;
@@ -48,7 +48,7 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
 
     private readonly tileId:number;
 
-    private readonly api:GunstickApi;
+    private readonly api:GunstickKspApi;
 
     constructor({dispatcher, initState, api, tileId, appServices, queryMatches, backlink, queryDomain}:GunstickModelArgs) {
         super(dispatcher, initState);
@@ -66,7 +66,9 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
             (state, action, dispatch) => {
                 this.api.call({
                     q: findCurrQueryMatch(List.head(queryMatches)).lemma,
-                    unit: 'lemma'
+                    unit: 'lemma',
+                    src: 'all',
+                    lang: 'cz'
                 }).subscribe(
                     (data) => {
                         dispatch<GlobalActions.TileDataLoaded<DataLoadedPayload>>({

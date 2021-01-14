@@ -22,7 +22,7 @@ import { QueryType } from '../../../query/index';
 import { init as viewInit } from './views';
 import { TileConf, ITileProvider, TileComponent, TileFactory } from '../../../page/tile';
 import { GunstickModel } from './model';
-import { GunstickApi } from './api';
+import { GunstickApi, GunstickKspApi } from './api';
 import { mkEmptyData } from './common';
 
 
@@ -53,7 +53,7 @@ export class GunstickTile implements ITileProvider {
 
     private readonly label:string;
 
-    private readonly api:GunstickApi;
+    private readonly api:GunstickKspApi;
 
     private view:TileComponent;
 
@@ -62,7 +62,7 @@ export class GunstickTile implements ITileProvider {
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.api = new GunstickApi(cache, conf.apiURL, appServices);
+        this.api = new GunstickKspApi(cache, conf.apiURL, appServices);
         this.model = new GunstickModel({
             dispatcher,
             appServices,
