@@ -49,6 +49,7 @@ export interface KSPRequestArgs {
     b?:unknown;
     p?:unknown;
     sort:'a';
+    src:'all';
     'pos[0]'?:'on';
     'pos[1]'?:'on';
     'pos[2]'?:'on';

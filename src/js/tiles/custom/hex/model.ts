@@ -71,6 +71,7 @@ export class HexModel extends StatelessModel<HexModelState> {
                 this.api.call({
                     q: match.lemma,
                     sort: 'a',
+                    src: 'all',
                     'pos[0]': 'on',
                     'pos[1]': 'on',
                     'pos[4]': 'on',
