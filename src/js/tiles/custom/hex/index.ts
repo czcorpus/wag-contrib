@@ -141,4 +141,9 @@ export class HexTile implements ITileProvider {
     }
 }
 
-export const init:TileFactory.TileFactory<HexTileConf> = (args) => new HexTile(args);
+export const init:TileFactory.TileFactory<HexTileConf> = {
+
+    sanityCheck: (args) => [],
+
+    create: (args) => new HexTile(args)
+};

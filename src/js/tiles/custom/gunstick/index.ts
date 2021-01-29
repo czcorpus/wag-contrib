@@ -22,7 +22,7 @@ import { QueryType } from '../../../query/index';
 import { init as viewInit } from './views';
 import { TileConf, ITileProvider, TileComponent, TileFactory } from '../../../page/tile';
 import { GunstickModel } from './model';
-import { GunstickApi, GunstickKspApi } from './api';
+import { GunstickKspApi } from './api';
 import { mkEmptyData } from './common';
 
 
@@ -140,4 +140,9 @@ export class GunstickTile implements ITileProvider {
     }
 }
 
-export const init:TileFactory.TileFactory<GunstickTileConf> = (args) => new GunstickTile(args);
+export const init:TileFactory.TileFactory<GunstickTileConf> = {
+
+    sanityCheck: (args) => [],
+
+    create: (args) => new GunstickTile(args)
+};
