@@ -50,7 +50,6 @@ export interface KSPRequestArgs {
     p?:unknown;
     sort:'a';
     src:'all';
-    'pos[0]'?:'on';
     'pos[1]'?:'on';
     'pos[2]'?:'on';
     'pos[3]'?:'on';
@@ -60,6 +59,7 @@ export interface KSPRequestArgs {
     'pos[7]'?:'on';
     'pos[8]'?:'on';
     'pos[9]'?:'on';
+    'pos[10]'?:'on';
     met:'kw';
     min:number;
     alpha:10|100;
