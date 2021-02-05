@@ -72,9 +72,9 @@ export class HexModel extends StatelessModel<HexModelState> {
                     q: match.lemma,
                     sort: 'a',
                     src: 'all',
-                    'pos[0]': 'on',
                     'pos[1]': 'on',
-                    'pos[4]': 'on',
+                    'pos[2]': 'on',
+                    'pos[5]': 'on',
                     met: 'kw',
                     min: 3, // TODO user configurable
                     alpha: 100, // TODO user configurable

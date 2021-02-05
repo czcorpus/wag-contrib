@@ -28,7 +28,7 @@ import { Data, DataTableItem } from './common';
 
 export function posToIndex(pos:PoSValues):number|undefined {
     return {
-        [PoSValues.NOUN]: pos[0],
+        [PoSValues.NOUN]: 0,
         [PoSValues.ADJECTIVE]: 1,
         [PoSValues.PRONOUN]: 2,
         [PoSValues.NUMERAL]: 3,
