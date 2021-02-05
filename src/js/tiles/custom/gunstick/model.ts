@@ -31,6 +31,7 @@ export interface GunstickModelState {
     error:string;
     data:Data;
     isAltViewMode:boolean;
+    serviceInfoUrl:string;
 }
 
 export interface GunstickModelArgs {

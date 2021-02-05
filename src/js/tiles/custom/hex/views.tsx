@@ -94,7 +94,8 @@ export function init(dispatcher:IActionDispatcher, ut:ViewUtils<GlobalComponents
         <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
                 hasData={props.data.count > 0}
                 supportsTileReload={props.supportsReloadOnError}
-                issueReportingUrl={props.issueReportingUrl}>
+                issueReportingUrl={props.issueReportingUrl}
+                sourceIdent={{corp: 'HEX', url: props.serviceInfoUrl}}>
             <div className="GunstickTileView">
                 {props.isAltViewMode ?
                     <Table data={props.data} /> :
