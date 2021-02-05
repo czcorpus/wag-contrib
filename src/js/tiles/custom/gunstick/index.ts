@@ -24,6 +24,7 @@ import { TileConf, ITileProvider, TileComponent, TileFactory } from '../../../pa
 import { GunstickModel } from './model';
 import { GunstickKspApi } from './api';
 import { mkEmptyData } from './common';
+import { LocalizedConfMsg } from '../../../types';
 
 
 declare var require:(src:string)=>void;  // webpack
@@ -32,6 +33,7 @@ require('./style.less');
 
 export interface GunstickTileConf extends TileConf {
     apiURL:string;
+    serviceInfoUrl:LocalizedConfMsg;
 }
 
 /**
@@ -75,7 +77,8 @@ export class GunstickTile implements ITileProvider {
                 isBusy: isBusy,
                 data: mkEmptyData(),
                 error: null,
-                isAltViewMode: false
+                isAltViewMode: false,
+                serviceInfoUrl: appServices.importExternalMessage(conf.serviceInfoUrl)
             }
         });
         this.label = appServices.importExternalMessage(conf.label || 'html__main_label');

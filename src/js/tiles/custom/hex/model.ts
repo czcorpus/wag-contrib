@@ -33,6 +33,7 @@ export interface HexModelState {
     data:Data;
     isAltViewMode:boolean;
     word:string;
+    serviceInfoUrl:string;
 }
 
 export interface HexModelArgs {
