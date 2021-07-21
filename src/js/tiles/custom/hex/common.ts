@@ -81,7 +81,3 @@ export function mkEmptyData():Data {
         }
     };
 }
-
-export interface DataLoadedPayload {
-    data:Data;
-}

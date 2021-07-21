@@ -20,7 +20,7 @@ import { IActionDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices';
 import { QueryType } from '../../../query/index';
 import { init as viewInit } from './views';
-import { TileConf, ITileProvider, TileComponent, TileFactory } from '../../../page/tile';
+import { TileConf, ITileProvider, TileComponent, TileFactoryArgs, TileFactory } from '../../../page/tile';
 import { GunstickModel } from './model';
 import { GunstickKspApi } from './api';
 import { mkEmptyData } from './common';
@@ -59,7 +59,10 @@ export class GunstickTile implements ITileProvider {
 
     private view:TileComponent;
 
-    constructor({tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy, cache, queryMatches, domain1}:TileFactory.Args<GunstickTileConf>) {
+    constructor({
+        tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
+        cache, queryMatches, domain1}:TileFactoryArgs<GunstickTileConf>
+    ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
@@ -143,7 +146,7 @@ export class GunstickTile implements ITileProvider {
     }
 }
 
-export const init:TileFactory.TileFactory<GunstickTileConf> = {
+export const init:TileFactory<GunstickTileConf> = {
 
     sanityCheck: (args) => [],
 

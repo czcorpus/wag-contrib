@@ -20,12 +20,14 @@ import { IActionQueue, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices';
 import { Backlink } from '../../../page/tile';
 import { RecognizedQueries } from '../../../query';
-import { Data, DataLoadedPayload, mkEmptyData } from './common';
-import { ActionName as GlobalActionName, Actions as GlobalActions } from '../../../models/actions';
+import { Data, mkEmptyData } from './common';
+import { Actions as GlobalActions } from '../../../models/actions';
+import { Actions } from './actions';
 import { List, tuple } from 'cnc-tskit';
 import { findCurrQueryMatch } from '../../../models/query';
 import { HexKspApi, posToIndex } from './api';
 import { PoSValues } from '../../../postag';
+
 
 export interface HexModelState {
     isBusy:boolean;
@@ -59,8 +61,8 @@ export class HexModel extends StatelessModel<HexModelState> {
         this.api = api;
 
 
-        this.addActionHandler<GlobalActions.RequestQueryResponse>(
-            GlobalActionName.RequestQueryResponse,
+        this.addActionHandler<typeof GlobalActions.RequestQueryResponse>(
+            GlobalActions.RequestQueryResponse.name,
             (state, action) => {
                 state.isBusy = true;
                 state.error = null;
@@ -81,9 +83,9 @@ export class HexModel extends StatelessModel<HexModelState> {
                     alpha: 100, // TODO user configurable
                     lang: 'cz'
                 }).subscribe(
-                    (data) => {
-                        dispatch<GlobalActions.TileDataLoaded<DataLoadedPayload>>({
-                            name: GlobalActionName.TileDataLoaded,
+                    data => {
+                        dispatch<typeof Actions.TileDataLoaded>({
+                            name: Actions.TileDataLoaded.name,
                             payload: {
                                 tileId: this.tileId,
                                 isEmpty: false,
@@ -91,11 +93,11 @@ export class HexModel extends StatelessModel<HexModelState> {
                             }
                         });
                     },
-                    (err) => {
-                        console.error(err);
-                        dispatch<GlobalActions.TileDataLoaded<DataLoadedPayload>>({
-                            name: GlobalActionName.TileDataLoaded,
-                            error: err,
+                    error => {
+                        console.error(error);
+                        dispatch<typeof Actions.TileDataLoaded>({
+                            name: Actions.TileDataLoaded.name,
+                            error,
                             payload: {
                                 tileId: this.tileId,
                                 isEmpty: true,
@@ -106,8 +108,8 @@ export class HexModel extends StatelessModel<HexModelState> {
                 );
             }
         );
-        this.addActionHandler<GlobalActions.TileDataLoaded<DataLoadedPayload>>(
-            GlobalActionName.TileDataLoaded,
+        this.addActionHandler<typeof Actions.TileDataLoaded>(
+            Actions.TileDataLoaded.name,
             (state, action) => {
                 if (action.payload.tileId === this.tileId) {
                     state.isBusy = false;
@@ -122,16 +124,16 @@ export class HexModel extends StatelessModel<HexModelState> {
             }
         );
 
-        this.addActionHandler<GlobalActions.EnableAltViewMode>(
-            GlobalActionName.EnableAltViewMode,
+        this.addActionHandler<typeof GlobalActions.EnableAltViewMode>(
+            GlobalActions.EnableAltViewMode.name,
             (state, action) => {
                 if (action.payload.ident === this.tileId) {
                     state.isAltViewMode = true;
                 }
             }
         );
-        this.addActionHandler<GlobalActions.DisableAltViewMode>(
-            GlobalActionName.DisableAltViewMode,
+        this.addActionHandler<typeof GlobalActions.DisableAltViewMode>(
+            GlobalActions.DisableAltViewMode.name,
             (state, action) => {
                 if (action.payload.ident === this.tileId) {
                     state.isAltViewMode = false;

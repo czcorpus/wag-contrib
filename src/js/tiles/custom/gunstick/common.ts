@@ -79,7 +79,3 @@ export function mkEmptyData():Data {
         table: {}
     };
 }
-
-export interface DataLoadedPayload {
-    data:Data;
-}
