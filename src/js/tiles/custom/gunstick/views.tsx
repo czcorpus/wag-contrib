@@ -21,7 +21,7 @@ import * as React from 'react';
 import { Dict, List, pipe, tuple } from 'cnc-tskit';
 import { Theme } from '../../../page/theme';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile';
-import { GlobalComponents } from '../../../views/global';
+import { GlobalComponents } from '../../../views/common';
 import { GunstickModel, GunstickModelState } from './model';
 import { ScatterChart, CartesianGrid, XAxis, YAxis, ZAxis, Legend, Scatter, Tooltip,
     ResponsiveContainer } from 'recharts';

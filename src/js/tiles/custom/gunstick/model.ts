@@ -21,8 +21,9 @@ import { IAppServices } from '../../../appServices';
 import { Backlink } from '../../../page/tile';
 import { RecognizedQueries } from '../../../query';
 import { GunstickKspApi } from './api';
-import { Data, DataLoadedPayload, mkEmptyData } from './common';
-import { ActionName as GlobalActionName, Actions as GlobalActions } from '../../../models/actions';
+import { Data, mkEmptyData } from './common';
+import { Actions as GlobalActions } from '../../../models/actions';
+import { Actions } from './actions';
 import { List } from 'cnc-tskit';
 import { findCurrQueryMatch } from '../../../models/query';
 
@@ -57,8 +58,8 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
         this.api = api;
 
 
-        this.addActionHandler<GlobalActions.RequestQueryResponse>(
-            GlobalActionName.RequestQueryResponse,
+        this.addActionHandler<typeof GlobalActions.RequestQueryResponse>(
+            GlobalActions.RequestQueryResponse.name,
             (state, action) => {
                 state.isBusy = true;
                 state.error = null;
@@ -72,8 +73,8 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
                     lang: 'cz'
                 }).subscribe(
                     (data) => {
-                        dispatch<GlobalActions.TileDataLoaded<DataLoadedPayload>>({
-                            name: GlobalActionName.TileDataLoaded,
+                        dispatch<typeof Actions.TileDataLoaded>({
+                            name: Actions.TileDataLoaded.name,
                             payload: {
                                 tileId: this.tileId,
                                 isEmpty: false,
@@ -81,11 +82,11 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
                             }
                         });
                     },
-                    (err) => {
-                        console.error(err);
-                        dispatch<GlobalActions.TileDataLoaded<DataLoadedPayload>>({
-                            name: GlobalActionName.TileDataLoaded,
-                            error: err,
+                    (error) => {
+                        console.error(error);
+                        dispatch<typeof Actions.TileDataLoaded>({
+                            name: Actions.TileDataLoaded.name,
+                            error,
                             payload: {
                                 tileId: this.tileId,
                                 isEmpty: true,
@@ -96,8 +97,8 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
                 );
             }
         );
-        this.addActionHandler<GlobalActions.TileDataLoaded<DataLoadedPayload>>(
-            GlobalActionName.TileDataLoaded,
+        this.addActionHandler<typeof Actions.TileDataLoaded>(
+            Actions.TileDataLoaded.name,
             (state, action) => {
                 if (action.payload.tileId === this.tileId) {
                     state.isBusy = false;
@@ -111,16 +112,16 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
             }
         );
 
-        this.addActionHandler<GlobalActions.EnableAltViewMode>(
-            GlobalActionName.EnableAltViewMode,
+        this.addActionHandler<typeof GlobalActions.EnableAltViewMode>(
+            GlobalActions.EnableAltViewMode.name,
             (state, action) => {
                 if (action.payload.ident === this.tileId) {
                     state.isAltViewMode = true;
                 }
             }
         );
-        this.addActionHandler<GlobalActions.DisableAltViewMode>(
-            GlobalActionName.DisableAltViewMode,
+        this.addActionHandler<typeof GlobalActions.DisableAltViewMode>(
+            GlobalActions.DisableAltViewMode.name,
             (state, action) => {
                 if (action.payload.ident === this.tileId) {
                     state.isAltViewMode = false;

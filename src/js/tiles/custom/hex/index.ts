@@ -20,7 +20,7 @@ import { IActionDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices';
 import { QueryType } from '../../../query/index';
 import { init as viewInit } from './views';
-import { TileConf, ITileProvider, TileComponent, TileFactory } from '../../../page/tile';
+import { TileConf, ITileProvider, TileComponent, TileFactory, TileFactoryArgs } from '../../../page/tile';
 import { HexModel } from './model';
 import { mkEmptyData } from './common';
 import { HexKspApi } from './api';
@@ -59,7 +59,10 @@ export class HexTile implements ITileProvider {
 
     private view:TileComponent;
 
-    constructor({tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy, cache, queryMatches, domain1}:TileFactory.Args<HexTileConf>) {
+    constructor({
+        tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy, cache,
+        queryMatches, domain1}:TileFactoryArgs<HexTileConf>
+    ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
@@ -144,7 +147,7 @@ export class HexTile implements ITileProvider {
     }
 }
 
-export const init:TileFactory.TileFactory<HexTileConf> = {
+export const init:TileFactory<HexTileConf> = {
 
     sanityCheck: (args) => [],
 
