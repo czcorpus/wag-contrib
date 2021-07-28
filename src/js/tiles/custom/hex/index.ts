@@ -27,10 +27,6 @@ import { HexKspApi } from './api';
 import { LocalizedConfMsg } from '../../../types';
 
 
-declare var require:(src:string)=>void;  // webpack
-require('./style.less');
-
-
 export interface HexTileConf extends TileConf {
     apiURL:string;
     serviceInfoUrl:LocalizedConfMsg;

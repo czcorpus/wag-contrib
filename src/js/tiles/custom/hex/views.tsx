@@ -18,13 +18,14 @@
 
 import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
 import * as React from 'react';
-import { Dict, List, pipe, tuple } from 'cnc-tskit';
+import { List, pipe, tuple } from 'cnc-tskit';
 import { Theme } from '../../../page/theme';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile';
 import { GlobalComponents } from '../../../views/common';
 import { HexModel, HexModelState } from './model';
 import { ScatterChart, CartesianGrid, XAxis, YAxis, Legend, Scatter, Tooltip } from 'recharts';
 import { ChartData, Data, transformDataForCharts } from './common';
+import * as S from './style';
 
 
 export function init(dispatcher:IActionDispatcher, ut:ViewUtils<GlobalComponents>, theme:Theme, model:HexModel):TileComponent {
@@ -96,7 +97,7 @@ export function init(dispatcher:IActionDispatcher, ut:ViewUtils<GlobalComponents
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'HEX', url: props.serviceInfoUrl}}>
-            <div className="GunstickTileView">
+            <S.HexTileView>
                 {props.isAltViewMode ?
                     <Table data={props.data} /> :
                     <Chart data={transformDataForCharts(props.data)}
@@ -104,7 +105,7 @@ export function init(dispatcher:IActionDispatcher, ut:ViewUtils<GlobalComponents
                             widthFract={props.widthFract}
                             word={props.word} />
                 }
-            </div>
+            </S.HexTileView>
         </globalComponents.TileWrapper>
     );
 
