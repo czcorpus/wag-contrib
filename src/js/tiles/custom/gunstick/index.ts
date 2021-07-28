@@ -27,10 +27,6 @@ import { mkEmptyData } from './common';
 import { LocalizedConfMsg } from '../../../types';
 
 
-declare var require:(src:string)=>void;  // webpack
-require('./style.less');
-
-
 export interface GunstickTileConf extends TileConf {
     apiURL:string;
     serviceInfoUrl:LocalizedConfMsg;

@@ -26,6 +26,7 @@ import { GunstickModel, GunstickModelState } from './model';
 import { ScatterChart, CartesianGrid, XAxis, YAxis, ZAxis, Legend, Scatter, Tooltip,
     ResponsiveContainer } from 'recharts';
 import { ChartData, Data, transformDataForCharts } from './common';
+import * as S from './style';
 
 
 export function init(dispatcher:IActionDispatcher, ut:ViewUtils<GlobalComponents>, theme:Theme, model:GunstickModel):TileComponent {
@@ -135,14 +136,14 @@ export function init(dispatcher:IActionDispatcher, ut:ViewUtils<GlobalComponents
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'Gunstick', url: props.serviceInfoUrl}}>
-            <div className="GunstickTileView">
+            <S.GunstickTileView>
                 {props.isAltViewMode ?
                     <Table data={props.data} /> :
                     <Chart data={transformDataForCharts(props.data)}
                             isMobile={props.isMobile}
                             widthFract={props.widthFract} />
                 }
-            </div>
+            </S.GunstickTileView>
         </globalComponents.TileWrapper>
     );
 
