@@ -27,6 +27,7 @@ import { List, tuple } from 'cnc-tskit';
 import { findCurrQueryMatch } from '../../../models/query';
 import { HexKspApi, posToIndex } from './api';
 import { PoSValues } from '../../../postag';
+import { AjaxError } from 'rxjs/ajax';
 
 
 export interface HexModelState {
@@ -94,7 +95,7 @@ export class HexModel extends StatelessModel<HexModelState> {
                         });
                     },
                     error => {
-                        if (error.name === "AjaxError" && error.status === 404) {
+                        if (error instanceof AjaxError && error.status === 404) {
                             console.error("Hex api url not found!");
                             dispatch<typeof Actions.TileDataLoaded>({
                                 name: Actions.TileDataLoaded.name,

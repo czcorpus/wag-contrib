@@ -26,6 +26,7 @@ import { Actions as GlobalActions } from '../../../models/actions';
 import { Actions } from './actions';
 import { List } from 'cnc-tskit';
 import { findCurrQueryMatch } from '../../../models/query';
+import { AjaxError } from 'rxjs/ajax';
 
 export interface GunstickModelState {
     isBusy:boolean;
@@ -83,7 +84,7 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
                         });
                     },
                     (error) => {
-                        if (error.name === "AjaxError" && error.status === 404) {
+                        if (error instanceof AjaxError && error.status === 404) {
                             console.error("Gunstick api url not found!");
                             dispatch<typeof Actions.TileDataLoaded>({
                                 name: Actions.TileDataLoaded.name,
