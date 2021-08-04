@@ -27,6 +27,7 @@ import { List, tuple } from 'cnc-tskit';
 import { findCurrQueryMatch } from '../../../models/query';
 import { HexKspApi, posToIndex } from './api';
 import { PoSValues } from '../../../postag';
+import { AjaxError } from 'rxjs/ajax';
 
 
 export interface HexModelState {
@@ -94,16 +95,29 @@ export class HexModel extends StatelessModel<HexModelState> {
                         });
                     },
                     error => {
-                        console.error(error);
-                        dispatch<typeof Actions.TileDataLoaded>({
-                            name: Actions.TileDataLoaded.name,
-                            error,
-                            payload: {
-                                tileId: this.tileId,
-                                isEmpty: true,
-                                data: mkEmptyData()
-                            }
-                        });
+                        if (error instanceof AjaxError && error.status === 404) {
+                            console.error("Hex api url not found!");
+                            dispatch<typeof Actions.TileDataLoaded>({
+                                name: Actions.TileDataLoaded.name,
+                                payload: {
+                                    tileId: this.tileId,
+                                    isEmpty: true,
+                                    data: mkEmptyData()
+                                }
+                            });
+
+                        } else {
+                            console.error(error);
+                            dispatch<typeof Actions.TileDataLoaded>({
+                                name: Actions.TileDataLoaded.name,
+                                error,
+                                payload: {
+                                    tileId: this.tileId,
+                                    isEmpty: true,
+                                    data: mkEmptyData()
+                                }
+                            });
+                        }
                     }
                 );
             }
