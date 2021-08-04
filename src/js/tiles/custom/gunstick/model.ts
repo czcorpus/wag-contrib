@@ -83,16 +83,29 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
                         });
                     },
                     (error) => {
-                        console.error(error);
-                        dispatch<typeof Actions.TileDataLoaded>({
-                            name: Actions.TileDataLoaded.name,
-                            error,
-                            payload: {
-                                tileId: this.tileId,
-                                isEmpty: true,
-                                data: mkEmptyData()
-                            }
-                        });
+                        if (error.name === "AjaxError" && error.status === 404) {
+                            console.error("Gunstick api url not found!");
+                            dispatch<typeof Actions.TileDataLoaded>({
+                                name: Actions.TileDataLoaded.name,
+                                payload: {
+                                    tileId: this.tileId,
+                                    isEmpty: true,
+                                    data: mkEmptyData()
+                                }
+                            });
+
+                        } else {
+                            console.error(error);
+                            dispatch<typeof Actions.TileDataLoaded>({
+                                name: Actions.TileDataLoaded.name,
+                                error,
+                                payload: {
+                                    tileId: this.tileId,
+                                    isEmpty: true,
+                                    data: mkEmptyData()
+                                }
+                            });
+                        }
                     }
                 );
             }
