@@ -46,7 +46,7 @@ export interface Data {
         };
     }
 
-export type ChartData = Array<{x: number; y: number; z: number}>;
+export type ChartData = Array<{x: number; y: number}>;
 
 
 export function transformDataForCharts(data:Data):ChartData {
@@ -57,8 +57,7 @@ export function transformDataForCharts(data:Data):ChartData {
         List.map(
             ([year, count]) => ({
                 x: parseInt(year),
-                y: count,
-                z: 2
+                y: count
             })
         )
     );

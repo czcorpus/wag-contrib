@@ -23,13 +23,47 @@ import { Theme } from '../../../page/theme';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile';
 import { GlobalComponents } from '../../../views/common';
 import { GunstickModel, GunstickModelState } from './model';
-import { ScatterChart, CartesianGrid, XAxis, YAxis, ZAxis, Legend, Scatter, Tooltip,
-    ResponsiveContainer } from 'recharts';
-import { ChartData, Data, transformDataForCharts } from './common';
+import { ScatterChart, CartesianGrid, XAxis, YAxis, Legend, Scatter, Tooltip } from 'recharts';
+import { ChartData, Data, DataTableItem, SummedSizes, transformDataForCharts } from './common';
 import * as S from './style';
 
 
-export function init(dispatcher:IActionDispatcher, ut:ViewUtils<GlobalComponents>, theme:Theme, model:GunstickModel):TileComponent {
+function getYearIdxMapping(data:SummedSizes):Array<string>{
+    return pipe(
+        data,
+        Dict.values(),
+        List.flatMap(v => Dict.keys(v)),
+        List.unique(v => v),
+        List.sortedAlphaBy(v => v)
+    );
+}
+
+
+function transformDataForTableView(data:SummedSizes):[Array<string>, Array<[string, Array<number|undefined>]>] {
+    const years = getYearIdxMapping(data);
+    return tuple(
+        years,
+        pipe(
+            data,
+            Dict.toEntries(),
+            List.map(([keyword, freqs]) => tuple(
+                keyword,
+                pipe(
+                    years,
+                    List.map(year => freqs[year])
+                )
+            ))
+        )
+    );
+}
+
+
+export function init(
+    dispatcher:IActionDispatcher,
+    ut:ViewUtils<GlobalComponents>,
+    theme:Theme,
+    model:GunstickModel
+):TileComponent {
 
     const globalComponents = ut.getComponents();
 
@@ -75,8 +109,9 @@ export function init(dispatcher:IActionDispatcher, ut:ViewUtils<GlobalComponents
                 <ScatterChart width={Math.max(100, width)} height={Math.max(350, height)} margin={{ top: 20, right: 20, bottom: 10, left: 10 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="x" name="year" type="number" unit="" domain ={rangeOf(props.data)} />
-                    <YAxis dataKey="y" name="count" unit="" type="number" />
-                    <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+                    <YAxis dataKey="y" name={ut.translate('hex__abs_freq')} unit="" type="number"
+                        label={{ value: ut.translate('gunstick__abs_freq'), angle: -90, position: 'insideLeft' }} />
+                    <Tooltip cursor={{ strokeDasharray: '3 3' }} labelStyle={{display: 'none'}} />
                     <Legend />
                     {pipe(
                         props.data,
@@ -94,38 +129,38 @@ export function init(dispatcher:IActionDispatcher, ut:ViewUtils<GlobalComponents
 
     const Table:React.FC<{
         data:Data;
-    }> = (props) => (
-        <div style={{maxHeight: '20em', overflowY: 'auto'}}>
-            <h2>nalezeno: {props.data.count}</h2>
-            <p>zobrazují se pouze nejfrekventovanější položky</p>
-            <dl>
-                {pipe(
-                    props.data.countRY,
-                    Dict.toEntries(),
-                    List.map(([rhyme, counts]) => (
-                        <React.Fragment key={`item:${rhyme}`}>
-                            <dt>{rhyme}</dt>
-                            <dd>
-                                <span>
-                                    {pipe(
-                                        counts,
-                                        Dict.toEntries(),
-                                        List.sortedBy(([year,]) => parseInt(year)),
-                                        List.map(([year, count]) => (
-                                            <React.Fragment key={`y:${year}`}>
-                                                <strong>{year}</strong>: {count}
-                                            </React.Fragment>
-                                        )),
-                                        List.join(i => <span key={`i:${i}`}>, </span>)
-                                    )}
-                                </span>
-                            </dd>
-                        </React.Fragment>
-                    ))
-                )}
-            </dl>
-        </div>
-    );
+    }> = ({data}) => {
+
+        const [years, tableData] = transformDataForTableView(data.countRY);
+        console.log('years: ', years);
+
+        return (
+            <div style={{maxHeight: '20em', overflowY: 'auto'}}>
+                <p>{ut.translate('gunstick__total_occurrences')}: <strong>{data.count}</strong><br />
+                    {ut.translate('gunstick__only_most_freq_displayed')}
+                </p>
+                <S.DataListTable className="data">
+                    <thead>
+                        <tr>
+                            <th />
+                            {List.map(v => <th key={`h:${v}`}>{v}</th>, years)}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {pipe(
+                            tableData,
+                            List.map(([word, freqs]) => (
+                                <tr key={`w:${word}`}>
+                                    <th className="word">{word}</th>
+                                    {List.map((f, i) => <td key={`f:${word}:${i}:${f}`}>{f}</td>, freqs)}
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </S.DataListTable>
+            </div>
+        );
+    };
 
 
     // -------------------- <GunstickTileView /> -----------------------------------------------

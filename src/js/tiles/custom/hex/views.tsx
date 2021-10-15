@@ -18,7 +18,7 @@
 
 import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
 import * as React from 'react';
-import { List, pipe, tuple } from 'cnc-tskit';
+import { List, Maths, pipe, tuple } from 'cnc-tskit';
 import { Theme } from '../../../page/theme';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile';
 import { GlobalComponents } from '../../../views/common';
@@ -28,9 +28,15 @@ import { ChartData, Data, transformDataForCharts } from './common';
 import * as S from './style';
 
 
-export function init(dispatcher:IActionDispatcher, ut:ViewUtils<GlobalComponents>, theme:Theme, model:HexModel):TileComponent {
+export function init(
+    dispatcher:IActionDispatcher,
+    ut:ViewUtils<GlobalComponents>,
+    theme:Theme, model:HexModel
+):TileComponent {
 
     const globalComponents = ut.getComponents();
+
+    // ---------------------- <Chart /> ------------------------------------
 
     const Chart:React.FC<{
         data:ChartData;
@@ -53,22 +59,35 @@ export function init(dispatcher:IActionDispatcher, ut:ViewUtils<GlobalComponents
                                         widthFract={props.widthFract} render={(width:number, height:number) => (
                 <ScatterChart width={Math.max(100, width)} height={Math.max(350, height)} margin={{ top: 20, right: 20, bottom: 10, left: 10 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="x" name="year" type="number" unit="" domain={range} />
-                    <YAxis dataKey="y" name="count" unit="" type="number" />
-                    <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+                    <XAxis dataKey="x" name={ut.translate('hex__label_year')} type="number" unit="" domain={range}>
+                    </XAxis>
+                    <YAxis dataKey="y" name={ut.translate('hex__abs_freq')} unit="" type="number"
+                            label={{ value: ut.translate('hex__abs_freq'), angle: -90, position: 'insideLeft' }} />
+                    <Tooltip cursor={{ strokeDasharray: '3 3' }} labelStyle={{display: 'none'}} />
                     <Legend />
                     <Scatter name={props.word} data={props.data} fill={theme.categoryColor(0)} />
                 </ScatterChart>)} />
         );
     };
 
+    // ---------------------- <Table /> ------------------------------------
 
     const Table:React.FC<{
         data:Data;
     }> = (props) => (
         <div style={{maxHeight: '20em', overflowY: 'auto'}}>
-            <h2>nalezeno: {props.data.count}</h2>
-            <table>
+            <p>{ut.translate('hex__freq_found_occurrences')}: <strong>{props.data.count}</strong></p>
+            <table className="data">
+                <thead>
+                    <tr>
+                        <th>{ut.translate('hex__label_author')}</th>
+                        <th>{ut.translate('hex__label_title')}</th>
+                        <th>{ut.translate('hex__label_year')}</th>
+                        <th>{ut.translate('hex__abs_freq')}</th>
+                        <th>{ut.translate('hex__rel_freq_poem_related')}</th>
+                        <th>{ut.translate('hex__coeff_phi')}</th>
+                    </tr>
+                </thead>
                 <tbody>
                 {pipe(
                     props.data.table,
@@ -80,7 +99,7 @@ export function init(dispatcher:IActionDispatcher, ut:ViewUtils<GlobalComponents
                             <td>{item.year}</td>
                             <td>{item.af}</td>
                             <td>{item.rf}</td>
-                            <td>{item.phi}</td>
+                            <td>{Maths.roundToPos(item.phi, 2)}</td>
                         </tr>
                     ))
                 )}
