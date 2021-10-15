@@ -18,6 +18,18 @@
 
 import styled from 'styled-components';
 
+// ----------- <GunstickTileView /> -------------------------
+
 export const GunstickTileView = styled.div`
     // here comes the style
+`;
+
+// ----------- <DataListTable /> -------------------------
+
+export const DataListTable = styled.table`
+
+    th.word {
+        text-align: left;
+        color: #e2007a;
+    }
 `;

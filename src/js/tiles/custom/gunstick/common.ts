@@ -29,11 +29,14 @@ export interface DataTableItem {
     ending:string;
 }
 
+
+export interface SummedSizes {
+    [k:string]:{[year:string]:number};
+}
+
 export interface Data {
     count:number;
-    countRY:{
-        [k:string]:{[year:string]:number};
-    };
+    countRY:SummedSizes;
     dataSize:{[year:string]:number};
     table:{
         [k:string]:Array<DataTableItem>
