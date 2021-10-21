@@ -31,7 +31,8 @@ export interface GunstickModelState {
     isBusy:boolean;
     error:string;
     data:Data;
-    isAltViewMode:boolean;
+    isAltViewMode: boolean;
+    isTweakMode:boolean;
     serviceInfoUrl:string;
 }
 
@@ -125,6 +126,23 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
             (state, action) => {
                 if (action.payload.ident === this.tileId) {
                     state.isAltViewMode = false;
+                }
+            }
+        );
+
+        this.addActionHandler<typeof GlobalActions.EnableTileTweakMode>(
+            GlobalActions.EnableTileTweakMode.name,
+            (state, action) => {
+                if (action.payload.ident === this.tileId) {
+                    state.isTweakMode = true;
+                }
+            }
+        );
+        this.addActionHandler<typeof GlobalActions.DisableTileTweakMode>(
+            GlobalActions.DisableTileTweakMode.name,
+            (state, action) => {
+                if (action.payload.ident === this.tileId) {
+                    state.isTweakMode = false;
                 }
             }
         );

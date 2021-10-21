@@ -34,6 +34,7 @@ export interface HexModelState {
     error:string;
     data:Data;
     isAltViewMode:boolean;
+    isTweakMode:boolean;
     word:string;
     serviceInfoUrl:string;
 }
@@ -137,6 +138,23 @@ export class HexModel extends StatelessModel<HexModelState> {
             (state, action) => {
                 if (action.payload.ident === this.tileId) {
                     state.isAltViewMode = false;
+                }
+            }
+        );
+
+        this.addActionHandler<typeof GlobalActions.EnableTileTweakMode>(
+            GlobalActions.EnableTileTweakMode.name,
+            (state, action) => {
+                if (action.payload.ident === this.tileId) {
+                    state.isTweakMode = true;
+                }
+            }
+        );
+        this.addActionHandler<typeof GlobalActions.DisableTileTweakMode>(
+            GlobalActions.DisableTileTweakMode.name,
+            (state, action) => {
+                if (action.payload.ident === this.tileId) {
+                    state.isTweakMode = false;
                 }
             }
         );

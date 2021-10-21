@@ -128,7 +128,8 @@ export function init(
 
 
     const Table:React.FC<{
-        data:Data;
+        data: Data;
+
     }> = ({data}) => {
 
         const [years, tableData] = transformDataForTableView(data.countRY);
@@ -161,7 +162,52 @@ export function init(
             </div>
         );
     };
+    
+    // ------------------ <Paginator /> --------------------------------------------
 
+    const Paginator:React.FC<{
+        page:number;
+        numPages:number;
+        tileId:number;
+
+    }> = (props) => {
+
+        const handlePrevPage = () => {
+        };
+
+        const handleNextPage = () => {
+        };
+
+        return (
+            <S.Paginator>
+                <a onClick={handlePrevPage} className={`${props.page === 1 ? 'disabled' : null}`}>
+                    <img className="arrow" src={ut.createStaticUrl(props.page === 1 ? 'triangle_left_gr.svg' : 'triangle_left.svg')}
+                        alt={ut.translate('global__img_alt_triable_left')} />
+                </a>
+                <input className="page" type="text" readOnly={true} value={props.page} />
+                <a onClick={handleNextPage} className={`${props.page === props.numPages ? 'disabled' : null}`}>
+                    <img className="arrow" src={ut.createStaticUrl(props.page === props.numPages ? 'triangle_right_gr.svg' : 'triangle_right.svg')}
+                        alt={ut.translate('global__img_alt_triable_right')} />
+                </a>
+            </S.Paginator>
+        );
+    };
+    
+    // ------------------ <Controls /> --------------------------------------------
+
+    const Controls: React.FC<{
+        tileId:number;
+    }> = (props) => {
+        return (
+            <S.Controls>
+                <fieldset>
+                        <label>{ut.translate('concordance__page')}:{'\u00a0'}
+                        <Paginator page={10} numPages={20} tileId={props.tileId} />
+                        </label>
+                </fieldset>
+            </S.Controls>
+        )
+    };
 
     // -------------------- <GunstickTileView /> -----------------------------------------------
 
@@ -172,6 +218,12 @@ export function init(
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'Gunstick', url: props.serviceInfoUrl}}>
             <S.GunstickTileView>
+                {props.isTweakMode ?
+                    <div className="tweak-box">
+                        <Controls tileId={props.tileId}/>
+                    </div> :
+                    null
+                }
                 {props.isAltViewMode ?
                     <Table data={props.data} /> :
                     <Chart data={transformDataForCharts(props.data)}

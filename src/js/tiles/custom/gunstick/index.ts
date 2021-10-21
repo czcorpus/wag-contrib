@@ -77,6 +77,7 @@ export class GunstickTile implements ITileProvider {
                 data: mkEmptyData(),
                 error: null,
                 isAltViewMode: false,
+                isTweakMode: false,
                 serviceInfoUrl: appServices.importExternalMessage(conf.serviceInfoUrl)
             }
         });
@@ -117,8 +118,8 @@ export class GunstickTile implements ITileProvider {
         return this.widthFract;
     }
 
-    supportsTweakMode():boolean {
-        return false;
+    supportsTweakMode(): boolean {
+        return true;
     }
 
     supportsAltView():boolean {

@@ -78,6 +78,7 @@ export class HexTile implements ITileProvider {
                 word: '',
                 error: null,
                 isAltViewMode: false,
+                isTweakMode: false,
                 serviceInfoUrl: appServices.importExternalMessage(conf.serviceInfoUrl)
             }
         });
@@ -119,7 +120,7 @@ export class HexTile implements ITileProvider {
     }
 
     supportsTweakMode():boolean {
-        return false;
+        return true;
     }
 
     supportsAltView():boolean {
