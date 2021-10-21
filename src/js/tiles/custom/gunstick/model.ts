@@ -34,6 +34,8 @@ export interface GunstickModelState {
     isAltViewMode: boolean;
     isTweakMode:boolean;
     serviceInfoUrl:string;
+    page:number;
+    pageSize:number;
 }
 
 export interface GunstickModelArgs {
@@ -143,6 +145,23 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
             (state, action) => {
                 if (action.payload.ident === this.tileId) {
                     state.isTweakMode = false;
+                }
+            }
+        );
+
+        this.addActionHandler<typeof Actions.NextPage>(
+            Actions.NextPage.name,
+            (state, action) => {
+                if (action.payload.tileId === this.tileId) {
+                    state.page++;
+                }
+            }
+        );
+        this.addActionHandler<typeof Actions.PrevPage>(
+            Actions.PrevPage.name,
+            (state, action) => {
+                if (action.payload.tileId === this.tileId) {
+                    state.page--;
                 }
             }
         );

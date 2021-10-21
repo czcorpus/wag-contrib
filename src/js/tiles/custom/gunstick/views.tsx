@@ -24,7 +24,8 @@ import { CoreTileComponentProps, TileComponent } from '../../../page/tile';
 import { GlobalComponents } from '../../../views/common';
 import { GunstickModel, GunstickModelState } from './model';
 import { ScatterChart, CartesianGrid, XAxis, YAxis, Legend, Scatter, Tooltip } from 'recharts';
-import { ChartData, Data, DataTableItem, SummedSizes, transformDataForCharts } from './common';
+import { ChartData, Data, SummedSizes, transformDataForCharts } from './common';
+import { Actions } from './actions';
 import * as S from './style';
 
 
@@ -129,8 +130,10 @@ export function init(
 
     const Table:React.FC<{
         data: Data;
+        page: number;
+        pageSize: number;
 
-    }> = ({data}) => {
+    }> = ({data, page, pageSize}) => {
 
         const [years, tableData] = transformDataForTableView(data.countRY);
         console.log('years: ', years);
@@ -150,6 +153,7 @@ export function init(
                     <tbody>
                         {pipe(
                             tableData,
+                            List.slice((page-1)*pageSize, page*pageSize),
                             List.map(([word, freqs]) => (
                                 <tr key={`w:${word}`}>
                                     <th className="word">{word}</th>
@@ -173,9 +177,25 @@ export function init(
     }> = (props) => {
 
         const handlePrevPage = () => {
+            if (props.page > 1) {
+                dispatcher.dispatch<typeof Actions.PrevPage>({
+                    name: Actions.PrevPage.name,
+                    payload: {
+                        tileId: props.tileId
+                    }
+                });
+            }
         };
 
         const handleNextPage = () => {
+            if (props.page < props.numPages) {
+                dispatcher.dispatch<typeof Actions.NextPage>({
+                    name: Actions.NextPage.name,
+                    payload: {
+                        tileId: props.tileId
+                    }
+                });
+            }
         };
 
         return (
@@ -196,13 +216,16 @@ export function init(
     // ------------------ <Controls /> --------------------------------------------
 
     const Controls: React.FC<{
-        tileId:number;
+        tileId: number;
+        page: number;
+        numPages: number;
+        
     }> = (props) => {
         return (
             <S.Controls>
                 <fieldset>
                         <label>{ut.translate('concordance__page')}:{'\u00a0'}
-                        <Paginator page={10} numPages={20} tileId={props.tileId} />
+                        <Paginator page={props.page} numPages={props.numPages} tileId={props.tileId} />
                         </label>
                 </fieldset>
             </S.Controls>
@@ -220,12 +243,14 @@ export function init(
             <S.GunstickTileView>
                 {props.isTweakMode ?
                     <div className="tweak-box">
-                        <Controls tileId={props.tileId}/>
+                        <Controls tileId={props.tileId} page={props.page} numPages={Math.ceil(Dict.size(props.data.countRY)/props.pageSize)}/>
                     </div> :
                     null
                 }
                 {props.isAltViewMode ?
-                    <Table data={props.data} /> :
+                    <Table data={props.data}
+                            page={props.page}
+                            pageSize={props.pageSize} /> :
                     <Chart data={transformDataForCharts(props.data)}
                             isMobile={props.isMobile}
                             widthFract={props.widthFract} />

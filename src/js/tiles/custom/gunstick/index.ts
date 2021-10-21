@@ -30,6 +30,7 @@ import { LocalizedConfMsg } from '../../../types';
 export interface GunstickTileConf extends TileConf {
     apiURL:string;
     serviceInfoUrl:LocalizedConfMsg;
+    pageSize:number;
 }
 
 /**
@@ -78,7 +79,9 @@ export class GunstickTile implements ITileProvider {
                 error: null,
                 isAltViewMode: false,
                 isTweakMode: false,
-                serviceInfoUrl: appServices.importExternalMessage(conf.serviceInfoUrl)
+                serviceInfoUrl: appServices.importExternalMessage(conf.serviceInfoUrl),
+                page: 1,
+                pageSize: conf.pageSize || 10,
             }
         });
         this.label = appServices.importExternalMessage(conf.label || 'html__main_label');

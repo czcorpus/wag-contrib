@@ -25,6 +25,7 @@ import { GlobalComponents } from '../../../views/common';
 import { HexModel, HexModelState } from './model';
 import { ScatterChart, CartesianGrid, XAxis, YAxis, Legend, Scatter, Tooltip } from 'recharts';
 import { ChartData, Data, transformDataForCharts } from './common';
+import { Actions } from './actions';
 import * as S from './style';
 
 
@@ -73,7 +74,9 @@ export function init(
     // ---------------------- <Table /> ------------------------------------
 
     const Table:React.FC<{
-        data:Data;
+        data: Data;
+        page: number;
+        pageSize: number;
     }> = (props) => (
         <div style={{maxHeight: '20em', overflowY: 'auto'}}>
             <p>{ut.translate('hex__freq_found_occurrences')}: <strong>{props.data.count}</strong></p>
@@ -91,7 +94,7 @@ export function init(
                 <tbody>
                 {pipe(
                     props.data.table,
-                    List.slice(0, 100),
+                    List.slice((props.page-1)*props.pageSize, props.page*props.pageSize),
                     List.map((item, i) => (
                         <tr key={`item:${i}:${item.bookId}`}>
                             <td>{item.author}</td>
@@ -118,9 +121,25 @@ export function init(
     }> = (props) => {
 
         const handlePrevPage = () => {
+            if (props.page > 1) {
+                dispatcher.dispatch<typeof Actions.PrevPage>({
+                    name: Actions.PrevPage.name,
+                    payload: {
+                        tileId: props.tileId
+                    }
+                });
+            }
         };
 
         const handleNextPage = () => {
+            if (props.page < props.numPages) {
+                dispatcher.dispatch<typeof Actions.NextPage>({
+                    name: Actions.NextPage.name,
+                    payload: {
+                        tileId: props.tileId
+                    }
+                });
+            }
         };
 
         return (
@@ -141,13 +160,15 @@ export function init(
     // ------------------ <Controls /> --------------------------------------------
 
     const Controls: React.FC<{
-        tileId:number;
+        tileId: number;
+        page: number;
+        numPages: number;
     }> = (props) => {
         return (
             <S.Controls>
                 <fieldset>
                         <label>{ut.translate('concordance__page')}:{'\u00a0'}
-                        <Paginator page={10} numPages={20} tileId={props.tileId} />
+                        <Paginator page={props.page} numPages={props.numPages} tileId={props.tileId} />
                         </label>
                 </fieldset>
             </S.Controls>
@@ -165,12 +186,14 @@ export function init(
             <S.HexTileView>
                 {props.isTweakMode ?
                     <div className="tweak-box">
-                        <Controls tileId={props.tileId}/>
+                        <Controls tileId={props.tileId} page={props.page} numPages={Math.ceil(props.data.count/props.pageSize)}/>
                     </div> :
                     null
                 }
                 {props.isAltViewMode ?
-                    <Table data={props.data} /> :
+                    <Table data={props.data}
+                        page={props.page}
+                        pageSize={props.pageSize} /> :
                     <Chart data={transformDataForCharts(props.data)}
                             isMobile={props.isMobile}
                             widthFract={props.widthFract}
