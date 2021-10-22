@@ -25,6 +25,7 @@ import { GlobalComponents } from '../../../views/common';
 import { HexModel, HexModelState } from './model';
 import { ScatterChart, CartesianGrid, XAxis, YAxis, Legend, Scatter, Tooltip } from 'recharts';
 import { ChartData, Data, transformDataForCharts } from './common';
+import { Actions } from './actions';
 import * as S from './style';
 
 
@@ -73,7 +74,9 @@ export function init(
     // ---------------------- <Table /> ------------------------------------
 
     const Table:React.FC<{
-        data:Data;
+        data: Data;
+        page: number;
+        pageSize: number;
     }> = (props) => (
         <div style={{maxHeight: '20em', overflowY: 'auto'}}>
             <p>{ut.translate('hex__freq_found_occurrences')}: <strong>{props.data.count}</strong></p>
@@ -91,7 +94,7 @@ export function init(
                 <tbody>
                 {pipe(
                     props.data.table,
-                    List.slice(0, 100),
+                    List.slice((props.page-1)*props.pageSize, props.page*props.pageSize),
                     List.map((item, i) => (
                         <tr key={`item:${i}:${item.bookId}`}>
                             <td>{item.author}</td>
@@ -108,6 +111,70 @@ export function init(
         </div>
     );
 
+    // ------------------ <Paginator /> --------------------------------------------
+
+    const Paginator:React.FC<{
+        page:number;
+        numPages:number;
+        tileId:number;
+
+    }> = (props) => {
+
+        const handlePrevPage = () => {
+            if (props.page > 1) {
+                dispatcher.dispatch<typeof Actions.PrevPage>({
+                    name: Actions.PrevPage.name,
+                    payload: {
+                        tileId: props.tileId
+                    }
+                });
+            }
+        };
+
+        const handleNextPage = () => {
+            if (props.page < props.numPages) {
+                dispatcher.dispatch<typeof Actions.NextPage>({
+                    name: Actions.NextPage.name,
+                    payload: {
+                        tileId: props.tileId
+                    }
+                });
+            }
+        };
+
+        return (
+            <S.Paginator>
+                <a onClick={handlePrevPage} className={`${props.page === 1 ? 'disabled' : null}`}>
+                    <img className="arrow" src={ut.createStaticUrl(props.page === 1 ? 'triangle_left_gr.svg' : 'triangle_left.svg')}
+                        alt={ut.translate('global__img_alt_triable_left')} />
+                </a>
+                <input className="page" type="text" readOnly={true} value={props.page} />
+                <a onClick={handleNextPage} className={`${props.page === props.numPages ? 'disabled' : null}`}>
+                    <img className="arrow" src={ut.createStaticUrl(props.page === props.numPages ? 'triangle_right_gr.svg' : 'triangle_right.svg')}
+                        alt={ut.translate('global__img_alt_triable_right')} />
+                </a>
+            </S.Paginator>
+        );
+    };
+    
+    // ------------------ <Controls /> --------------------------------------------
+
+    const Controls: React.FC<{
+        tileId: number;
+        page: number;
+        numPages: number;
+    }> = (props) => {
+        return (
+            <S.Controls>
+                <fieldset>
+                        <label>{ut.translate('concordance__page')}:{'\u00a0'}
+                        <Paginator page={props.page} numPages={props.numPages} tileId={props.tileId} />
+                        </label>
+                </fieldset>
+            </S.Controls>
+        )
+    };
+    
     // -------------------- <HexTileView /> -----------------------------------------------
 
     const HexTileView:React.FC<HexModelState & CoreTileComponentProps> = (props) => (
@@ -117,8 +184,16 @@ export function init(
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'HEX', url: props.serviceInfoUrl}}>
             <S.HexTileView>
+                {props.isTweakMode ?
+                    <div className="tweak-box">
+                        <Controls tileId={props.tileId} page={props.page} numPages={Math.ceil(props.data.count/props.pageSize)}/>
+                    </div> :
+                    null
+                }
                 {props.isAltViewMode ?
-                    <Table data={props.data} /> :
+                    <Table data={props.data}
+                        page={props.page}
+                        pageSize={props.pageSize} /> :
                     <Chart data={transformDataForCharts(props.data)}
                             isMobile={props.isMobile}
                             widthFract={props.widthFract}

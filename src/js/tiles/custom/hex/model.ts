@@ -23,10 +23,9 @@ import { RecognizedQueries } from '../../../query';
 import { Data, mkEmptyData } from './common';
 import { Actions as GlobalActions } from '../../../models/actions';
 import { Actions } from './actions';
-import { List, tuple } from 'cnc-tskit';
+import { List } from 'cnc-tskit';
 import { findCurrQueryMatch } from '../../../models/query';
-import { HexKspApi, posToIndex } from './api';
-import { PoSValues } from '../../../postag';
+import { HexKspApi } from './api';
 
 
 export interface HexModelState {
@@ -34,8 +33,11 @@ export interface HexModelState {
     error:string;
     data:Data;
     isAltViewMode:boolean;
+    isTweakMode:boolean;
     word:string;
     serviceInfoUrl:string;
+    page:number;
+    pageSize:number;
 }
 
 export interface HexModelArgs {
@@ -137,6 +139,40 @@ export class HexModel extends StatelessModel<HexModelState> {
             (state, action) => {
                 if (action.payload.ident === this.tileId) {
                     state.isAltViewMode = false;
+                }
+            }
+        );
+
+        this.addActionHandler<typeof GlobalActions.EnableTileTweakMode>(
+            GlobalActions.EnableTileTweakMode.name,
+            (state, action) => {
+                if (action.payload.ident === this.tileId) {
+                    state.isTweakMode = true;
+                }
+            }
+        );
+        this.addActionHandler<typeof GlobalActions.DisableTileTweakMode>(
+            GlobalActions.DisableTileTweakMode.name,
+            (state, action) => {
+                if (action.payload.ident === this.tileId) {
+                    state.isTweakMode = false;
+                }
+            }
+        );
+
+        this.addActionHandler<typeof Actions.NextPage>(
+            Actions.NextPage.name,
+            (state, action) => {
+                if (action.payload.tileId === this.tileId) {
+                    state.page++;
+                }
+            }
+        );
+        this.addActionHandler<typeof Actions.PrevPage>(
+            Actions.PrevPage.name,
+            (state, action) => {
+                if (action.payload.tileId === this.tileId) {
+                    state.page--;
                 }
             }
         );

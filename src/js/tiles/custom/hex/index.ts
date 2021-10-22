@@ -30,6 +30,7 @@ import { LocalizedConfMsg } from '../../../types';
 export interface HexTileConf extends TileConf {
     apiURL:string;
     serviceInfoUrl:LocalizedConfMsg;
+    pageSize:number;
 }
 
 /**
@@ -78,7 +79,10 @@ export class HexTile implements ITileProvider {
                 word: '',
                 error: null,
                 isAltViewMode: false,
-                serviceInfoUrl: appServices.importExternalMessage(conf.serviceInfoUrl)
+                isTweakMode: false,
+                serviceInfoUrl: appServices.importExternalMessage(conf.serviceInfoUrl),
+                page: 1,
+                pageSize: conf.pageSize || 10,
             }
         });
         this.label = appServices.importExternalMessage(conf.label || 'html__main_label');
@@ -119,7 +123,7 @@ export class HexTile implements ITileProvider {
     }
 
     supportsTweakMode():boolean {
-        return false;
+        return true;
     }
 
     supportsAltView():boolean {
