@@ -110,15 +110,11 @@ export function init(
             </table>
         </div>
     );
+    
+    // -------------------- <HexTileView /> -----------------------------------------------
 
-    // ------------------ <Paginator /> --------------------------------------------
-
-    const Paginator:React.FC<{
-        page:number;
-        numPages:number;
-        tileId:number;
-
-    }> = (props) => {
+    const HexTileView: React.FC<HexModelState & CoreTileComponentProps> = (props) => {
+        const numPages = Math.ceil(props.data.count / props.pageSize);
 
         const handlePrevPage = () => {
             if (props.page > 1) {
@@ -132,7 +128,7 @@ export function init(
         };
 
         const handleNextPage = () => {
-            if (props.page < props.numPages) {
+            if (props.page < numPages) {
                 dispatcher.dispatch<typeof Actions.NextPage>({
                     name: Actions.NextPage.name,
                     payload: {
@@ -143,65 +139,31 @@ export function init(
         };
 
         return (
-            <S.Paginator>
-                <a onClick={handlePrevPage} className={`${props.page === 1 ? 'disabled' : null}`}>
-                    <img className="arrow" src={ut.createStaticUrl(props.page === 1 ? 'triangle_left_gr.svg' : 'triangle_left.svg')}
-                        alt={ut.translate('global__img_alt_triable_left')} />
-                </a>
-                <input className="page" type="text" readOnly={true} value={props.page} />
-                <a onClick={handleNextPage} className={`${props.page === props.numPages ? 'disabled' : null}`}>
-                    <img className="arrow" src={ut.createStaticUrl(props.page === props.numPages ? 'triangle_right_gr.svg' : 'triangle_right.svg')}
-                        alt={ut.translate('global__img_alt_triable_right')} />
-                </a>
-            </S.Paginator>
-        );
-    };
-    
-    // ------------------ <Controls /> --------------------------------------------
-
-    const Controls: React.FC<{
-        tileId: number;
-        page: number;
-        numPages: number;
-    }> = (props) => {
-        return (
-            <S.Controls>
-                <fieldset>
-                        <label>{ut.translate('concordance__page')}:{'\u00a0'}
-                        <Paginator page={props.page} numPages={props.numPages} tileId={props.tileId} />
-                        </label>
-                </fieldset>
-            </S.Controls>
-        )
-    };
-    
-    // -------------------- <HexTileView /> -----------------------------------------------
-
-    const HexTileView:React.FC<HexModelState & CoreTileComponentProps> = (props) => (
-        <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
+            <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
                 hasData={props.data.count > 0}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
-                sourceIdent={{corp: 'HEX', url: props.serviceInfoUrl}}>
-            <S.HexTileView>
-                {props.isTweakMode ?
-                    <div className="tweak-box">
-                        <Controls tileId={props.tileId} page={props.page} numPages={Math.ceil(props.data.count/props.pageSize)}/>
-                    </div> :
-                    null
-                }
-                {props.isAltViewMode ?
-                    <Table data={props.data}
-                        page={props.page}
-                        pageSize={props.pageSize} /> :
-                    <Chart data={transformDataForCharts(props.data)}
+                sourceIdent={{ corp: 'HEX', url: props.serviceInfoUrl }}>
+                <S.HexTileView>
+                    {props.isTweakMode ?
+                        <div className="tweak-box">
+                            <globalComponents.Paginator page={props.page} numPages={numPages} onNext={handleNextPage} onPrev={handlePrevPage} />
+                        </div> :
+                        null
+                    }
+                    {props.isAltViewMode ?
+                        <Table data={props.data}
+                            page={props.page}
+                            pageSize={props.pageSize} /> :
+                        <Chart data={transformDataForCharts(props.data)}
                             isMobile={props.isMobile}
                             widthFract={props.widthFract}
                             word={props.word} />
-                }
-            </S.HexTileView>
-        </globalComponents.TileWrapper>
-    );
+                    }
+                </S.HexTileView>
+            </globalComponents.TileWrapper>
+        );
+    }
 
     return BoundWithProps(HexTileView, model);
 }
