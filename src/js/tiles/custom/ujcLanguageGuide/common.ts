@@ -70,8 +70,60 @@ export interface Data {
     scripts:Array<string>;
     cssLinks:Array<string>;
     heading:string;
-    division:string;
+    syllabification:string;
     grammarCase:CaseData;
     comparison:ComparisonData;
     conjugation:ConjugationData;
+}
+
+export function mkEmptyNumber():NumberData {
+    return {
+        singular: '',
+        plural: '',
+    };
+}
+
+export function mkEmptyData():Data {
+    return {
+        scripts: [],
+        cssLinks: [],
+        heading: '',
+        syllabification: '',
+        grammarCase: {
+            nominative: mkEmptyNumber(),
+            genitive: mkEmptyNumber(),
+            dative: mkEmptyNumber(),
+            accusative: mkEmptyNumber(),
+            vocative: mkEmptyNumber(),
+            locative: mkEmptyNumber(),
+            instrumental: mkEmptyNumber(),
+        },
+        comparison: {
+            comparative: '',
+            superlative: '',
+        },
+        conjugation: {
+            imperative: mkEmptyNumber(),
+            participle: {
+                active: '',
+                passive: '',
+            },
+            verbalNoun: '',
+            person: {
+                first: mkEmptyNumber(),
+                second: mkEmptyNumber(),
+                third: mkEmptyNumber(),
+            },
+            transgressive: {
+                past: {
+                    m: mkEmptyNumber(),
+                    zs: mkEmptyNumber(),
+                },
+                present: {
+                    m: mkEmptyNumber(),
+                    zs: mkEmptyNumber(),
+                },
+            }
+        }
+    };
 }
