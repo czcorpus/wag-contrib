@@ -16,11 +16,13 @@
  * limitations under the License.
  */
 
+import { Dict, List, pipe } from 'cnc-tskit';
 import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
 import * as React from 'react';
 import { Theme } from '../../../page/theme';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile';
 import { GlobalComponents } from '../../../views/common';
+import { CaseData } from './common';
 import { UjcLGuideModel, UjcLGuideModelState } from './model';
 import * as S from './style';
 
@@ -33,6 +35,65 @@ export function init(
 
     const globalComponents = ut.getComponents();
 
+    // -------------------- <CaseTable /> -----------------------------------------------
+
+    const CaseTable: React.FC<{
+        caseData: CaseData;
+    }> = (props) => {
+
+        // TODO why is data mapping problematic?
+        return (
+            <div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>singular</th>
+                            <th>plural</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>nominative</td>
+                            <td>{props.caseData.nominative.singular}</td>
+                            <td>{props.caseData.nominative.plural}</td>
+                        </tr>
+                        <tr>
+                            <td>genitive</td>
+                            <td>{props.caseData.genitive.singular}</td>
+                            <td>{props.caseData.genitive.plural}</td>
+                        </tr>
+                        <tr>
+                            <td>dative</td>
+                            <td>{props.caseData.dative.singular}</td>
+                            <td>{props.caseData.dative.plural}</td>
+                        </tr>
+                        <tr>
+                            <td>accusative</td>
+                            <td>{props.caseData.accusative.singular}</td>
+                            <td>{props.caseData.accusative.plural}</td>
+                        </tr>
+                        <tr>
+                            <td>vocative</td>
+                            <td>{props.caseData.vocative.singular}</td>
+                            <td>{props.caseData.vocative.plural}</td>
+                        </tr>
+                        <tr>
+                            <td>locative</td>
+                            <td>{props.caseData.locative.singular}</td>
+                            <td>{props.caseData.locative.plural}</td>
+                        </tr>
+                        <tr>
+                            <td>instrumental</td>
+                            <td>{props.caseData.instrumental.singular}</td>
+                            <td>{props.caseData.instrumental.plural}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        );
+    }
+
     // -------------------- <UjcLanguageGuideTileView /> -----------------------------------------------
 
     const UjcLanguageGuideTileView: React.FC<UjcLGuideModelState & CoreTileComponentProps> = (props) => {
@@ -44,6 +105,12 @@ export function init(
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{ corp: 'UJC', url: props.serviceInfoUrl }}>
                 <S.UjcLanguageGuideTileView>
+                    <S.Overview>
+                        <h2>{props.data.heading}</h2>
+                        <h3>{props.data.syllabification}</h3>
+                    </S.Overview>
+                    {Dict.some(item => !!item.singular || !!item.plural , props.data.grammarCase) ?
+                        <CaseTable caseData={props.data.grammarCase} /> : null}
                     {JSON.stringify(props.data)}
                 </S.UjcLanguageGuideTileView>
             </globalComponents.TileWrapper>

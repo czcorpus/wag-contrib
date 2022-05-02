@@ -24,6 +24,7 @@ import { TileConf, ITileProvider, TileComponent, TileFactory, TileFactoryArgs } 
 import { UjcLGuideModel } from './model';
 import { UjcLGuideApi } from './api';
 import { LocalizedConfMsg } from '../../../types';
+import { mkEmptyData } from './common';
 
 
 export interface UjcLanguageGuideConf extends TileConf {
@@ -67,7 +68,7 @@ export class UjcLanguageGuide implements ITileProvider {
             backlink: null, // TODO
             initState: {
                 isBusy: isBusy,
-                data: null,
+                data: mkEmptyData(),
                 serviceInfoUrl: appServices.importExternalMessage(conf.serviceInfoUrl),
                 error: null,
             }

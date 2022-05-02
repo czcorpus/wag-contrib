@@ -20,7 +20,7 @@ import { IActionQueue, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices';
 import { Backlink } from '../../../page/tile';
 import { RecognizedQueries } from '../../../query';
-import { Data } from './common';
+import { Data, mkEmptyData } from './common';
 import { Actions as GlobalActions } from '../../../models/actions';
 import { Actions } from './actions';
 import { List } from 'cnc-tskit';
@@ -30,7 +30,7 @@ import { UjcLGuideApi } from './api';
 
 export interface UjcLGuideModelState {
     isBusy:boolean;
-    data:Data|null;
+    data:Data;
     serviceInfoUrl:string;
     error:string;
 }
@@ -62,7 +62,7 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
             (state, action) => {
                 state.isBusy = true;
                 state.error = null;
-                state.data = null;
+                state.data = mkEmptyData();
             },
             (state, action, dispatch) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
@@ -87,7 +87,7 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
                             payload: {
                                 tileId: this.tileId,
                                 isEmpty: true,
-                                data: null,
+                                data: mkEmptyData(),
                             }
                         });
                     }
