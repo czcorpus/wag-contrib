@@ -41,7 +41,6 @@ export function init(
         caseData: CaseData;
     }> = (props) => {
 
-        // TODO why is data mapping problematic?
         return (
             <div>
                 <table>
@@ -52,43 +51,17 @@ export function init(
                             <th>plural</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>nominative</td>
-                            <td>{props.caseData.nominative.singular}</td>
-                            <td>{props.caseData.nominative.plural}</td>
-                        </tr>
-                        <tr>
-                            <td>genitive</td>
-                            <td>{props.caseData.genitive.singular}</td>
-                            <td>{props.caseData.genitive.plural}</td>
-                        </tr>
-                        <tr>
-                            <td>dative</td>
-                            <td>{props.caseData.dative.singular}</td>
-                            <td>{props.caseData.dative.plural}</td>
-                        </tr>
-                        <tr>
-                            <td>accusative</td>
-                            <td>{props.caseData.accusative.singular}</td>
-                            <td>{props.caseData.accusative.plural}</td>
-                        </tr>
-                        <tr>
-                            <td>vocative</td>
-                            <td>{props.caseData.vocative.singular}</td>
-                            <td>{props.caseData.vocative.plural}</td>
-                        </tr>
-                        <tr>
-                            <td>locative</td>
-                            <td>{props.caseData.locative.singular}</td>
-                            <td>{props.caseData.locative.plural}</td>
-                        </tr>
-                        <tr>
-                            <td>instrumental</td>
-                            <td>{props.caseData.instrumental.singular}</td>
-                            <td>{props.caseData.instrumental.plural}</td>
-                        </tr>
-                    </tbody>
+                    <tbody>{pipe(
+                        props.caseData,
+                        Dict.toEntries(),
+                        List.map(data =>
+                            <tr>
+                                <td>{data[0]}</td>
+                                <td>{data[1].singular}</td>
+                                <td>{data[1].plural}</td>
+                            </tr>
+                        )
+                    )}</tbody>
                 </table>
             </div>
         );
