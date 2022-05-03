@@ -43,7 +43,7 @@ export function init(
     }> = (props) => {
 
         return (
-            <table className='data'>
+            <S.DataTable className='data'>
                 <caption>{ut.translate('lguide__comparison')}</caption>
                 <thead>
                     <tr>
@@ -59,7 +59,7 @@ export function init(
                         <td className='word'>{props.comparisonData.superlative}</td>
                     </tr>
                 </tbody>
-            </table>
+            </S.DataTable>
         );
     }
 
@@ -70,7 +70,7 @@ export function init(
     }> = (props) => {
 
         return (
-            <table className='data'>
+            <S.DataTable className='data'>
                 <caption>{ut.translate('lguide__case')}</caption>
                 <thead>
                     <tr>
@@ -90,7 +90,7 @@ export function init(
                         </tr>
                     )
                 )}</tbody>
-            </table>
+            </S.DataTable>
         );
     }
 
@@ -101,7 +101,7 @@ export function init(
     }> = (props) => {
 
         return (
-            <table className='data'>
+            <S.DataTable className='data'>
                 <caption>{ut.translate('lguide__conjugation')}</caption>
                 <thead>
                     <tr>
@@ -168,7 +168,7 @@ export function init(
                             <td className='word' colSpan={2}>{props.conjugationData.verbalNoun}</td>
                         </tr> : null}
                 </tbody>
-            </table>
+            </S.DataTable>
         );
     }
 
@@ -184,8 +184,12 @@ export function init(
                 sourceIdent={{ corp: 'UJC', url: props.serviceInfoUrl }}>
                 <S.UjcLanguageGuideTileView>
                     <S.Overview>
-                        <h2>{props.data.heading}</h2>
-                        <h3>{props.data.syllabification}</h3>
+                        <dl className='info'>
+                            <dt>{ut.translate('lguide__overview_word')}:</dt>
+                            <dd>{props.data.heading}</dd>
+                            <dt>{ut.translate('lguide__overview_syllabification')}:</dt>
+                            <dd>{props.data.syllabification}</dd>
+                        </dl>
                     </S.Overview>
 
                     {!!props.data.comparison.comparative || !!props.data.comparison.superlative ?

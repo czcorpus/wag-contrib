@@ -1,6 +1,8 @@
 {
     "cs-CZ": {
         "lguide__main_label": "Jazyková příručka",
+        "lguide__overview_word": "slovo",
+        "lguide__overview_syllabification": "dělení",
         "lguide__number": "číslo",
         "lguide__number_singular": "jednotné číslo",
         "lguide__number_plural": "množné číslo",
@@ -31,6 +33,8 @@
     },
     "en-US": {
         "lguide__main_label": "Language guide",
+        "lguide__overview_word": "word",
+        "lguide__overview_syllabification": "syllabification",
         "lguide__number": "number",
         "lguide__number_singular": "singular",
         "lguide__number_plural": "plural",
