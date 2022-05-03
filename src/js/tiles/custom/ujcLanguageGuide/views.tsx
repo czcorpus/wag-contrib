@@ -22,7 +22,7 @@ import * as React from 'react';
 import { Theme } from '../../../page/theme';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile';
 import { GlobalComponents } from '../../../views/common';
-import { CaseData } from './common';
+import { CaseData, ComparisonData, ConjugationData } from './common';
 import { UjcLGuideModel, UjcLGuideModelState } from './model';
 import * as S from './style';
 
@@ -35,6 +35,34 @@ export function init(
 
     const globalComponents = ut.getComponents();
 
+    // -------------------- <ComparisonTable /> -----------------------------------------------
+
+    const ComparisonTable: React.FC<{
+        positive: string;
+        comparisonData: ComparisonData;
+    }> = (props) => {
+
+        return (
+            <table>
+                <caption>{ut.translate('lguide__comparison')}</caption>
+                <thead>
+                    <tr>
+                        <th>{ut.translate('lguide__comparison_positive')}</th>
+                        <th>{ut.translate('lguide__comparison_comparative')}</th>
+                        <th>{ut.translate('lguide__comparison_superlative')}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{props.positive}</td>
+                        <td>{props.comparisonData.comparative}</td>
+                        <td>{props.comparisonData.superlative}</td>
+                    </tr>
+                </tbody>
+            </table>
+        );
+    }
+
     // -------------------- <CaseTable /> -----------------------------------------------
 
     const CaseTable: React.FC<{
@@ -42,28 +70,105 @@ export function init(
     }> = (props) => {
 
         return (
-            <div>
-                <table>
-                    <thead>
+            <table>
+                <caption>{ut.translate('lguide__case')}</caption>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>{ut.translate('lguide__number_singular')}</th>
+                        <th>{ut.translate('lguide__number_plural')}</th>
+                    </tr>
+                </thead>
+                <tbody>{pipe(
+                    props.caseData,
+                    Dict.toEntries(),
+                    List.map(data =>
                         <tr>
-                            <th></th>
-                            <th>singular</th>
-                            <th>plural</th>
+                            <td>{ut.translate(`lguide__case_${data[0]}`)}</td>
+                            <td>{data[1].singular}</td>
+                            <td>{data[1].plural}</td>
                         </tr>
-                    </thead>
-                    <tbody>{pipe(
-                        props.caseData,
+                    )
+                )}</tbody>
+            </table>
+        );
+    }
+
+    // -------------------- <ConjugationTable /> -----------------------------------------------
+
+    const ConjugationTable: React.FC<{
+        conjugationData: ConjugationData;
+    }> = (props) => {
+
+        return (
+            <table>
+                <caption>{ut.translate('lguide__conjugation')}</caption>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>{ut.translate('lguide__number_singular')}</th>
+                        <th>{ut.translate('lguide__number_plural')}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {pipe(
+                        props.conjugationData.person,
                         Dict.toEntries(),
                         List.map(data =>
                             <tr>
-                                <td>{data[0]}</td>
+                                <td>{ut.translate(`lguide__conjugation_person_${data[0]}`)}</td>
                                 <td>{data[1].singular}</td>
                                 <td>{data[1].plural}</td>
                             </tr>
                         )
-                    )}</tbody>
-                </table>
-            </div>
+                    )}
+                    {!!props.conjugationData.imperative.singular || !!props.conjugationData.imperative.singular ?
+                        <tr>
+                            <td>{ut.translate('lguide__conjugation_imperative')}</td>
+                            <td>{props.conjugationData.imperative.singular}</td>
+                            <td>{props.conjugationData.imperative.plural}</td>
+                        </tr> : null}
+                    {!!props.conjugationData.participle.active ?
+                        <tr>
+                            <td>{ut.translate('lguide__conjugation_participle_active')}</td>
+                            <td colSpan={2}>{props.conjugationData.participle.active}</td>
+                        </tr> : null}
+                    {!!props.conjugationData.participle.passive ?
+                        <tr>
+                            <td>{ut.translate('lguide__conjugation_participle_passive')}</td>
+                            <td colSpan={2}>{props.conjugationData.participle.passive}</td>
+                        </tr> : null}
+                    {!!props.conjugationData.transgressive.past.m.singular || !!props.conjugationData.transgressive.past.m.plural ?
+                        <tr>
+                            <td>{ut.translate('lguide__conjugation_transgressive_past_m')}</td>
+                            <td>{props.conjugationData.transgressive.past.m.singular}</td>
+                            <td>{props.conjugationData.transgressive.past.m.plural}</td>
+                        </tr> : null}
+                    {!!props.conjugationData.transgressive.past.zs.singular || !!props.conjugationData.transgressive.past.zs.plural ?
+                        <tr>
+                            <td>{ut.translate('lguide__conjugation_transgressive_past_zs')}</td>
+                            <td>{props.conjugationData.transgressive.past.zs.singular}</td>
+                            <td>{props.conjugationData.transgressive.past.zs.plural}</td>
+                        </tr> : null}
+                    {!!props.conjugationData.transgressive.present.m.singular || !!props.conjugationData.transgressive.present.m.plural ?
+                        <tr>
+                            <td>{ut.translate('lguide__conjugation_transgressive_present_m')}</td>
+                            <td>{props.conjugationData.transgressive.present.m.singular}</td>
+                            <td>{props.conjugationData.transgressive.present.m.plural}</td>
+                        </tr> : null}
+                    {!!props.conjugationData.transgressive.present.zs.singular || !!props.conjugationData.transgressive.present.zs.plural ?
+                        <tr>
+                            <td>{ut.translate('lguide__conjugation_transgressive_present_zs')}</td>
+                            <td>{props.conjugationData.transgressive.present.zs.singular}</td>
+                            <td>{props.conjugationData.transgressive.present.zs.plural}</td>
+                        </tr> : null}
+                    {!!props.conjugationData.verbalNoun ?
+                        <tr>
+                            <td>{ut.translate('lguide__conjugation_verbal_noun')}</td>
+                            <td colSpan={2}>{props.conjugationData.verbalNoun}</td>
+                        </tr> : null}
+                </tbody>
+            </table>
         );
     }
 
@@ -82,9 +187,16 @@ export function init(
                         <h2>{props.data.heading}</h2>
                         <h3>{props.data.syllabification}</h3>
                     </S.Overview>
+
+                    {!!props.data.comparison.comparative || !!props.data.comparison.superlative ?
+                        <ComparisonTable positive={props.data.heading} comparisonData={props.data.comparison} /> : null}
+
                     {Dict.some(item => !!item.singular || !!item.plural , props.data.grammarCase) ?
                         <CaseTable caseData={props.data.grammarCase} /> : null}
-                    {JSON.stringify(props.data)}
+
+                    {Dict.some(item => !!item.singular || !!item.plural , props.data.conjugation.person) ?
+                        <ConjugationTable conjugationData={props.data.conjugation} /> : null}
+
                 </S.UjcLanguageGuideTileView>
             </globalComponents.TileWrapper>
         );
