@@ -19,9 +19,14 @@
 import styled from 'styled-components';
 
 export const UjcLanguageGuideTileView = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
 
-// here comes the style
-
+    table td.word, table th {
+        text-align: center;
+        vertical-align: middle;
+    }
 `;
 
 export const Overview = styled.div`
