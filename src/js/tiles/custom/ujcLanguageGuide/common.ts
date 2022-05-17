@@ -71,9 +71,11 @@ export interface Data {
     cssLinks:Array<string>;
     heading:string;
     syllabification:string;
+    gender:string;
     grammarCase:CaseData;
     comparison:ComparisonData;
     conjugation:ConjugationData;
+    examples:Array<string>;
 }
 
 export function mkEmptyNumber():NumberData {
@@ -89,6 +91,7 @@ export function mkEmptyData():Data {
         cssLinks: [],
         heading: '',
         syllabification: '',
+        gender: '',
         grammarCase: {
             nominative: mkEmptyNumber(),
             genitive: mkEmptyNumber(),
@@ -124,6 +127,7 @@ export function mkEmptyData():Data {
                     zs: mkEmptyNumber(),
                 },
             }
-        }
+        },
+        examples: [],
     };
 }
