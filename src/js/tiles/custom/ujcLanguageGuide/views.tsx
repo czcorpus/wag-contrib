@@ -189,6 +189,14 @@ export function init(
                             <dd>{props.data.heading}</dd>
                             <dt>{ut.translate('lguide__overview_syllabification')}:</dt>
                             <dd>{props.data.syllabification}</dd>
+                            {props.data.gender ? [
+                                <dt>{ut.translate('lguide__overview_gender')}:</dt>,
+                                <dd>{props.data.gender}</dd>,
+                            ] : null}
+                            {props.data.examples ? List.concat(
+                                List.map(e => <dd>{e}</dd>, props.data.examples),
+                                [<dt>{ut.translate('lguide__overview_examples')}:</dt>],
+                            ) : null}
                         </dl>
                     </S.Overview>
 
