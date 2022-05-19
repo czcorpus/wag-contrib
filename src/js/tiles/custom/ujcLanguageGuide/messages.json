@@ -2,9 +2,11 @@
     "cs-CZ": {
         "lguide__main_label": "Jazyková příručka",
         "lguide__overview_word": "slovo",
+        "lguide__overview_meaning": "význam",
         "lguide__overview_syllabification": "dělení",
         "lguide__overview_gender": "rod",
         "lguide__overview_examples": "příklady",
+        "lguide__overview_alternatives": "alternativy",
         "lguide__number": "číslo",
         "lguide__number_singular": "jednotné číslo",
         "lguide__number_plural": "množné číslo",
@@ -36,9 +38,11 @@
     "en-US": {
         "lguide__main_label": "Language guide",
         "lguide__overview_word": "word",
+        "lguide__overview_meaning": "meaning",
         "lguide__overview_syllabification": "syllabification",
         "lguide__overview_gender": "gender",
         "lguide__overview_examples": "examples",
+        "lguide__overview_alternatives": "alternatives",
         "lguide__number": "number",
         "lguide__number_singular": "singular",
         "lguide__number_plural": "plural",

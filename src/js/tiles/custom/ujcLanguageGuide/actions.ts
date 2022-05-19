@@ -31,4 +31,10 @@ export class Actions {
         name: GlobalActions.TileDataLoaded.name
     };
 
+    static RequestAlternative:Action<{
+        id: string
+    }> = {
+        name: 'LGUIDE_TILE_REQUEST_ALTERNATIVE'
+    };
+
 }

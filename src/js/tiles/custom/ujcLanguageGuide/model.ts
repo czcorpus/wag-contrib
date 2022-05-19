@@ -94,6 +94,50 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
                 });
             }
         );
+
+        this.addActionHandler(
+            Actions.RequestAlternative,
+            (state, action) => {
+                state.isBusy = true;
+                state.error = null;
+                const empty_data = mkEmptyData();
+                empty_data.alternatives = state.data.alternatives;
+                state.data = empty_data;
+            },
+            (state, action, dispatch) => {
+                this.api.call({
+                    q: action.payload.id,
+                    direct: 1
+                }).subscribe({
+                    next: data => {
+                        dispatch<typeof Actions.TileDataLoaded>({
+                            name: Actions.TileDataLoaded.name,
+                            payload: {
+                                tileId: this.tileId,
+                                isEmpty: false,
+                                data: {
+                                    ...data,
+                                    alternatives: state.data.alternatives,
+                                }
+                            }
+                        });
+                    },
+                    error: error => {
+                        console.error(error);
+                        dispatch<typeof Actions.TileDataLoaded>({
+                            name: Actions.TileDataLoaded.name,
+                            error,
+                            payload: {
+                                tileId: this.tileId,
+                                isEmpty: true,
+                                data: mkEmptyData(),
+                            }
+                        });
+                    }
+                });
+            }
+        );
+
         this.addActionHandler<typeof Actions.TileDataLoaded>(
             Actions.TileDataLoaded.name,
             (state, action) => {
