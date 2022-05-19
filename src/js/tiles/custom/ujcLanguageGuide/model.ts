@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { IActionQueue, StatelessModel } from 'kombo';
+import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices';
 import { Backlink } from '../../../page/tile';
 import { RecognizedQueries } from '../../../query';
@@ -66,32 +66,7 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
             },
             (state, action, dispatch) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
-                this.api.call({
-                    q: match.lemma
-                }).subscribe({
-                    next: data => {
-                        dispatch<typeof Actions.TileDataLoaded>({
-                            name: Actions.TileDataLoaded.name,
-                            payload: {
-                                tileId: this.tileId,
-                                isEmpty: false,
-                                data: data,
-                            }
-                        });
-                    },
-                    error: error => {
-                        console.error(error);
-                        dispatch<typeof Actions.TileDataLoaded>({
-                            name: Actions.TileDataLoaded.name,
-                            error,
-                            payload: {
-                                tileId: this.tileId,
-                                isEmpty: true,
-                                data: mkEmptyData(),
-                            }
-                        });
-                    }
-                });
+                this.loadData(dispatch, state, match.lemma, false);
             }
         );
 
@@ -100,41 +75,10 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
             (state, action) => {
                 state.isBusy = true;
                 state.error = null;
-                const empty_data = mkEmptyData();
-                empty_data.alternatives = state.data.alternatives;
-                state.data = empty_data;
+                state.data = {...mkEmptyData(), alternatives: state.data.alternatives};
             },
             (state, action, dispatch) => {
-                this.api.call({
-                    q: action.payload.id,
-                    direct: 1
-                }).subscribe({
-                    next: data => {
-                        dispatch<typeof Actions.TileDataLoaded>({
-                            name: Actions.TileDataLoaded.name,
-                            payload: {
-                                tileId: this.tileId,
-                                isEmpty: false,
-                                data: {
-                                    ...data,
-                                    alternatives: state.data.alternatives,
-                                }
-                            }
-                        });
-                    },
-                    error: error => {
-                        console.error(error);
-                        dispatch<typeof Actions.TileDataLoaded>({
-                            name: Actions.TileDataLoaded.name,
-                            error,
-                            payload: {
-                                tileId: this.tileId,
-                                isEmpty: true,
-                                data: mkEmptyData(),
-                            }
-                        });
-                    }
-                });
+                this.loadData(dispatch, state, action.payload.id, true);
             }
         );
 
@@ -152,7 +96,40 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
                 }
             }
         );
+    }
 
+    private loadData(dispatch: SEDispatcher, state: UjcLGuideModelState, q:string, direct:boolean) {
+        const args = {q};
+        if (direct) {
+            args['direct'] = 1;
+        }
+        this.api.call(args).subscribe({
+            next: data => {
+                if (direct) {
+                    data.alternatives = state.data.alternatives;
+                }
+                dispatch<typeof Actions.TileDataLoaded>({
+                    name: Actions.TileDataLoaded.name,
+                    payload: {
+                        tileId: this.tileId,
+                        isEmpty: false,
+                        data: data
+                    }
+                });
+            },
+            error: error => {
+                console.error(error);
+                dispatch<typeof Actions.TileDataLoaded>({
+                    name: Actions.TileDataLoaded.name,
+                    error,
+                    payload: {
+                        tileId: this.tileId,
+                        isEmpty: true,
+                        data: mkEmptyData(),
+                    }
+                });
+            }
+        });
     }
 
 }
