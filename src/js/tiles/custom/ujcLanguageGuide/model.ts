@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { IActionQueue, StatelessModel } from 'kombo';
+import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices';
 import { Backlink } from '../../../page/tile';
 import { RecognizedQueries } from '../../../query';
@@ -66,34 +66,22 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
             },
             (state, action, dispatch) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
-                this.api.call({
-                    q: match.lemma
-                }).subscribe({
-                    next: data => {
-                        dispatch<typeof Actions.TileDataLoaded>({
-                            name: Actions.TileDataLoaded.name,
-                            payload: {
-                                tileId: this.tileId,
-                                isEmpty: false,
-                                data: data,
-                            }
-                        });
-                    },
-                    error: error => {
-                        console.error(error);
-                        dispatch<typeof Actions.TileDataLoaded>({
-                            name: Actions.TileDataLoaded.name,
-                            error,
-                            payload: {
-                                tileId: this.tileId,
-                                isEmpty: true,
-                                data: mkEmptyData(),
-                            }
-                        });
-                    }
-                });
+                this.loadData(dispatch, state, match.lemma, false);
             }
         );
+
+        this.addActionHandler(
+            Actions.RequestAlternative,
+            (state, action) => {
+                state.isBusy = true;
+                state.error = null;
+                state.data = {...mkEmptyData(), alternatives: state.data.alternatives};
+            },
+            (state, action, dispatch) => {
+                this.loadData(dispatch, state, action.payload.id, true);
+            }
+        );
+
         this.addActionHandler<typeof Actions.TileDataLoaded>(
             Actions.TileDataLoaded.name,
             (state, action) => {
@@ -108,7 +96,40 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
                 }
             }
         );
+    }
 
+    private loadData(dispatch: SEDispatcher, state: UjcLGuideModelState, q:string, direct:boolean) {
+        const args = {q};
+        if (direct) {
+            args['direct'] = 1;
+        }
+        this.api.call(args).subscribe({
+            next: data => {
+                if (direct) {
+                    data.alternatives = state.data.alternatives;
+                }
+                dispatch<typeof Actions.TileDataLoaded>({
+                    name: Actions.TileDataLoaded.name,
+                    payload: {
+                        tileId: this.tileId,
+                        isEmpty: false,
+                        data: data
+                    }
+                });
+            },
+            error: error => {
+                console.error(error);
+                dispatch<typeof Actions.TileDataLoaded>({
+                    name: Actions.TileDataLoaded.name,
+                    error,
+                    payload: {
+                        tileId: this.tileId,
+                        isEmpty: true,
+                        data: mkEmptyData(),
+                    }
+                });
+            }
+        });
     }
 
 }

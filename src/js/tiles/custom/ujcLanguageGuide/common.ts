@@ -66,16 +66,23 @@ export interface ConjugationData {
     verbalNoun:string;
 }
 
+export interface Alternative {
+    id:string;
+    info:string;
+}
+
 export interface Data {
     scripts:Array<string>;
     cssLinks:Array<string>;
     heading:string;
+    meaning:string;
     syllabification:string;
     gender:string;
     grammarCase:CaseData;
     comparison:ComparisonData;
     conjugation:ConjugationData;
     examples:Array<string>;
+    alternatives:Array<Alternative>;
 }
 
 export function mkEmptyNumber():NumberData {
@@ -90,6 +97,7 @@ export function mkEmptyData():Data {
         scripts: [],
         cssLinks: [],
         heading: '',
+        meaning: '',
         syllabification: '',
         gender: '',
         grammarCase: {
@@ -129,5 +137,6 @@ export function mkEmptyData():Data {
             }
         },
         examples: [],
+        alternatives: [],
     };
 }

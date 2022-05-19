@@ -22,6 +22,7 @@ import * as React from 'react';
 import { Theme } from '../../../page/theme';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile';
 import { GlobalComponents } from '../../../views/common';
+import { Actions } from './actions';
 import { CaseData, ComparisonData, ConjugationData } from './common';
 import { UjcLGuideModel, UjcLGuideModelState } from './model';
 import * as S from './style';
@@ -176,6 +177,13 @@ export function init(
 
     const UjcLanguageGuideTileView: React.FC<UjcLGuideModelState & CoreTileComponentProps> = (props) => {
 
+        const handleAlternative = (id:string) => {
+            dispatcher.dispatch<typeof Actions.RequestAlternative>({
+                name: Actions.RequestAlternative.name,
+                payload: {id: id},
+            })
+        }
+
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
                 hasData={props.data !== null && !!props.data.heading}
@@ -187,6 +195,10 @@ export function init(
                         <dl className='info'>
                             <dt>{ut.translate('lguide__overview_word')}:</dt>
                             <dd>{props.data.heading}</dd>
+                            {props.data.meaning ? [
+                                <dt>{ut.translate('lguide__overview_meaning')}:</dt>,
+                                <dd>{props.data.meaning}</dd>,
+                            ] : null}
                             <dt>{ut.translate('lguide__overview_syllabification')}:</dt>
                             <dd>{props.data.syllabification}</dd>
                             {props.data.gender ? [
@@ -196,6 +208,10 @@ export function init(
                             {props.data.examples ? List.concat(
                                 List.map(e => <dd>{e}</dd>, props.data.examples),
                                 [<dt>{ut.translate('lguide__overview_examples')}:</dt>],
+                            ) : null}
+                            {props.data.alternatives ? List.concat(
+                                List.map(alt => <dd><a onClick={e => handleAlternative(alt.id)}>{props.data.heading}{alt.info}</a></dd>, props.data.alternatives),
+                                [<dt>{ut.translate('lguide__overview_alternatives')}:</dt>],
                             ) : null}
                         </dl>
                     </S.Overview>

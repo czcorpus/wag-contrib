@@ -26,6 +26,7 @@ import { Data } from './common';
 
 export interface UjcLGuideRequestArgs {
     q:string;
+    direct?:number;
 }
 
 
