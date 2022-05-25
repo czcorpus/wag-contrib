@@ -23,7 +23,6 @@ import { init as viewInit } from './views';
 import { TileConf, ITileProvider, TileComponent, TileFactory, TileFactoryArgs } from '../../../page/tile';
 import { UjcLGuideModel } from './model';
 import { UjcLGuideApi } from './api';
-import { LocalizedConfMsg } from '../../../types';
 import { mkEmptyData } from './common';
 
 
@@ -69,6 +68,7 @@ export class UjcLangRefBook implements ITileProvider {
                 isBusy: isBusy,
                 data: mkEmptyData(),
                 error: null,
+                backlinks: []
             }
         });
         this.label = appServices.importExternalMessage(conf.label || 'lguide__main_label');
