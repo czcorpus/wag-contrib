@@ -137,5 +137,5 @@ export const init:TileFactory<UjcLangRefBookConf> = {
 
     sanityCheck: (args) => [],
 
-    create: (args) => new UjcLangRefBook(args)
+    create: (args) => new UjcLangRefBookTile(args)
 };
