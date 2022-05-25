@@ -30,7 +30,7 @@ export interface UjcLangRefBookConf extends TileConf {
     apiURL:string;
 }
 
-export class UjcLangRefBook implements ITileProvider {
+export class UjcLangRefBookTile implements ITileProvider {
 
     private readonly tileId:number;
 
