@@ -190,7 +190,7 @@ export function init(
                 backlink={props.backlinks}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
-                sourceIdent={{ corp: 'UJC', url: props.serviceInfoUrl }}>
+                sourceIdent={{corp: 'UJC'}}>
                 <S.UjcLangRefBookTileView>
                     <S.Overview>
                         <dl className='info'>

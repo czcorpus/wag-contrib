@@ -18,7 +18,7 @@
 
 import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices';
-import { Backlink, BacklinkWithArgs, createAppBacklink } from '../../../page/tile';
+import { Backlink, BacklinkWithArgs } from '../../../page/tile';
 import { RecognizedQueries } from '../../../query';
 import { Data, mkEmptyData } from './common';
 import { Actions as GlobalActions } from '../../../models/actions';
@@ -143,7 +143,7 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
         );
     }
 
-    private generateBacklink(ident:string, direct:boolean):BacklinkWithArgs {
+    private generateBacklink(ident:string, direct:boolean):BacklinkWithArgs<{id:string}|{slovo:string}> {
         return {
             url: 'https://prirucka.ujc.cas.cz/',
             label: 'heslo v Internetové jazykové příručce',
