@@ -19,7 +19,7 @@
 import styled from 'styled-components';
 import * as theme from '../../../views/common/theme';
 
-export const UjcLanguageGuideTileView = styled.div`
+export const UjcLangRefBookTileView = styled.div`
     display: flex;
     flex-wrap: wrap;
     align-items: stretch;
@@ -46,6 +46,10 @@ export const Overview = styled.div`
             }
         }
 
+        dd.example, dd.alternative {
+            font-size: 1.2em;
+        }
+
         dd:not(:last-child) {
             margin-bottom: 0.7em;
         }
@@ -68,6 +72,16 @@ export const Overview = styled.div`
 `;
 
 export const DataTable = styled.table`
+
+    &.data {
+        margin-left: 0;
+    }
+
+    caption {
+        font-size: 1em;
+        text-align: left;
+        color: ${theme.colorLightText};
+    }
 
     td.word, th {
         text-align: center;

@@ -27,12 +27,11 @@ import { LocalizedConfMsg } from '../../../types';
 import { mkEmptyData } from './common';
 
 
-export interface UjcLanguageGuideConf extends TileConf {
+export interface UjcLangRefBookConf extends TileConf {
     apiURL:string;
-    serviceInfoUrl:LocalizedConfMsg;
 }
 
-export class UjcLanguageGuide implements ITileProvider {
+export class UjcLangRefBook implements ITileProvider {
 
     private readonly tileId:number;
 
@@ -52,7 +51,7 @@ export class UjcLanguageGuide implements ITileProvider {
 
     constructor({
         tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy, cache,
-        queryMatches}:TileFactoryArgs<UjcLanguageGuideConf>
+        queryMatches}:TileFactoryArgs<UjcLangRefBookConf>
     ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
@@ -69,7 +68,6 @@ export class UjcLanguageGuide implements ITileProvider {
             initState: {
                 isBusy: isBusy,
                 data: mkEmptyData(),
-                serviceInfoUrl: appServices.importExternalMessage(conf.serviceInfoUrl),
                 error: null,
             }
         });
@@ -135,9 +133,9 @@ export class UjcLanguageGuide implements ITileProvider {
     }
 }
 
-export const init:TileFactory<UjcLanguageGuideConf> = {
+export const init:TileFactory<UjcLangRefBookConf> = {
 
     sanityCheck: (args) => [],
 
-    create: (args) => new UjcLanguageGuide(args)
+    create: (args) => new UjcLangRefBook(args)
 };

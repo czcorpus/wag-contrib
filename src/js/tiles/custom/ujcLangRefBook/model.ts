@@ -18,12 +18,13 @@
 
 import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices';
-import { Backlink } from '../../../page/tile';
+import { Backlink, BacklinkWithArgs, createAppBacklink } from '../../../page/tile';
 import { RecognizedQueries } from '../../../query';
 import { Data, mkEmptyData } from './common';
 import { Actions as GlobalActions } from '../../../models/actions';
 import { Actions } from './actions';
-import { List } from 'cnc-tskit';
+import { List, HTTP } from 'cnc-tskit';
+import { isWebDelegateApi } from '../../../types';
 import { findCurrQueryMatch } from '../../../models/query';
 import { UjcLGuideApi } from './api';
 
@@ -31,8 +32,8 @@ import { UjcLGuideApi } from './api';
 export interface UjcLGuideModelState {
     isBusy:boolean;
     data:Data;
-    serviceInfoUrl:string;
     error:string;
+    backlinks:Array<BacklinkWithArgs<{}>>;
 }
 
 export interface UjcLGuideModelArgs {
@@ -51,18 +52,27 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
 
     private readonly api:UjcLGuideApi;
 
+    private readonly appServices:IAppServices;
+
+    private readonly backlink:Backlink;
+
+
     constructor({dispatcher, initState, api, tileId, appServices, queryMatches, backlink}:UjcLGuideModelArgs) {
         super(dispatcher, initState);
         this.tileId = tileId;
+        this.appServices = appServices;
         this.api = api;
+        this.backlink = !backlink?.isAppUrl && isWebDelegateApi(this.api) ? this.api.getBackLink(backlink) : backlink;
 
 
-        this.addActionHandler<typeof GlobalActions.RequestQueryResponse>(
-            GlobalActions.RequestQueryResponse.name,
+        this.addActionHandler(
+            GlobalActions.RequestQueryResponse,
             (state, action) => {
+                const match = findCurrQueryMatch(List.head(queryMatches));
                 state.isBusy = true;
                 state.error = null;
-                state.data = mkEmptyData();
+                state.data = {...mkEmptyData(), rawQuery: match.lemma};
+                state.backlinks = []
             },
             (state, action, dispatch) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
@@ -75,15 +85,19 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
             (state, action) => {
                 state.isBusy = true;
                 state.error = null;
-                state.data = {...mkEmptyData(), alternatives: state.data.alternatives};
+                state.data = {
+                    ...mkEmptyData(),
+                    rawQuery: action.payload.id,
+                    alternatives: state.data.alternatives
+                };
             },
             (state, action, dispatch) => {
                 this.loadData(dispatch, state, action.payload.id, true);
             }
         );
 
-        this.addActionHandler<typeof Actions.TileDataLoaded>(
-            Actions.TileDataLoaded.name,
+        this.addActionHandler(
+            Actions.TileDataLoaded,
             (state, action) => {
                 if (action.payload.tileId === this.tileId) {
                     state.isBusy = false;
@@ -92,28 +106,71 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
 
                     } else {
                         state.data = action.payload.data;
+                        state.backlinks = [this.generateBacklink(state.data.rawQuery, state.data.isDirect)];
                     }
                 }
             }
         );
+
+        this.addActionHandler(
+            GlobalActions.GetSourceInfo,
+            (state, action) => {
+            },
+            (state, action, dispatch) => {
+                this.api.getSourceDescription(
+                    this.tileId,
+                    this.appServices.getISO639UILang(),
+                    ''
+                ).subscribe(
+                    (data) => {
+                        dispatch({
+                            name: GlobalActions.GetSourceInfoDone.name,
+                            payload: {
+                                data: data
+                            }
+                        });
+                    },
+                    (err) => {
+                        console.error(err);
+                        dispatch({
+                            name: GlobalActions.GetSourceInfoDone.name,
+                            error: err
+
+                        });
+                    }
+                );
+            }
+        );
     }
 
-    private loadData(dispatch: SEDispatcher, state: UjcLGuideModelState, q:string, direct:boolean) {
-        const args = {q};
-        if (direct) {
-            args['direct'] = 1;
-        }
+    private generateBacklink(ident:string, direct:boolean):BacklinkWithArgs {
+        return {
+            url: 'https://prirucka.ujc.cas.cz/',
+            label: 'heslo v Internetové jazykové příručce',
+            method: HTTP.Method.GET,
+            args: direct ? {id: ident} : {slovo: ident}
+        };
+    }
+
+    private loadData(dispatch:SEDispatcher, state:UjcLGuideModelState, q:string, direct:boolean) {
+        const args:{q:string; direct?:0|1} = {
+            q,
+            direct: direct ? 1 : 0
+        };
         this.api.call(args).subscribe({
             next: data => {
                 if (direct) {
                     data.alternatives = state.data.alternatives;
                 }
+                data.isDirect = direct;
+                data.rawQuery = q;
+
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
                     payload: {
                         tileId: this.tileId,
                         isEmpty: false,
-                        data: data
+                        data
                     }
                 });
             },
@@ -125,7 +182,11 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
                     payload: {
                         tileId: this.tileId,
                         isEmpty: true,
-                        data: mkEmptyData(),
+                        data: {
+                            ...mkEmptyData(),
+                            isDirect: true,
+                            rawQuery: q
+                        },
                     }
                 });
             }
