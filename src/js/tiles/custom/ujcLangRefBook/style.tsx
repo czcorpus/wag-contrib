@@ -21,8 +21,7 @@ import * as theme from '../../../views/common/theme';
 
 export const UjcLangRefBookTileView = styled.div`
     display: flex;
-    flex-wrap: wrap;
-    align-items: stretch;
+    flex-direction: column;
     justify-content: space-between;
 `;
 
