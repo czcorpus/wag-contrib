@@ -72,6 +72,7 @@ export interface Alternative {
 }
 
 export interface Data {
+    rawQuery:string;
     scripts:Array<string>;
     cssLinks:Array<string>;
     heading:string;
@@ -83,6 +84,7 @@ export interface Data {
     conjugation:ConjugationData;
     examples:Array<string>;
     alternatives:Array<Alternative>;
+    isDirect:boolean;
 }
 
 export function mkEmptyNumber():NumberData {
@@ -94,6 +96,7 @@ export function mkEmptyNumber():NumberData {
 
 export function mkEmptyData():Data {
     return {
+        rawQuery: '',
         scripts: [],
         cssLinks: [],
         heading: '',
@@ -138,5 +141,6 @@ export function mkEmptyData():Data {
         },
         examples: [],
         alternatives: [],
+        isDirect: false
     };
 }

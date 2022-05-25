@@ -72,7 +72,7 @@ export function init(
 
         return (
             <S.DataTable className='data'>
-                <caption>{ut.translate('lguide__case')}</caption>
+                <caption>{ut.translate('lguide__case')}:</caption>
                 <thead>
                     <tr>
                         <th></th>
@@ -83,8 +83,8 @@ export function init(
                 <tbody>{pipe(
                     props.caseData,
                     Dict.toEntries(),
-                    List.map(data =>
-                        <tr>
+                    List.map((data, i) =>
+                        <tr key={`${i}:${data[0]}`}>
                             <td>{ut.translate(`lguide__case_${data[0]}`)}</td>
                             <td className='word'>{data[1].singular}</td>
                             <td className='word'>{data[1].plural}</td>
@@ -173,9 +173,9 @@ export function init(
         );
     }
 
-    // -------------------- <UjcLanguageGuideTileView /> -----------------------------------------------
+    // -------------------- <UjcLangRefBookTileView /> -----------------------------------------------
 
-    const UjcLanguageGuideTileView: React.FC<UjcLGuideModelState & CoreTileComponentProps> = (props) => {
+    const UjcLangRefBookTileView: React.FC<UjcLGuideModelState & CoreTileComponentProps> = (props) => {
 
         const handleAlternative = (id:string) => {
             dispatcher.dispatch<typeof Actions.RequestAlternative>({
@@ -187,32 +187,54 @@ export function init(
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
                 hasData={props.data !== null && !!props.data.heading}
+                backlink={props.backlinks}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{ corp: 'UJC', url: props.serviceInfoUrl }}>
-                <S.UjcLanguageGuideTileView>
+                <S.UjcLangRefBookTileView>
                     <S.Overview>
                         <dl className='info'>
                             <dt>{ut.translate('lguide__overview_word')}:</dt>
                             <dd>{props.data.heading}</dd>
-                            {props.data.meaning ? [
-                                <dt>{ut.translate('lguide__overview_meaning')}:</dt>,
-                                <dd>{props.data.meaning}</dd>,
-                            ] : null}
+                            {props.data.meaning ?
+                                <>
+                                    <dt>{ut.translate('lguide__overview_meaning')}:</dt>
+                                    <dd>{props.data.meaning}</dd>,
+                                </> :
+                                null
+                            }
                             <dt>{ut.translate('lguide__overview_syllabification')}:</dt>
                             <dd>{props.data.syllabification}</dd>
-                            {props.data.gender ? [
-                                <dt>{ut.translate('lguide__overview_gender')}:</dt>,
-                                <dd>{props.data.gender}</dd>,
-                            ] : null}
-                            {props.data.examples ? List.concat(
-                                List.map(e => <dd>{e}</dd>, props.data.examples),
-                                [<dt>{ut.translate('lguide__overview_examples')}:</dt>],
-                            ) : null}
-                            {props.data.alternatives ? List.concat(
-                                List.map(alt => <dd><a onClick={e => handleAlternative(alt.id)}>{props.data.heading}{alt.info}</a></dd>, props.data.alternatives),
-                                [<dt>{ut.translate('lguide__overview_alternatives')}:</dt>],
-                            ) : null}
+                            {props.data.gender ?
+                                <>
+                                    <dt>{ut.translate('lguide__overview_gender')}:</dt>
+                                    <dd>{props.data.gender}</dd>
+                                </> :
+                                null
+                            }
+                            {props.data.examples ?
+                                <>
+                                    <dt>{ut.translate('lguide__overview_examples')}:</dt>
+                                    {List.map((e, i) => <dd key={`dd:${i}:${e}`} className="example">{e}</dd>, props.data.examples)}
+                                </> :null
+                            }
+                            {props.data.alternatives ?
+                                <>
+                                    <dt>{ut.translate('lguide__overview_alternatives')}:</dt>
+                                    {
+                                        List.map(
+                                            (alt, i) => (
+                                                <dd key={`alt:${i}:${alt.id}`} className="alternative">
+                                                    {props.data.rawQuery === alt.id && props.data.isDirect ? '\u2713' : ''}
+                                                    <a onClick={e => handleAlternative(alt.id)}>{props.data.heading}{alt.info}</a>
+                                                </dd>
+                                            ),
+                                            props.data.alternatives
+                                        )
+                                    }
+                                </> :
+                                null
+                            }
                         </dl>
                     </S.Overview>
 
@@ -225,10 +247,10 @@ export function init(
                     {Dict.some(item => !!item.singular || !!item.plural , props.data.conjugation.person) ?
                         <ConjugationTable conjugationData={props.data.conjugation} /> : null}
 
-                </S.UjcLanguageGuideTileView>
+                </S.UjcLangRefBookTileView>
             </globalComponents.TileWrapper>
         );
     }
 
-    return BoundWithProps(UjcLanguageGuideTileView, model);
+    return BoundWithProps(UjcLangRefBookTileView, model);
 }
