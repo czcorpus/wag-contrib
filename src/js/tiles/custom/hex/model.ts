@@ -79,7 +79,14 @@ export class HexModel extends StatelessModel<HexModelState> {
                     src: 'all',
                     'pos[1]': 'on',
                     'pos[2]': 'on',
+                    'pos[3]': 'on',
+                    'pos[4]': 'on',
                     'pos[5]': 'on',
+                    'pos[6]': 'on',
+                    'pos[7]': 'on',
+                    'pos[8]': 'on',
+                    'pos[9]': 'on',
+                    'pos[10]': 'on',
                     met: 'kw',
                     min: 3, // TODO user configurable
                     alpha: 100, // TODO user configurable
