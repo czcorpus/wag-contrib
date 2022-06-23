@@ -19,13 +19,14 @@
 import { IActionQueue, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices';
 import { Backlink } from '../../../page/tile';
-import { RecognizedQueries } from '../../../query';
+import { RecognizedQueries, QueryMatch } from '../../../query';
 import { Data, mkEmptyData } from './common';
 import { Actions as GlobalActions } from '../../../models/actions';
 import { Actions } from './actions';
-import { List } from 'cnc-tskit';
+import { Dict, List } from 'cnc-tskit';
 import { findCurrQueryMatch } from '../../../models/query';
-import { HexKspApi } from './api';
+import { PoSValues } from '../../../postag';
+import { HexKspApi, KSPRequestArgs } from './api';
 
 
 export interface HexModelState {
@@ -51,6 +52,34 @@ export interface HexModelArgs {
     queryDomain:string;
 }
 
+const posArgMapping = {
+    [PoSValues.NOUN]: 'pos[1]',
+    [PoSValues.ADJECTIVE]: 'pos[2]',
+    [PoSValues.PRONOUN]: 'pos[3]',
+    [PoSValues.NUMERAL]: 'pos[4]',
+    [PoSValues.VERB]: 'pos[5]',
+    [PoSValues.ADVERB]: 'pos[6]',
+    [PoSValues.PREPOSITION]: 'pos[7]',
+    [PoSValues.CONJUNCTION]: 'pos[8]',
+    [PoSValues.PARTICLE]: 'pos[9]',
+    [PoSValues.INTERJECTION]: 'pos[10]'
+};
+
+function exportPosArgs(args:KSPRequestArgs, match:QueryMatch):void {
+    const wordPos = match.pos[0];
+    if (wordPos === undefined) {
+        Dict.forEach(
+            (v, _) => {
+                args[v] = 'on';
+            },
+            posArgMapping
+        );
+
+    } else {
+        args[posArgMapping[wordPos]] = 'on';
+    }
+}
+
 export class HexModel extends StatelessModel<HexModelState> {
 
     private readonly tileId:number;
@@ -73,25 +102,17 @@ export class HexModel extends StatelessModel<HexModelState> {
             },
             (state, action, dispatch) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
-                this.api.call({
+                const args:KSPRequestArgs = {
                     q: match.lemma,
                     sort: 'a',
                     src: 'all',
-                    'pos[1]': 'on',
-                    'pos[2]': 'on',
-                    'pos[3]': 'on',
-                    'pos[4]': 'on',
-                    'pos[5]': 'on',
-                    'pos[6]': 'on',
-                    'pos[7]': 'on',
-                    'pos[8]': 'on',
-                    'pos[9]': 'on',
-                    'pos[10]': 'on',
                     met: 'kw',
                     min: 3, // TODO user configurable
                     alpha: 100, // TODO user configurable
                     lang: 'cz'
-                }).subscribe({
+                };
+                exportPosArgs(args, match);
+                this.api.call(args).subscribe({
                     next: data => {
                         dispatch<typeof Actions.TileDataLoaded>({
                             name: Actions.TileDataLoaded.name,
