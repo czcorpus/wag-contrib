@@ -26,44 +26,44 @@ import { Actions } from './actions';
 import { List, HTTP } from 'cnc-tskit';
 import { isWebDelegateApi } from '../../../types';
 import { findCurrQueryMatch } from '../../../models/query';
-import { UjcLGuideApi, UjcLGuideRequestArgs } from './api';
+import { UjcDictionaryArgs, UjcDictionaryApi } from './api';
 
 
-export interface UjcLGuideModelState {
+export interface UjcDictionaryModelState {
     isBusy:boolean;
+    ident:string;
     data:Data;
     error:string;
     backlinks:Array<BacklinkWithArgs<{}>>;
 }
 
-export interface UjcLGuideModelArgs {
+export interface UjcDictionaryModelArgs {
     dispatcher:IActionQueue;
-    initState:UjcLGuideModelState;
+    initState:UjcDictionaryModelState;
     tileId:number;
-    api:UjcLGuideApi,
+    api:UjcDictionaryApi,
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
     backlink:Backlink;
 }
 
-export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
+export class UjcDictionaryModel extends StatelessModel<UjcDictionaryModelState> {
 
     private readonly tileId:number;
 
-    private readonly api:UjcLGuideApi;
+    private readonly api:UjcDictionaryApi;
 
     private readonly appServices:IAppServices;
 
     private readonly backlink:Backlink;
 
 
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, backlink}:UjcLGuideModelArgs) {
+    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, backlink}:UjcDictionaryModelArgs) {
         super(dispatcher, initState);
         this.tileId = tileId;
         this.appServices = appServices;
         this.api = api;
         this.backlink = !backlink?.isAppUrl && isWebDelegateApi(this.api) ? this.api.getBackLink(backlink) : backlink;
-
 
         this.addActionHandler(
             GlobalActions.RequestQueryResponse,
@@ -71,28 +71,13 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
                 const match = findCurrQueryMatch(List.head(queryMatches));
                 state.isBusy = true;
                 state.error = null;
-                state.data = {...mkEmptyData(), rawQuery: match.lemma};
+                state.ident = match.lemma;
+                state.data = mkEmptyData();
                 state.backlinks = []
             },
             (state, action, dispatch) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
-                this.loadData(dispatch, state, match.lemma, false);
-            }
-        );
-
-        this.addActionHandler(
-            Actions.RequestAlternative,
-            (state, action) => {
-                state.isBusy = true;
-                state.error = null;
-                state.data = {
-                    ...mkEmptyData(),
-                    rawQuery: action.payload.id,
-                    alternatives: state.data.alternatives
-                };
-            },
-            (state, action, dispatch) => {
-                this.loadData(dispatch, state, action.payload.id, true);
+                this.loadData(dispatch, state, match.lemma);
             }
         );
 
@@ -106,7 +91,7 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
 
                     } else {
                         state.data = action.payload.data;
-                        state.backlinks = [this.generateBacklink(state.data.rawQuery, state.data.isDirect)];
+                        state.backlinks = [this.generateBacklink(state.ident)];
                     }
                 }
             }
@@ -143,28 +128,21 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
         );
     }
 
-    private generateBacklink(ident:string, direct:boolean):BacklinkWithArgs<{id:string}|{slovo:string}> {
+    private generateBacklink(ident:string):BacklinkWithArgs<{}> {
         return {
-            url: 'https://prirucka.ujc.cas.cz/',
-            label: 'heslo v Internetové jazykové příručce',
+            url: `https://slovnikcestiny.cz/heslo/${ident}/`,
+            label: 'heslo v Akademickém slovníku současné češtiny',
             method: HTTP.Method.GET,
-            args: direct ? {id: ident} : {slovo: ident}
+            args: {}
         };
     }
 
-    private loadData(dispatch:SEDispatcher, state:UjcLGuideModelState, q:string, direct:boolean) {
-        const args:UjcLGuideRequestArgs = {
-            q,
-            direct: direct ? 1 : 0
+    private loadData(dispatch:SEDispatcher, state:UjcDictionaryModelState, q:string) {
+        const args:UjcDictionaryArgs = {
+            q
         };
         this.api.call(args).subscribe({
             next: data => {
-                if (direct) {
-                    data.alternatives = state.data.alternatives;
-                }
-                data.isDirect = direct;
-                data.rawQuery = q;
-
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
                     payload: {
@@ -182,11 +160,7 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
                     payload: {
                         tileId: this.tileId,
                         isEmpty: true,
-                        data: {
-                            ...mkEmptyData(),
-                            isDirect: true,
-                            rawQuery: q
-                        },
+                        data: mkEmptyData(),
                     }
                 });
             }
