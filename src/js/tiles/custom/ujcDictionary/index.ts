@@ -23,7 +23,6 @@ import { init as viewInit } from './views';
 import { TileConf, ITileProvider, TileComponent, TileFactory, TileFactoryArgs } from '../../../page/tile';
 import { UjcDictionaryModel } from './model';
 import { UjcDictionaryApi } from './api';
-import { mkEmptyData } from './common';
 
 
 export interface UjcDictionaryConf extends TileConf {
@@ -67,7 +66,7 @@ export class UjcDictionaryTile implements ITileProvider {
             initState: {
                 isBusy: isBusy,
                 ident: '',
-                data: mkEmptyData(),
+                data: [],
                 error: null,
                 backlinks: []
             }

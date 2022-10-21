@@ -17,9 +17,55 @@
  */
 
 import styled from 'styled-components';
+import * as theme from '../../../views/common/theme';
 
 export const UjcDictionaryTileView = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+`;
+
+export const Overview = styled.div`
+
+    // style same as info in wordFreq tile
+    dl.info {
+
+        dt {
+            margin-bottom: 0.4em;
+            color: ${theme.colorLightText};
+            font-family: ${theme.condensedFontFamily};
+        }
+
+        dd {
+            font-size: 1.5em;
+            margin-left: 1em;
+
+            span.squareb {
+                color: ${theme.colorLightText};
+            }
+        }
+
+        dd.example, dd.alternative {
+            font-size: 1.2em;
+        }
+
+        dd:not(:last-child) {
+            margin-bottom: 0.7em;
+        }
+
+        dd.word-list {
+            font-size: 1.3em;
+            a {
+                color: ${theme.colorDefaultText};
+                cursor: pointer;
+                text-decoration: none;
+            }
+
+            a:hover {
+                color: ${theme.colorLogoBlue};
+                text-decoration: underline;
+            }
+        }
+    }
+
 `;

@@ -16,11 +16,14 @@
  * limitations under the License.
  */
 
+import { Dict, List } from 'cnc-tskit';
 import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
 import * as React from 'react';
+import { pipe } from 'rxjs';
 import { Theme } from '../../../page/theme';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile';
 import { GlobalComponents } from '../../../views/common';
+import { DataItem } from './common';
 import { UjcDictionaryModel, UjcDictionaryModelState } from './model';
 import * as S from './style';
 
@@ -37,6 +40,32 @@ export function init(
 
     const UjcDictionaryTileView: React.FC<UjcDictionaryModelState & CoreTileComponentProps> = (props) => {
 
+        const renderDataItem = (item: DataItem) => {
+            return <>
+                <dl className='info'>
+                    <dt>{ut.translate('ujc_dict__key')}:</dt>
+                    <dd>{item.key}</dd>
+                    <dt>{ut.translate('ujc_dict__pronunciation')}:</dt>
+                    <dd>{item.pronunciation}</dd>
+                    <dt>{ut.translate('ujc_dict__pos')}:</dt>
+                    <dd>{item.pos}</dd>
+                    {item.quality ? <>
+                        <dt>{ut.translate('ujc_dict__quality')}:</dt>
+                        <dd>{item.quality}</dd>
+                    </> : null}
+                    {item.forms ? <>
+                        <dt>{ut.translate('ujc_dict__forms')}:</dt>
+                        <dd>{List.map(([k, v], i) => `${i > 0 ? '; ' : ''} ${k}: ${v}`, Dict.toEntries(item.forms))}</dd>
+                    </> : null}
+                    {item.note ? <>
+                        <dt>{ut.translate('ujc_dict__note')}:</dt>
+                        <dd>{item.note}</dd>
+                    </> : null}
+                </dl>
+                <hr/>
+            </>
+        }
+
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
                 hasData={props.data !== null}
@@ -45,7 +74,9 @@ export function init(
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'UJC'}}>
                 <S.UjcDictionaryTileView>
-                    {props.data.rawData}
+                    <S.Overview>
+                        {List.map(item => renderDataItem(item), props.data)}
+                    </S.Overview>
                 </S.UjcDictionaryTileView>
             </globalComponents.TileWrapper>
         );

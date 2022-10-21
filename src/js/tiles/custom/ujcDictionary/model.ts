@@ -20,7 +20,7 @@ import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices';
 import { Backlink, BacklinkWithArgs } from '../../../page/tile';
 import { RecognizedQueries } from '../../../query';
-import { Data, mkEmptyData } from './common';
+import { DataItem } from './common';
 import { Actions as GlobalActions } from '../../../models/actions';
 import { Actions } from './actions';
 import { List, HTTP } from 'cnc-tskit';
@@ -32,7 +32,7 @@ import { UjcDictionaryArgs, UjcDictionaryApi } from './api';
 export interface UjcDictionaryModelState {
     isBusy:boolean;
     ident:string;
-    data:Data;
+    data:Array<DataItem>;
     error:string;
     backlinks:Array<BacklinkWithArgs<{}>>;
 }
@@ -69,15 +69,14 @@ export class UjcDictionaryModel extends StatelessModel<UjcDictionaryModelState> 
             GlobalActions.RequestQueryResponse,
             (state, action) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
+                state.ident = match.lemma;
                 state.isBusy = true;
                 state.error = null;
-                state.ident = match.lemma;
-                state.data = mkEmptyData();
-                state.backlinks = []
+                state.data = [];
+                state.backlinks = [];
             },
             (state, action, dispatch) => {
-                const match = findCurrQueryMatch(List.head(queryMatches));
-                this.loadData(dispatch, state, match.lemma);
+                this.loadData(dispatch, state, state.ident);
             }
         );
 
@@ -160,7 +159,7 @@ export class UjcDictionaryModel extends StatelessModel<UjcDictionaryModelState> 
                     payload: {
                         tileId: this.tileId,
                         isEmpty: true,
-                        data: mkEmptyData(),
+                        data: [],
                     }
                 });
             }
