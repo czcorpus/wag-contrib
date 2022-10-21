@@ -19,7 +19,6 @@
 import { Dict, List } from 'cnc-tskit';
 import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
 import * as React from 'react';
-import { pipe } from 'rxjs';
 import { Theme } from '../../../page/theme';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile';
 import { GlobalComponents } from '../../../views/common';
