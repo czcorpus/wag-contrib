@@ -17,11 +17,11 @@
  */
 
 import { HTTP } from 'cnc-tskit';
-import { map, Observable, of as rxOf } from 'rxjs';
+import { Observable, of as rxOf } from 'rxjs';
 import { IApiServices } from '../../../appServices';
 import { cachedAjax$ } from '../../../page/ajax';
 import { ResourceApi, SourceDetails, HTTPHeaders, IAsyncKeyValueStore } from '../../../types';
-import { Data } from './common';
+import { DataItem } from './common';
 
 
 export interface UjcDictionaryArgs {
@@ -29,7 +29,7 @@ export interface UjcDictionaryArgs {
 }
 
 
-export class UjcDictionaryApi implements ResourceApi<UjcDictionaryArgs, Data> {
+export class UjcDictionaryApi implements ResourceApi<UjcDictionaryArgs, Array<DataItem>> {
 
     private readonly cache:IAsyncKeyValueStore;
 
@@ -47,13 +47,11 @@ export class UjcDictionaryApi implements ResourceApi<UjcDictionaryArgs, Data> {
         this.apiServices = apiServices;
     }
 
-    call(args:UjcDictionaryArgs):Observable<Data> {
-        return cachedAjax$<string>(this.cache)(
+    call(args:UjcDictionaryArgs):Observable<Array<DataItem>> {
+        return cachedAjax$<Array<DataItem>>(this.cache)(
             HTTP.Method.GET,
             this.apiURL,
             args,
-        ).pipe(
-            map(v => ({rawData: v}))
         );
     }
 

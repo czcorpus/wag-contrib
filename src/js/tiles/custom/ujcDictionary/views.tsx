@@ -45,7 +45,7 @@ export function init(
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'UJC'}}>
                 <S.UjcDictionaryTileView>
-                    {props.data.rawData}
+                    {JSON.stringify(props.data)}
                 </S.UjcDictionaryTileView>
             </globalComponents.TileWrapper>
         );

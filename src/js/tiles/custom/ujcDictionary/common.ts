@@ -16,13 +16,16 @@
  * limitations under the License.
  */
 
-
-export interface Data {
-    rawData: string;
-}
-
-export function mkEmptyData():Data {
-    return {
-        rawData: '',
-    };
+export interface DataItem {
+    key: string;
+	pronunciation: string;
+	quality: string;
+	forms: {[key:string]:string};
+	pos: string;
+	meaning: Array<{
+        explanation: string;
+        metaExplanation: string;
+        examples: Array<string>;
+    }>;
+	note: string;
 }
