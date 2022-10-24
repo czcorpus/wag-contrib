@@ -42,10 +42,20 @@ export function init(
         const renderDataItem = (item: DataItem) => {
             return <>
                 <dl className='info'>
-                    <dt>{ut.translate('ujc_dict__key')}:</dt>
-                    <dd>{item.key}</dd>
-                    <dt>{ut.translate('ujc_dict__pronunciation')}:</dt>
-                    <dd>{item.pronunciation}</dd>
+                    <dt>{ut.translate('ujc_dict__key')}, {ut.translate('ujc_dict__pronunciation')}:</dt>
+                    <dd>{item.key}, {item.pronunciation}</dd>
+                    <dt>{ut.translate('ujc_dict__meaning')}:</dt>
+                    <dd>
+                        <ol>{List.map(v =>
+                            <li>
+                                <span>{v.explanation}</span><span>{v.metaExplanation}</span>
+                                <ul>{
+                                    List.map(e => <li>{e}</li>, v.examples)
+                                }</ul>
+                            </li>
+                        , item.meaning)}</ol>
+                    </dd>
+                    {/*
                     <dt>{ut.translate('ujc_dict__pos')}:</dt>
                     <dd>{item.pos}</dd>
                     {item.quality ? <>
@@ -56,6 +66,7 @@ export function init(
                         <dt>{ut.translate('ujc_dict__forms')}:</dt>
                         <dd>{List.map(([k, v], i) => `${i > 0 ? '; ' : ''} ${k}: ${v}`, Dict.toEntries(item.forms))}</dd>
                     </> : null}
+                    */}
                     {item.note ? <>
                         <dt>{ut.translate('ujc_dict__note')}:</dt>
                         <dd>{item.note}</dd>

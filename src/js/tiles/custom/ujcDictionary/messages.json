@@ -6,7 +6,8 @@
         "ujc_dict__pos": "slovní druh",
         "ujc_dict__quality": "kvalita",
         "ujc_dict__forms": "tvary",
-        "ujc_dict__note": "poznámka"
+        "ujc_dict__note": "poznámka",
+        "ujc_dict__meaning": "význam"
     },
     "en-US": {
         "ujc_dict__main_label": "Academic dictionary of contemporary Czech",
@@ -15,6 +16,7 @@
         "ujc_dict__pos": "part of speach",
         "ujc_dict__quality": "quality",
         "ujc_dict__forms": "forms",
-        "ujc_dict__note": "note"
+        "ujc_dict__note": "note",
+        "ujc_dict__meaning": "meaning"
     }
 }
