@@ -17,7 +17,7 @@
  */
 
 export interface DataItem {
-    key: string;
+	key: string;
 	pronunciation: string;
 	audioFile: string;
 	quality: string;
@@ -26,6 +26,7 @@ export interface DataItem {
 	meaning: Array<{
         explanation: string;
         metaExplanation: string;
+        synonyms: Array<string>;
         examples: Array<string>;
     }>;
 	phrasemes: Array<{
