@@ -7,7 +7,8 @@
         "ujc_dict__quality": "kvalita",
         "ujc_dict__forms": "tvary",
         "ujc_dict__note": "poznámka",
-        "ujc_dict__meaning": "význam"
+        "ujc_dict__meaning": "význam",
+        "ujc_dict__examples": "příklady"
     },
     "en-US": {
         "ujc_dict__main_label": "Academic dictionary of contemporary Czech",
@@ -17,6 +18,7 @@
         "ujc_dict__quality": "quality",
         "ujc_dict__forms": "forms",
         "ujc_dict__note": "note",
-        "ujc_dict__meaning": "meaning"
+        "ujc_dict__meaning": "meaning",
+        "ujc_dict__examples": "examples"
     }
 }

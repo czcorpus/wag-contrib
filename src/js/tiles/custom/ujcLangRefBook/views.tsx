@@ -199,7 +199,7 @@ export function init(
                             {props.data.meaning ?
                                 <>
                                     <dt>{ut.translate('lguide__overview_meaning')}:</dt>
-                                    <dd>{props.data.meaning}</dd>,
+                                    <dd>{props.data.meaning}</dd>
                                 </> :
                                 null
                             }

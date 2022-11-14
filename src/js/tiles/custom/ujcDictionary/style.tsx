@@ -67,5 +67,54 @@ export const Overview = styled.div`
             }
         }
     }
+`;
 
+export const MeaningItem = styled.div`
+    display: flex;
+    gap: 5px;
+
+    .examples {
+        font-size: 0.8em;
+    }
+
+    .examples-heading {
+        margin-bottom: 0.5em;
+    }
+
+    .example {
+        font-style: italic;
+    }
+`;
+
+// ---------------- <TooltipContent /> --------------------------------------
+
+export const TooltipContent = styled.div<{}>`
+    visibility: hidden;
+    background-color: #555;
+    color: #fff;
+    padding: 5px 5px;
+    border-radius: 6px;
+
+    position: absolute;
+    z-index: 1;
+    top: 120%;
+    left: 20%;
+    margin: 0 auto;
+
+    opacity: 0;
+    transition: opacity 0.3s;
+`;
+
+// ---------------- <Tooltip /> --------------------------------------
+
+export const Tooltip = styled.div<{}>`
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+    top: 100%;
+
+    &:hover ${TooltipContent} {
+        visibility: visible;
+        opacity: 1;
+    }
 `;
