@@ -23,7 +23,7 @@ import { IApiServices } from '../../../appServices';
 import { cachedAjax$, ResponseType } from '../../../page/ajax';
 import { PoSValues } from '../../../postag';
 import { DataApi, HTTPHeaders, IAsyncKeyValueStore } from '../../../types';
-import { Data, DataTableItem } from './common';
+import { Data } from './common';
 
 
 export function posToIndex(pos:PoSValues):number|undefined {
