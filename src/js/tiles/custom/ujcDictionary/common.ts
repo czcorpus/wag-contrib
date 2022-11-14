@@ -28,5 +28,15 @@ export interface DataItem {
         metaExplanation: string;
         examples: Array<string>;
     }>;
+	phrasemes: Array<{
+		phraseme: string;
+        explanation: string;
+        examples: Array<string>;
+    }>;
+	collocations: Array<{
+		collocation: string;
+        explanation: string;
+        examples: Array<string>;
+    }>;
 	note: string;
 }
