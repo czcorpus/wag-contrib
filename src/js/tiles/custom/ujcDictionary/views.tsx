@@ -43,18 +43,21 @@ export function init(
             return <>
                 <dl className='info'>
                     <dt>{ut.translate('ujc_dict__key')}, {ut.translate('ujc_dict__pronunciation')}:</dt>
-                    <dd>{item.key}, {item.pronunciation}</dd>
+                    <dd>{item.key} {item.pronunciation}</dd>
                     <dt>{ut.translate('ujc_dict__meaning')}:</dt>
-                    <dd>
-                        <ol>{List.map(v =>
-                            <li>
-                                <span>{v.explanation}</span><span>{v.metaExplanation}</span>
-                                <ul>{
-                                    List.map(e => <li>{e}</li>, v.examples)
-                                }</ul>
-                            </li>
-                        , item.meaning)}</ol>
-                    </dd>
+                    <dd>{List.map((v, i) =>
+                        <S.MeaningItem>
+                            {List.size(item.meaning) > 1 ? <div>{i+1}.</div> : null}
+                            <S.Tooltip>
+                                <div>{v.explanation}</div>
+                                <div>{v.metaExplanation}</div>
+                                <S.TooltipContent className='examples'>
+                                    <div className='examples-heading'>{ut.translate('ujc_dict__examples')}:</div>
+                                    <div>{List.map(e => <span className='example'>{e}<br/></span>, v.examples)}</div>
+                                </S.TooltipContent>
+                            </S.Tooltip>
+                        </S.MeaningItem>
+                    , item.meaning)}</dd>
                     {/*
                     <dt>{ut.translate('ujc_dict__pos')}:</dt>
                     <dd>{item.pos}</dd>

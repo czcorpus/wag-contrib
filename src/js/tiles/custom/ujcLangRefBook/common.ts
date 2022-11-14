@@ -76,6 +76,7 @@ export interface Data {
     scripts:Array<string>;
     cssLinks:Array<string>;
     heading:string;
+    pronunciation:string;
     meaning:string;
     syllabification:string;
     gender:string;
@@ -83,6 +84,7 @@ export interface Data {
     comparison:ComparisonData;
     conjugation:ConjugationData;
     examples:Array<string>;
+    notes:string;
     alternatives:Array<Alternative>;
     isDirect:boolean;
 }
@@ -100,6 +102,7 @@ export function mkEmptyData():Data {
         scripts: [],
         cssLinks: [],
         heading: '',
+        pronunciation: '',
         meaning: '',
         syllabification: '',
         gender: '',
@@ -139,6 +142,7 @@ export function mkEmptyData():Data {
                 },
             }
         },
+        notes: '',
         examples: [],
         alternatives: [],
         isDirect: false

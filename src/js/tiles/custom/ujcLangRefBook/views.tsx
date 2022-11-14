@@ -195,11 +195,11 @@ export function init(
                     <S.Overview>
                         <dl className='info'>
                             <dt>{ut.translate('lguide__overview_word')}:</dt>
-                            <dd>{props.data.heading}</dd>
+                            <dd>{props.data.heading} {props.data.pronunciation}</dd>
                             {props.data.meaning ?
                                 <>
                                     <dt>{ut.translate('lguide__overview_meaning')}:</dt>
-                                    <dd>{props.data.meaning}</dd>,
+                                    <dd>{props.data.meaning}</dd>
                                 </> :
                                 null
                             }
@@ -216,6 +216,12 @@ export function init(
                                 <>
                                     <dt>{ut.translate('lguide__overview_examples')}:</dt>
                                     {List.map((e, i) => <dd key={`dd:${i}:${e}`} className="example">{e}</dd>, props.data.examples)}
+                                </> :null
+                            }
+                            {props.data.notes ?
+                                <>
+                                    <dt>{ut.translate('lguide__overview_notes')}:</dt>
+                                    <dd>{props.data.notes}</dd>
                                 </> :null
                             }
                             {props.data.alternatives ?
