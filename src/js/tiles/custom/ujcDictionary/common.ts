@@ -19,6 +19,7 @@
 export interface DataItem {
     key: string;
 	pronunciation: string;
+	audioFile: string;
 	quality: string;
 	forms: {[key:string]:string};
 	pos: string;

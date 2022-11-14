@@ -43,7 +43,7 @@ export function init(
             return <>
                 <dl className='info'>
                     <dt>{ut.translate('ujc_dict__key')}, {ut.translate('ujc_dict__pronunciation')}:</dt>
-                    <dd>{item.key}, {item.pronunciation}</dd>
+                    <dd>{item.key} {item.pronunciation}</dd>
                     <dt>{ut.translate('ujc_dict__meaning')}:</dt>
                     <dd>
                         <ol>{List.map(v =>
