@@ -117,4 +117,9 @@ export const Tooltip = styled.div<{}>`
         visibility: visible;
         opacity: 1;
     }
+
+    ${TooltipContent}:hover {
+        visibility: hidden;
+        opacity: 0;
+    }
 `;
