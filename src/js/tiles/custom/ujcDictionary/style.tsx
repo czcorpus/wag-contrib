@@ -19,53 +19,36 @@
 import styled from 'styled-components';
 import * as theme from '../../../views/common/theme';
 
-export const UjcDictionaryTileView = styled.div`
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-`;
+// ---------------- <Keyword /> --------------------------------------
 
-export const Overview = styled.div`
+export const Keyword = styled.div`
+    font-size: 1.5em;
+    color: ${theme.colorDefaultText};
 
-    // style same as info in wordFreq tile
-    dl.info {
+    .dict-key {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #6f74f0;
+    }
 
-        dt {
-            margin-bottom: 0.4em;
-            color: ${theme.colorLightText};
-            font-family: ${theme.condensedFontFamily};
-        }
+    .dict-pronunciation {
 
-        dd {
-            font-size: 1.5em;
-            margin-left: 1em;
+    }
 
-            span.squareb {
-                color: ${theme.colorLightText};
-            }
-        }
+    .dict-note {
+        margin-top: 0.5em;
+        padding: 0.5em;
+        font-size: 0.8em;
+        background-color: #f4f4fe;
+        border-radius: 5px;
+    }
 
-        dd.example, dd.alternative {
-            font-size: 1.2em;
-        }
+    .dict-note-label {
+        font-weight: 700;
+    }
 
-        dd:not(:last-child) {
-            margin-bottom: 0.7em;
-        }
-
-        dd.word-list {
-            font-size: 1.3em;
-            a {
-                color: ${theme.colorDefaultText};
-                cursor: pointer;
-                text-decoration: none;
-            }
-
-            a:hover {
-                color: ${theme.colorLogoBlue};
-                text-decoration: underline;
-            }
-        }
+    .dict-note-label:first-letter {
+        text-transform: capitalize;
     }
 `;
 
@@ -140,4 +123,12 @@ export const MeaningRow = styled.tr`
     .example {
         font-style: italic;
     }
+`;
+
+// ---------------- <UjcDictionaryTileView /> --------------------------------------
+
+export const UjcDictionaryTileView = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 `;
