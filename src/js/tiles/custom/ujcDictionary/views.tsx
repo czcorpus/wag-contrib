@@ -45,19 +45,29 @@ export function init(
                     <dt>{ut.translate('ujc_dict__key')}, {ut.translate('ujc_dict__pronunciation')}:</dt>
                     <dd>{item.key} {item.pronunciation}</dd>
                     <dt>{ut.translate('ujc_dict__meaning')}:</dt>
-                    <dd>{List.map((v, i) =>
-                        <S.MeaningItem>
-                            {List.size(item.meaning) > 1 ? <div>{i+1}.</div> : null}
-                            <S.Tooltip>
-                                <div>{v.explanation}</div>
-                                <div>{v.metaExplanation}</div>
-                                <S.TooltipContent className='examples'>
-                                    <div className='examples-heading'>{ut.translate('ujc_dict__examples')}:</div>
-                                    <div>{List.map(e => <span className='example'>{e}<br/></span>, v.examples)}</div>
-                                </S.TooltipContent>
-                            </S.Tooltip>
-                        </S.MeaningItem>
-                    , item.meaning)}</dd>
+                    <dd>
+                        <table>
+                            {List.map((v, i) =>
+                                <S.MeaningRow>
+                                    <td className='meaning-count'>
+                                        {List.size(item.meaning) > 1 ? <div>{i+1}.</div> : null}
+                                    </td>
+                                    <td>
+                                        <S.Tooltip>
+                                            <S.Tooltiped>
+                                                {v.explanation ? <div>{v.explanation}</div> : null}
+                                                {v.metaExplanation ? <div>{v.metaExplanation}</div> : null}
+                                            </S.Tooltiped>
+                                            <S.TooltipContent className='examples'>
+                                                <div className='examples-heading'>{ut.translate('ujc_dict__examples')}:</div>
+                                                <div>{List.map(e => <span className='example'>{e}<br/></span>, v.examples)}</div>
+                                            </S.TooltipContent>
+                                        </S.Tooltip>
+                                    </td>
+                                </S.MeaningRow>
+                            , item.meaning)}
+                        </table>
+                    </dd>
                     {/*
                     <dt>{ut.translate('ujc_dict__pos')}:</dt>
                     <dd>{item.pos}</dd>

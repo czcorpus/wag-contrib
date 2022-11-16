@@ -69,20 +69,12 @@ export const Overview = styled.div`
     }
 `;
 
-export const MeaningItem = styled.div`
-    display: flex;
-    gap: 5px;
+// ---------------- <Tooltiped /> --------------------------------------
 
-    .examples {
-        font-size: 0.8em;
-    }
-
-    .examples-heading {
-        margin-bottom: 0.5em;
-    }
-
-    .example {
-        font-style: italic;
+export const Tooltiped = styled.div<{}>`
+    & > *{
+        width: fit-content;
+        border-bottom: 1px dotted black;
     }
 `;
 
@@ -98,8 +90,7 @@ export const TooltipContent = styled.div<{}>`
     position: absolute;
     z-index: 1;
     top: 120%;
-    left: 20%;
-    margin: 0 auto;
+    left: 1em;
 
     opacity: 0;
     transition: opacity 0.3s;
@@ -110,7 +101,6 @@ export const TooltipContent = styled.div<{}>`
 export const Tooltip = styled.div<{}>`
     position: relative;
     display: inline-block;
-    border-bottom: 1px dotted black;
     top: 100%;
 
     &:hover ${TooltipContent} {
@@ -121,5 +111,33 @@ export const Tooltip = styled.div<{}>`
     ${TooltipContent}:hover {
         visibility: hidden;
         opacity: 0;
+    }
+`;
+
+// ---------------- <MeaningRow /> --------------------------------------
+
+export const MeaningRow = styled.tr`
+    td {
+        vertical-align: top;
+    }
+
+    ${Tooltip} {
+        width: 100%;
+    }
+
+    .meaning-count {
+        text-align: right;
+    }
+
+    .examples {
+        font-size: 0.8em;
+    }
+
+    .examples-heading {
+        margin-bottom: 0.5em;
+    }
+
+    .example {
+        font-style: italic;
     }
 `;
