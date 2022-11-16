@@ -26,6 +26,7 @@ export interface DataItem {
 	meaning: Array<{
         explanation: string;
         metaExplanation: string;
+        attachement: string;
         synonyms: Array<string>;
         examples: Array<string>;
     }>;
