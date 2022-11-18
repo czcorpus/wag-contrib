@@ -18,11 +18,11 @@
 
 import { Action } from 'kombo';
 import { Actions as GlobalActions } from '../../../models/actions';
-import { DataItem } from './common';
+import { DataStructure } from './common';
 
 
 export interface DataLoadedPayload {
-    data:Array<DataItem>;
+    data:DataStructure;
 }
 
 export class Actions {

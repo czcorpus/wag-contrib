@@ -16,13 +16,13 @@
  * limitations under the License.
  */
 
-import { Dict, List } from 'cnc-tskit';
+import { List } from 'cnc-tskit';
 import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
 import * as React from 'react';
 import { Theme } from '../../../page/theme';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile';
 import { GlobalComponents } from '../../../views/common';
-import { DataItem } from './common';
+import { DataItem, DataStructure } from './common';
 import { UjcDictionaryModel, UjcDictionaryModelState } from './model';
 import * as S from './style';
 
@@ -40,56 +40,68 @@ export function init(
     const UjcDictionaryTileView: React.FC<UjcDictionaryModelState & CoreTileComponentProps> = (props) => {
 
         const renderDataItem = (item: DataItem) => {
-            return <>
-                <dl className='info'>
-                    <dt>{ut.translate('ujc_dict__key')}, {ut.translate('ujc_dict__pronunciation')}:</dt>
-                    <dd>{item.key} {item.pronunciation}</dd>
-                    <dt>{ut.translate('ujc_dict__meaning')}:</dt>
-                    <dd>{List.map((v, i) =>
-                        <S.MeaningItem>
-                            {List.size(item.meaning) > 1 ? <div>{i+1}.</div> : null}
-                            <S.Tooltip>
-                                <div>{v.explanation}</div>
-                                <div>{v.metaExplanation}</div>
-                                <S.TooltipContent className='examples'>
-                                    <div className='examples-heading'>{ut.translate('ujc_dict__examples')}:</div>
-                                    <div>{List.map(e => <span className='example'>{e}<br/></span>, v.examples)}</div>
-                                </S.TooltipContent>
-                            </S.Tooltip>
-                        </S.MeaningItem>
-                    , item.meaning)}</dd>
-                    {/*
-                    <dt>{ut.translate('ujc_dict__pos')}:</dt>
-                    <dd>{item.pos}</dd>
-                    {item.quality ? <>
-                        <dt>{ut.translate('ujc_dict__quality')}:</dt>
-                        <dd>{item.quality}</dd>
-                    </> : null}
-                    {item.forms ? <>
-                        <dt>{ut.translate('ujc_dict__forms')}:</dt>
-                        <dd>{List.map(([k, v], i) => `${i > 0 ? '; ' : ''} ${k}: ${v}`, Dict.toEntries(item.forms))}</dd>
-                    </> : null}
-                    */}
-                    {item.note ? <>
-                        <dt>{ut.translate('ujc_dict__note')}:</dt>
-                        <dd>{item.note}</dd>
-                    </> : null}
-                </dl>
-                <hr/>
-            </>
+            return <S.Keyword key={item.key}>
+                <p className = 'dict-heading'>
+                    <span className='dict-key'>{item.key}</span>
+                    <span className='dict-pronunciation'>{item.pronunciation}</span>
+                </p>
+                <S.MeaningTable>
+                    <tbody>
+                        {List.map((v, i) =>
+                            <S.MeaningRow key={i}>
+                                <td className='meaning-count'>
+                                    {List.size(item.meaning) > 1 ? <div>{i+1}.</div> : null}
+                                </td>
+                                <td>
+                                    <S.Tooltip>
+                                        <S.Tooltiped>
+                                            {v.explanation ? <div>{v.explanation}</div> : null}
+                                            {v.metaExplanation ? <div><i>{v.metaExplanation}</i></div> : null}
+                                        </S.Tooltiped>
+                                        <S.TooltipContent className='examples'>
+                                            <div className='examples-heading'>{ut.translate('ujc_dict__examples')}:</div>
+                                            {List.map((e, i) =>
+                                                <div key={i} className='example-block'>
+                                                    {e.usage ? <span className='example-usage'>&#8226; {e.usage}:<br/></span> : null }
+                                                    {List.map(v => <span className='example'>{v}<br/></span>, e.data)}
+                                                </div>, v.examples)
+                                            }
+                                        </S.TooltipContent>
+                                    </S.Tooltip>
+                                </td>
+                            </S.MeaningRow>
+                        , item.meaning.slice(0, props.maxItems))}
+                        {item.meaning.length > props.maxItems ? <tr><td/><td>...{ut.translate('ujc_dict__more_data')}</td></tr> : null}
+                    </tbody>
+                </S.MeaningTable>
+            </S.Keyword>
         }
 
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
-                hasData={props.data !== null}
+                hasData={props.data.items.length > 0}
                 backlink={props.backlinks}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'UJC'}}>
                 <S.UjcDictionaryTileView>
-                    <S.Overview>
-                        {List.map(item => renderDataItem(item), props.data)}
-                    </S.Overview>
+                    {List.map(item => renderDataItem(item), props.data.items.slice(0, props.maxItems))}
+                    {props.data.items.length > props.maxItems ?
+                        <S.Keyword>
+                            <p className = 'dict-heading'>
+                                <span className='dict-key'>...{ut.translate('ujc_dict__more_data')}</span>
+                            </p>
+                        </S.Keyword> : null
+                    }
+                    {props.data.notes ?
+                        List.map((note, i) =>
+                            <S.Note key={i}>
+                                <span className='dict-note-label'>{ut.translate('ujc_dict__note')}</span>
+                                <span dangerouslySetInnerHTML={{__html: note}}/>
+                            </S.Note>
+                        , props.data.notes) :
+                        null
+                    }
                 </S.UjcDictionaryTileView>
             </globalComponents.TileWrapper>
         );

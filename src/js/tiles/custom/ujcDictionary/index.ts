@@ -23,10 +23,12 @@ import { init as viewInit } from './views';
 import { TileConf, ITileProvider, TileComponent, TileFactory, TileFactoryArgs } from '../../../page/tile';
 import { UjcDictionaryModel } from './model';
 import { UjcDictionaryApi } from './api';
+import { createEmptyData } from './common';
 
 
 export interface UjcDictionaryConf extends TileConf {
     apiURL:string;
+    maxItems:number;
 }
 
 export class UjcDictionaryTile implements ITileProvider {
@@ -66,7 +68,8 @@ export class UjcDictionaryTile implements ITileProvider {
             initState: {
                 isBusy: isBusy,
                 ident: '',
-                data: [],
+                data: createEmptyData(),
+                maxItems: conf.maxItems,
                 error: null,
                 backlinks: []
             }

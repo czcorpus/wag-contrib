@@ -19,70 +19,60 @@
 import styled from 'styled-components';
 import * as theme from '../../../views/common/theme';
 
-export const UjcDictionaryTileView = styled.div`
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-`;
+// ---------------- <Keyword /> --------------------------------------
 
-export const Overview = styled.div`
+export const Keyword = styled.div`
+    margin-bottom: 0.5em;
+    color: ${theme.colorDefaultText};
 
-    // style same as info in wordFreq tile
-    dl.info {
+    &:not(:first-child) {
+        border-top: 4px solid #f4f4fe;
+    }
 
-        dt {
-            margin-bottom: 0.4em;
-            color: ${theme.colorLightText};
-            font-family: ${theme.condensedFontFamily};
+    &:last-child {
+        margin-bottom: 0em;
+    }
+
+    .dict-key {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #6f74f0;
+
+        :after {
+            content: " ";
         }
+    }
 
-        dd {
-            font-size: 1.5em;
-            margin-left: 1em;
+    .dict-pronunciation {
 
-            span.squareb {
-                color: ${theme.colorLightText};
-            }
-        }
-
-        dd.example, dd.alternative {
-            font-size: 1.2em;
-        }
-
-        dd:not(:last-child) {
-            margin-bottom: 0.7em;
-        }
-
-        dd.word-list {
-            font-size: 1.3em;
-            a {
-                color: ${theme.colorDefaultText};
-                cursor: pointer;
-                text-decoration: none;
-            }
-
-            a:hover {
-                color: ${theme.colorLogoBlue};
-                text-decoration: underline;
-            }
-        }
     }
 `;
 
-export const MeaningItem = styled.div`
-    display: flex;
-    gap: 5px;
+// ---------------- <Note /> --------------------------------------
 
-    .examples {
-        font-size: 0.8em;
+export const Note = styled.div`
+    margin-top: 0.5em;
+    padding: 0.5em;
+    font-size: 0.8em;
+    background-color: #f4f4fe;
+    border-radius: 5px;
+
+    .dict-note-label {
+        font-weight: 700;
+        text-transform: capitalize;
+
+        :after {
+            content: " ";
+        }
     }
+`;
 
-    .examples-heading {
-        margin-bottom: 0.5em;
-    }
+// ---------------- <Tooltiped /> --------------------------------------
 
-    .example {
-        font-style: italic;
+export const Tooltiped = styled.div<{}>`
+    & > *{
+        width: fit-content;
+        border-bottom: 1px dotted black;
     }
 `;
 
@@ -98,8 +88,7 @@ export const TooltipContent = styled.div<{}>`
     position: absolute;
     z-index: 1;
     top: 120%;
-    left: 20%;
-    margin: 0 auto;
+    left: 1em;
 
     opacity: 0;
     transition: opacity 0.3s;
@@ -110,7 +99,6 @@ export const TooltipContent = styled.div<{}>`
 export const Tooltip = styled.div<{}>`
     position: relative;
     display: inline-block;
-    border-bottom: 1px dotted black;
     top: 100%;
 
     &:hover ${TooltipContent} {
@@ -122,4 +110,52 @@ export const Tooltip = styled.div<{}>`
         visibility: hidden;
         opacity: 0;
     }
+`;
+
+// ---------------- <MeaningTable /> --------------------------------------
+
+export const MeaningTable = styled.table`
+    width: 100%;
+`;
+
+// ---------------- <MeaningRow /> --------------------------------------
+
+export const MeaningRow = styled.tr`
+    td {
+        vertical-align: top;
+    }
+
+    ${Tooltip} {
+        width: 100%;
+    }
+
+    .meaning-count {
+        text-align: right;
+        width: 2em;
+    }
+
+    .examples {
+        font-size: 0.8em;
+    }
+
+    .example-block {
+        margin-top: 0.5em;
+    }
+
+    .examples-heading {
+
+    }
+
+    .example {
+        font-style: italic;
+    }
+`;
+
+// ---------------- <UjcDictionaryTileView /> --------------------------------------
+
+export const UjcDictionaryTileView = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 1.5em;
 `;
