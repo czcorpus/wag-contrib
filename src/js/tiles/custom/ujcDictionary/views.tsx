@@ -16,13 +16,13 @@
  * limitations under the License.
  */
 
-import { Dict, List } from 'cnc-tskit';
+import { List } from 'cnc-tskit';
 import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
 import * as React from 'react';
 import { Theme } from '../../../page/theme';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile';
 import { GlobalComponents } from '../../../views/common';
-import { DataItem } from './common';
+import { DataItem, DataStructure } from './common';
 import { UjcDictionaryModel, UjcDictionaryModelState } from './model';
 import * as S from './style';
 
@@ -55,13 +55,13 @@ export function init(
                                 <S.Tooltip>
                                     <S.Tooltiped>
                                         {v.explanation ? <div>{v.explanation}</div> : null}
-                                        {v.metaExplanation ? <div>{v.metaExplanation}</div> : null}
+                                        {v.metaExplanation ? <div><i>{v.metaExplanation}</i></div> : null}
                                     </S.Tooltiped>
                                     <S.TooltipContent className='examples'>
                                         <div className='examples-heading'>{ut.translate('ujc_dict__examples')}:</div>
                                         {List.map(e =>
                                             <div className='example-block'>
-                                                {e.usage ? <span className='example-usage'>&#8226; {e.usage}<br/></span> : null }
+                                                {e.usage ? <span className='example-usage'>&#8226; {e.usage}:<br/></span> : null }
                                                 {List.map(v => <span className='example'>{v}<br/></span>, e.data)}
                                             </div>, v.examples)
                                         }
@@ -69,27 +69,37 @@ export function init(
                                 </S.Tooltip>
                             </td>
                         </S.MeaningRow>
-                    , item.meaning)}
+                    , item.meaning.slice(0, props.maxItems))}
+                    {item.meaning.length > props.maxItems ? <tr><td/><td>...{ut.translate('ujc_dict__more_data')}</td></tr> : null}
                 </S.MeaningTable>
-                {item.note ?
-                    <div className='dict-note'>
-                        <span className='dict-note-label'>{ut.translate('ujc_dict__note')}</span>
-                        <span dangerouslySetInnerHTML={{__html: item.note}}/>
-                    </div> :
-                    null
-                }
             </S.Keyword>
         }
 
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
-                hasData={props.data !== null}
+                hasData={props.data.items.length > 0}
                 backlink={props.backlinks}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'UJC'}}>
                 <S.UjcDictionaryTileView>
-                    {List.map(item => renderDataItem(item), props.data)}
+                    {List.map(item => renderDataItem(item), props.data.items.slice(0, props.maxItems))}
+                    {props.data.items.length > props.maxItems ?
+                        <S.Keyword>
+                            <p className = 'dict-heading'>
+                                <span className='dict-key'>...{ut.translate('ujc_dict__more_data')}</span>
+                            </p>
+                        </S.Keyword> : null
+                    }
+                    {props.data.notes ?
+                        List.map(note =>
+                            <div className='dict-note'>
+                                <span className='dict-note-label'>{ut.translate('ujc_dict__note')}</span>
+                                <span dangerouslySetInnerHTML={{__html: note}}/>
+                            </div>
+                        , props.data.notes) :
+                        null
+                    }
                 </S.UjcDictionaryTileView>
             </globalComponents.TileWrapper>
         );

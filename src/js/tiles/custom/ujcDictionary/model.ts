@@ -20,7 +20,7 @@ import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices';
 import { Backlink, BacklinkWithArgs } from '../../../page/tile';
 import { RecognizedQueries } from '../../../query';
-import { DataItem } from './common';
+import { createEmptyData, DataStructure } from './common';
 import { Actions as GlobalActions } from '../../../models/actions';
 import { Actions } from './actions';
 import { List, HTTP } from 'cnc-tskit';
@@ -32,7 +32,8 @@ import { UjcDictionaryArgs, UjcDictionaryApi } from './api';
 export interface UjcDictionaryModelState {
     isBusy:boolean;
     ident:string;
-    data:Array<DataItem>;
+    data:DataStructure;
+    maxItems:number;
     error:string;
     backlinks:Array<BacklinkWithArgs<{}>>;
 }
@@ -72,7 +73,7 @@ export class UjcDictionaryModel extends StatelessModel<UjcDictionaryModelState> 
                 state.ident = match.lemma;
                 state.isBusy = true;
                 state.error = null;
-                state.data = [];
+                state.data = createEmptyData();
                 state.backlinks = [];
             },
             (state, action, dispatch) => {
@@ -159,7 +160,7 @@ export class UjcDictionaryModel extends StatelessModel<UjcDictionaryModelState> 
                     payload: {
                         tileId: this.tileId,
                         isEmpty: true,
-                        data: [],
+                        data: createEmptyData(),
                     }
                 });
             }

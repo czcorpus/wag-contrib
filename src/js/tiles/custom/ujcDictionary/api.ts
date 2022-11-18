@@ -21,7 +21,7 @@ import { Observable, of as rxOf } from 'rxjs';
 import { IApiServices } from '../../../appServices';
 import { cachedAjax$ } from '../../../page/ajax';
 import { ResourceApi, SourceDetails, HTTPHeaders, IAsyncKeyValueStore } from '../../../types';
-import { DataItem } from './common';
+import { DataStructure } from './common';
 
 
 export interface UjcDictionaryArgs {
@@ -29,7 +29,7 @@ export interface UjcDictionaryArgs {
 }
 
 
-export class UjcDictionaryApi implements ResourceApi<UjcDictionaryArgs, Array<DataItem>> {
+export class UjcDictionaryApi implements ResourceApi<UjcDictionaryArgs, DataStructure> {
 
     private readonly cache:IAsyncKeyValueStore;
 
@@ -47,8 +47,8 @@ export class UjcDictionaryApi implements ResourceApi<UjcDictionaryArgs, Array<Da
         this.apiServices = apiServices;
     }
 
-    call(args:UjcDictionaryArgs):Observable<Array<DataItem>> {
-        return cachedAjax$<Array<DataItem>>(this.cache)(
+    call(args:UjcDictionaryArgs):Observable<DataStructure> {
+        return cachedAjax$<DataStructure>(this.cache)(
             HTTP.Method.GET,
             this.apiURL,
             args,

@@ -24,24 +24,35 @@ export interface DataItem {
 	forms: {[key:string]:string};
 	pos: string;
 	meaning: Array<{
-        explanation: string;
-        metaExplanation: string;
-        attachement: string;
-        synonyms: Array<string>;
-        examples: Array<{
+		explanation: string;
+		metaExplanation: string;
+		attachement: string;
+		synonyms: Array<string>;
+		examples: Array<{
 			usage: string;
 			data:Array<string>;
 		}>;
-    }>;
+	}>;
 	phrasemes: Array<{
 		phraseme: string;
-        explanation: string;
-        examples: Array<string>;
-    }>;
+		explanation: string;
+		examples: Array<string>;
+	}>;
 	collocations: Array<{
 		collocation: string;
-        explanation: string;
-        examples: Array<string>;
-    }>;
-	note: string;
+		explanation: string;
+		examples: Array<string>;
+	}>;
+}
+
+export interface DataStructure {
+	items: Array<DataItem>;
+	notes: Array<string>;
+}
+
+export function createEmptyData():DataStructure {
+	return {
+		items: [],
+		notes: [],
+	}
 }
