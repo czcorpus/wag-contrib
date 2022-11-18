@@ -22,13 +22,26 @@ import * as theme from '../../../views/common/theme';
 // ---------------- <Keyword /> --------------------------------------
 
 export const Keyword = styled.div`
+    margin-bottom: 0.5em;
     font-size: 1.5em;
     color: ${theme.colorDefaultText};
+
+    &:not(:first-child) {
+        border-top: 4px solid #f4f4fe;
+    }
+
+    &:last-child {
+        margin-bottom: 0em;
+    }
 
     .dict-key {
         font-size: 1.5em;
         font-weight: bold;
         color: #6f74f0;
+
+        :after {
+            content: " ";
+        }
     }
 
     .dict-pronunciation {
@@ -45,10 +58,11 @@ export const Keyword = styled.div`
 
     .dict-note-label {
         font-weight: 700;
-    }
-
-    .dict-note-label:first-letter {
         text-transform: capitalize;
+
+        :after {
+            content: " ";
+        }
     }
 `;
 
@@ -97,6 +111,12 @@ export const Tooltip = styled.div<{}>`
     }
 `;
 
+// ---------------- <MeaningTable /> --------------------------------------
+
+export const MeaningTable = styled.table`
+    width: 100%;
+`;
+
 // ---------------- <MeaningRow /> --------------------------------------
 
 export const MeaningRow = styled.tr`
@@ -110,14 +130,19 @@ export const MeaningRow = styled.tr`
 
     .meaning-count {
         text-align: right;
+        width: 2em;
     }
 
     .examples {
         font-size: 0.8em;
     }
 
+    .example-block {
+        margin-top: 0.5em;
+    }
+
     .examples-heading {
-        margin-bottom: 0.5em;
+
     }
 
     .example {

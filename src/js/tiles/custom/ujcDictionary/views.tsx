@@ -41,8 +41,11 @@ export function init(
 
         const renderDataItem = (item: DataItem) => {
             return <S.Keyword>
-                <p><span className='dict-key'>{item.key}</span> <span className='dict-pronunciation'>{item.pronunciation}</span></p>
-                <table>
+                <p className = 'dict-heading'>
+                    <span className='dict-key'>{item.key}</span>
+                    <span className='dict-pronunciation'>{item.pronunciation}</span>
+                </p>
+                <S.MeaningTable>
                     {List.map((v, i) =>
                         <S.MeaningRow>
                             <td className='meaning-count'>
@@ -56,20 +59,25 @@ export function init(
                                     </S.Tooltiped>
                                     <S.TooltipContent className='examples'>
                                         <div className='examples-heading'>{ut.translate('ujc_dict__examples')}:</div>
-                                        <div>{List.map(e => <span className='example'>{e}<br/></span>, v.examples)}</div>
+                                        {List.map(e =>
+                                            <div className='example-block'>
+                                                {e.usage ? <span className='example-usage'>&#8226; {e.usage}<br/></span> : null }
+                                                {List.map(v => <span className='example'>{v}<br/></span>, e.data)}
+                                            </div>, v.examples)
+                                        }
                                     </S.TooltipContent>
                                 </S.Tooltip>
                             </td>
                         </S.MeaningRow>
                     , item.meaning)}
-                </table>
+                </S.MeaningTable>
                 {item.note ?
                     <div className='dict-note'>
-                        <span className='dict-note-label'>{ut.translate('ujc_dict__note')}</span> {item.note}
+                        <span className='dict-note-label'>{ut.translate('ujc_dict__note')}</span>
+                        <span dangerouslySetInnerHTML={{__html: item.note}}/>
                     </div> :
                     null
                 }
-                <hr/>
             </S.Keyword>
         }
 

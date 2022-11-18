@@ -28,7 +28,10 @@ export interface DataItem {
         metaExplanation: string;
         attachement: string;
         synonyms: Array<string>;
-        examples: Array<string>;
+        examples: Array<{
+			usage: string;
+			data:Array<string>;
+		}>;
     }>;
 	phrasemes: Array<{
 		phraseme: string;
