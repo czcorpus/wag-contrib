@@ -23,7 +23,6 @@ import * as theme from '../../../views/common/theme';
 
 export const Keyword = styled.div`
     margin-bottom: 0.5em;
-    font-size: 1.5em;
     color: ${theme.colorDefaultText};
 
     &:not(:first-child) {
@@ -47,14 +46,16 @@ export const Keyword = styled.div`
     .dict-pronunciation {
 
     }
+`;
 
-    .dict-note {
-        margin-top: 0.5em;
-        padding: 0.5em;
-        font-size: 0.8em;
-        background-color: #f4f4fe;
-        border-radius: 5px;
-    }
+// ---------------- <Note /> --------------------------------------
+
+export const Note = styled.div`
+    margin-top: 0.5em;
+    padding: 0.5em;
+    font-size: 0.8em;
+    background-color: #f4f4fe;
+    border-radius: 5px;
 
     .dict-note-label {
         font-weight: 700;
@@ -156,4 +157,5 @@ export const UjcDictionaryTileView = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    font-size: 1.5em;
 `;

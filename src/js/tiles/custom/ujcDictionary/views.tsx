@@ -40,37 +40,39 @@ export function init(
     const UjcDictionaryTileView: React.FC<UjcDictionaryModelState & CoreTileComponentProps> = (props) => {
 
         const renderDataItem = (item: DataItem) => {
-            return <S.Keyword>
+            return <S.Keyword key={item.key}>
                 <p className = 'dict-heading'>
                     <span className='dict-key'>{item.key}</span>
                     <span className='dict-pronunciation'>{item.pronunciation}</span>
                 </p>
                 <S.MeaningTable>
-                    {List.map((v, i) =>
-                        <S.MeaningRow>
-                            <td className='meaning-count'>
-                                {List.size(item.meaning) > 1 ? <div>{i+1}.</div> : null}
-                            </td>
-                            <td>
-                                <S.Tooltip>
-                                    <S.Tooltiped>
-                                        {v.explanation ? <div>{v.explanation}</div> : null}
-                                        {v.metaExplanation ? <div><i>{v.metaExplanation}</i></div> : null}
-                                    </S.Tooltiped>
-                                    <S.TooltipContent className='examples'>
-                                        <div className='examples-heading'>{ut.translate('ujc_dict__examples')}:</div>
-                                        {List.map(e =>
-                                            <div className='example-block'>
-                                                {e.usage ? <span className='example-usage'>&#8226; {e.usage}:<br/></span> : null }
-                                                {List.map(v => <span className='example'>{v}<br/></span>, e.data)}
-                                            </div>, v.examples)
-                                        }
-                                    </S.TooltipContent>
-                                </S.Tooltip>
-                            </td>
-                        </S.MeaningRow>
-                    , item.meaning.slice(0, props.maxItems))}
-                    {item.meaning.length > props.maxItems ? <tr><td/><td>...{ut.translate('ujc_dict__more_data')}</td></tr> : null}
+                    <tbody>
+                        {List.map((v, i) =>
+                            <S.MeaningRow key={i}>
+                                <td className='meaning-count'>
+                                    {List.size(item.meaning) > 1 ? <div>{i+1}.</div> : null}
+                                </td>
+                                <td>
+                                    <S.Tooltip>
+                                        <S.Tooltiped>
+                                            {v.explanation ? <div>{v.explanation}</div> : null}
+                                            {v.metaExplanation ? <div><i>{v.metaExplanation}</i></div> : null}
+                                        </S.Tooltiped>
+                                        <S.TooltipContent className='examples'>
+                                            <div className='examples-heading'>{ut.translate('ujc_dict__examples')}:</div>
+                                            {List.map((e, i) =>
+                                                <div key={i} className='example-block'>
+                                                    {e.usage ? <span className='example-usage'>&#8226; {e.usage}:<br/></span> : null }
+                                                    {List.map(v => <span className='example'>{v}<br/></span>, e.data)}
+                                                </div>, v.examples)
+                                            }
+                                        </S.TooltipContent>
+                                    </S.Tooltip>
+                                </td>
+                            </S.MeaningRow>
+                        , item.meaning.slice(0, props.maxItems))}
+                        {item.meaning.length > props.maxItems ? <tr><td/><td>...{ut.translate('ujc_dict__more_data')}</td></tr> : null}
+                    </tbody>
                 </S.MeaningTable>
             </S.Keyword>
         }
@@ -92,11 +94,11 @@ export function init(
                         </S.Keyword> : null
                     }
                     {props.data.notes ?
-                        List.map(note =>
-                            <div className='dict-note'>
+                        List.map((note, i) =>
+                            <S.Note key={i}>
                                 <span className='dict-note-label'>{ut.translate('ujc_dict__note')}</span>
                                 <span dangerouslySetInnerHTML={{__html: note}}/>
-                            </div>
+                            </S.Note>
                         , props.data.notes) :
                         null
                     }
