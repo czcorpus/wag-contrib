@@ -44,7 +44,7 @@ export function init(
     }> = (props) => {
 
         return (
-            <S.DataTable className='data'>
+            <S.DataTable>
                 <caption>{ut.translate('lguide__comparison')}</caption>
                 <thead>
                     <tr>
@@ -71,7 +71,7 @@ export function init(
     }> = (props) => {
 
         return (
-            <S.DataTable className='data'>
+            <S.DataTable>
                 <caption>{ut.translate('lguide__case')}:</caption>
                 <thead>
                     <tr>
@@ -102,7 +102,7 @@ export function init(
     }> = (props) => {
 
         return (
-            <S.DataTable className='data'>
+            <S.DataTable>
                 <caption>{ut.translate('lguide__conjugation')}</caption>
                 <thead>
                     <tr>
@@ -193,16 +193,12 @@ export function init(
                 sourceIdent={{corp: 'UJC'}}>
                 <S.UjcLangRefBookTileView>
                     <S.Overview>
+                        <p className="langbook-heading">
+                            <span className="langbook-key">{props.data.heading}</span>
+                            <span className="langbook-pronunciation">{props.data.pronunciation}</span><br/>
+                            <span className="langbook-meaning">{props.data.meaning}</span>
+                        </p>
                         <dl className='info'>
-                            <dt>{ut.translate('lguide__overview_word')}:</dt>
-                            <dd>{props.data.heading} {props.data.pronunciation}</dd>
-                            {props.data.meaning ?
-                                <>
-                                    <dt>{ut.translate('lguide__overview_meaning')}:</dt>
-                                    <dd>{props.data.meaning}</dd>
-                                </> :
-                                null
-                            }
                             <dt>{ut.translate('lguide__overview_syllabification')}:</dt>
                             <dd>{props.data.syllabification}</dd>
                             {props.data.gender ?
