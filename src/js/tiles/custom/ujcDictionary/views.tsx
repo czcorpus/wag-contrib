@@ -71,7 +71,16 @@ export function init(
                                 </td>
                             </S.MeaningRow>
                         , item.meaning.slice(0, props.maxItems))}
-                        {item.meaning.length > props.maxItems ? <tr><td/><td>...{ut.translate('ujc_dict__more_data')}</td></tr> : null}
+                        {item.meaning.length > props.maxItems ?
+                            <S.MeaningRow key={"..."} className="hidden-items">
+                                <td className='meaning-count'>...</td>
+                                <td>{ut.translate(
+                                    'ujc_dict__more_data_{num_hidden}',
+                                    {num_hidden: item.meaning.length-props.maxItems}
+                                )}</td>
+                            </S.MeaningRow> :
+                            null
+                        }
                     </tbody>
                 </S.MeaningTable>
             </S.Keyword>
@@ -87,9 +96,12 @@ export function init(
                 <S.UjcDictionaryTileView>
                     {List.map(item => renderDataItem(item), props.data.items.slice(0, props.maxItems))}
                     {props.data.items.length > props.maxItems ?
-                        <S.Keyword>
+                        <S.Keyword className='hidden-items'>
                             <p className = 'dict-heading'>
-                                <span className='dict-key'>...{ut.translate('ujc_dict__more_data')}</span>
+                                <span className='dict-key'>...{ut.translate(
+                                    'ujc_dict__more_data_{num_hidden}',
+                                    {num_hidden: props.data.items.length-props.maxItems}
+                                )}</span>
                             </p>
                         </S.Keyword> : null
                     }

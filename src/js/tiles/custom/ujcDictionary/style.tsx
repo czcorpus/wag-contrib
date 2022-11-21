@@ -25,6 +25,11 @@ export const Keyword = styled.div`
     margin-bottom: 0.5em;
     color: ${theme.colorDefaultText};
 
+    &.hidden-items {
+        font-size: 0.8em;
+        font-style: italic;
+    }
+
     &:not(:first-child) {
         border-top: 4px solid #f4f4fe;
     }
@@ -121,6 +126,11 @@ export const MeaningTable = styled.table`
 // ---------------- <MeaningRow /> --------------------------------------
 
 export const MeaningRow = styled.tr`
+    &.hidden-items {
+        font-size: 0.8em;
+        font-style: italic;
+    }
+
     td {
         vertical-align: top;
     }
