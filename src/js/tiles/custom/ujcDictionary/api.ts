@@ -60,11 +60,11 @@ export class UjcDictionaryApi implements ResourceApi<UjcDictionaryArgs, DataStru
             tileId,
             title: this.apiServices.importExternalMessage({
                 'cs-CZ': 'Akademický slovník současné češtiny',
-                'en-US': 'Academic dictionary of contemporary Czech'
+                'en-US': 'Academic Dictionary of Contemporary Czech'
             }),
             description: this.apiServices.importExternalMessage({
                 'cs-CZ': 'Původní webová aplikace vznikla v rámci grantového projektu Programu aplikovaného výzkumu a vývoje národní a kulturní identity (NAKI) Ministerstva kultury ČR – Nová cesta k modernímu jednojazyčnému výkladovému slovníku současné češtiny (DF13P01OVV011). Její nová verze je rozvíjena a financována z institucionálních prostředků Ústavu pro jazyk český AV ČR, v. v. i.',
-                'en-US': 'Původní webová aplikace vznikla v rámci grantového projektu Programu aplikovaného výzkumu a vývoje národní a kulturní identity (NAKI) Ministerstva kultury ČR – Nová cesta k modernímu jednojazyčnému výkladovému slovníku současné češtiny (DF13P01OVV011). Její nová verze je rozvíjena a financována z institucionálních prostředků Ústavu pro jazyk český AV ČR, v. v. i.'
+                'en-US': 'Původní webová aplikace vznikla v rámci grantového projektu Programu aplikovaného výzkumu a vývoje národní a kulturní identity (NAKI) Ministerstva kultury ČR – Nová cesta k modernímu jednojazyčnému výkladovému slovníku současné češtiny (DF13P01OVV011). Její nová verze je rozvíjena a financována z institucionálních prostředků Ústavu pro jazyk český AV ČR, v. v. i. UNTRANSLATED'
             }),
             author: 'Ústav pro jazyk český AV ČR',
             href: 'https://slovnikcestiny.cz/o_slovniku.php'

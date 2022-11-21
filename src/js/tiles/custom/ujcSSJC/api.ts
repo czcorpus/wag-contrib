@@ -21,16 +21,15 @@ import { Observable, of as rxOf } from 'rxjs';
 import { IApiServices } from '../../../appServices';
 import { cachedAjax$ } from '../../../page/ajax';
 import { ResourceApi, SourceDetails, HTTPHeaders, IAsyncKeyValueStore } from '../../../types';
-import { Data } from './common';
+import { DataStructure } from './common';
 
 
-export interface UjcLGuideRequestArgs {
+export interface UjcSSJCArgs {
     q:string;
-    direct?:number;
 }
 
 
-export class UjcLGuideApi implements ResourceApi<UjcLGuideRequestArgs, Data> {
+export class UjcSSJCApi implements ResourceApi<UjcSSJCArgs, DataStructure> {
 
     private readonly cache:IAsyncKeyValueStore;
 
@@ -48,27 +47,27 @@ export class UjcLGuideApi implements ResourceApi<UjcLGuideRequestArgs, Data> {
         this.apiServices = apiServices;
     }
 
-    call(args:UjcLGuideRequestArgs):Observable<Data> {
-        return cachedAjax$<Data>(this.cache)(
+    call(args:UjcSSJCArgs):Observable<DataStructure> {
+        return cachedAjax$<DataStructure>(this.cache)(
             HTTP.Method.GET,
             this.apiURL,
             args,
-        )
+        );
     }
 
     getSourceDescription(tileId:number, lang:string, corpname:string):Observable<SourceDetails> {
         return rxOf({
             tileId,
             title: this.apiServices.importExternalMessage({
-                'cs-CZ': 'Internetová jazyková příručka',
-                'en-US': 'Internet Language Reference Book'
+                'cs-CZ': 'Slovník spisovného jazyka českého',
+                'en-US': 'Slovník spisovného jazyka českého UNTRANSLATED'
             }),
             description: this.apiServices.importExternalMessage({
-                'cs-CZ': 'Internetová jazyková příručka (IJP) vznikla a byla rozvíjena s podporou projektu Jazyková poradna na internetu, č. 1ET200610406, řešeného v letech 2004–2008, projektu LINDAT/CLARIN Institut pro analýzu, zpracování a distribuci lingvistických dat, č. LM2010013, řešeného v letech 2013–2015, a projektu LINDAT/CLARIN Jazyková výzkumná infrastruktura v ČR, č. LM2015071, řešeného v letech 2016–2019. Jde o první jazykovou pomůcku svého druhu.',
-                'en-US': 'Internetová jazyková příručka (IJP) vznikla a byla rozvíjena s podporou projektu Jazyková poradna na internetu, č. 1ET200610406, řešeného v letech 2004–2008, projektu LINDAT/CLARIN Institut pro analýzu, zpracování a distribuci lingvistických dat, č. LM2010013, řešeného v letech 2013–2015, a projektu LINDAT/CLARIN Jazyková výzkumná infrastruktura v ČR, č. LM2015071, řešeného v letech 2016–2019. Jde o první jazykovou pomůcku svého druhu. UNTRANSLATED'
+                'cs-CZ': 'Slovník spisovného jazyka českého vycházel knižně v letech 1960–1971 a obsahuje 197 200 hesel české slovní zásoby s jejich výklady a typickými příklady užití. Ústav pro jazyk český AV ČR v roce 2011 zveřejnil jeho digitalizovanou podobu.',
+                'en-US': 'Slovník spisovného jazyka českého vycházel knižně v letech 1960–1971 a obsahuje 197 200 hesel české slovní zásoby s jejich výklady a typickými příklady užití. Ústav pro jazyk český AV ČR v roce 2011 zveřejnil jeho digitalizovanou podobu. UNTRANSLATED'
             }),
             author: 'Ústav pro jazyk český AV ČR',
-            href: 'https://prirucka.ujc.cas.cz/?id=_about'
+            href: 'https://ujc.avcr.cz/elektronicke-slovniky-a-zdroje/Slovnik_spisovneho_jazyka_ceskeho.html'
         })
     }
 }

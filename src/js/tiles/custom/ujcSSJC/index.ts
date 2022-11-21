@@ -21,16 +21,15 @@ import { IAppServices } from '../../../appServices';
 import { QueryType } from '../../../query/index';
 import { init as viewInit } from './views';
 import { TileConf, ITileProvider, TileComponent, TileFactory, TileFactoryArgs } from '../../../page/tile';
-import { UjcLGuideModel } from './model';
-import { UjcLGuideApi } from './api';
-import { mkEmptyData } from './common';
+import { UjcSSJCModel as UjcSSJCModel } from './model';
+import { UjcSSJCApi } from './api';
 
 
-export interface UjcLangRefBookConf extends TileConf {
+export interface UjcSSJCConf extends TileConf {
     apiURL:string;
 }
 
-export class UjcLangRefBookTile implements ITileProvider {
+export class UjcSSJCTile implements ITileProvider {
 
     private readonly tileId:number;
 
@@ -38,40 +37,43 @@ export class UjcLangRefBookTile implements ITileProvider {
 
     private readonly appServices:IAppServices;
 
-    private readonly model:UjcLGuideModel;
+    private readonly model:UjcSSJCModel;
 
     private readonly widthFract:number;
 
     private readonly label:string;
 
-    private readonly api:UjcLGuideApi;
+    private readonly api:UjcSSJCApi;
 
     private view:TileComponent;
 
     constructor({
         tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy, cache,
-        queryMatches}:TileFactoryArgs<UjcLangRefBookConf>
+        queryMatches}:TileFactoryArgs<UjcSSJCConf>
     ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.api = new UjcLGuideApi(cache, conf.apiURL, appServices);
-        this.model = new UjcLGuideModel({
+        this.api = new UjcSSJCApi(cache, conf.apiURL, appServices);
+        this.model = new UjcSSJCModel({
             dispatcher,
             appServices,
             api: this.api,
             queryMatches,
             tileId,
-            backlink: null, // TODO
+            backlink: null,
             initState: {
                 isBusy: isBusy,
-                data: mkEmptyData(),
+                ident: '',
+                data: {
+                    entries: [],
+                },
                 error: null,
                 backlinks: []
             }
         });
-        this.label = appServices.importExternalMessage(conf.label || 'lguide__main_label');
+        this.label = appServices.importExternalMessage(conf.label || 'ujc_ssjc__main_label');
         this.view = viewInit(
             this.dispatcher,
             ut,
@@ -133,9 +135,9 @@ export class UjcLangRefBookTile implements ITileProvider {
     }
 }
 
-export const init:TileFactory<UjcLangRefBookConf> = {
+export const init:TileFactory<UjcSSJCConf> = {
 
     sanityCheck: (args) => [],
 
-    create: (args) => new UjcLangRefBookTile(args)
+    create: (args) => new UjcSSJCTile(args)
 };
