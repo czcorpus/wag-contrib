@@ -71,6 +71,7 @@ export const Overview = styled.div`
 `;
 
 export const DataTable = styled.table`
+    width: 100%;
 
     &.data {
         margin-left: 0;
