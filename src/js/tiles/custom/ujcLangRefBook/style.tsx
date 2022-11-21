@@ -26,10 +26,27 @@ export const UjcLangRefBookTileView = styled.div`
 `;
 
 export const Overview = styled.div`
+    p.langbook-heading {
+        font-size: 1.5em;
+
+        .langbook-key {
+            font-size: 1.5em;
+            font-weight: 500;
+
+            :after {
+                content: " ";
+            }
+        }
+
+        .langbook-pronunciation {
+        }
+
+        .langbook-meaning {
+        }
+    }
 
     // style same as info in wordFreq tile
     dl.info {
-
         dt {
             margin-bottom: 0.4em;
             color: ${theme.colorLightText};
@@ -71,15 +88,19 @@ export const Overview = styled.div`
 `;
 
 export const DataTable = styled.table`
-
-    &.data {
-        margin-left: 0;
-    }
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0em;
 
     caption {
         font-size: 1em;
         text-align: left;
         color: ${theme.colorLightText};
+    }
+
+    td, th {
+        padding: 0.2em 0.5em;
+        border: 2px solid #dddddd;
     }
 
     td.word, th {
