@@ -131,10 +131,15 @@ export class UjcSSJCModel extends StatelessModel<UjcSSJCModelState> {
 
     private generateBacklink(ident:string):BacklinkWithArgs<{}> {
         return {
-            url: `https://ssjc.ujc.cas.cz/search.php?hledej=Hledat&heslo=${ident}&where=hesla&hsubstr=no/`,
+            url: `https://ssjc.ujc.cas.cz/search.php`,
             label: 'heslo ve Slovníku spisovného jazyka českého',
             method: HTTP.Method.GET,
-            args: {}
+            args: {
+                hledej: "Hledat",
+                heslo: ident,
+                where: "hesla",
+                hsubstr: "no",
+            }
         };
     }
 
