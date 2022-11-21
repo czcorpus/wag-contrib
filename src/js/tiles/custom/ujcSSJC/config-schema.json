@@ -4,9 +4,6 @@
         "apiURL": {
             "type": "string"
         },
-        "maxItems": {
-            "type": "number"
-        },
         "tileType": {
             "description": "An identifier as defined by tiles configuration interface",
             "type": "string"
@@ -68,7 +65,6 @@
     },
     "required": [
         "apiURL",
-        "maxItems",
         "tileType"
     ],
     "definitions": {
