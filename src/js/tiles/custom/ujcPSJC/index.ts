@@ -21,15 +21,15 @@ import { IAppServices } from '../../../appServices';
 import { QueryType } from '../../../query/index';
 import { init as viewInit } from './views';
 import { TileConf, ITileProvider, TileComponent, TileFactory, TileFactoryArgs } from '../../../page/tile';
-import { UjcSSJCModel } from './model';
-import { UjcSSJCApi } from './api';
+import { UjcPSJCModel } from './model';
+import { UjcPSJCApi } from './api';
 
 
-export interface UjcSSJCConf extends TileConf {
+export interface UjcPSJCConf extends TileConf {
     apiURL:string;
 }
 
-export class UjcSSJCTile implements ITileProvider {
+export class UjcPSJCTile implements ITileProvider {
 
     private readonly tileId:number;
 
@@ -37,26 +37,26 @@ export class UjcSSJCTile implements ITileProvider {
 
     private readonly appServices:IAppServices;
 
-    private readonly model:UjcSSJCModel;
+    private readonly model:UjcPSJCModel;
 
     private readonly widthFract:number;
 
     private readonly label:string;
 
-    private readonly api:UjcSSJCApi;
+    private readonly api:UjcPSJCApi;
 
     private view:TileComponent;
 
     constructor({
         tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy, cache,
-        queryMatches}:TileFactoryArgs<UjcSSJCConf>
+        queryMatches}:TileFactoryArgs<UjcPSJCConf>
     ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.api = new UjcSSJCApi(cache, conf.apiURL, appServices);
-        this.model = new UjcSSJCModel({
+        this.api = new UjcPSJCApi(cache, conf.apiURL, appServices);
+        this.model = new UjcPSJCModel({
             dispatcher,
             appServices,
             api: this.api,
@@ -73,7 +73,7 @@ export class UjcSSJCTile implements ITileProvider {
                 backlinks: []
             }
         });
-        this.label = appServices.importExternalMessage(conf.label || 'ujc_ssjc__main_label');
+        this.label = appServices.importExternalMessage(conf.label || 'ujc_psjc__main_label');
         this.view = viewInit(
             this.dispatcher,
             ut,
@@ -135,9 +135,9 @@ export class UjcSSJCTile implements ITileProvider {
     }
 }
 
-export const init:TileFactory<UjcSSJCConf> = {
+export const init:TileFactory<UjcPSJCConf> = {
 
     sanityCheck: (args) => [],
 
-    create: (args) => new UjcSSJCTile(args)
+    create: (args) => new UjcPSJCTile(args)
 };
