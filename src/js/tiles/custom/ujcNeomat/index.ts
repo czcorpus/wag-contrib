@@ -75,7 +75,7 @@ export class UjcNeomatTile implements ITileProvider {
                 backlinks: []
             }
         });
-        this.label = appServices.importExternalMessage(conf.label || 'ujc_kla__main_label');
+        this.label = appServices.importExternalMessage(conf.label || 'ujc_neomat__main_label');
         this.view = viewInit(
             this.dispatcher,
             ut,
