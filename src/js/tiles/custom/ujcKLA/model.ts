@@ -26,39 +26,40 @@ import { Actions } from './actions';
 import { List, HTTP } from 'cnc-tskit';
 import { isWebDelegateApi } from '../../../types';
 import { findCurrQueryMatch } from '../../../models/query';
-import { UjcPSJCArgs, UjcPSJCApi } from './api';
+import { UjcKLAArgs, UjcKLAApi } from './api';
 
 
-export interface UjcPSJCModelState {
+export interface UjcKLAModelState {
     isBusy:boolean;
     ident:string;
+    maxImages:number;
     data:DataStructure;
     error:string;
     backlinks:Array<BacklinkWithArgs<{}>>;
 }
 
-export interface UjcPSJCModelArgs {
+export interface UjcKLAModelArgs {
     dispatcher:IActionQueue;
-    initState:UjcPSJCModelState;
+    initState:UjcKLAModelState;
     tileId:number;
-    api:UjcPSJCApi,
+    api:UjcKLAApi,
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
     backlink:Backlink;
 }
 
-export class UjcPSJCModel extends StatelessModel<UjcPSJCModelState> {
+export class UjcKLAModel extends StatelessModel<UjcKLAModelState> {
 
     private readonly tileId:number;
 
-    private readonly api:UjcPSJCApi;
+    private readonly api:UjcKLAApi;
 
     private readonly appServices:IAppServices;
 
     private readonly backlink:Backlink;
 
 
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, backlink}:UjcPSJCModelArgs) {
+    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, backlink}:UjcKLAModelArgs) {
         super(dispatcher, initState);
         this.tileId = tileId;
         this.appServices = appServices;
@@ -73,7 +74,7 @@ export class UjcPSJCModel extends StatelessModel<UjcPSJCModelState> {
                 state.isBusy = true;
                 state.error = null;
                 state.data = {
-                    entries: [],
+                    images: [],
                 }
                 state.backlinks = [];
             },
@@ -132,21 +133,22 @@ export class UjcPSJCModel extends StatelessModel<UjcPSJCModelState> {
     private generateBacklink(ident:string):BacklinkWithArgs<{}> {
         return {
             url: `https://psjc.ujc.cas.cz/search.php`,
-            label: 'heslo v Příručním slovníku jazyka českého',
+            label: 'heslo v Kartotéce lexikálního archivu',
             method: HTTP.Method.GET,
             args: {
                 hledej: "Hledej",
                 heslo: ident,
                 where: "hesla",
-                zobraz_ps: "ps",
+                zobraz_cards: "cards",
                 not_initial: 1
             }
         };
     }
 
-    private loadData(dispatch:SEDispatcher, state:UjcPSJCModelState, q:string) {
-        const args:UjcPSJCArgs = {
-            q
+    private loadData(dispatch:SEDispatcher, state:UjcKLAModelState, q:string) {
+        const args:UjcKLAArgs = {
+            q,
+            maxImages: state.maxImages,
         };
         this.api.call(args).subscribe({
             next: data => {
@@ -168,7 +170,7 @@ export class UjcPSJCModel extends StatelessModel<UjcPSJCModelState> {
                         tileId: this.tileId,
                         isEmpty: true,
                         data: {
-                            entries: [],
+                            images: [],
                         },
                     }
                 });
