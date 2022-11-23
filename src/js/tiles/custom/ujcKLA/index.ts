@@ -27,6 +27,7 @@ import { UjcKLAApi } from './api';
 
 export interface UjcKLAConf extends TileConf {
     apiURL:string;
+    maxItems?:number;
 }
 
 export class UjcKLATile implements ITileProvider {
@@ -66,6 +67,7 @@ export class UjcKLATile implements ITileProvider {
             initState: {
                 isBusy: isBusy,
                 ident: '',
+                maxImages: conf.maxItems || 2,
                 data: {
                     images: [],
                 },

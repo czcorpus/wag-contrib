@@ -46,7 +46,7 @@ export function init(
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'UJC'}}>
                 <S.UjcKLATileView>
-                    {List.map(image => <img src={image}/>, props.data.images)}
+                    {List.map((image, i) => <S.Ticket key={i} src={image}/>, props.data.images)}
                 </S.UjcKLATileView>
             </globalComponents.TileWrapper>
         );

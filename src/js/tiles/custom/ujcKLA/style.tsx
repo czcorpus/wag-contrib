@@ -18,8 +18,14 @@
 
 import styled from 'styled-components';
 
-// ---------------- <UjcPSJCTileView /> --------------------------------------
+// ---------------- <UjcKLATileView /> --------------------------------------
 
 export const UjcKLATileView = styled.div`
     text-align: center;
+`;
+
+// ---------------- <Ticket /> --------------------------------------
+
+export const Ticket = styled.img`
+    max-width: 100%;
 `;

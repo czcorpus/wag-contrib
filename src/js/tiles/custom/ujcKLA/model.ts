@@ -32,6 +32,7 @@ import { UjcKLAArgs, UjcKLAApi } from './api';
 export interface UjcKLAModelState {
     isBusy:boolean;
     ident:string;
+    maxImages:number;
     data:DataStructure;
     error:string;
     backlinks:Array<BacklinkWithArgs<{}>>;
@@ -144,7 +145,8 @@ export class UjcKLAModel extends StatelessModel<UjcKLAModelState> {
 
     private loadData(dispatch:SEDispatcher, state:UjcKLAModelState, q:string) {
         const args:UjcKLAArgs = {
-            q
+            q,
+            maxImages: state.maxImages,
         };
         this.api.call(args).subscribe({
             next: data => {
