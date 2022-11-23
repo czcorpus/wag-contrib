@@ -131,14 +131,13 @@ export class UjcPSJCModel extends StatelessModel<UjcPSJCModelState> {
 
     private generateBacklink(ident:string):BacklinkWithArgs<{}> {
         return {
-            url: `https://ssjc.ujc.cas.cz/search.php`,
-            label: 'heslo ve Slovníku spisovného jazyka českého',
+            url: `https://psjc.ujc.cas.cz/search.php`,
+            label: 'heslo v Příručním slovníku jazyka českého',
             method: HTTP.Method.GET,
             args: {
-                hledej: "Hledat",
+                hledej: "Hledej",
                 heslo: ident,
                 where: "hesla",
-                hsubstr: "no",
             }
         };
     }
