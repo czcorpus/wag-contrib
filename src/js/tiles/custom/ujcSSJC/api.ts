@@ -59,8 +59,8 @@ export class UjcSSJCApi implements ResourceApi<UjcSSJCArgs, DataStructure> {
         return rxOf({
             tileId,
             title: this.apiServices.importExternalMessage({
-                'cs-CZ': 'Slovník spisovného jazyka českého',
-                'en-US': 'Slovník spisovného jazyka českého UNTRANSLATED'
+                'cs-CZ': 'Slovník spisovného jazyka českého (1960–1971)',
+                'en-US': 'Slovník spisovného jazyka českého (1960–1971) UNTRANSLATED'
             }),
             description: this.apiServices.importExternalMessage({
                 'cs-CZ': 'Slovník spisovného jazyka českého vycházel knižně v letech 1960–1971 a obsahuje 197 200 hesel české slovní zásoby s jejich výklady a typickými příklady užití. Ústav pro jazyk český AV ČR v roce 2011 zveřejnil jeho digitalizovanou podobu.',
