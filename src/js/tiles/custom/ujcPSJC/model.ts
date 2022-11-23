@@ -138,6 +138,8 @@ export class UjcPSJCModel extends StatelessModel<UjcPSJCModelState> {
                 hledej: "Hledej",
                 heslo: ident,
                 where: "hesla",
+                zobraz_ps: "ps",
+                not_initial: 1
             }
         };
     }

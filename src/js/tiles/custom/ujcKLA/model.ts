@@ -133,12 +133,14 @@ export class UjcKLAModel extends StatelessModel<UjcKLAModelState> {
     private generateBacklink(ident:string):BacklinkWithArgs<{}> {
         return {
             url: `https://psjc.ujc.cas.cz/search.php`,
-            label: 'heslo v Příručním slovníku jazyka českého',
+            label: 'heslo v Kartotéce lexikálního archivu',
             method: HTTP.Method.GET,
             args: {
                 hledej: "Hledej",
                 heslo: ident,
                 where: "hesla",
+                zobraz_cards: "cards",
+                not_initial: 1
             }
         };
     }
