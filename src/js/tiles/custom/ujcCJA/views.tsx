@@ -36,6 +36,8 @@ export function init(
     // -------------------- <UjcCJATileView /> -----------------------------------------------
 
     const UjcCJATileView: React.FC<UjcCJAModelState & CoreTileComponentProps> = (props) => {
+        const MAX_HEIGHT = 400;
+        let [overflows, setOverflows] =  React.useState(false);
 
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
@@ -45,7 +47,21 @@ export function init(
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'UJC'}}>
                 <S.UjcCJATileView>
-                    <div className='container' dangerouslySetInnerHTML={{__html: props.data.content}}/>
+                    <S.Preview maxHeight={MAX_HEIGHT}>
+                        <div className='container' dangerouslySetInnerHTML={{__html: props.data.content}}
+                            ref={el => {
+                                if (!el) return;
+                                if (el.getBoundingClientRect().height > MAX_HEIGHT) {
+                                    setOverflows(true);
+                                } else {
+                                    setOverflows(false);
+                                }
+                            }}
+                        />
+                        <S.Rollover style={{visibility: overflows ? 'visible' : 'hidden'}}>
+                            <div id='hidden-data-label'>...{ut.translate("ujc_cja__hidden_data_label")}</div>
+                        </S.Rollover>
+                    </S.Preview>
                     {props.data.image ? <img src={props.data.image} /> : null}
                 </S.UjcCJATileView>
             </globalComponents.TileWrapper>

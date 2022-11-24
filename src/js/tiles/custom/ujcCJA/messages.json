@@ -1,8 +1,10 @@
 {
     "cs-CZ": {
-        "ujc_cja__main_label": "Český jazykový atlas"
+        "ujc_cja__main_label": "Český jazykový atlas",
+        "ujc_cja__hidden_data_label": "více informací viz. zdroj"
     },
     "en-US": {
-        "ujc_cja__main_label": "Český jazykový atlas UNTRANSLATED"
+        "ujc_cja__main_label": "Český jazykový atlas UNTRANSLATED",
+        "ujc_cja__hidden_data_label": "for more information check the source"
     }
 }
