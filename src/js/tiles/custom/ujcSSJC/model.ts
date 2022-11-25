@@ -69,7 +69,7 @@ export class UjcSSJCModel extends StatelessModel<UjcSSJCModelState> {
             GlobalActions.RequestQueryResponse,
             (state, action) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
-                state.ident = match.lemma;
+                state.ident = match.lemma || match.word;
                 state.isBusy = true;
                 state.error = null;
                 state.data = {

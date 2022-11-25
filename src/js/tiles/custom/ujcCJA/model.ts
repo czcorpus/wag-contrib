@@ -26,40 +26,39 @@ import { Actions } from './actions';
 import { List, HTTP } from 'cnc-tskit';
 import { isWebDelegateApi } from '../../../types';
 import { findCurrQueryMatch } from '../../../models/query';
-import { UjcKLAArgs, UjcKLAApi } from './api';
+import { UjcCJAArgs, UjcCJAApi } from './api';
 
 
-export interface UjcKLAModelState {
+export interface UjcCJAModelState {
     isBusy:boolean;
     ident:string;
-    maxImages:number;
     data:DataStructure;
     error:string;
     backlinks:Array<BacklinkWithArgs<{}>>;
 }
 
-export interface UjcKLAModelArgs {
+export interface UjcCJAModelArgs {
     dispatcher:IActionQueue;
-    initState:UjcKLAModelState;
+    initState:UjcCJAModelState;
     tileId:number;
-    api:UjcKLAApi,
+    api:UjcCJAApi,
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
     backlink:Backlink;
 }
 
-export class UjcKLAModel extends StatelessModel<UjcKLAModelState> {
+export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
 
     private readonly tileId:number;
 
-    private readonly api:UjcKLAApi;
+    private readonly api:UjcCJAApi;
 
     private readonly appServices:IAppServices;
 
     private readonly backlink:Backlink;
 
 
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, backlink}:UjcKLAModelArgs) {
+    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, backlink}:UjcCJAModelArgs) {
         super(dispatcher, initState);
         this.tileId = tileId;
         this.appServices = appServices;
@@ -74,7 +73,9 @@ export class UjcKLAModel extends StatelessModel<UjcKLAModelState> {
                 state.isBusy = true;
                 state.error = null;
                 state.data = {
-                    images: [],
+                    content: '',
+                    image: '',
+                    css: '',
                 }
                 state.backlinks = [];
             },
@@ -132,23 +133,18 @@ export class UjcKLAModel extends StatelessModel<UjcKLAModelState> {
 
     private generateBacklink(ident:string):BacklinkWithArgs<{}> {
         return {
-            url: `https://psjc.ujc.cas.cz/search.php`,
-            label: 'heslo v Kartotéce lexikálního archivu',
+            url: `https://cja.ujc.cas.cz/e-cja/h/`,
+            label: 'heslo v Českém jazykovém atlasu',
             method: HTTP.Method.GET,
             args: {
-                hledej: "Hledej",
-                heslo: ident,
-                where: "hesla",
-                zobraz_cards: "cards",
-                not_initial: 1
+                hw: ident,
             }
         };
     }
 
-    private loadData(dispatch:SEDispatcher, state:UjcKLAModelState, q:string) {
-        const args:UjcKLAArgs = {
-            q,
-            maxImages: state.maxImages,
+    private loadData(dispatch:SEDispatcher, state:UjcCJAModelState, q:string) {
+        const args:UjcCJAArgs = {
+            q
         };
         this.api.call(args).subscribe({
             next: data => {
@@ -170,7 +166,9 @@ export class UjcKLAModel extends StatelessModel<UjcKLAModelState> {
                         tileId: this.tileId,
                         isEmpty: true,
                         data: {
-                            images: [],
+                            content: '',
+                            image: '',
+                            css: '',
                         },
                     }
                 });

@@ -71,12 +71,12 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
                 const match = findCurrQueryMatch(List.head(queryMatches));
                 state.isBusy = true;
                 state.error = null;
-                state.data = {...mkEmptyData(), rawQuery: match.lemma};
+                state.data = {...mkEmptyData(), rawQuery: match.lemma || match.word};
                 state.backlinks = []
             },
             (state, action, dispatch) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
-                this.loadData(dispatch, state, match.lemma, false);
+                this.loadData(dispatch, state, match.lemma || match.word, false);
             }
         );
 
