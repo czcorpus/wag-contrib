@@ -20,4 +20,14 @@ export interface DataStructure {
 	content: string;
 	image: string;
 	css: string;
+	backlink: string;
+}
+
+export function createEmptyData():DataStructure {
+	return {
+		content: "",
+		image: "",
+		css: "",
+		backlink: "",
+	}
 }
