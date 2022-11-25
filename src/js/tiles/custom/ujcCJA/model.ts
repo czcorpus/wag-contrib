@@ -23,7 +23,7 @@ import { RecognizedQueries } from '../../../query';
 import { createEmptyData, DataStructure } from './common';
 import { Actions as GlobalActions } from '../../../models/actions';
 import { Actions } from './actions';
-import { List, HTTP, pipe, Dict } from 'cnc-tskit';
+import { List, HTTP, pipe, Dict, tuple } from 'cnc-tskit';
 import { isWebDelegateApi } from '../../../types';
 import { findCurrQueryMatch } from '../../../models/query';
 import { UjcCJAArgs, UjcCJAApi } from './api';
@@ -128,17 +128,20 @@ export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
     }
 
     private generateBacklink(url:string):BacklinkWithArgs<{}> {
-        let [path, query] = url.split("?", 1);
-        let args = pipe(
-            query.split("&"),
-            List.map(v => v.split("=", 1)),
-            Dict.fromEntries()
+        const urlSplit = url.split("?");
+        const args = pipe(
+            urlSplit[1].split("&"),
+            List.map(v => {
+                const keyVal = v.split("=");
+                return tuple(keyVal[0], keyVal[1]);
+            }),
+            Dict.fromEntries(),
         );
         return {
-            url: path,
+            url: urlSplit[0],
             label: 'heslo v Českém jazykovém atlasu',
             method: HTTP.Method.GET,
-            args: args
+            args: args,
         };
     }
 
