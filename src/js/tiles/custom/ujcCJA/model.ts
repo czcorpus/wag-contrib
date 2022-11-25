@@ -20,10 +20,10 @@ import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices';
 import { Backlink, BacklinkWithArgs } from '../../../page/tile';
 import { RecognizedQueries } from '../../../query';
-import { DataStructure } from './common';
+import { createEmptyData, DataStructure } from './common';
 import { Actions as GlobalActions } from '../../../models/actions';
 import { Actions } from './actions';
-import { List, HTTP } from 'cnc-tskit';
+import { List, HTTP, pipe, Dict } from 'cnc-tskit';
 import { isWebDelegateApi } from '../../../types';
 import { findCurrQueryMatch } from '../../../models/query';
 import { UjcCJAArgs, UjcCJAApi } from './api';
@@ -72,11 +72,7 @@ export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
                 state.ident = match.lemma || match.word;
                 state.isBusy = true;
                 state.error = null;
-                state.data = {
-                    content: '',
-                    image: '',
-                    css: '',
-                }
+                state.data = createEmptyData();
                 state.backlinks = [];
             },
             (state, action, dispatch) => {
@@ -94,7 +90,7 @@ export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
 
                     } else {
                         state.data = action.payload.data;
-                        state.backlinks = [this.generateBacklink(state.ident)];
+                        state.backlinks = [this.generateBacklink(action.payload.data.backlink)];
                     }
                 }
             }
@@ -131,14 +127,18 @@ export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
         );
     }
 
-    private generateBacklink(ident:string):BacklinkWithArgs<{}> {
+    private generateBacklink(url:string):BacklinkWithArgs<{}> {
+        let [path, query] = url.split("?", 1);
+        let args = pipe(
+            query.split("&"),
+            List.map(v => v.split("=", 1)),
+            Dict.fromEntries()
+        );
         return {
-            url: `https://cja.ujc.cas.cz/e-cja/h/`,
+            url: path,
             label: 'heslo v Českém jazykovém atlasu',
             method: HTTP.Method.GET,
-            args: {
-                hw: ident,
-            }
+            args: args
         };
     }
 
@@ -165,11 +165,7 @@ export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
                     payload: {
                         tileId: this.tileId,
                         isEmpty: true,
-                        data: {
-                            content: '',
-                            image: '',
-                            css: '',
-                        },
+                        data: createEmptyData(),
                     }
                 });
             }
