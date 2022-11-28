@@ -90,7 +90,7 @@ export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
 
                     } else {
                         state.data = action.payload.data;
-                        state.backlinks = [this.generateBacklink(action.payload.data.backlink)];
+                        state.backlinks = [this.generateBacklink(state, action.payload.data.backlink)];
                     }
                 }
             }
@@ -127,12 +127,15 @@ export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
         );
     }
 
-    private generateBacklink(url:string):BacklinkWithArgs<{}> {
+    private generateBacklink(state:UjcCJAModelState, url:string):BacklinkWithArgs<{}> {
         const urlSplit = url.split("?");
         const args = pipe(
             urlSplit[1].split("&"),
             List.map(v => {
                 const keyVal = v.split("=");
+                if (keyVal[0] == "hw" || keyVal[0] == "doklad") {
+                    return tuple(keyVal[0], state.ident);
+                }
                 return tuple(keyVal[0], keyVal[1]);
             }),
             Dict.fromEntries(),
