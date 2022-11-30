@@ -18,4 +18,12 @@
 
 export interface DataStructure {
 	entries: Array<string>;
+	query: string;
+}
+
+export function createEmptyData():DataStructure {
+	return {
+		entries: [],
+		query: null,
+	}
 }

@@ -20,7 +20,7 @@ import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices';
 import { Backlink, BacklinkWithArgs } from '../../../page/tile';
 import { RecognizedQueries } from '../../../query';
-import { DataStructure } from './common';
+import { createEmptyData, DataStructure } from './common';
 import { Actions as GlobalActions } from '../../../models/actions';
 import { Actions } from './actions';
 import { List, HTTP } from 'cnc-tskit';
@@ -31,7 +31,7 @@ import { UjcPSJCArgs, UjcPSJCApi } from './api';
 
 export interface UjcPSJCModelState {
     isBusy:boolean;
-    ident:string;
+    queries:Array<string>;
     data:DataStructure;
     error:string;
     backlinks:Array<BacklinkWithArgs<{}>>;
@@ -69,16 +69,14 @@ export class UjcPSJCModel extends StatelessModel<UjcPSJCModelState> {
             GlobalActions.RequestQueryResponse,
             (state, action) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
-                state.ident = match.lemma || match.word;
+                state.queries = [match.word, match.lemma];
                 state.isBusy = true;
                 state.error = null;
-                state.data = {
-                    entries: [],
-                }
+                state.data = createEmptyData(),
                 state.backlinks = [];
             },
             (state, action, dispatch) => {
-                this.loadData(dispatch, state, state.ident);
+                this.loadData(dispatch, state);
             }
         );
 
@@ -92,7 +90,7 @@ export class UjcPSJCModel extends StatelessModel<UjcPSJCModelState> {
 
                     } else {
                         state.data = action.payload.data;
-                        state.backlinks = [this.generateBacklink(state.ident)];
+                        state.backlinks = [this.generateBacklink(state.data.query)];
                     }
                 }
             }
@@ -144,9 +142,9 @@ export class UjcPSJCModel extends StatelessModel<UjcPSJCModelState> {
         };
     }
 
-    private loadData(dispatch:SEDispatcher, state:UjcPSJCModelState, q:string) {
+    private loadData(dispatch:SEDispatcher, state:UjcPSJCModelState) {
         const args:UjcPSJCArgs = {
-            q
+            q: state.queries
         };
         this.api.call(args).subscribe({
             next: data => {
@@ -167,9 +165,7 @@ export class UjcPSJCModel extends StatelessModel<UjcPSJCModelState> {
                     payload: {
                         tileId: this.tileId,
                         isEmpty: true,
-                        data: {
-                            entries: [],
-                        },
+                        data: createEmptyData(),
                     }
                 });
             }

@@ -70,7 +70,7 @@ export class UjcDictionaryModel extends StatelessModel<UjcDictionaryModelState> 
             GlobalActions.RequestQueryResponse,
             (state, action) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
-                state.queries = [match.word, match.lemma];
+                state.queries = [match.lemma||match.word];
                 state.isBusy = true;
                 state.error = null;
                 state.data = createEmptyData();
