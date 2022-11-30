@@ -21,4 +21,12 @@ export interface DataStructure {
 		sti: number,
 		payload: string;
 	}>;
+	query:string;
+}
+
+export function createEmptyData():DataStructure {
+	return {
+		entries: [],
+		query: null,
+	}
 }
