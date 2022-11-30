@@ -18,4 +18,12 @@
 
 export interface DataStructure {
 	images: Array<string>;
+	query: string;
+}
+
+export function createEmptyData():DataStructure {
+	return {
+		images: [],
+		query: null,
+	}
 }
