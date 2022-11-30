@@ -67,7 +67,7 @@ export class UjcDictionaryTile implements ITileProvider {
             backlink: null,
             initState: {
                 isBusy: isBusy,
-                ident: '',
+                queries: [],
                 data: createEmptyData(),
                 maxItems: conf.maxItems,
                 error: null,
