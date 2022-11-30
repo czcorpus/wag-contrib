@@ -70,7 +70,10 @@ export class UjcKLAModel extends StatelessModel<UjcKLAModelState> {
             GlobalActions.RequestQueryResponse,
             (state, action) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
-                state.queries = [match.word, match.lemma];
+                state.queries = [match.word];
+                if (!match.isNonDict) {
+                    state.queries.push(match.lemma)
+                };
                 state.isBusy = true;
                 state.error = null;
                 state.data = createEmptyData();
