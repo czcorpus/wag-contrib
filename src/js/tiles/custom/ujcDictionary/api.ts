@@ -25,7 +25,7 @@ import { DataStructure } from './common';
 
 
 export interface UjcDictionaryArgs {
-    q:string;
+    q:string|Array<string>;
 }
 
 

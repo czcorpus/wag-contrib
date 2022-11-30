@@ -20,7 +20,7 @@ import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices';
 import { Backlink, BacklinkWithArgs } from '../../../page/tile';
 import { RecognizedQueries } from '../../../query';
-import { DataStructure } from './common';
+import { createEmptyData, DataStructure } from './common';
 import { Actions as GlobalActions } from '../../../models/actions';
 import { Actions } from './actions';
 import { List, HTTP } from 'cnc-tskit';
@@ -31,7 +31,7 @@ import { UjcSSJCArgs, UjcSSJCApi } from './api';
 
 export interface UjcSSJCModelState {
     isBusy:boolean;
-    ident:string;
+    queries:Array<string>;
     data:DataStructure;
     error:string;
     backlinks:Array<BacklinkWithArgs<{}>>;
@@ -69,16 +69,17 @@ export class UjcSSJCModel extends StatelessModel<UjcSSJCModelState> {
             GlobalActions.RequestQueryResponse,
             (state, action) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
-                state.ident = match.lemma || match.word;
+                state.queries = [match.word];
+                if (!match.isNonDict) {
+                    state.queries.push(match.lemma)
+                };
                 state.isBusy = true;
                 state.error = null;
-                state.data = {
-                    entries: [],
-                }
+                state.data = createEmptyData();
                 state.backlinks = [];
             },
             (state, action, dispatch) => {
-                this.loadData(dispatch, state, state.ident);
+                this.loadData(dispatch, state);
             }
         );
 
@@ -92,7 +93,7 @@ export class UjcSSJCModel extends StatelessModel<UjcSSJCModelState> {
 
                     } else {
                         state.data = action.payload.data;
-                        state.backlinks = [this.generateBacklink(state.ident)];
+                        state.backlinks = [this.generateBacklink(state.data.query)];
                     }
                 }
             }
@@ -143,9 +144,9 @@ export class UjcSSJCModel extends StatelessModel<UjcSSJCModelState> {
         };
     }
 
-    private loadData(dispatch:SEDispatcher, state:UjcSSJCModelState, q:string) {
+    private loadData(dispatch:SEDispatcher, state:UjcSSJCModelState) {
         const args:UjcSSJCArgs = {
-            q
+            q: state.queries
         };
         this.api.call(args).subscribe({
             next: data => {
@@ -166,9 +167,7 @@ export class UjcSSJCModel extends StatelessModel<UjcSSJCModelState> {
                     payload: {
                         tileId: this.tileId,
                         isEmpty: true,
-                        data: {
-                            entries: [],
-                        },
+                        data: createEmptyData(),
                     }
                 });
             }

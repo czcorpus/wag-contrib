@@ -25,7 +25,7 @@ import { DataStructure } from './common';
 
 
 export interface UjcKLAArgs {
-    q:string;
+    q:string|Array<string>;
     maxImages:number;
 }
 

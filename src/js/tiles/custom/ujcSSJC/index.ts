@@ -23,6 +23,7 @@ import { init as viewInit } from './views';
 import { TileConf, ITileProvider, TileComponent, TileFactory, TileFactoryArgs } from '../../../page/tile';
 import { UjcSSJCModel } from './model';
 import { UjcSSJCApi } from './api';
+import { createEmptyData } from './common';
 
 
 export interface UjcSSJCConf extends TileConf {
@@ -65,10 +66,8 @@ export class UjcSSJCTile implements ITileProvider {
             backlink: null,
             initState: {
                 isBusy: isBusy,
-                ident: '',
-                data: {
-                    entries: [],
-                },
+                queries: [],
+                data: createEmptyData(),
                 error: null,
                 backlinks: []
             }

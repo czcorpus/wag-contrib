@@ -23,6 +23,7 @@ import { init as viewInit } from './views';
 import { TileConf, ITileProvider, TileComponent, TileFactory, TileFactoryArgs } from '../../../page/tile';
 import { UjcKLAModel } from './model';
 import { UjcKLAApi } from './api';
+import { createEmptyData } from './common';
 
 
 export interface UjcKLAConf extends TileConf {
@@ -66,11 +67,9 @@ export class UjcKLATile implements ITileProvider {
             backlink: null,
             initState: {
                 isBusy: isBusy,
-                ident: '',
+                queries: [],
                 maxImages: conf.maxItems || 2,
-                data: {
-                    images: [],
-                },
+                data: createEmptyData(),
                 error: null,
                 backlinks: []
             }

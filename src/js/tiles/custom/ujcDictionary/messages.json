@@ -21,6 +21,6 @@
         "ujc_dict__note": "note",
         "ujc_dict__meaning": "meaning",
         "ujc_dict__examples": "examples",
-        "ujc_dict__more_data_{num_hidden}": "zdroj obsahuje {num_hidden, plural, one{# more item} other{# more items}}"
+        "ujc_dict__more_data_{num_hidden}": "source contains {num_hidden, plural, one{# more item} other{# more items}}"
     }
 }

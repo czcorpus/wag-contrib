@@ -31,7 +31,7 @@ import { UjcDictionaryArgs, UjcDictionaryApi } from './api';
 
 export interface UjcDictionaryModelState {
     isBusy:boolean;
-    ident:string;
+    queries:Array<string>;
     data:DataStructure;
     maxItems:number;
     error:string;
@@ -70,14 +70,14 @@ export class UjcDictionaryModel extends StatelessModel<UjcDictionaryModelState> 
             GlobalActions.RequestQueryResponse,
             (state, action) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
-                state.ident = match.lemma || match.word;
+                state.queries = [match.lemma||match.word];
                 state.isBusy = true;
                 state.error = null;
                 state.data = createEmptyData();
                 state.backlinks = [];
             },
             (state, action, dispatch) => {
-                this.loadData(dispatch, state, state.ident);
+                this.loadData(dispatch, state);
             }
         );
 
@@ -91,7 +91,7 @@ export class UjcDictionaryModel extends StatelessModel<UjcDictionaryModelState> 
 
                     } else {
                         state.data = action.payload.data;
-                        state.backlinks = [this.generateBacklink(state.ident)];
+                        state.backlinks = [this.generateBacklink(state.data.query)];
                     }
                 }
             }
@@ -137,9 +137,9 @@ export class UjcDictionaryModel extends StatelessModel<UjcDictionaryModelState> 
         };
     }
 
-    private loadData(dispatch:SEDispatcher, state:UjcDictionaryModelState, q:string) {
+    private loadData(dispatch:SEDispatcher, state:UjcDictionaryModelState) {
         const args:UjcDictionaryArgs = {
-            q
+            q: state.queries
         };
         this.api.call(args).subscribe({
             next: data => {
