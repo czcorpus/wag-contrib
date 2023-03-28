@@ -76,7 +76,7 @@ function exportPosArgs(args:KSPRequestArgs, match:QueryMatch):void {
         );
 
     } else {
-        args[posArgMapping[wordPos]] = 'on';
+        args[posArgMapping[wordPos.value]] = 'on';
     }
 }
 
