@@ -20,7 +20,7 @@ import { IActionDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices';
 import { QueryType } from '../../../query/index';
 import { init as viewInit } from './views';
-import { TileConf, ITileProvider, TileComponent, TileFactory, TileFactoryArgs } from '../../../page/tile';
+import { TileConf, ITileProvider, TileComponent, TileFactory, TileFactoryArgs, DEFAULT_ALT_VIEW_ICON, ITileReloader } from '../../../page/tile';
 import { UjcCJAModel } from './model';
 import { UjcCJAApi } from './api';
 import { createEmptyData } from './common';
@@ -117,8 +117,13 @@ export class UjcCJATile implements ITileProvider {
         return false;
     }
 
-    exposeModel():StatelessModel<{}>|null {
-        return this.model;
+    getAltViewIcon():[string, string] {
+        return DEFAULT_ALT_VIEW_ICON;
+    }
+
+    registerReloadModel(model:ITileReloader):boolean {
+        model.registerModel(this, this.model);
+        return true;
     }
 
     getBlockingTiles():Array<number> {

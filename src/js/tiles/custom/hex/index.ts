@@ -15,12 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { IActionDispatcher, StatelessModel } from 'kombo';
+import { IActionDispatcher } from 'kombo';
 
 import { IAppServices } from '../../../appServices';
 import { QueryType } from '../../../query/index';
 import { init as viewInit } from './views';
-import { TileConf, ITileProvider, TileComponent, TileFactory, TileFactoryArgs } from '../../../page/tile';
+import { TileConf, ITileProvider, TileComponent, TileFactory, TileFactoryArgs, DEFAULT_ALT_VIEW_ICON, ITileReloader } from '../../../page/tile';
 import { HexModel } from './model';
 import { mkEmptyData } from './common';
 import { HexKspApi } from './api';
@@ -115,7 +115,7 @@ export class HexTile implements ITileProvider {
     }
 
     disable():void {
-        this.model.suspend({}, (_, syncData)=>syncData);
+        this.model.waitForAction({}, (_, syncData)=>syncData);
     }
 
     getWidthFract():number {
@@ -130,8 +130,13 @@ export class HexTile implements ITileProvider {
         return true;
     }
 
-    exposeModel():StatelessModel<{}>|null {
-        return this.model;
+    getAltViewIcon():[string, string] {
+        return DEFAULT_ALT_VIEW_ICON;
+    }
+
+    registerReloadModel(model:ITileReloader):boolean {
+        model.registerModel(this, this.model);
+        return true;
     }
 
     getBlockingTiles():Array<number> {
