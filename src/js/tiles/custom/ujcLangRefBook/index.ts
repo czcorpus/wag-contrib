@@ -20,7 +20,7 @@ import { IActionDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices';
 import { QueryType } from '../../../query/index';
 import { init as viewInit } from './views';
-import { TileConf, ITileProvider, TileComponent, TileFactory, TileFactoryArgs } from '../../../page/tile';
+import { TileConf, ITileProvider, TileComponent, TileFactory, TileFactoryArgs, DEFAULT_ALT_VIEW_ICON, ITileReloader } from '../../../page/tile';
 import { UjcLGuideModel } from './model';
 import { UjcLGuideApi } from './api';
 import { mkEmptyData } from './common';
@@ -116,8 +116,9 @@ export class UjcLangRefBookTile implements ITileProvider {
         return false;
     }
 
-    exposeModel():StatelessModel<{}>|null {
-        return this.model;
+    registerReloadModel(model:ITileReloader):boolean {
+        model.registerModel(this, this.model);
+        return true;
     }
 
     getBlockingTiles():Array<number> {
@@ -130,6 +131,10 @@ export class UjcLangRefBookTile implements ITileProvider {
 
     getIssueReportingUrl():null {
         return null;
+    }
+
+    getAltViewIcon():[string, string] {
+        return DEFAULT_ALT_VIEW_ICON;
     }
 }
 
