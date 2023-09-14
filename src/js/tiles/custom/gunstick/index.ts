@@ -20,7 +20,10 @@ import { IActionDispatcher } from 'kombo';
 import { IAppServices } from '../../../appServices';
 import { QueryType } from '../../../query/index';
 import { init as viewInit } from './views';
-import { TileConf, ITileProvider, TileComponent, TileFactoryArgs, TileFactory, DEFAULT_ALT_VIEW_ICON, ITileReloader } from '../../../page/tile';
+import {
+    TileConf, ITileProvider, TileComponent, TileFactoryArgs, TileFactory,
+    DEFAULT_ALT_VIEW_ICON, ITileReloader, AltViewIconProps
+} from '../../../page/tile';
 import { GunstickModel } from './model';
 import { GunstickKspApi } from './api';
 import { mkEmptyData } from './common';
@@ -129,7 +132,7 @@ export class GunstickTile implements ITileProvider {
         return true;
     }
 
-    getAltViewIcon():[string, string] {
+    getAltViewIcon():AltViewIconProps {
         return DEFAULT_ALT_VIEW_ICON;
     }
 

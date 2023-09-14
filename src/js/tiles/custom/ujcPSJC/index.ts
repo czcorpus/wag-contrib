@@ -20,7 +20,9 @@ import { IActionDispatcher } from 'kombo';
 import { IAppServices } from '../../../appServices';
 import { QueryType } from '../../../query/index';
 import { init as viewInit } from './views';
-import { TileConf, ITileProvider, TileComponent, TileFactory, TileFactoryArgs, DEFAULT_ALT_VIEW_ICON, ITileReloader } from '../../../page/tile';
+import {
+    TileConf, ITileProvider, TileComponent, TileFactory,
+    TileFactoryArgs, DEFAULT_ALT_VIEW_ICON, ITileReloader, AltViewIconProps } from '../../../page/tile';
 import { UjcPSJCModel } from './model';
 import { UjcPSJCApi } from './api';
 import { createEmptyData } from './common';
@@ -117,7 +119,7 @@ export class UjcPSJCTile implements ITileProvider {
         return false;
     }
 
-    getAltViewIcon():[string, string] {
+    getAltViewIcon():AltViewIconProps {
         return DEFAULT_ALT_VIEW_ICON;
     }
 
