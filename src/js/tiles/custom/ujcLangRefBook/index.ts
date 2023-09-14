@@ -15,12 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { IActionDispatcher, StatelessModel } from 'kombo';
+import { IActionDispatcher } from 'kombo';
 
 import { IAppServices } from '../../../appServices';
 import { QueryType } from '../../../query/index';
 import { init as viewInit } from './views';
-import { TileConf, ITileProvider, TileComponent, TileFactory, TileFactoryArgs, DEFAULT_ALT_VIEW_ICON, ITileReloader } from '../../../page/tile';
+import {
+    TileConf, ITileProvider, TileComponent, TileFactory,
+    TileFactoryArgs, DEFAULT_ALT_VIEW_ICON, ITileReloader, AltViewIconProps } from '../../../page/tile';
 import { UjcLGuideModel } from './model';
 import { UjcLGuideApi } from './api';
 import { mkEmptyData } from './common';
@@ -133,7 +135,7 @@ export class UjcLangRefBookTile implements ITileProvider {
         return null;
     }
 
-    getAltViewIcon():[string, string] {
+    getAltViewIcon():AltViewIconProps {
         return DEFAULT_ALT_VIEW_ICON;
     }
 }
