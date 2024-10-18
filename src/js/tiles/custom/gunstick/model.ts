@@ -20,12 +20,13 @@ import { IActionQueue, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices';
 import { Backlink } from '../../../page/tile';
 import { RecognizedQueries } from '../../../query';
-import { GunstickKspApi } from './api';
+import { GunstickKspApi, KSPRequestArgs } from './api';
 import { Data, mkEmptyData } from './common';
 import { Actions as GlobalActions } from '../../../models/actions';
 import { Actions } from './actions';
 import { List } from 'cnc-tskit';
 import { findCurrQueryMatch } from '../../../models/query';
+import { DataApi } from '../../../types';
 
 export interface GunstickModelState {
     isBusy:boolean;
@@ -53,7 +54,7 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
 
     private readonly tileId:number;
 
-    private readonly api:GunstickKspApi;
+    private readonly api:DataApi<KSPRequestArgs, Data>;
 
     constructor({dispatcher, initState, api, tileId, appServices, queryMatches, backlink, queryDomain}:GunstickModelArgs) {
         super(dispatcher, initState);
