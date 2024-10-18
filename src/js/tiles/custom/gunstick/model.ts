@@ -100,62 +100,69 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
                 );
             }
         );
-        this.addActionSubtypeHandler<typeof Actions.TileDataLoaded>(
+        this.addActionHandler<typeof Actions.TileDataLoaded>(
             Actions.TileDataLoaded.name,
-            action => action.payload.tileId === this.tileId,
             (state, action) => {
-                state.isBusy = false;
-                if (action.error) {
-                    state.error = action.error.message;
+                if (action.payload.tileId === this.tileId) {
+                    state.isBusy = false;
+                    if (action.error) {
+                        state.error = action.error.message;
 
-                } else {
-                    state.data = action.payload.data;
+                    } else {
+                        state.data = action.payload.data;
+                    }
                 }
             }
         );
 
-        this.addActionSubtypeHandler<typeof GlobalActions.EnableAltViewMode>(
+        this.addActionHandler<typeof GlobalActions.EnableAltViewMode>(
             GlobalActions.EnableAltViewMode.name,
-            action => action.payload.tileId === this.tileId,
             (state, action) => {
-                state.isAltViewMode = true;
+                if (action.payload.ident === this.tileId) {
+                    state.isAltViewMode = true;
+                }
             }
         );
-        this.addActionSubtypeHandler<typeof GlobalActions.DisableAltViewMode>(
+        this.addActionHandler<typeof GlobalActions.DisableAltViewMode>(
             GlobalActions.DisableAltViewMode.name,
-            action => action.payload.tileId === this.tileId,
             (state, action) => {
-                state.isAltViewMode = false;
+                if (action.payload.ident === this.tileId) {
+                    state.isAltViewMode = false;
+                }
             }
         );
 
-        this.addActionSubtypeHandler<typeof GlobalActions.EnableTileTweakMode>(
+        this.addActionHandler<typeof GlobalActions.EnableTileTweakMode>(
             GlobalActions.EnableTileTweakMode.name,
-            action => action.payload.tileId === this.tileId,
             (state, action) => {
-                state.isTweakMode = true;
+                if (action.payload.ident === this.tileId) {
+                    state.isTweakMode = true;
+                }
             }
         );
-        this.addActionSubtypeHandler<typeof GlobalActions.DisableTileTweakMode>(
+        this.addActionHandler<typeof GlobalActions.DisableTileTweakMode>(
             GlobalActions.DisableTileTweakMode.name,
-            action => action.payload.tileId === this.tileId,
             (state, action) => {
-                state.isTweakMode = false;
+                if (action.payload.ident === this.tileId) {
+                    state.isTweakMode = false;
+                }
             }
         );
 
-        this.addActionSubtypeHandler<typeof Actions.NextPage>(
+        this.addActionHandler<typeof Actions.NextPage>(
             Actions.NextPage.name,
-            action => action.payload.tileId === this.tileId,
             (state, action) => {
-                state.page++;
+                if (action.payload.tileId === this.tileId) {
+                    state.page++;
+                }
             }
         );
-        this.addActionSubtypeHandler<typeof Actions.PrevPage>(
+        this.addActionHandler<typeof Actions.PrevPage>(
             Actions.PrevPage.name,
-            action => action.payload.tileId === this.tileId,
             (state, action) => {
-                state.page--;
+                if (action.payload.tileId === this.tileId) {
+                    state.page--;
+                }
             }
         );
     }
