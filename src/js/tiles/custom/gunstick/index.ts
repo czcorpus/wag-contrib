@@ -25,9 +25,9 @@ import {
     DEFAULT_ALT_VIEW_ICON, ITileReloader, AltViewIconProps
 } from '../../../page/tile';
 import { GunstickModel } from './model';
-import { GunstickKspApi } from './api';
-import { mkEmptyData } from './common';
-import { LocalizedConfMsg } from '../../../types';
+import { GunstickApi, KSPRequestArgs } from './api';
+import { mkEmptyData, Data } from './common';
+import { LocalizedConfMsg, DataApi } from '../../../types';
 
 
 export interface GunstickTileConf extends TileConf {
@@ -55,7 +55,7 @@ export class GunstickTile implements ITileProvider {
 
     private readonly label:string;
 
-    private readonly api:GunstickKspApi;
+    private readonly api:DataApi<KSPRequestArgs, Data>;
 
     private view:TileComponent;
 
@@ -67,7 +67,7 @@ export class GunstickTile implements ITileProvider {
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.api = new GunstickKspApi(cache, conf.apiURL, appServices);
+        this.api = new GunstickApi(cache, conf.apiURL, appServices);
         this.model = new GunstickModel({
             dispatcher,
             appServices,
