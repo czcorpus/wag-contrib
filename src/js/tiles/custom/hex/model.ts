@@ -138,18 +138,17 @@ export class HexModel extends StatelessModel<HexModelState> {
                 });
             }
         );
-        this.addActionHandler<typeof Actions.TileDataLoaded>(
+        this.addActionSubtypeHandler<typeof Actions.TileDataLoaded>(
             Actions.TileDataLoaded.name,
+            action => action.payload.tileId === this.tileId,
             (state, action) => {
-                if (action.payload.tileId === this.tileId) {
-                    state.isBusy = false;
-                    state.word = findCurrQueryMatch(List.head(queryMatches)).word;
-                    if (action.error) {
-                        state.error = action.error.message;
+                state.isBusy = false;
+                state.word = findCurrQueryMatch(List.head(queryMatches)).word;
+                if (action.error) {
+                    state.error = action.error.message;
 
-                    } else {
-                        state.data = action.payload.data;
-                    }
+                } else {
+                    state.data = action.payload.data;
                 }
             }
         );
@@ -188,20 +187,18 @@ export class HexModel extends StatelessModel<HexModelState> {
             }
         );
 
-        this.addActionHandler<typeof Actions.NextPage>(
+        this.addActionSubtypeHandler<typeof Actions.NextPage>(
             Actions.NextPage.name,
+            action => action.payload.tileId === this.tileId,
             (state, action) => {
-                if (action.payload.tileId === this.tileId) {
-                    state.page++;
-                }
+                state.page++;
             }
         );
-        this.addActionHandler<typeof Actions.PrevPage>(
+        this.addActionSubtypeHandler<typeof Actions.PrevPage>(
             Actions.PrevPage.name,
+            action => action.payload.tileId === this.tileId,
             (state, action) => {
-                if (action.payload.tileId === this.tileId) {
-                    state.page--;
-                }
+                state.page--;
             }
         );
     }
