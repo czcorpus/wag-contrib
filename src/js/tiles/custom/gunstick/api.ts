@@ -39,8 +39,8 @@ export interface KSPRequestArgs {
     unit:'word'|'lemma';
     src:'all';
     lang:'cz';
-    y1:string;
-    y2:string;
+    y1:number;
+    y2:number;
 }
 
 export interface RawDataTableItem {
