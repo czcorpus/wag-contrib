@@ -37,13 +37,15 @@ export interface GunstickModelState {
     serviceInfoUrl:string;
     page:number;
     pageSize:number;
+    y1:string;
+    y2:string;
 }
 
 export interface GunstickModelArgs {
     dispatcher:IActionQueue;
     initState:GunstickModelState;
     tileId:number;
-    api:GunstickKspApi,
+    api:DataApi<KSPRequestArgs, Data>,
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
     backlink:Backlink;
@@ -56,7 +58,16 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
 
     private readonly api:DataApi<KSPRequestArgs, Data>;
 
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, backlink, queryDomain}:GunstickModelArgs) {
+    constructor({
+        dispatcher,
+        initState,
+        api,
+        tileId,
+        appServices,
+        queryMatches,
+        backlink,
+        queryDomain}:GunstickModelArgs
+    ) {
         super(dispatcher, initState);
         this.tileId = tileId;
         this.api = api;
@@ -74,7 +85,9 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
                     q: findCurrQueryMatch(List.head(queryMatches)).lemma,
                     unit: 'lemma',
                     src: 'all',
-                    lang: 'cz'
+                    lang: 'cz',
+                    y1: state.y1,
+                    y2: state.y2
                 }).subscribe(
                     (data) => {
                         dispatch<typeof Actions.TileDataLoaded>({
