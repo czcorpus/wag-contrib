@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { Dict, HTTP, List } from 'cnc-tskit';
+import { Dict, HTTP, List, pipe, tuple } from 'cnc-tskit';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { IApiServices } from '../../../appServices';
@@ -85,15 +85,34 @@ export class GunstickApi implements DataApi<RequestArgs, Data> {
         return cachedAjax$<HTTPResponse>(this.cache)(
             HTTP.Method.GET,
             this.apiURL,
-            args
+            // TODO: Gunstick API currently cannot deal with y1, y2
+            {...args, y1: undefined, y2: undefined}
         ).pipe(
             map(
                 resp => ({
                     count: resp.count,
                     countRY: Dict.map(
-                        item => Dict.map(
-                            count => parseInt(count),
-                            item
+                        wordFreqs => pipe(
+                            wordFreqs,
+                            Dict.toEntries(),
+                            List.map(
+                                ([year, count]) => tuple(parseInt(year), parseInt(count))
+                            ),
+                            List.filter(
+                                ([year, count]) => {
+                                    if (args.y1 && year < args.y1) {
+                                        return false;
+                                    }
+                                    if (args.y2 && year > args.y2) {
+                                        return false;
+                                    }
+                                    return true;
+                                }
+                            ),
+                            List.map(
+                                ([year, count]) => tuple(year + '', count)
+                            ),
+                            Dict.fromEntries()
                         ),
                         resp.countRY
                     ),
