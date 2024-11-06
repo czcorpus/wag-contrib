@@ -34,8 +34,8 @@ export interface GunstickTileConf extends TileConf {
     apiURL:string;
     serviceInfoUrl:LocalizedConfMsg;
     pageSize:number;
-    y1:string;
-    y2:string;
+    y1:number;
+    y2:number;
 }
 
 /**

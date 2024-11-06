@@ -37,8 +37,8 @@ export interface GunstickModelState {
     serviceInfoUrl:string;
     page:number;
     pageSize:number;
-    y1:string;
-    y2:string;
+    y1:number;
+    y2:number;
 }
 
 export interface GunstickModelArgs {
