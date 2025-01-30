@@ -37,8 +37,6 @@ export interface HexModelState {
     isTweakMode:boolean;
     word:string;
     serviceInfoUrl:string;
-    page:number;
-    pageSize:number;
 }
 
 export interface HexModelArgs {
@@ -169,38 +167,5 @@ export class HexModel extends StatelessModel<HexModelState> {
                 }
             }
         );
-
-        this.addActionHandler<typeof GlobalActions.EnableTileTweakMode>(
-            GlobalActions.EnableTileTweakMode.name,
-            (state, action) => {
-                if (action.payload.ident === this.tileId) {
-                    state.isTweakMode = true;
-                }
-            }
-        );
-        this.addActionHandler<typeof GlobalActions.DisableTileTweakMode>(
-            GlobalActions.DisableTileTweakMode.name,
-            (state, action) => {
-                if (action.payload.ident === this.tileId) {
-                    state.isTweakMode = false;
-                }
-            }
-        );
-
-        this.addActionSubtypeHandler<typeof Actions.NextPage>(
-            Actions.NextPage.name,
-            action => action.payload.tileId === this.tileId,
-            (state, action) => {
-                state.page++;
-            }
-        );
-        this.addActionSubtypeHandler<typeof Actions.PrevPage>(
-            Actions.PrevPage.name,
-            action => action.payload.tileId === this.tileId,
-            (state, action) => {
-                state.page--;
-            }
-        );
     }
-
 }

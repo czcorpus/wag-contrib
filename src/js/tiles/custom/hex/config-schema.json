@@ -17,9 +17,6 @@
                 }
             ]
         },
-        "pageSize": {
-            "type": "number"
-        },
         "tileType": {
             "description": "An identifier as defined by tiles configuration interface",
             "type": "string"
@@ -81,7 +78,6 @@
     },
     "required": [
         "apiURL",
-        "pageSize",
         "serviceInfoUrl",
         "tileType"
     ],

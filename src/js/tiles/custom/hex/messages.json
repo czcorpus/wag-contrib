@@ -1,20 +1,12 @@
 {
     "cs-CZ": {
         "hex__freq_found_occurrences": "celkem nalezených dokladů",
-        "hex__label_author": "autor",
-        "hex__label_title": "dílo",
         "hex__label_year": "rok",
-        "hex__abs_freq": "abs. frekvence",
-        "hex__rel_freq_poem_related": "rel. frekv. (k počtu básní)",
-        "hex__coeff_phi": "koeficient φ"
+        "hex__abs_freq": "abs. frekvence"
     },
     "en-US": {
         "hex__freq_found_occurrences": "total occurrences found",
-        "hex__label_author": "author",
-        "hex__label_title": "title",
         "hex__label_year": "year",
-        "hex__abs_freq": "abs. frequency",
-        "hex__rel_freq_poem_related": "rel. freq. (to the num of poems)",
-        "hex__coeff_phi": "coefficient φ"
+        "hex__abs_freq": "abs. frequency"
     }
 }

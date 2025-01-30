@@ -83,8 +83,6 @@ export class HexTile implements ITileProvider {
                 isAltViewMode: false,
                 isTweakMode: false,
                 serviceInfoUrl: appServices.importExternalMessage(conf.serviceInfoUrl),
-                page: 1,
-                pageSize: conf.pageSize || 10,
             }
         });
         this.label = appServices.importExternalMessage(conf.label || 'html__main_label');
@@ -125,7 +123,7 @@ export class HexTile implements ITileProvider {
     }
 
     supportsTweakMode():boolean {
-        return true;
+        return false;
     }
 
     supportsAltView():boolean {
