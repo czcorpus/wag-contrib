@@ -25,7 +25,6 @@ import { GlobalComponents } from '../../../views/common';
 import { HexModel, HexModelState } from './model';
 import { ScatterChart, CartesianGrid, XAxis, YAxis, Legend, Scatter, Tooltip } from 'recharts';
 import { ChartData, Data, transformDataForCharts } from './common';
-import { Actions } from './actions';
 import * as S from './style';
 
 
@@ -65,7 +64,7 @@ export function init(
                     <YAxis dataKey="y" name={ut.translate('hex__abs_freq')} unit="" type="number"
                             label={{ value: ut.translate('hex__abs_freq'), angle: -90, position: 'insideLeft' }} />
                     <Tooltip cursor={{ strokeDasharray: '3 3' }} labelStyle={{display: 'none'}} />
-                    <Legend />
+                    <Legend formatter={(value) => <span style={{ color: 'black' }}>{value}</span>} />
                     <Scatter name={props.word} data={props.data} fill={theme.categoryColor(0)} />
                 </ScatterChart>)} />
         );
