@@ -46,7 +46,7 @@ export interface Data {
 export type ChartData = {[verse:string]:Array<{x: number; y: number; z: number}>};
 
 
-export function transformDataForCharts(data:Data):ChartData {
+export function transformDataForCharts(data:Data, page:number, pageSize:number):ChartData {
     return pipe(
         data.countRY,
         Dict.toEntries(),
@@ -69,7 +69,7 @@ export function transformDataForCharts(data:Data):ChartData {
             ([verse, counts]) => List.foldl((acc, curr) => acc + curr.y, 0, counts),
         ),
         List.reverse(),
-        List.slice(0, 5),
+        List.slice(pageSize*(page-1), pageSize*page),
         Dict.fromEntries()
     );
 }

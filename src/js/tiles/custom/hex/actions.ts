@@ -30,16 +30,4 @@ export class Actions {
     static TileDataLoaded:Action<typeof GlobalActions.TileDataLoaded.payload & DataLoadedPayload> = {
         name: GlobalActions.TileDataLoaded.name
     };
-
-    static NextPage:Action<{
-        tileId:number;
-    }> = {
-        name: 'HEX_LOAD_NEXT_PAGE'
-    };
-
-    static PrevPage:Action<{
-        tileId:number;
-    }> = {
-        name: 'HEX_LOAD_PREV_PAGE'
-    };
 }

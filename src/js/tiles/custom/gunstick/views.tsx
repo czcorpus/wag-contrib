@@ -53,7 +53,11 @@ function transformDataForTableView(data:SummedSizes):[Array<string>, Array<[stri
                     years,
                     List.map(year => freqs[year])
                 )
-            ))
+            )),
+            List.sortedBy(
+                ([keyword, freqs]) => List.foldl((acc, curr) => acc + (curr ? curr : 0), 0, freqs)
+            ),
+            List.reverse(),
         )
     );
 }
@@ -211,7 +215,7 @@ export function init(
                         <Table data={props.data}
                             page={props.page}
                             pageSize={props.pageSize} /> :
-                        <Chart data={transformDataForCharts(props.data)}
+                        <Chart data={transformDataForCharts(props.data, props.page, props.pageSize)}
                             isMobile={props.isMobile}
                             widthFract={props.widthFract} />
                     }

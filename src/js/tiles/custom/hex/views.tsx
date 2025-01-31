@@ -18,7 +18,7 @@
 
 import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
 import * as React from 'react';
-import { List, Maths, pipe, tuple } from 'cnc-tskit';
+import { Dict, List, Maths, pipe, tuple } from 'cnc-tskit';
 import { Theme } from '../../../page/theme';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile';
 import { GlobalComponents } from '../../../views/common';
@@ -75,34 +75,24 @@ export function init(
 
     const Table:React.FC<{
         data: Data;
-        page: number;
-        pageSize: number;
     }> = (props) => (
         <div style={{maxHeight: '20em', overflowY: 'auto'}}>
             <p>{ut.translate('hex__freq_found_occurrences')}: <strong>{props.data.count}</strong></p>
             <table className="data">
                 <thead>
                     <tr>
-                        <th>{ut.translate('hex__label_author')}</th>
-                        <th>{ut.translate('hex__label_title')}</th>
                         <th>{ut.translate('hex__label_year')}</th>
                         <th>{ut.translate('hex__abs_freq')}</th>
-                        <th>{ut.translate('hex__rel_freq_poem_related')}</th>
-                        <th>{ut.translate('hex__coeff_phi')}</th>
                     </tr>
                 </thead>
                 <tbody>
                 {pipe(
-                    props.data.table,
-                    List.slice((props.page-1)*props.pageSize, props.page*props.pageSize),
-                    List.map((item, i) => (
-                        <tr key={`item:${i}:${item.bookId}`}>
-                            <td>{item.author}</td>
-                            <td>{item.poemName}</td>
-                            <td>{item.year}</td>
-                            <td>{item.af}</td>
-                            <td>{item.rf}</td>
-                            <td>{Maths.roundToPos(item.phi, 2)}</td>
+                    props.data.countY,
+                    Dict.toEntries(),
+                    List.map(([year, freq]) => (
+                        <tr key={`year:${year}`}>
+                            <td>{year}</td>
+                            <td>{freq}</td>
                         </tr>
                     ))
                 )}
@@ -114,29 +104,6 @@ export function init(
     // -------------------- <HexTileView /> -----------------------------------------------
 
     const HexTileView: React.FC<HexModelState & CoreTileComponentProps> = (props) => {
-        const numPages = Math.ceil(props.data.count / props.pageSize);
-
-        const handlePrevPage = () => {
-            if (props.page > 1) {
-                dispatcher.dispatch<typeof Actions.PrevPage>({
-                    name: Actions.PrevPage.name,
-                    payload: {
-                        tileId: props.tileId
-                    }
-                });
-            }
-        };
-
-        const handleNextPage = () => {
-            if (props.page < numPages) {
-                dispatcher.dispatch<typeof Actions.NextPage>({
-                    name: Actions.NextPage.name,
-                    payload: {
-                        tileId: props.tileId
-                    }
-                });
-            }
-        };
 
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
@@ -145,16 +112,8 @@ export function init(
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{ corp: 'HEX', url: props.serviceInfoUrl }}>
                 <S.HexTileView>
-                    {props.isTweakMode ?
-                        <div className="tweak-box">
-                            <globalComponents.Paginator page={props.page} numPages={numPages} onNext={handleNextPage} onPrev={handlePrevPage} />
-                        </div> :
-                        null
-                    }
                     {props.isAltViewMode ?
-                        <Table data={props.data}
-                            page={props.page}
-                            pageSize={props.pageSize} /> :
+                        <Table data={props.data} /> :
                         <Chart data={transformDataForCharts(props.data)}
                             isMobile={props.isMobile}
                             widthFract={props.widthFract}
