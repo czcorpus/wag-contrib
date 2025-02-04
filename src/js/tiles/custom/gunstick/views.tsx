@@ -139,7 +139,6 @@ export function init(
     }> = ({data, page, pageSize}) => {
 
         const [years, tableData] = transformDataForTableView(data.countRY);
-        console.log('years: ', years);
 
         return (
             <div style={{maxHeight: '20em', overflowY: 'auto'}}>
