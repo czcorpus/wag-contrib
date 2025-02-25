@@ -17,16 +17,17 @@
  */
 import { IActionDispatcher } from 'kombo';
 
-import { IAppServices } from '../../../appServices';
-import { QueryType } from '../../../query/index';
-import { init as viewInit } from './views';
+import { IAppServices } from '../../../appServices.js';
+import { QueryType } from '../../../query/index.js';
+import { init as viewInit } from './views.js';
 import {
     TileConf, ITileProvider, TileComponent, TileFactory,
-    TileFactoryArgs, DEFAULT_ALT_VIEW_ICON, ITileReloader, AltViewIconProps } from '../../../page/tile';
-import { HexModel } from './model';
-import { mkEmptyData } from './common';
-import { HexKspApi } from './api';
-import { LocalizedConfMsg } from '../../../types';
+    TileFactoryArgs, DEFAULT_ALT_VIEW_ICON, ITileReloader,
+    AltViewIconProps } from '../../../page/tile.js';
+import { HexModel } from './model.js';
+import { mkEmptyData } from './common.js';
+import { HexKspApi } from './api.js';
+import { LocalizedConfMsg } from '../../../types.js';
 
 
 export interface HexTileConf extends TileConf {

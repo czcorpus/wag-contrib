@@ -17,18 +17,18 @@
  */
 
 import { IActionQueue, StatelessModel } from 'kombo';
-import { Actions } from './actions';
 import { Dict, List } from 'cnc-tskit';
 import { of as rxOf } from 'rxjs';
 
-import { IAppServices } from '../../../appServices';
-import { Backlink } from '../../../page/tile';
-import { RecognizedQueries, QueryMatch } from '../../../query';
-import { Data, mkEmptyData } from './common';
-import { Actions as GlobalActions } from '../../../models/actions';
-import { findCurrQueryMatch } from '../../../models/query';
-import { PoSValues } from '../../../postag';
-import { HexKspApi, KSPRequestArgs } from './api';
+import { IAppServices } from '../../../appServices.js';
+import { Backlink } from '../../../page/tile.js';
+import { RecognizedQueries, QueryMatch } from '../../../query/index.js';
+import { Data, mkEmptyData } from './common.js';
+import { Actions as GlobalActions } from '../../../models/actions.js';
+import { Actions } from './actions.js';
+import { findCurrQueryMatch } from '../../../models/query.js';
+import { PoSValues } from '../../../postag.js';
+import { HexKspApi, KSPRequestArgs } from './api.js';
 
 
 export interface HexModelState {

@@ -18,14 +18,15 @@
 
 import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
 import * as React from 'react';
-import { Dict, List, Maths, pipe, tuple } from 'cnc-tskit';
-import { Theme } from '../../../page/theme';
-import { CoreTileComponentProps, TileComponent } from '../../../page/tile';
-import { GlobalComponents } from '../../../views/common';
-import { HexModel, HexModelState } from './model';
 import { ScatterChart, CartesianGrid, XAxis, YAxis, Legend, Scatter, Tooltip } from 'recharts';
-import { ChartData, Data, transformDataForCharts } from './common';
-import * as S from './style';
+import { Dict, List, pipe, tuple } from 'cnc-tskit';
+
+import { Theme } from '../../../page/theme.js';
+import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
+import { GlobalComponents } from '../../../views/common/index.js';
+import { HexModel, HexModelState } from './model.js';
+import { ChartData, Data, transformDataForCharts } from './common.js';
+import * as S from './style.js';
 
 
 export function init(
@@ -99,7 +100,7 @@ export function init(
             </table>
         </div>
     );
-    
+
     // -------------------- <HexTileView /> -----------------------------------------------
 
     const HexTileView: React.FC<HexModelState & CoreTileComponentProps> = (props) => {

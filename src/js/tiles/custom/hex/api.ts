@@ -19,11 +19,12 @@
 import { Dict, HTTP, List, pipe } from 'cnc-tskit';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { IApiServices } from '../../../appServices';
-import { cachedAjax$, ResponseType } from '../../../page/ajax';
-import { PoSValues } from '../../../postag';
-import { DataApi, HTTPHeaders, IAsyncKeyValueStore } from '../../../types';
-import { Data } from './common';
+
+import { IApiServices } from '../../../appServices.js';
+import { cachedAjax$, ResponseType } from '../../../page/ajax.js';
+import { PoSValues } from '../../../postag.js';
+import { DataApi, HTTPHeaders, IAsyncKeyValueStore } from '../../../types.js';
+import { Data } from './common.js';
 
 
 export function posToIndex(pos:PoSValues):number|undefined {

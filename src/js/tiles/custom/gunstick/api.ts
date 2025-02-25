@@ -19,10 +19,10 @@
 import { Dict, HTTP, List, pipe, tuple } from 'cnc-tskit';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { IApiServices } from '../../../appServices';
-import { cachedAjax$, ResponseType } from '../../../page/ajax';
-import { DataApi, HTTPHeaders, IAsyncKeyValueStore } from '../../../types';
-import { Data, DataTableItem } from './common';
+import { IApiServices } from '../../../appServices.js';
+import { cachedAjax$, ResponseType } from '../../../page/ajax.js';
+import { DataApi, HTTPHeaders, IAsyncKeyValueStore } from '../../../types.js';
+import { Data, DataTableItem } from './common.js';
 
 export interface RequestArgs {
     q:string;

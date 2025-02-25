@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { Dict, List, pipe, tuple } from "cnc-tskit";
+import { Dict, List, pipe, tuple } from 'cnc-tskit';
 
 export interface DataTableItem {
     author:string;

@@ -20,15 +20,15 @@ import { List } from 'cnc-tskit';
 import { of as rxOf } from 'rxjs';
 import { IActionQueue, StatelessModel } from 'kombo';
 
-import { IAppServices } from '../../../appServices';
-import { Backlink } from '../../../page/tile';
-import { RecognizedQueries } from '../../../query';
-import { KSPRequestArgs } from './api';
-import { Data, mkEmptyData } from './common';
-import { Actions as GlobalActions } from '../../../models/actions';
-import { Actions } from './actions';
-import { findCurrQueryMatch } from '../../../models/query';
-import { DataApi } from '../../../types';
+import { IAppServices } from '../../../appServices.js';
+import { Backlink } from '../../../page/tile.js';
+import { RecognizedQueries } from '../../../query/index.js';
+import { KSPRequestArgs } from './api.js';
+import { Data, mkEmptyData } from './common.js';
+import { Actions as GlobalActions } from '../../../models/actions.js';
+import { Actions } from './actions.js';
+import { findCurrQueryMatch } from '../../../models/query.js';
+import { DataApi } from '../../../types.js';
 
 export interface GunstickModelState {
     isBusy:boolean;
