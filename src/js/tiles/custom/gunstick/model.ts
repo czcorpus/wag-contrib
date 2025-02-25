@@ -16,15 +16,17 @@
  * limitations under the License.
  */
 
+import { List } from 'cnc-tskit';
+import { of as rxOf } from 'rxjs';
 import { IActionQueue, StatelessModel } from 'kombo';
+
 import { IAppServices } from '../../../appServices';
 import { Backlink } from '../../../page/tile';
 import { RecognizedQueries } from '../../../query';
-import { GunstickKspApi, KSPRequestArgs } from './api';
+import { KSPRequestArgs } from './api';
 import { Data, mkEmptyData } from './common';
 import { Actions as GlobalActions } from '../../../models/actions';
 import { Actions } from './actions';
-import { List } from 'cnc-tskit';
 import { findCurrQueryMatch } from '../../../models/query';
 import { DataApi } from '../../../types';
 
@@ -81,14 +83,24 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
                 state.data = mkEmptyData();
             },
             (state, action, dispatch) => {
-                this.api.call({
-                    q: findCurrQueryMatch(List.head(queryMatches)).lemma,
-                    unit: 'lemma',
-                    src: 'all',
-                    lang: 'cz',
-                    y1: state.y1,
-                    y2: state.y2
-                }).subscribe(
+                const currMatch = findCurrQueryMatch(List.head(queryMatches));
+                (currMatch && currMatch.abs > 0 ?
+                    this.api.call({
+                        q: findCurrQueryMatch(List.head(queryMatches)).lemma,
+                        unit: 'lemma',
+                        src: 'all',
+                        lang: 'cz',
+                        y1: state.y1,
+                        y2: state.y2
+                    }) :
+                    rxOf({
+                        count: 0,
+                        countRY: {},
+                        dataSize: {},
+                        table: {}
+                    })
+
+                ).subscribe(
                     (data) => {
                         dispatch<typeof Actions.TileDataLoaded>({
                             name: Actions.TileDataLoaded.name,
