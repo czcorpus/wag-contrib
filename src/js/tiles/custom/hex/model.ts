@@ -17,13 +17,15 @@
  */
 
 import { IActionQueue, StatelessModel } from 'kombo';
+import { Actions } from './actions';
+import { Dict, List } from 'cnc-tskit';
+import { of as rxOf } from 'rxjs';
+
 import { IAppServices } from '../../../appServices';
 import { Backlink } from '../../../page/tile';
 import { RecognizedQueries, QueryMatch } from '../../../query';
 import { Data, mkEmptyData } from './common';
 import { Actions as GlobalActions } from '../../../models/actions';
-import { Actions } from './actions';
-import { Dict, List } from 'cnc-tskit';
 import { findCurrQueryMatch } from '../../../models/query';
 import { PoSValues } from '../../../postag';
 import { HexKspApi, KSPRequestArgs } from './api';
@@ -110,7 +112,26 @@ export class HexModel extends StatelessModel<HexModelState> {
                     lang: 'cz'
                 };
                 exportPosArgs(args, match);
-                this.api.call(args).subscribe({
+                (
+                    match && match.abs > 0 ?
+                        this.api.call(args) :
+                        rxOf({
+                            count: 0,
+                            size:{
+                                lemma: {},
+                                line: {},
+                                poem:{}
+                            },
+                            countY: {},
+                            table: [],
+                            sorting: {
+                                author: {},
+                                bookName: {},
+                                poemName:{}
+                            }
+                        })
+
+                ).subscribe({
                     next: data => {
                         dispatch<typeof Actions.TileDataLoaded>({
                             name: Actions.TileDataLoaded.name,
