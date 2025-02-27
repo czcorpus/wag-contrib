@@ -21,9 +21,9 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { IApiServices } from '../../../appServices.js';
-import { cachedAjax$, ResponseType } from '../../../page/ajax.js';
+import { ajax$, ResponseType } from '../../../page/ajax.js';
 import { PoSValues } from '../../../postag.js';
-import { DataApi, HTTPHeaders, IAsyncKeyValueStore } from '../../../types.js';
+import { DataApi, HTTPHeaders } from '../../../types.js';
 import { Data } from './common.js';
 
 
@@ -108,21 +108,18 @@ function transformDictKeys<T>(data:{[k:number]:T}):{[k:string]:T} {
  */
 export class HexKspApi implements DataApi<KSPRequestArgs, Data> {
 
-    private readonly cache:IAsyncKeyValueStore;
-
     private readonly apiURL:string;
 
     private readonly customHeaders:HTTPHeaders;
 
 
-    constructor(cache:IAsyncKeyValueStore, apiURL:string, apiServices:IApiServices) {
+    constructor(apiURL:string, apiServices:IApiServices) {
         this.apiURL = apiURL;
         this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
-        this.cache = cache;
     }
 
     call(args:KSPRequestArgs):Observable<Data> {
-        return cachedAjax$<string>(this.cache)(
+        return ajax$<string>(
             HTTP.Method.GET,
             this.apiURL,
             args,
@@ -130,17 +127,17 @@ export class HexKspApi implements DataApi<KSPRequestArgs, Data> {
                 responseType: ResponseType.TEXT
             }
         ).pipe(
-            map(
-                resp => {
+            map<string, HTTPResponse>(
+                (resp:string) => {
                     const srch = /var hex = (\{.+\});/.exec(resp);
                     if (srch) {
-                        return JSON.parse(srch[1]) as HTTPResponse;
+                        return JSON.parse(srch[1]);
                     }
-                    return null;
+                    return JSON.parse(resp);
                 }
             ),
             map(
-                resp => ({
+                (resp:HTTPResponse) => ({
                     count: resp.count,
                     size: {
                         lemma: pipe(

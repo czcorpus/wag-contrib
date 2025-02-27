@@ -18,10 +18,10 @@
 
 import { HTTP } from 'cnc-tskit';
 import { Observable, of as rxOf } from 'rxjs';
-import { IApiServices } from '../../../appServices';
-import { cachedAjax$ } from '../../../page/ajax';
-import { ResourceApi, SourceDetails, HTTPHeaders, IAsyncKeyValueStore } from '../../../types';
-import { Data } from './common';
+import { IApiServices } from '../../../appServices.js';
+import { ajax$ } from '../../../page/ajax.js';
+import { ResourceApi, SourceDetails, HTTPHeaders } from '../../../types.js';
+import { Data } from './common.js';
 
 
 export interface UjcLGuideRequestArgs {
@@ -32,8 +32,6 @@ export interface UjcLGuideRequestArgs {
 
 export class UjcLGuideApi implements ResourceApi<UjcLGuideRequestArgs, Data> {
 
-    private readonly cache:IAsyncKeyValueStore;
-
     private readonly apiURL:string;
 
     private readonly customHeaders:HTTPHeaders;
@@ -41,15 +39,14 @@ export class UjcLGuideApi implements ResourceApi<UjcLGuideRequestArgs, Data> {
     private readonly apiServices:IApiServices;
 
 
-    constructor(cache:IAsyncKeyValueStore, apiURL:string, apiServices:IApiServices) {
+    constructor(apiURL:string, apiServices:IApiServices) {
         this.apiURL = apiURL;
         this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
-        this.cache = cache;
         this.apiServices = apiServices;
     }
 
     call(args:UjcLGuideRequestArgs):Observable<Data> {
-        return cachedAjax$<Data>(this.cache)(
+        return ajax$<Data>(
             HTTP.Method.GET,
             this.apiURL,
             args,

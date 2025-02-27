@@ -19,11 +19,11 @@
 import { List } from 'cnc-tskit';
 import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
 import * as React from 'react';
-import { Theme } from '../../../page/theme';
-import { CoreTileComponentProps, TileComponent } from '../../../page/tile';
-import { GlobalComponents } from '../../../views/common';
-import { UjcPSJCModel, UjcPSJCModelState } from './model';
-import * as S from './style';
+import { Theme } from '../../../page/theme.js';
+import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
+import { GlobalComponents } from '../../../views/common.js';
+import { UjcPSJCModel, UjcPSJCModelState } from './model.js';
+import * as S from './style.js';
 
 
 export function init(

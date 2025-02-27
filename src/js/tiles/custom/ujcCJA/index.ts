@@ -17,14 +17,14 @@
  */
 import { IActionDispatcher } from 'kombo';
 
-import { IAppServices } from '../../../appServices';
-import { QueryType } from '../../../query/index';
-import { init as viewInit } from './views';
+import { IAppServices } from '../../../appServices.js';
+import { QueryType } from '../../../query/index.js';
+import { init as viewInit } from './views.js';
 import { TileConf, ITileProvider, TileComponent, TileFactory, TileFactoryArgs,
-    DEFAULT_ALT_VIEW_ICON, ITileReloader, AltViewIconProps } from '../../../page/tile';
-import { UjcCJAModel } from './model';
-import { UjcCJAApi } from './api';
-import { createEmptyData } from './common';
+    DEFAULT_ALT_VIEW_ICON, ITileReloader, AltViewIconProps } from '../../../page/tile.js';
+import { UjcCJAModel } from './model.js';
+import { UjcCJAApi } from './api.js';
+import { createEmptyData } from './common.js';
 
 
 export interface UjcCJAConf extends TileConf {
@@ -50,14 +50,14 @@ export class UjcCJATile implements ITileProvider {
     private view:TileComponent;
 
     constructor({
-        tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy, cache,
+        tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
         queryMatches}:TileFactoryArgs<UjcCJAConf>
     ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.api = new UjcCJAApi(cache, conf.apiURL, appServices);
+        this.api = new UjcCJAApi(conf.apiURL, appServices);
         this.model = new UjcCJAModel({
             dispatcher,
             appServices,

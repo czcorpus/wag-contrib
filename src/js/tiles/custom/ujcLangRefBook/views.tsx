@@ -19,13 +19,13 @@
 import { Dict, List, pipe } from 'cnc-tskit';
 import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
 import * as React from 'react';
-import { Theme } from '../../../page/theme';
-import { CoreTileComponentProps, TileComponent } from '../../../page/tile';
-import { GlobalComponents } from '../../../views/common';
-import { Actions } from './actions';
-import { CaseData, ComparisonData, ConjugationData } from './common';
-import { UjcLGuideModel, UjcLGuideModelState } from './model';
-import * as S from './style';
+import { Theme } from '../../../page/theme.js';
+import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
+import { GlobalComponents } from '../../../views/common/index.js';
+import { Actions } from './actions.js';
+import { CaseData, ComparisonData, ConjugationData } from './common.js';
+import { UjcLGuideModel, UjcLGuideModelState } from './model.js';
+import * as S from './style.js';
 
 
 export function init(

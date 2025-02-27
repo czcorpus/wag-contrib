@@ -17,15 +17,15 @@
  */
 import { IActionDispatcher } from 'kombo';
 
-import { IAppServices } from '../../../appServices';
-import { QueryType } from '../../../query/index';
-import { init as viewInit } from './views';
+import { IAppServices } from '../../../appServices.js';
+import { QueryType } from '../../../query/index.js';
+import { init as viewInit } from './views.js';
 import {
     TileConf, ITileProvider, TileComponent, TileFactory,
-    TileFactoryArgs, ITileReloader, DEFAULT_ALT_VIEW_ICON, AltViewIconProps } from '../../../page/tile';
-import { UjcDictionaryModel } from './model';
-import { UjcDictionaryApi } from './api';
-import { createEmptyData } from './common';
+    TileFactoryArgs, ITileReloader, DEFAULT_ALT_VIEW_ICON, AltViewIconProps } from '../../../page/tile.js';
+import { UjcDictionaryModel } from './model.js';
+import { UjcDictionaryApi } from './api.js';
+import { createEmptyData } from './common.js';
 
 
 export interface UjcDictionaryConf extends TileConf {
@@ -52,14 +52,14 @@ export class UjcDictionaryTile implements ITileProvider {
     private view:TileComponent;
 
     constructor({
-        tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy, cache,
+        tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
         queryMatches}:TileFactoryArgs<UjcDictionaryConf>
     ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.api = new UjcDictionaryApi(cache, conf.apiURL, appServices);
+        this.api = new UjcDictionaryApi(conf.apiURL, appServices);
         this.model = new UjcDictionaryModel({
             dispatcher,
             appServices,

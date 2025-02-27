@@ -20,8 +20,8 @@ import { Dict, HTTP, List, pipe, tuple } from 'cnc-tskit';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { IApiServices } from '../../../appServices.js';
-import { cachedAjax$, ResponseType } from '../../../page/ajax.js';
-import { DataApi, HTTPHeaders, IAsyncKeyValueStore } from '../../../types.js';
+import { ajax$, ResponseType } from '../../../page/ajax.js';
+import { DataApi, HTTPHeaders } from '../../../types.js';
 import { Data, DataTableItem } from './common.js';
 
 export interface RequestArgs {
@@ -68,21 +68,18 @@ export interface HTTPResponse {
 
 export class GunstickApi implements DataApi<RequestArgs, Data> {
 
-    private readonly cache:IAsyncKeyValueStore;
-
     private readonly apiURL:string;
 
     private readonly customHeaders:HTTPHeaders;
 
 
-    constructor(cache:IAsyncKeyValueStore, apiURL:string, apiServices:IApiServices) {
+    constructor(apiURL:string, apiServices:IApiServices) {
         this.apiURL = apiURL;
         this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
-        this.cache = cache;
     }
 
     call(args:RequestArgs):Observable<Data> {
-        return cachedAjax$<HTTPResponse>(this.cache)(
+        return ajax$<HTTPResponse>(
             HTTP.Method.GET,
             this.apiURL,
             // TODO: Gunstick API currently cannot deal with y1, y2
@@ -140,21 +137,18 @@ export class GunstickApi implements DataApi<RequestArgs, Data> {
  */
 export class GunstickKspApi implements DataApi<KSPRequestArgs, Data> {
 
-    private readonly cache:IAsyncKeyValueStore;
-
     private readonly apiURL:string;
 
     private readonly customHeaders:HTTPHeaders;
 
 
-    constructor(cache:IAsyncKeyValueStore, apiURL:string, apiServices:IApiServices) {
+    constructor(apiURL:string, apiServices:IApiServices) {
         this.apiURL = apiURL;
         this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
-        this.cache = cache;
     }
 
     call(args:KSPRequestArgs):Observable<Data> {
-        return cachedAjax$<string>(this.cache)(
+        return ajax$<string>(
             HTTP.Method.GET,
             this.apiURL,
             args,

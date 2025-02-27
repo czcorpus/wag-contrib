@@ -17,16 +17,16 @@
  */
 
 import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
-import { IAppServices } from '../../../appServices';
-import { Backlink, BacklinkWithArgs } from '../../../page/tile';
-import { RecognizedQueries } from '../../../query';
-import { createEmptyData, DataStructure } from './common';
-import { Actions as GlobalActions } from '../../../models/actions';
-import { Actions } from './actions';
+import { IAppServices } from '../../../appServices.js';
+import { Backlink, BacklinkWithArgs } from '../../../page/tile.js';
+import { RecognizedQueries } from '../../../query.js';
+import { createEmptyData, DataStructure } from './common.js';
+import { Actions as GlobalActions } from '../../../models/actions.js';
+import { Actions } from './actions.js';
 import { List, HTTP } from 'cnc-tskit';
-import { isWebDelegateApi } from '../../../types';
-import { findCurrQueryMatch } from '../../../models/query';
-import { UjcPSJCArgs, UjcPSJCApi } from './api';
+import { isWebDelegateApi } from '../../../types.js';
+import { findCurrQueryMatch } from '../../../models/query.js';
+import { UjcPSJCArgs, UjcPSJCApi } from './api.js';
 
 
 export interface UjcPSJCModelState {

@@ -17,15 +17,15 @@
  */
 import { IActionDispatcher } from 'kombo';
 
-import { IAppServices } from '../../../appServices';
-import { QueryType } from '../../../query/index';
-import { init as viewInit } from './views';
+import { IAppServices } from '../../../appServices.js';
+import { QueryType } from '../../../query/index.js';
+import { init as viewInit } from './views.js';
 import {
     TileConf, ITileProvider, TileComponent, TileFactory,
-    TileFactoryArgs, DEFAULT_ALT_VIEW_ICON, ITileReloader, AltViewIconProps } from '../../../page/tile';
-import { UjcKLAModel } from './model';
-import { UjcKLAApi } from './api';
-import { createEmptyData } from './common';
+    TileFactoryArgs, DEFAULT_ALT_VIEW_ICON, ITileReloader, AltViewIconProps } from '../../../page/tile.js';
+import { UjcKLAModel } from './model.js';
+import { UjcKLAApi } from './api.js';
+import { createEmptyData } from './common.js';
 
 
 export interface UjcKLAConf extends TileConf {
@@ -52,14 +52,14 @@ export class UjcKLATile implements ITileProvider {
     private view:TileComponent;
 
     constructor({
-        tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy, cache,
+        tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
         queryMatches}:TileFactoryArgs<UjcKLAConf>
     ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.api = new UjcKLAApi(cache, conf.apiURL, appServices);
+        this.api = new UjcKLAApi(conf.apiURL, appServices);
         this.model = new UjcKLAModel({
             dispatcher,
             appServices,

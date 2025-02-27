@@ -18,10 +18,10 @@
 
 import { HTTP } from 'cnc-tskit';
 import { Observable, of as rxOf } from 'rxjs';
-import { IApiServices } from '../../../appServices';
-import { cachedAjax$ } from '../../../page/ajax';
-import { ResourceApi, SourceDetails, HTTPHeaders, IAsyncKeyValueStore } from '../../../types';
-import { DataStructure } from './common';
+import { IApiServices } from '../../../appServices.js';
+import { ajax$ } from '../../../page/ajax.js';
+import { ResourceApi, SourceDetails, HTTPHeaders } from '../../../types.js';
+import { DataStructure } from './common.js';
 
 
 export interface UjcKLAArgs {
@@ -32,8 +32,6 @@ export interface UjcKLAArgs {
 
 export class UjcKLAApi implements ResourceApi<UjcKLAArgs, DataStructure> {
 
-    private readonly cache:IAsyncKeyValueStore;
-
     private readonly apiURL:string;
 
     private readonly customHeaders:HTTPHeaders;
@@ -41,15 +39,14 @@ export class UjcKLAApi implements ResourceApi<UjcKLAArgs, DataStructure> {
     private readonly apiServices:IApiServices;
 
 
-    constructor(cache:IAsyncKeyValueStore, apiURL:string, apiServices:IApiServices) {
+    constructor(apiURL:string, apiServices:IApiServices) {
         this.apiURL = apiURL;
         this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
-        this.cache = cache;
         this.apiServices = apiServices;
     }
 
     call(args:UjcKLAArgs):Observable<DataStructure> {
-        return cachedAjax$<DataStructure>(this.cache)(
+        return ajax$<DataStructure>(
             HTTP.Method.GET,
             this.apiURL,
             args,
