@@ -118,6 +118,10 @@ export class UjcLangRefBookTile implements ITileProvider {
         return false;
     }
 
+    supportsSVGFigureSave():boolean {
+        return false;
+    }
+
     registerReloadModel(model:ITileReloader):boolean {
         model.registerModel(this, this.model);
         return true;
