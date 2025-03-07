@@ -85,7 +85,7 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
             (state, action, dispatch) => {
                 const currMatch = findCurrQueryMatch(List.head(queryMatches));
                 (currMatch && currMatch.abs > 0 ?
-                    this.api.call({
+                    this.api.call(this.tileId, {
                         q: findCurrQueryMatch(List.head(queryMatches)).lemma,
                         unit: 'lemma',
                         src: 'all',
@@ -100,8 +100,8 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
                         table: {}
                     })
 
-                ).subscribe(
-                    (data) => {
+                ).subscribe({
+                    next: (data) => {
                         dispatch<typeof Actions.TileDataLoaded>({
                             name: Actions.TileDataLoaded.name,
                             payload: {
@@ -111,7 +111,7 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
                             }
                         });
                     },
-                    (error) => {
+                    error: (error) => {
                         console.error(error);
                         dispatch<typeof Actions.TileDataLoaded>({
                             name: Actions.TileDataLoaded.name,
@@ -123,7 +123,7 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
                             }
                         });
                     }
-                );
+                });
             }
         );
         this.addActionHandler<typeof Actions.TileDataLoaded>(

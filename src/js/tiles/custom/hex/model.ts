@@ -114,7 +114,7 @@ export class HexModel extends StatelessModel<HexModelState> {
                 exportPosArgs(args, match);
                 (
                     match && match.abs > 0 ?
-                        this.api.call(args) :
+                        this.api.call(tileId, args) :
                         rxOf({
                             count: 0,
                             size:{
