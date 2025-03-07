@@ -72,18 +72,35 @@ export class GunstickApi implements DataApi<RequestArgs, Data> {
 
     private readonly customHeaders:HTTPHeaders;
 
+    protected readonly useDataStream:boolean;
 
-    constructor(apiURL:string, apiServices:IApiServices) {
+    private readonly apiServices:IApiServices;
+
+
+    constructor(apiURL:string, useDataStream:boolean, apiServices:IApiServices) {
         this.apiURL = apiURL;
         this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
+        this.useDataStream = useDataStream;
+        this.apiServices = apiServices;
     }
 
-    call(args:RequestArgs):Observable<Data> {
-        return ajax$<HTTPResponse>(
-            HTTP.Method.GET,
-            this.apiURL,
-            // TODO: Gunstick API currently cannot deal with y1, y2
-            {...args, y1: undefined, y2: undefined}
+    call(tileId:number, args:RequestArgs):Observable<Data> {
+        return (
+            this.useDataStream ?
+            this.apiServices.dataStreaming().registerTileRequest<HTTPResponse>({
+                    tileId,
+                    method: HTTP.Method.GET,
+                    url: this.apiURL,
+                    body: {...args, y1: undefined, y2: undefined},
+                    contentType: 'application/json',
+                    base64EncodeResult: false
+            })
+            : ajax$<HTTPResponse>(
+                HTTP.Method.GET,
+                this.apiURL,
+                // TODO: Gunstick API currently cannot deal with y1, y2
+                {...args, y1: undefined, y2: undefined}
+            )
         ).pipe(
             map(
                 resp => ({
@@ -141,13 +158,16 @@ export class GunstickKspApi implements DataApi<KSPRequestArgs, Data> {
 
     private readonly customHeaders:HTTPHeaders;
 
+    protected readonly useDataStream:boolean;
 
-    constructor(apiURL:string, apiServices:IApiServices) {
+
+    constructor(apiURL:string, useDataStream:boolean, apiServices:IApiServices) {
         this.apiURL = apiURL;
         this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
+        this.useDataStream = useDataStream;
     }
 
-    call(args:KSPRequestArgs):Observable<Data> {
+    call(tileId:number, args:KSPRequestArgs):Observable<Data> {
         return ajax$<string>(
             HTTP.Method.GET,
             this.apiURL,

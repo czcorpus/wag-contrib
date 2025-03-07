@@ -61,13 +61,13 @@ export class HexTile implements ITileProvider {
 
     constructor({
         tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
-        queryMatches, domain1}:TileFactoryArgs<HexTileConf>
+        queryMatches, useDataStream, domain1}:TileFactoryArgs<HexTileConf>
     ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.api = new HexKspApi(conf.apiURL, appServices);
+        this.api = new HexKspApi(conf.apiURL, useDataStream, appServices);
         this.model = new HexModel({
             dispatcher,
             appServices,

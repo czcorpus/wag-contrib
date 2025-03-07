@@ -112,20 +112,37 @@ export class HexKspApi implements DataApi<KSPRequestArgs, Data> {
 
     private readonly customHeaders:HTTPHeaders;
 
+    protected readonly useDataStream:boolean;
 
-    constructor(apiURL:string, apiServices:IApiServices) {
+    protected apiServices:IApiServices;
+
+
+    constructor(apiURL:string, useDataStream:boolean, apiServices:IApiServices) {
         this.apiURL = apiURL;
+        this.useDataStream = useDataStream;
+        this.apiServices = apiServices;
         this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
     }
 
-    call(args:KSPRequestArgs):Observable<Data> {
-        return ajax$<string>(
-            HTTP.Method.GET,
-            this.apiURL,
-            args,
-            {
-                responseType: ResponseType.TEXT
-            }
+    call(tileId:number, args:KSPRequestArgs):Observable<Data> {
+        return (
+            this.useDataStream ?
+                this.apiServices.dataStreaming().registerTileRequest<string>({
+                        tileId,
+                        method: HTTP.Method.GET,
+                        url: this.apiURL,
+                        body: args,
+                        contentType: 'text/plain',
+                        base64EncodeResult: true
+                }) :
+                ajax$<string>(
+                    HTTP.Method.GET,
+                    this.apiURL,
+                    args,
+                    {
+                        responseType: ResponseType.TEXT
+                    }
+                )
         ).pipe(
             map<string, HTTPResponse>(
                 (resp:string) => {
