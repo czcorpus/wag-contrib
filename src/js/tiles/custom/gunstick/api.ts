@@ -84,17 +84,20 @@ export class GunstickApi implements DataApi<RequestArgs, Data> {
         this.apiServices = apiServices;
     }
 
-    call(tileId:number, args:RequestArgs):Observable<Data> {
+    call(tileId:number, multicastRequest:boolean, args:RequestArgs):Observable<Data> {
         return (
             this.useDataStream ?
-            this.apiServices.dataStreaming().registerTileRequest<HTTPResponse>({
+            this.apiServices.dataStreaming().registerTileRequest<HTTPResponse>(
+                multicastRequest,
+                {
                     tileId,
                     method: HTTP.Method.GET,
                     url: this.apiURL,
                     body: {...args, y1: undefined, y2: undefined},
                     contentType: 'application/json',
                     base64EncodeResult: false
-            })
+                }
+            )
             : ajax$<HTTPResponse>(
                 HTTP.Method.GET,
                 this.apiURL,
@@ -167,7 +170,7 @@ export class GunstickKspApi implements DataApi<KSPRequestArgs, Data> {
         this.useDataStream = useDataStream;
     }
 
-    call(tileId:number, args:KSPRequestArgs):Observable<Data> {
+    call(tileId:number, multicastRequest:boolean, args:KSPRequestArgs):Observable<Data> {
         return ajax$<string>(
             HTTP.Method.GET,
             this.apiURL,
