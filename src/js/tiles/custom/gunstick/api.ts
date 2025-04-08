@@ -84,7 +84,7 @@ export class GunstickApi implements DataApi<RequestArgs, Data> {
         this.apiServices = apiServices;
     }
 
-    call(tileId:number, multicastRequest:boolean, args:RequestArgs):Observable<Data> {
+    call(tileId:number, multicastRequest:boolean, args:RequestArgs|null):Observable<Data> {
         return (
             this.useDataStream ?
             this.apiServices.dataStreaming().registerTileRequest<HTTPResponse>(
@@ -92,11 +92,22 @@ export class GunstickApi implements DataApi<RequestArgs, Data> {
                 {
                     tileId,
                     method: HTTP.Method.GET,
-                    url: this.apiURL,
+                    url: args ? this.apiURL : '',
                     body: {...args, y1: undefined, y2: undefined},
                     contentType: 'application/json',
                     base64EncodeResult: false
                 }
+            ).pipe(
+                map(
+                    resp => resp ?
+                        resp :
+                        {
+                            count: 0,
+                            countRY: {},
+                            dataSize: {},
+                            table:{}
+                        }
+                )
             )
             : ajax$<HTTPResponse>(
                 HTTP.Method.GET,

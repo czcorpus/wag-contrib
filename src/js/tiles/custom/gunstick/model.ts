@@ -22,12 +22,11 @@ import { IActionQueue, StatelessModel } from 'kombo';
 
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
-import { RecognizedQueries } from '../../../query/index.js';
+import { RecognizedQueries, findCurrQueryMatch, testIsDictMatch } from '../../../query/index.js';
 import { KSPRequestArgs } from './api.js';
 import { Data, mkEmptyData } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
-import { findCurrQueryMatch } from '../../../models/query.js';
 import { DataApi } from '../../../types.js';
 
 export interface GunstickModelState {
@@ -75,8 +74,8 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
         this.api = api;
 
 
-        this.addActionHandler<typeof GlobalActions.RequestQueryResponse>(
-            GlobalActions.RequestQueryResponse.name,
+        this.addActionHandler(
+            GlobalActions.RequestQueryResponse,
             (state, action) => {
                 state.isBusy = true;
                 state.error = null;
@@ -84,22 +83,19 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
             },
             (state, action, dispatch) => {
                 const currMatch = findCurrQueryMatch(List.head(queryMatches));
-                (currMatch && currMatch.abs > 0 ?
-                    this.api.call(this.tileId, true, {
-                        q: findCurrQueryMatch(List.head(queryMatches)).lemma,
-                        unit: 'lemma',
-                        src: 'all',
-                        lang: 'cz',
-                        y1: state.y1,
-                        y2: state.y2
-                    }) :
-                    rxOf({
-                        count: 0,
-                        countRY: {},
-                        dataSize: {},
-                        table: {}
-                    })
-
+                this.api.call(
+                    this.tileId,
+                    true,
+                    testIsDictMatch(currMatch) ?
+                        {
+                            q: currMatch.lemma,
+                            unit: 'lemma',
+                            src: 'all',
+                            lang: 'cz',
+                            y1: state.y1,
+                            y2: state.y2
+                        } :
+                        null
                 ).subscribe({
                     next: (data) => {
                         dispatch<typeof Actions.TileDataLoaded>({
