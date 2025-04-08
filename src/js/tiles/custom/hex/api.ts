@@ -157,7 +157,6 @@ export class HexKspApi implements DataApi<KSPRequestArgs, Data> {
         ).pipe(
             map<string, HTTPResponse>(
                 (resp:string) => {
-                    console.log('resp = ', resp)
                     const srch = /var hex = (\{.+\});/.exec(resp);
                     if (srch) {
                         return JSON.parse(srch[1]);
