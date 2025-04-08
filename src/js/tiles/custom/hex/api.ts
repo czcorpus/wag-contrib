@@ -18,7 +18,7 @@
 
 import { Dict, HTTP, List, pipe } from 'cnc-tskit';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 
 import { IApiServices } from '../../../appServices.js';
 import { ajax$, ResponseType } from '../../../page/ajax.js';
@@ -124,7 +124,8 @@ export class HexKspApi implements DataApi<KSPRequestArgs, Data> {
         this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
     }
 
-    call(tileId:number, multicastRequest:boolean, args:KSPRequestArgs):Observable<Data> {
+    call(tileId:number, multicastRequest:boolean, args:KSPRequestArgs|null):Observable<Data> {
+
         return (
             this.useDataStream ?
                 this.apiServices.dataStreaming().registerTileRequest<string>(
@@ -132,11 +133,18 @@ export class HexKspApi implements DataApi<KSPRequestArgs, Data> {
                     {
                         tileId,
                         method: HTTP.Method.GET,
-                        url: this.apiURL,
+                        url: args ? this.apiURL : '',
                         body: args,
                         contentType: 'text/plain',
                         base64EncodeResult: true
                     }
+                ).pipe(
+                    map(
+                        resp => resp ?
+                            resp :
+                            // here we fake an empty response from the server
+                            'var hex = { "size": 0, "line": {}, "poem": {}, "table": [], "sorting": {} };'
+                    )
                 ) :
                 ajax$<string>(
                     HTTP.Method.GET,
@@ -149,6 +157,7 @@ export class HexKspApi implements DataApi<KSPRequestArgs, Data> {
         ).pipe(
             map<string, HTTPResponse>(
                 (resp:string) => {
+                    console.log('resp = ', resp)
                     const srch = /var hex = (\{.+\});/.exec(resp);
                     if (srch) {
                         return JSON.parse(srch[1]);

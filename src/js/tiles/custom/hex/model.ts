@@ -22,11 +22,10 @@ import { of as rxOf } from 'rxjs';
 
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
-import { RecognizedQueries, QueryMatch } from '../../../query/index.js';
+import { RecognizedQueries, QueryMatch, findCurrQueryMatch, testIsDictMatch } from '../../../query/index.js';
 import { Data, mkEmptyData } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
-import { findCurrQueryMatch } from '../../../models/query.js';
 import { PoSValues } from '../../../postag.js';
 import { HexKspApi, KSPRequestArgs } from './api.js';
 
@@ -112,24 +111,11 @@ export class HexModel extends StatelessModel<HexModelState> {
                     lang: 'cz'
                 };
                 exportPosArgs(args, match);
-                (
-                    match && match.abs > 0 ?
-                        this.api.call(tileId, true, args) :
-                        rxOf({
-                            count: 0,
-                            size:{
-                                lemma: {},
-                                line: {},
-                                poem:{}
-                            },
-                            countY: {},
-                            table: [],
-                            sorting: {
-                                author: {},
-                                bookName: {},
-                                poemName:{}
-                            }
-                        })
+                const currMatch = findCurrQueryMatch(List.head(queryMatches));
+                this.api.call(
+                    tileId,
+                    true,
+                    testIsDictMatch(currMatch) ? args : null
 
                 ).subscribe({
                     next: data => {
