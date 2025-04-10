@@ -75,7 +75,6 @@ export class HexTile implements ITileProvider {
             queryMatches,
             tileId,
             queryDomain: domain1,
-            backlink: null, // TODO
             initState: {
                 isBusy: isBusy,
                 data: mkEmptyData(),

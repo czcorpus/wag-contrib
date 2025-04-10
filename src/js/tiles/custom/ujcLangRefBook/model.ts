@@ -18,14 +18,12 @@
 
 import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
-import { Backlink, BacklinkWithArgs } from '../../../page/tile.js';
-import { RecognizedQueries } from '../../../query/index.js';
+import { Backlink } from '../../../page/tile.js';
+import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
 import { Data, mkEmptyData } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
-import { List, HTTP } from 'cnc-tskit';
-import { isWebDelegateApi } from '../../../types.js';
-import { findCurrQueryMatch } from '../../../models/query.js';
+import { List } from 'cnc-tskit';
 import { UjcLGuideApi, UjcLGuideRequestArgs } from './api.js';
 
 
@@ -33,7 +31,7 @@ export interface UjcLGuideModelState {
     isBusy:boolean;
     data:Data;
     error:string;
-    backlinks:Array<BacklinkWithArgs<{}>>;
+    backlink:Backlink;
 }
 
 export interface UjcLGuideModelArgs {
@@ -43,7 +41,6 @@ export interface UjcLGuideModelArgs {
     api:UjcLGuideApi,
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
-    backlink:Backlink;
 }
 
 export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
@@ -54,16 +51,11 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
 
     private readonly appServices:IAppServices;
 
-    private readonly backlink:Backlink;
-
-
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, backlink}:UjcLGuideModelArgs) {
+    constructor({dispatcher, initState, api, tileId, appServices, queryMatches}:UjcLGuideModelArgs) {
         super(dispatcher, initState);
         this.tileId = tileId;
         this.appServices = appServices;
         this.api = api;
-        this.backlink = !backlink?.isAppUrl && isWebDelegateApi(this.api) ? this.api.getBackLink(backlink) : backlink;
-
 
         this.addActionHandler(
             GlobalActions.RequestQueryResponse,
@@ -72,11 +64,11 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
                 state.isBusy = true;
                 state.error = null;
                 state.data = {...mkEmptyData(), rawQuery: match.lemma || match.word};
-                state.backlinks = []
+                state.backlink = null;
             },
             (state, action, dispatch) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
-                this.loadData(dispatch, state, match.lemma || match.word, false);
+                this.loadData(dispatch, true, state, match.lemma || match.word, false);
             }
         );
 
@@ -92,33 +84,33 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
                 };
             },
             (state, action, dispatch) => {
-                this.loadData(dispatch, state, action.payload.id, true);
+                this.loadData(dispatch, false, state, action.payload.id, true);
             }
         );
 
-        this.addActionHandler(
+        this.addActionSubtypeHandler(
             Actions.TileDataLoaded,
+            action => action.payload.tileId === this.tileId,
             (state, action) => {
-                if (action.payload.tileId === this.tileId) {
-                    state.isBusy = false;
-                    if (action.error) {
-                        state.error = action.error.message;
+                state.isBusy = false;
+                if (action.error) {
+                    state.error = action.error.message;
 
-                    } else {
-                        state.data = action.payload.data;
-                        state.backlinks = [this.generateBacklink(state.data.rawQuery, state.data.isDirect)];
-                    }
+                } else {
+                    state.data = action.payload.data;
+                    state.backlink = this.api.getBacklink(0);
                 }
             }
         );
 
-        this.addActionHandler(
+        this.addActionSubtypeHandler(
             GlobalActions.GetSourceInfo,
-            (state, action) => {
-            },
+            action => action.payload.tileId === this.tileId,
+            null,
             (state, action, dispatch) => {
                 this.api.getSourceDescription(
                     this.tileId,
+                    false,
                     this.appServices.getISO639UILang(),
                     ''
                 ).subscribe({
@@ -141,23 +133,29 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
                 });
             }
         );
+
+        this.addActionSubtypeHandler(
+            GlobalActions.FollowBacklink,
+            action => action.payload.tileId === this.tileId,
+            null,
+            (state, action, dispatch) => {
+                const backlinkUrl = new URL('https://prirucka.ujc.cas.cz/');
+                if (state.data.isDirect) {
+                    backlinkUrl.searchParams.set('id', state.data.rawQuery);
+                } else {
+                    backlinkUrl.searchParams.set('slovo', state.data.rawQuery);
+                }
+                window.open(backlinkUrl.toString(), '_blank');
+            }
+        );
     }
 
-    private generateBacklink(ident:string, direct:boolean):BacklinkWithArgs<{id:string}|{slovo:string}> {
-        return {
-            url: 'https://prirucka.ujc.cas.cz/',
-            label: 'heslo v Internetové jazykové příručce',
-            method: HTTP.Method.GET,
-            args: direct ? {id: ident} : {slovo: ident}
-        };
-    }
-
-    private loadData(dispatch:SEDispatcher, state:UjcLGuideModelState, q:string, direct:boolean) {
+    private loadData(dispatch:SEDispatcher, multicastRequest:boolean, state:UjcLGuideModelState, q:string, direct:boolean) {
         const args:UjcLGuideRequestArgs = {
             q,
             direct: direct ? 1 : 0
         };
-        this.api.call(args).subscribe({
+        this.api.call(this.tileId, multicastRequest, args).subscribe({
             next: data => {
                 if (direct) {
                     data.alternatives = state.data.alternatives;

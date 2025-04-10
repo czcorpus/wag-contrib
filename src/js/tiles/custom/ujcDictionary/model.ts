@@ -18,15 +18,13 @@
 
 import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
-import { Backlink, BacklinkWithArgs } from '../../../page/tile.js';
-import { RecognizedQueries } from '../../../query.js';
+import { Backlink } from '../../../page/tile.js';
 import { createEmptyData, DataStructure } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
-import { List, HTTP } from 'cnc-tskit';
-import { isWebDelegateApi } from '../../../types.js';
-import { findCurrQueryMatch } from '../../../models/query.js';
+import { List } from 'cnc-tskit';
 import { UjcDictionaryArgs, UjcDictionaryApi } from './api.js';
+import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
 
 
 export interface UjcDictionaryModelState {
@@ -35,7 +33,7 @@ export interface UjcDictionaryModelState {
     data:DataStructure;
     maxItems:number;
     error:string;
-    backlinks:Array<BacklinkWithArgs<{}>>;
+    backlink:Backlink;
 }
 
 export interface UjcDictionaryModelArgs {
@@ -45,7 +43,6 @@ export interface UjcDictionaryModelArgs {
     api:UjcDictionaryApi,
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
-    backlink:Backlink;
 }
 
 export class UjcDictionaryModel extends StatelessModel<UjcDictionaryModelState> {
@@ -56,15 +53,11 @@ export class UjcDictionaryModel extends StatelessModel<UjcDictionaryModelState> 
 
     private readonly appServices:IAppServices;
 
-    private readonly backlink:Backlink;
-
-
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, backlink}:UjcDictionaryModelArgs) {
+    constructor({dispatcher, initState, api, tileId, appServices, queryMatches}:UjcDictionaryModelArgs) {
         super(dispatcher, initState);
         this.tileId = tileId;
         this.appServices = appServices;
         this.api = api;
-        this.backlink = !backlink?.isAppUrl && isWebDelegateApi(this.api) ? this.api.getBackLink(backlink) : backlink;
 
         this.addActionHandler(
             GlobalActions.RequestQueryResponse,
@@ -74,36 +67,36 @@ export class UjcDictionaryModel extends StatelessModel<UjcDictionaryModelState> 
                 state.isBusy = true;
                 state.error = null;
                 state.data = createEmptyData();
-                state.backlinks = [];
+                state.backlink = null;
             },
             (state, action, dispatch) => {
-                this.loadData(dispatch, state);
+                this.loadData(dispatch, true, state);
             }
         );
 
-        this.addActionHandler(
+        this.addActionSubtypeHandler(
             Actions.TileDataLoaded,
+            action => action.payload.tileId === this.tileId,
             (state, action) => {
-                if (action.payload.tileId === this.tileId) {
-                    state.isBusy = false;
-                    if (action.error) {
-                        state.error = action.error.message;
+                state.isBusy = false;
+                if (action.error) {
+                    state.error = action.error.message;
 
-                    } else {
-                        state.data = action.payload.data;
-                        state.backlinks = [this.generateBacklink(state.data.query)];
-                    }
+                } else {
+                    state.data = action.payload.data;
+                    state.backlink = this.api.getBacklink(0);
                 }
             }
         );
 
-        this.addActionHandler(
+        this.addActionSubtypeHandler(
             GlobalActions.GetSourceInfo,
-            (state, action) => {
-            },
+            action => action.payload.tileId === this.tileId,
+            null,
             (state, action, dispatch) => {
                 this.api.getSourceDescription(
                     this.tileId,
+                    false,
                     this.appServices.getISO639UILang(),
                     ''
                 ).subscribe({
@@ -126,22 +119,22 @@ export class UjcDictionaryModel extends StatelessModel<UjcDictionaryModelState> 
                 });
             }
         );
+
+        this.addActionSubtypeHandler(
+            GlobalActions.FollowBacklink,
+            action => action.payload.tileId === this.tileId,
+            null,
+            (state, action, dispatch) => {
+                window.open(`https://slovnikcestiny.cz/heslo/${state.data.query}/`, '_blank');
+            }
+        );
     }
 
-    private generateBacklink(ident:string):BacklinkWithArgs<{}> {
-        return {
-            url: `https://slovnikcestiny.cz/heslo/${ident}/`,
-            label: 'heslo v Akademickém slovníku současné češtiny',
-            method: HTTP.Method.GET,
-            args: {}
-        };
-    }
-
-    private loadData(dispatch:SEDispatcher, state:UjcDictionaryModelState) {
+    private loadData(dispatch:SEDispatcher, multicastRequest:boolean, state:UjcDictionaryModelState) {
         const args:UjcDictionaryArgs = {
             q: state.queries
         };
-        this.api.call(args).subscribe({
+        this.api.call(this.tileId, multicastRequest, args).subscribe({
             next: data => {
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,

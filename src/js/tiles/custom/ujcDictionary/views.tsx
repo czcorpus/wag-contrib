@@ -21,10 +21,10 @@ import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
 import * as React from 'react';
 import { Theme } from '../../../page/theme.js';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
-import { GlobalComponents } from '../../../views/common.js';
 import { DataItem } from './common.js';
 import { UjcDictionaryModel, UjcDictionaryModelState } from './model.js';
 import * as S from './style.js';
+import { GlobalComponents } from '../../../views/common/index.js';
 
 
 export function init(
@@ -89,7 +89,7 @@ export function init(
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
                 hasData={props.data.items.length > 0}
-                backlink={props.backlinks}
+                backlink={props.backlink}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'UJC'}}>

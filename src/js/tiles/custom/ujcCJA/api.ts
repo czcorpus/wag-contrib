@@ -22,6 +22,7 @@ import { IApiServices } from '../../../appServices.js';
 import { ajax$ } from '../../../page/ajax.js';
 import { ResourceApi, SourceDetails, HTTPHeaders } from '../../../types.js';
 import { DataStructure } from './common.js';
+import { Backlink } from '../../../page/tile.js';
 
 
 export interface UjcCJAArgs {
@@ -37,22 +38,21 @@ export class UjcCJAApi implements ResourceApi<UjcCJAArgs, DataStructure> {
 
     private readonly apiServices:IApiServices;
 
-
     constructor(apiURL:string, apiServices:IApiServices) {
         this.apiURL = apiURL;
         this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
         this.apiServices = apiServices;
     }
 
-    call(args:UjcCJAArgs):Observable<DataStructure> {
+    call(tileId:number, multicastRequest:boolean, queryArgs:UjcCJAArgs):Observable<DataStructure> {
         return ajax$<DataStructure>(
             HTTP.Method.GET,
             this.apiURL,
-            args,
+            queryArgs,
         );
     }
 
-    getSourceDescription(tileId:number, lang:string, corpname:string):Observable<SourceDetails> {
+    getSourceDescription(tileId:number, multicastRequest:boolean, lang:string, corpname:string):Observable<SourceDetails> {
         return rxOf({
             tileId,
             title: this.apiServices.importExternalMessage({
@@ -65,6 +65,13 @@ export class UjcCJAApi implements ResourceApi<UjcCJAArgs, DataStructure> {
             }),
             author: 'Ústav pro jazyk český AV ČR',
             href: 'https://ujc.avcr.cz/elektronicke-slovniky-a-zdroje/Cesky_jazykovy_atlas.html'
-        })
+        });
+    }
+
+    getBacklink(queryId:number):Backlink|null {
+        return {
+            queryId,
+            label: 'heslo v Českém jazykovém atlasu',
+        };
     }
 }

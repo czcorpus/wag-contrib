@@ -22,6 +22,7 @@ import { IApiServices } from '../../../appServices.js';
 import { ajax$ } from '../../../page/ajax.js';
 import { ResourceApi, SourceDetails, HTTPHeaders } from '../../../types.js';
 import { DataStructure } from './common.js';
+import { Backlink } from '../../../page/tile.js';
 
 
 export interface UjcKLAArgs {
@@ -45,15 +46,15 @@ export class UjcKLAApi implements ResourceApi<UjcKLAArgs, DataStructure> {
         this.apiServices = apiServices;
     }
 
-    call(args:UjcKLAArgs):Observable<DataStructure> {
+    call(tileId:number, multicastRequest:boolean, queryArgs:UjcKLAArgs):Observable<DataStructure> {
         return ajax$<DataStructure>(
             HTTP.Method.GET,
             this.apiURL,
-            args,
+            queryArgs,
         );
     }
 
-    getSourceDescription(tileId:number, lang:string, corpname:string):Observable<SourceDetails> {
+    getSourceDescription(tileId:number, multicastRequest:boolean, lang:string, corpname:string):Observable<SourceDetails> {
         return rxOf({
             tileId,
             title: this.apiServices.importExternalMessage({
@@ -67,5 +68,12 @@ export class UjcKLAApi implements ResourceApi<UjcKLAArgs, DataStructure> {
             author: 'Ústav pro jazyk český AV ČR',
             href: 'https://ujc.avcr.cz/elektronicke-slovniky-a-zdroje/kartoteka_lexikalniho_archivu.html'
         })
+    }
+
+    getBacklink(queryId:number):Backlink|null {
+        return {
+            queryId,
+            label: 'heslo v Kartotéce lexikálního archivu',
+        };
     }
 }

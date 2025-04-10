@@ -66,14 +66,13 @@ export class UjcDictionaryTile implements ITileProvider {
             api: this.api,
             queryMatches,
             tileId,
-            backlink: null,
             initState: {
                 isBusy: isBusy,
                 queries: [],
                 data: createEmptyData(),
                 maxItems: conf.maxItems,
                 error: null,
-                backlinks: []
+                backlink: null,
             }
         });
         this.label = appServices.importExternalMessage(conf.label || 'ujc_dict__main_label');

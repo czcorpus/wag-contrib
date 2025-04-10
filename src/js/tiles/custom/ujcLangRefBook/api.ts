@@ -22,6 +22,7 @@ import { IApiServices } from '../../../appServices.js';
 import { ajax$ } from '../../../page/ajax.js';
 import { ResourceApi, SourceDetails, HTTPHeaders } from '../../../types.js';
 import { Data } from './common.js';
+import { Backlink } from '../../../page/tile.js';
 
 
 export interface UjcLGuideRequestArgs {
@@ -38,22 +39,21 @@ export class UjcLGuideApi implements ResourceApi<UjcLGuideRequestArgs, Data> {
 
     private readonly apiServices:IApiServices;
 
-
     constructor(apiURL:string, apiServices:IApiServices) {
         this.apiURL = apiURL;
         this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
         this.apiServices = apiServices;
     }
 
-    call(args:UjcLGuideRequestArgs):Observable<Data> {
+    call(tileId:number, multicastRequest:boolean, queryArgs:UjcLGuideRequestArgs):Observable<Data> {
         return ajax$<Data>(
             HTTP.Method.GET,
             this.apiURL,
-            args,
+            queryArgs,
         )
     }
 
-    getSourceDescription(tileId:number, lang:string, corpname:string):Observable<SourceDetails> {
+    getSourceDescription(tileId:number, multicastRequest:boolean, lang:string, corpname:string):Observable<SourceDetails> {
         return rxOf({
             tileId,
             title: this.apiServices.importExternalMessage({
@@ -67,5 +67,12 @@ export class UjcLGuideApi implements ResourceApi<UjcLGuideRequestArgs, Data> {
             author: 'Ústav pro jazyk český AV ČR',
             href: 'https://prirucka.ujc.cas.cz/?id=_about'
         })
+    }
+
+    getBacklink(queryId:number):Backlink|null {
+        return {
+            queryId,
+            label: 'heslo v Internetové jazykové příručce',
+        };
     }
 }

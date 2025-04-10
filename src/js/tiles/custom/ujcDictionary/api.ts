@@ -22,6 +22,7 @@ import { IApiServices } from '../../../appServices.js';
 import { ajax$ } from '../../../page/ajax.js';
 import { ResourceApi, SourceDetails, HTTPHeaders } from '../../../types.js';
 import { DataStructure } from './common.js';
+import { Backlink } from '../../../page/tile.js';
 
 
 export interface UjcDictionaryArgs {
@@ -44,15 +45,15 @@ export class UjcDictionaryApi implements ResourceApi<UjcDictionaryArgs, DataStru
         this.apiServices = apiServices;
     }
 
-    call(args:UjcDictionaryArgs):Observable<DataStructure> {
+    call(tileId:number, multicastRequest:boolean, queryArgs:UjcDictionaryArgs):Observable<DataStructure> {
         return ajax$<DataStructure>(
             HTTP.Method.GET,
             this.apiURL,
-            args,
+            queryArgs,
         );
     }
 
-    getSourceDescription(tileId:number, lang:string, corpname:string):Observable<SourceDetails> {
+    getSourceDescription(tileId:number, multicastRequest:boolean, lang:string, corpname:string):Observable<SourceDetails> {
         return rxOf({
             tileId,
             title: this.apiServices.importExternalMessage({
@@ -66,5 +67,12 @@ export class UjcDictionaryApi implements ResourceApi<UjcDictionaryArgs, DataStru
             author: 'Ústav pro jazyk český AV ČR',
             href: 'https://slovnikcestiny.cz/o_slovniku.php'
         })
+    }
+
+    getBacklink(queryId:number):Backlink|null {
+        return {
+            queryId,
+            label: 'heslo v Akademickém slovníku současné češtiny',
+        };
     }
 }

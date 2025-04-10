@@ -65,7 +65,6 @@ export class UjcNeomatTile implements ITileProvider {
             api: this.api,
             queryMatches,
             tileId,
-            backlink: null,
             initState: {
                 isBusy: isBusy,
                 ident: '',
@@ -74,7 +73,7 @@ export class UjcNeomatTile implements ITileProvider {
                     entries: [],
                 },
                 error: null,
-                backlinks: []
+                backlink: null,
             }
         });
         this.label = appServices.importExternalMessage(conf.label || 'ujc_neomat__main_label');

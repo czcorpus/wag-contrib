@@ -36,7 +36,7 @@ function getYearIdxMapping(data:SummedSizes):Array<string>{
         Dict.values(),
         List.flatMap(v => Dict.keys(v)),
         List.unique(v => v),
-        List.sortedAlphaBy(v => v)
+        List.sortedAlphaBy(v => v),
     );
 }
 

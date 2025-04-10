@@ -18,15 +18,13 @@
 
 import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
-import { Backlink, BacklinkWithArgs } from '../../../page/tile.js';
-import { RecognizedQueries } from '../../../query.js';
+import { Backlink, BacklinkConf } from '../../../page/tile.js';
 import { createEmptyData, DataStructure } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
-import { List, HTTP, pipe, Dict, tuple } from 'cnc-tskit';
-import { isWebDelegateApi } from '../../../types.js';
-import { findCurrQueryMatch } from '../../../models/query.js';
+import { List } from 'cnc-tskit';
 import { UjcCJAArgs, UjcCJAApi } from './api.js';
+import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
 
 
 export interface UjcCJAModelState {
@@ -34,7 +32,7 @@ export interface UjcCJAModelState {
     ident:string;
     data:DataStructure;
     error:string;
-    backlinks:Array<BacklinkWithArgs<{}>>;
+    backlink:Backlink;
 }
 
 export interface UjcCJAModelArgs {
@@ -44,7 +42,6 @@ export interface UjcCJAModelArgs {
     api:UjcCJAApi,
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
-    backlink:Backlink;
 }
 
 export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
@@ -55,15 +52,11 @@ export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
 
     private readonly appServices:IAppServices;
 
-    private readonly backlink:Backlink;
-
-
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, backlink}:UjcCJAModelArgs) {
+    constructor({dispatcher, initState, api, tileId, appServices, queryMatches}:UjcCJAModelArgs) {
         super(dispatcher, initState);
         this.tileId = tileId;
         this.appServices = appServices;
         this.api = api;
-        this.backlink = !backlink?.isAppUrl && isWebDelegateApi(this.api) ? this.api.getBackLink(backlink) : backlink;
 
         this.addActionHandler(
             GlobalActions.RequestQueryResponse,
@@ -73,38 +66,38 @@ export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
                 state.isBusy = true;
                 state.error = null;
                 state.data = createEmptyData();
-                state.backlinks = [];
+                state.backlink = null;
             },
             (state, action, dispatch) => {
-                this.loadData(dispatch, state, state.ident);
+                this.loadData(dispatch, true, state, state.ident);
             }
         );
 
-        this.addActionHandler(
+        this.addActionSubtypeHandler(
             Actions.TileDataLoaded,
+            action => action.payload.tileId === this.tileId,
             (state, action) => {
-                if (action.payload.tileId === this.tileId) {
-                    state.isBusy = false;
-                    if (action.error) {
-                        state.error = action.error.message;
+                state.isBusy = false;
+                if (action.error) {
+                    state.error = action.error.message;
 
-                    } else {
-                        state.data = action.payload.data;
-                        state.backlinks = [this.generateBacklink(state, action.payload.data.backlink)];
-                    }
+                } else {
+                    state.data = action.payload.data;
+                    state.backlink = this.api.getBacklink(0);
                 }
             }
         );
 
-        this.addActionHandler(
+        this.addActionSubtypeHandler(
             GlobalActions.GetSourceInfo,
-            (state, action) => {
-            },
+            action => action.payload.tileId === this.tileId,
+            null,
             (state, action, dispatch) => {
                 this.api.getSourceDescription(
                     this.tileId,
+                    false,
                     this.appServices.getISO639UILang(),
-                    ''
+                    '',
                 ).subscribe({
                     next: (data) => {
                         dispatch({
@@ -119,40 +112,34 @@ export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
                         dispatch({
                             name: GlobalActions.GetSourceInfoDone.name,
                             error: err
-
                         });
                     }
                 });
             }
         );
-    }
 
-    private generateBacklink(state:UjcCJAModelState, url:string):BacklinkWithArgs<{}> {
-        const urlSplit = url.split("?");
-        const args = pipe(
-            urlSplit[1].split("&"),
-            List.map(v => {
-                const keyVal = v.split("=");
-                if (keyVal[0] == "hw" || keyVal[0] == "doklad") {
-                    return tuple(keyVal[0], state.ident);
+        this.addActionSubtypeHandler(
+            GlobalActions.FollowBacklink,
+            action => action.payload.tileId === this.tileId,
+            null,
+            (state, action, dispatch) => {
+                const backlinkUrl = URL.parse(state.data.backlink);
+                if (backlinkUrl.searchParams.has('hw')) {
+                    backlinkUrl.searchParams.set('hw', state.ident);
                 }
-                return tuple(keyVal[0], keyVal[1]);
-            }),
-            Dict.fromEntries(),
+                if (backlinkUrl.searchParams.has('doklad')) {
+                    backlinkUrl.searchParams.set('doklad', state.ident);
+                }
+                window.open(backlinkUrl.toString(), '_blank');
+            }
         );
-        return {
-            url: urlSplit[0],
-            label: 'heslo v Českém jazykovém atlasu',
-            method: HTTP.Method.GET,
-            args: args,
-        };
     }
 
-    private loadData(dispatch:SEDispatcher, state:UjcCJAModelState, q:string) {
+    private loadData(dispatch:SEDispatcher, multicastRequest:boolean, state:UjcCJAModelState, q:string) {
         const args:UjcCJAArgs = {
             q
         };
-        this.api.call(args).subscribe({
+        this.api.call(this.tileId, multicastRequest, args).subscribe({
             next: data => {
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
@@ -177,5 +164,4 @@ export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
             }
         });
     }
-
 }

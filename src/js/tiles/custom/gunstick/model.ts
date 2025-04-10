@@ -17,11 +17,9 @@
  */
 
 import { List } from 'cnc-tskit';
-import { of as rxOf } from 'rxjs';
 import { IActionQueue, StatelessModel } from 'kombo';
 
 import { IAppServices } from '../../../appServices.js';
-import { Backlink } from '../../../page/tile.js';
 import { RecognizedQueries, findCurrQueryMatch, testIsDictMatch } from '../../../query/index.js';
 import { KSPRequestArgs } from './api.js';
 import { Data, mkEmptyData } from './common.js';
@@ -49,7 +47,6 @@ export interface GunstickModelArgs {
     api:DataApi<KSPRequestArgs, Data>,
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
-    backlink:Backlink;
     queryDomain:string;
 }
 
@@ -66,7 +63,6 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
         tileId,
         appServices,
         queryMatches,
-        backlink,
         queryDomain}:GunstickModelArgs
     ) {
         super(dispatcher, initState);

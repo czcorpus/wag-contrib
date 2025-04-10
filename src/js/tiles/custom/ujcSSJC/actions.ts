@@ -17,8 +17,8 @@
  */
 
 import { Action } from 'kombo';
-import { Actions as GlobalActions } from '../../../models/actions';
-import { DataStructure } from './common';
+import { Actions as GlobalActions } from '../../../models/actions.js';
+import { DataStructure } from './common.js';
 
 
 export interface DataLoadedPayload {
