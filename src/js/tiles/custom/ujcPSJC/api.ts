@@ -22,6 +22,7 @@ import { IApiServices } from '../../../appServices.js';
 import { ajax$ } from '../../../page/ajax.js';
 import { ResourceApi, SourceDetails, HTTPHeaders } from '../../../types.js';
 import { DataStructure } from './common.js';
+import { Backlink } from '../../../page/tile.js';
 
 
 export interface UjcPSJCArgs {
@@ -44,15 +45,15 @@ export class UjcPSJCApi implements ResourceApi<UjcPSJCArgs, DataStructure> {
         this.apiServices = apiServices;
     }
 
-    call(args:UjcPSJCArgs):Observable<DataStructure> {
+    call(tileId:number, multicastRequest:boolean, queryArgs:UjcPSJCArgs):Observable<DataStructure> {
         return ajax$<DataStructure>(
             HTTP.Method.GET,
             this.apiURL,
-            args,
+            queryArgs,
         );
     }
 
-    getSourceDescription(tileId:number, lang:string, corpname:string):Observable<SourceDetails> {
+    getSourceDescription(tileId:number, multicastRequest:boolean, lang:string, corpname:string):Observable<SourceDetails> {
         return rxOf({
             tileId,
             title: this.apiServices.importExternalMessage({
@@ -66,5 +67,12 @@ export class UjcPSJCApi implements ResourceApi<UjcPSJCArgs, DataStructure> {
             author: 'Ústav pro jazyk český AV ČR',
             href: 'https://ujc.avcr.cz/elektronicke-slovniky-a-zdroje/Prirucni_slovik_jazyka_ceskeho.html'
         })
+    }
+
+    getBacklink(queryId:number):Backlink {
+        return {
+            queryId,
+            label: 'heslo v Příručním slovníku jazyka českého',
+        };
     }
 }

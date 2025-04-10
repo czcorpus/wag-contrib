@@ -18,15 +18,13 @@
 
 import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
-import { Backlink, BacklinkWithArgs } from '../../../page/tile.js';
-import { RecognizedQueries } from '../../../query.js';
+import { Backlink } from '../../../page/tile.js';
 import { createEmptyData, DataStructure } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
-import { List, HTTP } from 'cnc-tskit';
-import { isWebDelegateApi } from '../../../types.js';
-import { findCurrQueryMatch } from '../../../models/query.js';
+import { List } from 'cnc-tskit';
 import { UjcSSJCArgs, UjcSSJCApi } from './api.js';
+import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
 
 
 export interface UjcSSJCModelState {
@@ -34,7 +32,7 @@ export interface UjcSSJCModelState {
     queries:Array<string>;
     data:DataStructure;
     error:string;
-    backlinks:Array<BacklinkWithArgs<{}>>;
+    backlink:Backlink;
 }
 
 export interface UjcSSJCModelArgs {
@@ -44,7 +42,6 @@ export interface UjcSSJCModelArgs {
     api:UjcSSJCApi,
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
-    backlink:Backlink;
 }
 
 export class UjcSSJCModel extends StatelessModel<UjcSSJCModelState> {
@@ -55,57 +52,56 @@ export class UjcSSJCModel extends StatelessModel<UjcSSJCModelState> {
 
     private readonly appServices:IAppServices;
 
-    private readonly backlink:Backlink;
 
-
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, backlink}:UjcSSJCModelArgs) {
+    constructor({dispatcher, initState, api, tileId, appServices, queryMatches}:UjcSSJCModelArgs) {
         super(dispatcher, initState);
         this.tileId = tileId;
         this.appServices = appServices;
         this.api = api;
-        this.backlink = !backlink?.isAppUrl && isWebDelegateApi(this.api) ? this.api.getBackLink(backlink) : backlink;
 
         this.addActionHandler(
             GlobalActions.RequestQueryResponse,
             (state, action) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
                 state.queries = [match.word];
+                /* TODO
                 if (!match.isNonDict) {
                     state.queries.push(match.lemma)
                 };
+                */
                 state.isBusy = true;
                 state.error = null;
                 state.data = createEmptyData();
-                state.backlinks = [];
+                state.backlink = null;
             },
             (state, action, dispatch) => {
-                this.loadData(dispatch, state);
+                this.loadData(dispatch, true, state);
             }
         );
 
-        this.addActionHandler(
+        this.addActionSubtypeHandler(
             Actions.TileDataLoaded,
+            action => action.payload.tileId === this.tileId,
             (state, action) => {
-                if (action.payload.tileId === this.tileId) {
-                    state.isBusy = false;
-                    if (action.error) {
-                        state.error = action.error.message;
+                state.isBusy = false;
+                if (action.error) {
+                    state.error = action.error.message;
 
-                    } else {
-                        state.data = action.payload.data;
-                        state.backlinks = [this.generateBacklink(state.data.query)];
-                    }
+                } else {
+                    state.data = action.payload.data;
+                    state.backlink = this.api.getBacklink(0);
                 }
             }
         );
 
-        this.addActionHandler(
+        this.addActionSubtypeHandler(
             GlobalActions.GetSourceInfo,
-            (state, action) => {
-            },
+            action => action.payload.tileId === this.tileId,
+            null,
             (state, action, dispatch) => {
                 this.api.getSourceDescription(
                     this.tileId,
+                    false,
                     this.appServices.getISO639UILang(),
                     ''
                 ).subscribe({
@@ -128,27 +124,27 @@ export class UjcSSJCModel extends StatelessModel<UjcSSJCModelState> {
                 });
             }
         );
-    }
 
-    private generateBacklink(ident:string):BacklinkWithArgs<{}> {
-        return {
-            url: `https://ssjc.ujc.cas.cz/search.php`,
-            label: 'heslo ve Slovníku spisovného jazyka českého',
-            method: HTTP.Method.GET,
-            args: {
-                hledej: "Hledat",
-                heslo: ident,
-                where: "hesla",
-                hsubstr: "no",
+        this.addActionSubtypeHandler(
+            GlobalActions.FollowBacklink,
+            action => action.payload.tileId === this.tileId,
+            null,
+            (state, action, dispatch) => {
+                const backlinkUrl = new URL('https://ssjc.ujc.cas.cz/search.php');
+                backlinkUrl.searchParams.set('hledej', 'Hledat');
+                backlinkUrl.searchParams.set('heslo', state.data.query);
+                backlinkUrl.searchParams.set('where', 'hesla');
+                backlinkUrl.searchParams.set('hsubstr', 'no');
+                window.open(backlinkUrl.toString(), '_blank');
             }
-        };
+        );
     }
 
-    private loadData(dispatch:SEDispatcher, state:UjcSSJCModelState) {
+    private loadData(dispatch:SEDispatcher, multicastRequest:boolean, state:UjcSSJCModelState) {
         const args:UjcSSJCArgs = {
             q: state.queries
         };
-        this.api.call(args).subscribe({
+        this.api.call(this.tileId, multicastRequest, args).subscribe({
             next: data => {
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,

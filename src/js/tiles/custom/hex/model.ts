@@ -18,10 +18,8 @@
 
 import { IActionQueue, StatelessModel } from 'kombo';
 import { Dict, List } from 'cnc-tskit';
-import { of as rxOf } from 'rxjs';
 
 import { IAppServices } from '../../../appServices.js';
-import { Backlink } from '../../../page/tile.js';
 import { RecognizedQueries, QueryMatch, findCurrQueryMatch, testIsDictMatch } from '../../../query/index.js';
 import { Data, mkEmptyData } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
@@ -47,7 +45,6 @@ export interface HexModelArgs {
     api:HexKspApi,
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
-    backlink:Backlink;
     queryDomain:string;
 }
 
@@ -85,7 +82,7 @@ export class HexModel extends StatelessModel<HexModelState> {
 
     private readonly api:HexKspApi;
 
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, backlink, queryDomain}:HexModelArgs) {
+    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, queryDomain}:HexModelArgs) {
         super(dispatcher, initState);
         this.tileId = tileId;
         this.api = api;

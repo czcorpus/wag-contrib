@@ -187,7 +187,7 @@ export function init(
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
                 hasData={props.data !== null && !!props.data.heading}
-                backlink={props.backlinks}
+                backlink={props.backlink}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'UJC'}}>

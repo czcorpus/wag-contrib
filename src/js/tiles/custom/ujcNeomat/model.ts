@@ -18,15 +18,13 @@
 
 import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
-import { Backlink, BacklinkWithArgs } from '../../../page/tile.js';
-import { RecognizedQueries } from '../../../query.js';
+import { Backlink } from '../../../page/tile.js';
 import { DataStructure } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
-import { List, HTTP } from 'cnc-tskit';
-import { isWebDelegateApi } from '../../../types.js';
-import { findCurrQueryMatch } from '../../../models/query.js';
+import { List } from 'cnc-tskit';
 import { UjcNeomatArgs, UjcNeomatApi } from './api.js';
+import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
 
 
 export interface UjcNeomatModelState {
@@ -35,7 +33,7 @@ export interface UjcNeomatModelState {
     maxItems:number;
     data:DataStructure;
     error:string;
-    backlinks:Array<BacklinkWithArgs<{}>>;
+    backlink:Backlink;
 }
 
 export interface UjcNeomatModelArgs {
@@ -45,7 +43,6 @@ export interface UjcNeomatModelArgs {
     api:UjcNeomatApi,
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
-    backlink:Backlink;
 }
 
 export class UjcNeomatModel extends StatelessModel<UjcNeomatModelState> {
@@ -56,15 +53,11 @@ export class UjcNeomatModel extends StatelessModel<UjcNeomatModelState> {
 
     private readonly appServices:IAppServices;
 
-    private readonly backlink:Backlink;
-
-
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, backlink}:UjcNeomatModelArgs) {
+    constructor({dispatcher, initState, api, tileId, appServices, queryMatches}:UjcNeomatModelArgs) {
         super(dispatcher, initState);
         this.tileId = tileId;
         this.appServices = appServices;
         this.api = api;
-        this.backlink = !backlink?.isAppUrl && isWebDelegateApi(this.api) ? this.api.getBackLink(backlink) : backlink;
 
         this.addActionHandler(
             GlobalActions.RequestQueryResponse,
@@ -76,36 +69,36 @@ export class UjcNeomatModel extends StatelessModel<UjcNeomatModelState> {
                 state.data = {
                     entries: [],
                 }
-                state.backlinks = [];
+                state.backlink = null;
             },
             (state, action, dispatch) => {
-                this.loadData(dispatch, state, state.ident);
+                this.loadData(dispatch, true, state, state.ident);
             }
         );
 
-        this.addActionHandler(
+        this.addActionSubtypeHandler(
             Actions.TileDataLoaded,
+            action => action.payload.tileId === this.tileId,
             (state, action) => {
-                if (action.payload.tileId === this.tileId) {
-                    state.isBusy = false;
-                    if (action.error) {
-                        state.error = action.error.message;
+                state.isBusy = false;
+                if (action.error) {
+                    state.error = action.error.message;
 
-                    } else {
-                        state.data = action.payload.data;
-                        state.backlinks = [this.generateBacklink(state.ident)];
-                    }
+                } else {
+                    state.data = action.payload.data;
+                    state.backlink = this.api.getBacklink(0);
                 }
             }
         );
 
-        this.addActionHandler(
+        this.addActionSubtypeHandler(
             GlobalActions.GetSourceInfo,
-            (state, action) => {
-            },
+            action => action.payload.tileId === this.tileId,
+            null,
             (state, action, dispatch) => {
                 this.api.getSourceDescription(
                     this.tileId,
+                    false,
                     this.appServices.getISO639UILang(),
                     ''
                 ).subscribe({
@@ -128,28 +121,28 @@ export class UjcNeomatModel extends StatelessModel<UjcNeomatModelState> {
                 });
             }
         );
-    }
 
-    private generateBacklink(ident:string):BacklinkWithArgs<{}> {
-        return {
-            url: 'http://www.neologismy.cz/index.php',
-            label: 'heslo v Neomatu',
-            method: HTTP.Method.GET,
-            args: {
-                retezec: ident,
-                nove_hledani: 1,
-                button: "Hledat",
-                prijimam: 1,
+        this.addActionSubtypeHandler(
+            GlobalActions.FollowBacklink,
+            action => action.payload.tileId === this.tileId,
+            null,
+            (state, action, dispatch) => {
+                const backlinkUrl = new URL('http://www.neologismy.cz/index.php');
+                backlinkUrl.searchParams.set('retezec', state.ident);
+                backlinkUrl.searchParams.set('nove_hledani', '1');
+                backlinkUrl.searchParams.set('button', 'Hledat');
+                backlinkUrl.searchParams.set('prijimam', '1');
+                window.open(backlinkUrl.toString(), '_blank');
             }
-        };
+        );
     }
 
-    private loadData(dispatch:SEDispatcher, state:UjcNeomatModelState, q:string) {
+    private loadData(dispatch:SEDispatcher, multicastRequest:boolean, state:UjcNeomatModelState, q:string) {
         const args:UjcNeomatArgs = {
             q,
             maxItems: state.maxItems,
         };
-        this.api.call(args).subscribe({
+        this.api.call(this.tileId, multicastRequest, args).subscribe({
             next: data => {
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,

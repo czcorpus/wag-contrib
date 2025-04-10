@@ -65,12 +65,11 @@ export class UjcLangRefBookTile implements ITileProvider {
             api: this.api,
             queryMatches,
             tileId,
-            backlink: null, // TODO
             initState: {
                 isBusy: isBusy,
                 data: mkEmptyData(),
                 error: null,
-                backlinks: []
+                backlink: null,
             }
         });
         this.label = appServices.importExternalMessage(conf.label || 'lguide__main_label');

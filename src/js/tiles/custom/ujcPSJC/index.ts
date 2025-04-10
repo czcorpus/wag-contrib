@@ -65,13 +65,12 @@ export class UjcPSJCTile implements ITileProvider {
             api: this.api,
             queryMatches,
             tileId,
-            backlink: null,
             initState: {
                 isBusy: isBusy,
                 queries: [],
                 data: createEmptyData(),
                 error: null,
-                backlinks: []
+                backlink: null,
             }
         });
         this.label = appServices.importExternalMessage(conf.label || 'ujc_psjc__main_label');

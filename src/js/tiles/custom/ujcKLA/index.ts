@@ -66,14 +66,13 @@ export class UjcKLATile implements ITileProvider {
             api: this.api,
             queryMatches,
             tileId,
-            backlink: null,
             initState: {
                 isBusy: isBusy,
                 queries: [],
                 maxImages: conf.maxItems || 2,
                 data: createEmptyData(),
                 error: null,
-                backlinks: []
+                backlink: null
             }
         });
         this.label = appServices.importExternalMessage(conf.label || 'ujc_kla__main_label');
