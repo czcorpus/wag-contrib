@@ -148,15 +148,15 @@ export class GunstickTile implements ITileProvider {
         return true;
     }
 
-    getBlockingTiles():Array<number> {
-        return [];
-    }
-
     supportsMultiWordQueries():boolean {
         return false;
     }
 
     getIssueReportingUrl():null {
+        return null;
+    }
+
+    getReadDataFrom():number|null {
         return null;
     }
 }

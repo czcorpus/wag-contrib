@@ -110,8 +110,8 @@ export class HexModel extends StatelessModel<HexModelState> {
                 exportPosArgs(args, match);
                 const currMatch = findCurrQueryMatch(List.head(queryMatches));
                 this.api.call(
+                    appServices.dataStreaming(),
                     tileId,
-                    true,
                     testIsDictMatch(currMatch) ? args : null
 
                 ).subscribe({

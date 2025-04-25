@@ -23,6 +23,7 @@ import { IApiServices } from '../../../appServices.js';
 import { ajax$, ResponseType } from '../../../page/ajax.js';
 import { DataApi, HTTPHeaders } from '../../../types.js';
 import { Data, DataTableItem } from './common.js';
+import { IDataStreaming } from '../../../page/streaming.js';
 
 export interface RequestArgs {
     q:string;
@@ -84,11 +85,10 @@ export class GunstickApi implements DataApi<RequestArgs, Data> {
         this.apiServices = apiServices;
     }
 
-    call(tileId:number, multicastRequest:boolean, args:RequestArgs|null):Observable<Data> {
+    call(dataStreaming:IDataStreaming, tileId:number, args:RequestArgs|null):Observable<Data> {
         return (
             this.useDataStream ?
-            this.apiServices.dataStreaming().registerTileRequest<HTTPResponse>(
-                multicastRequest,
+            dataStreaming.registerTileRequest<HTTPResponse>(
                 {
                     tileId,
                     method: HTTP.Method.GET,
@@ -181,7 +181,7 @@ export class GunstickKspApi implements DataApi<KSPRequestArgs, Data> {
         this.useDataStream = useDataStream;
     }
 
-    call(tileId:number, multicastRequest:boolean, args:KSPRequestArgs):Observable<Data> {
+    call(dataStreaming:IDataStreaming, tileId:number, args:KSPRequestArgs):Observable<Data> {
         return ajax$<string>(
             HTTP.Method.GET,
             this.apiURL,
