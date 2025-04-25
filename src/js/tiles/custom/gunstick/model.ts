@@ -80,8 +80,8 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
             (state, action, dispatch) => {
                 const currMatch = findCurrQueryMatch(List.head(queryMatches));
                 this.api.call(
+                    appServices.dataStreaming(),
                     this.tileId,
-                    true,
                     testIsDictMatch(currMatch) ?
                         {
                             q: currMatch.lemma,

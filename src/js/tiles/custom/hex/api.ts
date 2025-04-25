@@ -25,6 +25,7 @@ import { ajax$, ResponseType } from '../../../page/ajax.js';
 import { PoSValues } from '../../../postag.js';
 import { DataApi, HTTPHeaders } from '../../../types.js';
 import { Data } from './common.js';
+import { IDataStreaming } from '../../../page/streaming.js';
 
 
 export function posToIndex(pos:PoSValues):number|undefined {
@@ -124,12 +125,11 @@ export class HexKspApi implements DataApi<KSPRequestArgs, Data> {
         this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
     }
 
-    call(tileId:number, multicastRequest:boolean, args:KSPRequestArgs|null):Observable<Data> {
+    call(dataStreaming:IDataStreaming, tileId:number, args:KSPRequestArgs|null):Observable<Data> {
 
         return (
             this.useDataStream ?
-                this.apiServices.dataStreaming().registerTileRequest<string>(
-                    multicastRequest,
+                dataStreaming.registerTileRequest<string>(
                     {
                         tileId,
                         method: HTTP.Method.GET,
