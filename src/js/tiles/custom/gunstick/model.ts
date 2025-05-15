@@ -82,6 +82,7 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
                 this.api.call(
                     appServices.dataStreaming(),
                     this.tileId,
+                    0,
                     testIsDictMatch(currMatch) ?
                         {
                             q: currMatch.lemma,

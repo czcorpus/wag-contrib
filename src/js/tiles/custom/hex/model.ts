@@ -112,6 +112,7 @@ export class HexModel extends StatelessModel<HexModelState> {
                 this.api.call(
                     appServices.dataStreaming(),
                     tileId,
+                    0,
                     testIsDictMatch(currMatch) ? args : null
 
                 ).subscribe({

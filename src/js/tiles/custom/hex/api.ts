@@ -125,13 +125,14 @@ export class HexKspApi implements DataApi<KSPRequestArgs, Data> {
         this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
     }
 
-    call(dataStreaming:IDataStreaming, tileId:number, args:KSPRequestArgs|null):Observable<Data> {
+    call(dataStreaming:IDataStreaming, tileId:number, queryIdx:number, args:KSPRequestArgs|null):Observable<Data> {
 
         return (
             this.useDataStream ?
                 dataStreaming.registerTileRequest<string>(
                     {
                         tileId,
+                        queryIdx,
                         method: HTTP.Method.GET,
                         url: args ? this.apiURL : '',
                         body: args,
