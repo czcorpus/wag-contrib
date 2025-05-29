@@ -45,7 +45,6 @@ export interface HexModelArgs {
     api:HexKspApi,
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
-    queryDomain:string;
 }
 
 const posArgMapping = {
@@ -82,7 +81,7 @@ export class HexModel extends StatelessModel<HexModelState> {
 
     private readonly api:HexKspApi;
 
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, queryDomain}:HexModelArgs) {
+    constructor({dispatcher, initState, api, tileId, appServices, queryMatches}:HexModelArgs) {
         super(dispatcher, initState);
         this.tileId = tileId;
         this.api = api;

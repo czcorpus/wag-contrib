@@ -47,7 +47,6 @@ export interface GunstickModelArgs {
     api:DataApi<KSPRequestArgs, Data>,
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
-    queryDomain:string;
 }
 
 export class GunstickModel extends StatelessModel<GunstickModelState> {
@@ -62,8 +61,8 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
         api,
         tileId,
         appServices,
-        queryMatches,
-        queryDomain}:GunstickModelArgs
+        queryMatches
+    }:GunstickModelArgs
     ) {
         super(dispatcher, initState);
         this.tileId = tileId;

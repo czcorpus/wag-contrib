@@ -63,7 +63,7 @@ export class GunstickTile implements ITileProvider {
 
     constructor({
         tileId, dispatcher, appServices, useDataStream, ut, theme, widthFract, conf, isBusy,
-        queryMatches, domain1}:TileFactoryArgs<GunstickTileConf>
+        queryMatches}:TileFactoryArgs<GunstickTileConf>
     ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
@@ -76,7 +76,6 @@ export class GunstickTile implements ITileProvider {
             api: this.api,
             queryMatches,
             tileId,
-            queryDomain: domain1,
             initState: {
                 isBusy: isBusy,
                 data: mkEmptyData(),
