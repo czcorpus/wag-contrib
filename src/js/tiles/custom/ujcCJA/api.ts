@@ -23,6 +23,7 @@ import { ajax$ } from '../../../page/ajax.js';
 import { ResourceApi, SourceDetails, HTTPHeaders } from '../../../types.js';
 import { DataStructure } from './common.js';
 import { Backlink } from '../../../page/tile.js';
+import { IDataStreaming } from '../../../page/streaming.js';
 
 
 export interface UjcCJAArgs {
@@ -44,7 +45,7 @@ export class UjcCJAApi implements ResourceApi<UjcCJAArgs, DataStructure> {
         this.apiServices = apiServices;
     }
 
-    call(tileId:number, multicastRequest:boolean, queryArgs:UjcCJAArgs):Observable<DataStructure> {
+    call(streaming:IDataStreaming, tileId:number, queryIdx:number, queryArgs:UjcCJAArgs):Observable<DataStructure> {
         return ajax$<DataStructure>(
             HTTP.Method.GET,
             this.apiURL,
@@ -52,7 +53,7 @@ export class UjcCJAApi implements ResourceApi<UjcCJAArgs, DataStructure> {
         );
     }
 
-    getSourceDescription(tileId:number, multicastRequest:boolean, lang:string, corpname:string):Observable<SourceDetails> {
+    getSourceDescription(streaming:IDataStreaming, tileId:number, lang:string, corpname:string):Observable<SourceDetails> {
         return rxOf({
             tileId,
             title: this.apiServices.importExternalMessage({
@@ -68,7 +69,7 @@ export class UjcCJAApi implements ResourceApi<UjcCJAArgs, DataStructure> {
         });
     }
 
-    getBacklink(queryId:number):Backlink|null {
+    getBacklink(queryId:number, subqueryId?:number):Backlink|null {
         return {
             queryId,
             label: 'heslo v Českém jazykovém atlasu',
