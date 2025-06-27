@@ -142,6 +142,10 @@ export class UjcSSJCTile implements ITileProvider {
     getIssueReportingUrl():null {
         return null;
     }
+
+    getReadDataFrom():number|null {
+        return null;
+    }
 }
 
 export const init:TileFactory<UjcSSJCConf> = {

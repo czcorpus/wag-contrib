@@ -141,6 +141,10 @@ export class UjcLangRefBookTile implements ITileProvider {
     getAltViewIcon():AltViewIconProps {
         return DEFAULT_ALT_VIEW_ICON;
     }
+
+    getReadDataFrom():number|null {
+        return null;
+    }
 }
 
 export const init:TileFactory<UjcLangRefBookConf> = {

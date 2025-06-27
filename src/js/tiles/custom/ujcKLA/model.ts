@@ -75,7 +75,7 @@ export class UjcKLAModel extends StatelessModel<UjcKLAModelState> {
                 state.backlink = null;
             },
             (state, action, dispatch) => {
-                this.loadData(dispatch, true, state);
+                this.loadData(dispatch, state);
             }
         );
 
@@ -100,8 +100,8 @@ export class UjcKLAModel extends StatelessModel<UjcKLAModelState> {
             null,
             (state, action, dispatch) => {
                 this.api.getSourceDescription(
+                    this.appServices.dataStreaming(),
                     this.tileId,
-                    false,
                     this.appServices.getISO639UILang(),
                     ''
                 ).subscribe({
@@ -141,12 +141,12 @@ export class UjcKLAModel extends StatelessModel<UjcKLAModelState> {
         );
     }
 
-    private loadData(dispatch:SEDispatcher, multicastRequest:boolean, state:UjcKLAModelState) {
+    private loadData(dispatch:SEDispatcher, state:UjcKLAModelState) {
         const args:UjcKLAArgs = {
             q: state.queries,
             maxImages: state.maxImages,
         };
-        this.api.call(this.tileId, multicastRequest, args).subscribe({
+        this.api.call(this.appServices.dataStreaming(), this.tileId, 0, args).subscribe({
             next: data => {
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,

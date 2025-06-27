@@ -145,6 +145,10 @@ export class UjcNeomatTile implements ITileProvider {
     getIssueReportingUrl():null {
         return null;
     }
+
+    getReadDataFrom():number|null {
+        return null;
+    }
 }
 
 export const init:TileFactory<UjcNeomatConf> = {

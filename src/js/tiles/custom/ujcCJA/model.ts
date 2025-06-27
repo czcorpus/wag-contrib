@@ -69,7 +69,7 @@ export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
                 state.backlink = null;
             },
             (state, action, dispatch) => {
-                this.loadData(dispatch, true, state, state.ident);
+                this.loadData(dispatch, state, state.ident);
             }
         );
 
@@ -94,8 +94,8 @@ export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
             null,
             (state, action, dispatch) => {
                 this.api.getSourceDescription(
+                    this.appServices.dataStreaming(),
                     this.tileId,
-                    false,
                     this.appServices.getISO639UILang(),
                     '',
                 ).subscribe({
@@ -135,11 +135,11 @@ export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
         );
     }
 
-    private loadData(dispatch:SEDispatcher, multicastRequest:boolean, state:UjcCJAModelState, q:string) {
+    private loadData(dispatch:SEDispatcher, state:UjcCJAModelState, q:string) {
         const args:UjcCJAArgs = {
             q
         };
-        this.api.call(this.tileId, multicastRequest, args).subscribe({
+        this.api.call(this.appServices.dataStreaming(), this.tileId, 0, args).subscribe({
             next: data => {
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,

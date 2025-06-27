@@ -144,6 +144,10 @@ export class UjcDictionaryTile implements ITileProvider {
     getIssueReportingUrl():null {
         return null;
     }
+
+    getReadDataFrom():number|null {
+        return null;
+    }
 }
 
 export const init:TileFactory<UjcDictionaryConf> = {
