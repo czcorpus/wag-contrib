@@ -28,7 +28,7 @@ import { UjcLGuideApi } from './api.js';
 import { mkEmptyData } from './common.js';
 
 
-export interface UjcLangRefBookConf extends TileConf {
+export interface UjcLangRefBookTileConf extends TileConf {
     apiURL:string;
 }
 
@@ -52,7 +52,7 @@ export class UjcLangRefBookTile implements ITileProvider {
 
     constructor({
         tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
-        queryMatches}:TileFactoryArgs<UjcLangRefBookConf>
+        queryMatches}:TileFactoryArgs<UjcLangRefBookTileConf>
     ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
@@ -147,7 +147,7 @@ export class UjcLangRefBookTile implements ITileProvider {
     }
 }
 
-export const init:TileFactory<UjcLangRefBookConf> = {
+export const init:TileFactory<UjcLangRefBookTileConf> = {
 
     sanityCheck: (args) => [],
 

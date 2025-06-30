@@ -28,7 +28,7 @@ import { UjcKLAApi } from './api.js';
 import { createEmptyData } from './common.js';
 
 
-export interface UjcKLAConf extends TileConf {
+export interface UjcKLATileConf extends TileConf {
     apiURL:string;
     maxItems?:number;
 }
@@ -53,7 +53,7 @@ export class UjcKLATile implements ITileProvider {
 
     constructor({
         tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
-        queryMatches}:TileFactoryArgs<UjcKLAConf>
+        queryMatches}:TileFactoryArgs<UjcKLATileConf>
     ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
@@ -150,7 +150,7 @@ export class UjcKLATile implements ITileProvider {
     }
 }
 
-export const init:TileFactory<UjcKLAConf> = {
+export const init:TileFactory<UjcKLATileConf> = {
 
     sanityCheck: (args) => [],
 

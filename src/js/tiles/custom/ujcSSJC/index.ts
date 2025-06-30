@@ -28,7 +28,7 @@ import { UjcSSJCApi } from './api.js';
 import { createEmptyData } from './common.js';
 
 
-export interface UjcSSJCConf extends TileConf {
+export interface UjcSSJCTileConf extends TileConf {
     apiURL:string;
 }
 
@@ -52,7 +52,7 @@ export class UjcSSJCTile implements ITileProvider {
 
     constructor({
         tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
-        queryMatches}:TileFactoryArgs<UjcSSJCConf>
+        queryMatches}:TileFactoryArgs<UjcSSJCTileConf>
     ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
@@ -148,7 +148,7 @@ export class UjcSSJCTile implements ITileProvider {
     }
 }
 
-export const init:TileFactory<UjcSSJCConf> = {
+export const init:TileFactory<UjcSSJCTileConf> = {
 
     sanityCheck: (args) => [],
 
