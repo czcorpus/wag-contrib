@@ -20,7 +20,7 @@ import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
 import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
-import { Data, mkEmptyData } from './common.js';
+import { DataStructure, mkEmptyData } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
@@ -29,7 +29,7 @@ import { UjcLGuideApi, UjcLGuideRequestArgs } from './api.js';
 
 export interface UjcLGuideModelState {
     isBusy:boolean;
-    data:Data;
+    data:DataStructure;
     error:string;
     backlink:Backlink;
 }

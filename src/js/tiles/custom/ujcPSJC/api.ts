@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { HTTP } from 'cnc-tskit';
+import { Dict, HTTP, List, pipe } from 'cnc-tskit';
 import { Observable, of as rxOf } from 'rxjs';
 import { IApiServices } from '../../../appServices.js';
 import { ajax$ } from '../../../page/ajax.js';
@@ -46,7 +46,36 @@ export class UjcPSJCApi implements ResourceApi<UjcPSJCArgs, DataStructure> {
         this.apiServices = apiServices;
     }
 
+    private prepareArgs(queryArgs:{[k:string]:any}):string {
+        return pipe(
+            {
+                ...queryArgs
+            },
+            Dict.toEntries(),
+            List.filter(
+                ([k, v]) => v !== undefined
+            ),
+            List.map(
+                ([k, v]) => `${k}=${encodeURIComponent(v)}`
+            ),
+            x => x.join('&')
+        )
+    }
+
     call(streaming:IDataStreaming, tileId:number, queryIdx:number, queryArgs:UjcPSJCArgs):Observable<DataStructure> {
+        if (streaming) {
+            return streaming.registerTileRequest<DataStructure>(
+                {
+                    tileId,
+                    queryIdx,
+                    method: HTTP.Method.GET,
+                    url: this.apiURL + '?' + this.prepareArgs(queryArgs),
+                    body: {},
+                    contentType: 'application/json',
+                }
+            );
+        }
+
         return ajax$<DataStructure>(
             HTTP.Method.GET,
             this.apiURL,

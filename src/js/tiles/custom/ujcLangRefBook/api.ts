@@ -16,12 +16,12 @@
  * limitations under the License.
  */
 
-import { HTTP } from 'cnc-tskit';
+import { Dict, HTTP, List, pipe } from 'cnc-tskit';
 import { Observable, of as rxOf } from 'rxjs';
 import { IApiServices } from '../../../appServices.js';
 import { ajax$ } from '../../../page/ajax.js';
 import { ResourceApi, SourceDetails, HTTPHeaders } from '../../../types.js';
-import { Data } from './common.js';
+import { DataStructure } from './common.js';
 import { Backlink } from '../../../page/tile.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 
@@ -32,7 +32,7 @@ export interface UjcLGuideRequestArgs {
 }
 
 
-export class UjcLGuideApi implements ResourceApi<UjcLGuideRequestArgs, Data> {
+export class UjcLGuideApi implements ResourceApi<UjcLGuideRequestArgs, DataStructure> {
 
     private readonly apiURL:string;
 
@@ -46,8 +46,37 @@ export class UjcLGuideApi implements ResourceApi<UjcLGuideRequestArgs, Data> {
         this.apiServices = apiServices;
     }
 
-    call(streaming:IDataStreaming, tileId:number, queryIdx:number, queryArgs:UjcLGuideRequestArgs):Observable<Data> {
-        return ajax$<Data>(
+    private prepareArgs(queryArgs:{[k:string]:any}):string {
+        return pipe(
+            {
+                ...queryArgs
+            },
+            Dict.toEntries(),
+            List.filter(
+                ([k, v]) => v !== undefined
+            ),
+            List.map(
+                ([k, v]) => `${k}=${encodeURIComponent(v)}`
+            ),
+            x => x.join('&')
+        )
+    }
+
+    call(streaming:IDataStreaming, tileId:number, queryIdx:number, queryArgs:UjcLGuideRequestArgs):Observable<DataStructure> {
+        if (streaming) {
+            return streaming.registerTileRequest<DataStructure>(
+                {
+                    tileId,
+                    queryIdx,
+                    method: HTTP.Method.GET,
+                    url: this.apiURL + '?' + this.prepareArgs(queryArgs),
+                    body: {},
+                    contentType: 'application/json',
+                }
+            );
+        }
+        
+        return ajax$<DataStructure>(
             HTTP.Method.GET,
             this.apiURL,
             queryArgs,
