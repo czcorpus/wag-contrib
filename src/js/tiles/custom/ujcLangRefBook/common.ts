@@ -71,7 +71,7 @@ export interface Alternative {
     info:string;
 }
 
-export interface Data {
+export interface DataStructure {
     rawQuery:string;
     scripts:Array<string>;
     cssLinks:Array<string>;
@@ -96,7 +96,7 @@ export function mkEmptyNumber():NumberData {
     };
 }
 
-export function mkEmptyData():Data {
+export function mkEmptyData():DataStructure {
     return {
         rawQuery: '',
         scripts: [],

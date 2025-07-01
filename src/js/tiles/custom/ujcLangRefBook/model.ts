@@ -20,7 +20,7 @@ import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
 import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
-import { Data, mkEmptyData } from './common.js';
+import { DataStructure, mkEmptyData } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
@@ -29,7 +29,7 @@ import { UjcLGuideApi, UjcLGuideRequestArgs } from './api.js';
 
 export interface UjcLGuideModelState {
     isBusy:boolean;
-    data:Data;
+    data:DataStructure;
     error:string;
     backlink:Backlink;
 }
@@ -68,7 +68,7 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
             },
             (state, action, dispatch) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
-                this.loadData(dispatch, true, state, match.lemma || match.word, false);
+                this.loadData(dispatch, state, match.lemma || match.word, false);
             }
         );
 
@@ -84,7 +84,7 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
                 };
             },
             (state, action, dispatch) => {
-                this.loadData(dispatch, false, state, action.payload.id, true);
+                this.loadData(dispatch, state, action.payload.id, true);
             }
         );
 
@@ -109,8 +109,8 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
             null,
             (state, action, dispatch) => {
                 this.api.getSourceDescription(
+                    this.appServices.dataStreaming(),
                     this.tileId,
-                    false,
                     this.appServices.getISO639UILang(),
                     ''
                 ).subscribe({
@@ -150,12 +150,12 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
         );
     }
 
-    private loadData(dispatch:SEDispatcher, multicastRequest:boolean, state:UjcLGuideModelState, q:string, direct:boolean) {
+    private loadData(dispatch:SEDispatcher, state:UjcLGuideModelState, q:string, direct:boolean) {
         const args:UjcLGuideRequestArgs = {
             q,
             direct: direct ? 1 : 0
         };
-        this.api.call(this.tileId, multicastRequest, args).subscribe({
+        this.api.call(this.appServices.dataStreaming(), this.tileId, 0, args).subscribe({
             next: data => {
                 if (direct) {
                     data.alternatives = state.data.alternatives;

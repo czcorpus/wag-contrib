@@ -46,7 +46,7 @@ export function init(
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'UJC'}}>
                 <S.UjcSSJCTileView>
-                    {List.map(entry => <S.Entry dangerouslySetInnerHTML={{__html: entry.payload}}/>, props.data.entries)}
+                    {List.map((entry, i) => <S.Entry key={i} dangerouslySetInnerHTML={{__html: entry.payload}}/>, props.data.entries)}
                 </S.UjcSSJCTileView>
             </globalComponents.TileWrapper>
         );

@@ -28,7 +28,7 @@ import { UjcDictionaryApi } from './api.js';
 import { createEmptyData } from './common.js';
 
 
-export interface UjcDictionaryConf extends TileConf {
+export interface UjcDictionaryTileConf extends TileConf {
     apiURL:string;
     maxItems:number;
 }
@@ -53,13 +53,13 @@ export class UjcDictionaryTile implements ITileProvider {
 
     constructor({
         tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
-        queryMatches}:TileFactoryArgs<UjcDictionaryConf>
+        queryMatches}:TileFactoryArgs<UjcDictionaryTileConf>
     ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.api = new UjcDictionaryApi(conf.apiURL, appServices);
+        this.api = new UjcDictionaryApi(conf.apiURL, conf.useDataStream, appServices);
         this.model = new UjcDictionaryModel({
             dispatcher,
             appServices,
@@ -144,9 +144,13 @@ export class UjcDictionaryTile implements ITileProvider {
     getIssueReportingUrl():null {
         return null;
     }
+
+    getReadDataFrom():number|null {
+        return null;
+    }
 }
 
-export const init:TileFactory<UjcDictionaryConf> = {
+export const init:TileFactory<UjcDictionaryTileConf> = {
 
     sanityCheck: (args) => [],
 

@@ -27,7 +27,7 @@ import { UjcNeomatModel } from './model.js';
 import { UjcNeomatApi } from './api.js';
 
 
-export interface UjcNeomatConf extends TileConf {
+export interface UjcNeomatTileConf extends TileConf {
     apiURL:string;
     maxItems?:number;
 }
@@ -52,13 +52,13 @@ export class UjcNeomatTile implements ITileProvider {
 
     constructor({
         tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
-        queryMatches}:TileFactoryArgs<UjcNeomatConf>
+        queryMatches}:TileFactoryArgs<UjcNeomatTileConf>
     ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.api = new UjcNeomatApi(conf.apiURL, appServices);
+        this.api = new UjcNeomatApi(conf.apiURL, conf.useDataStream, appServices);
         this.model = new UjcNeomatModel({
             dispatcher,
             appServices,
@@ -145,9 +145,13 @@ export class UjcNeomatTile implements ITileProvider {
     getIssueReportingUrl():null {
         return null;
     }
+
+    getReadDataFrom():number|null {
+        return null;
+    }
 }
 
-export const init:TileFactory<UjcNeomatConf> = {
+export const init:TileFactory<UjcNeomatTileConf> = {
 
     sanityCheck: (args) => [],
 
