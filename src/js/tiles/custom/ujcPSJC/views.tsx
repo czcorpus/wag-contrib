@@ -47,7 +47,7 @@ export function init(
                 sourceIdent={{corp: 'UJC'}}>
                 <S.UjcPSJCTileView>
                     <ul>
-                        {List.map(entry => <li dangerouslySetInnerHTML={{__html: entry}}/>, props.data.entries)}
+                        {List.map((entry, i) => <li key={i} dangerouslySetInnerHTML={{__html: entry}}/>, props.data.entries)}
                     </ul>
                 </S.UjcPSJCTileView>
             </globalComponents.TileWrapper>

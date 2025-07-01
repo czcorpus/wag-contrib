@@ -63,7 +63,7 @@ export function init(
                                             {List.map((e, i) =>
                                                 <div key={i} className='example-block'>
                                                     {e.usage ? <span className='example-usage'>&#8226; {e.usage}:<br/></span> : null }
-                                                    {List.map(v => <span className='example'>{v}<br/></span>, e.data)}
+                                                    {List.map((v, i) => <span key={i} className='example'>{v}<br/></span>, e.data)}
                                                 </div>, v.examples)
                                             }
                                         </S.TooltipContent>
