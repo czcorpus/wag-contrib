@@ -59,7 +59,7 @@ export class UjcKLATile implements ITileProvider {
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.api = new UjcKLAApi(conf.apiURL, appServices);
+        this.api = new UjcKLAApi(conf.apiURL, conf.useDataStream, appServices);
         this.model = new UjcKLAModel({
             dispatcher,
             appServices,

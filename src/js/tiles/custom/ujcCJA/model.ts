@@ -69,7 +69,7 @@ export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
                 state.backlink = null;
             },
             (state, action, dispatch) => {
-                this.loadData(dispatch, state, state.ident);
+                this.loadData(dispatch, state);
             }
         );
 
@@ -135,9 +135,9 @@ export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
         );
     }
 
-    private loadData(dispatch:SEDispatcher, state:UjcCJAModelState, q:string) {
+    private loadData(dispatch:SEDispatcher, state:UjcCJAModelState) {
         const args:UjcCJAArgs = {
-            q
+            q: state.ident,
         };
         this.api.call(this.appServices.dataStreaming(), this.tileId, 0, args).subscribe({
             next: data => {

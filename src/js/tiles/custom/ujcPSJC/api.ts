@@ -37,12 +37,15 @@ export class UjcPSJCApi implements ResourceApi<UjcPSJCArgs, DataStructure> {
 
     private readonly customHeaders:HTTPHeaders;
 
+    private readonly useDataStream:boolean;
+
     private readonly apiServices:IApiServices;
 
 
-    constructor(apiURL:string, apiServices:IApiServices) {
+    constructor(apiURL:string, useDataStream:boolean, apiServices:IApiServices) {
         this.apiURL = apiURL;
         this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
+        this.useDataStream = useDataStream;
         this.apiServices = apiServices;
     }
 
@@ -63,7 +66,7 @@ export class UjcPSJCApi implements ResourceApi<UjcPSJCArgs, DataStructure> {
     }
 
     call(streaming:IDataStreaming, tileId:number, queryIdx:number, queryArgs:UjcPSJCArgs):Observable<DataStructure> {
-        if (streaming) {
+        if (this.useDataStream) {
             return streaming.registerTileRequest<DataStructure>(
                 {
                     tileId,

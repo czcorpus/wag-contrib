@@ -58,7 +58,7 @@ export class UjcLangRefBookTile implements ITileProvider {
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.api = new UjcLGuideApi(conf.apiURL, appServices);
+        this.api = new UjcLGuideApi(conf.apiURL, conf.useDataStream, appServices);
         this.model = new UjcLGuideModel({
             dispatcher,
             appServices,

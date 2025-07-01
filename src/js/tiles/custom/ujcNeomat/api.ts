@@ -38,12 +38,15 @@ export class UjcNeomatApi implements ResourceApi<UjcNeomatArgs, DataStructure> {
 
     private readonly customHeaders:HTTPHeaders;
 
+    private readonly useDataStream:boolean;
+
     private readonly apiServices:IApiServices;
 
 
-    constructor(apiURL:string, apiServices:IApiServices) {
+    constructor(apiURL:string, useDataStream:boolean, apiServices:IApiServices) {
         this.apiURL = apiURL;
         this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
+        this.useDataStream = useDataStream;
         this.apiServices = apiServices;
     }
 
@@ -64,7 +67,7 @@ export class UjcNeomatApi implements ResourceApi<UjcNeomatArgs, DataStructure> {
     }
 
     call(streaming:IDataStreaming, tileId:number, queryIdx:number, queryArgs:UjcNeomatArgs):Observable<DataStructure> {
-        if (streaming) {
+        if (this.useDataStream) {
             return streaming.registerTileRequest<DataStructure>(
                 {
                     tileId,
