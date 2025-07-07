@@ -72,7 +72,7 @@ export class UjcNeomatModel extends StatelessModel<UjcNeomatModelState> {
                 state.backlink = null;
             },
             (state, action, dispatch) => {
-                this.loadData(dispatch, true, state, state.ident);
+                this.loadData(dispatch, state, state.ident);
             }
         );
 
@@ -97,8 +97,8 @@ export class UjcNeomatModel extends StatelessModel<UjcNeomatModelState> {
             null,
             (state, action, dispatch) => {
                 this.api.getSourceDescription(
+                    this.appServices.dataStreaming(),
                     this.tileId,
-                    false,
                     this.appServices.getISO639UILang(),
                     ''
                 ).subscribe({
@@ -137,12 +137,12 @@ export class UjcNeomatModel extends StatelessModel<UjcNeomatModelState> {
         );
     }
 
-    private loadData(dispatch:SEDispatcher, multicastRequest:boolean, state:UjcNeomatModelState, q:string) {
+    private loadData(dispatch:SEDispatcher, state:UjcNeomatModelState, q:string) {
         const args:UjcNeomatArgs = {
             q,
             maxItems: state.maxItems,
         };
-        this.api.call(this.tileId, multicastRequest, args).subscribe({
+        this.api.call(this.appServices.dataStreaming(), this.tileId, 0, args).subscribe({
             next: data => {
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,

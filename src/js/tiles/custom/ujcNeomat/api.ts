@@ -16,13 +16,14 @@
  * limitations under the License.
  */
 
-import { HTTP } from 'cnc-tskit';
+import { Dict, HTTP, List, pipe } from 'cnc-tskit';
 import { Observable, of as rxOf } from 'rxjs';
 import { IApiServices } from '../../../appServices.js';
 import { ajax$ } from '../../../page/ajax.js';
 import { ResourceApi, SourceDetails, HTTPHeaders } from '../../../types.js';
 import { DataStructure } from './common.js';
 import { Backlink } from '../../../page/tile.js';
+import { IDataStreaming } from '../../../page/streaming.js';
 
 
 export interface UjcNeomatArgs {
@@ -37,16 +38,48 @@ export class UjcNeomatApi implements ResourceApi<UjcNeomatArgs, DataStructure> {
 
     private readonly customHeaders:HTTPHeaders;
 
+    private readonly useDataStream:boolean;
+
     private readonly apiServices:IApiServices;
 
 
-    constructor(apiURL:string, apiServices:IApiServices) {
+    constructor(apiURL:string, useDataStream:boolean, apiServices:IApiServices) {
         this.apiURL = apiURL;
         this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
+        this.useDataStream = useDataStream;
         this.apiServices = apiServices;
     }
 
-    call(tileId:number, multicastRequest:boolean, queryArgs:UjcNeomatArgs):Observable<DataStructure> {
+    private prepareArgs(queryArgs:{[k:string]:any}):string {
+        return pipe(
+            {
+                ...queryArgs
+            },
+            Dict.toEntries(),
+            List.filter(
+                ([k, v]) => v !== undefined
+            ),
+            List.map(
+                ([k, v]) => `${k}=${encodeURIComponent(v)}`
+            ),
+            x => x.join('&')
+        )
+    }
+
+    call(streaming:IDataStreaming, tileId:number, queryIdx:number, queryArgs:UjcNeomatArgs):Observable<DataStructure> {
+        if (this.useDataStream) {
+            return streaming.registerTileRequest<DataStructure>(
+                {
+                    tileId,
+                    queryIdx,
+                    method: HTTP.Method.GET,
+                    url: this.apiURL + '?' + this.prepareArgs(queryArgs),
+                    body: {},
+                    contentType: 'application/json',
+                }
+            );
+        }
+
         return ajax$<DataStructure>(
             HTTP.Method.GET,
             this.apiURL,
@@ -54,7 +87,7 @@ export class UjcNeomatApi implements ResourceApi<UjcNeomatArgs, DataStructure> {
         );
     }
 
-    getSourceDescription(tileId:number, multicastRequest:boolean, lang:string, corpname:string):Observable<SourceDetails> {
+    getSourceDescription(streaming:IDataStreaming, tileId:number, lang:string, corpname:string):Observable<SourceDetails> {
         return rxOf({
             tileId,
             title: this.apiServices.importExternalMessage({
@@ -70,7 +103,7 @@ export class UjcNeomatApi implements ResourceApi<UjcNeomatArgs, DataStructure> {
         })
     }
 
-    getBacklink(queryId:number):Backlink|null {
+    getBacklink(queryId:number, subqueryId?:number):Backlink|null {
         return {
             queryId,
             label: 'heslo v databázi Neomat',

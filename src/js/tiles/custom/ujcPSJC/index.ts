@@ -28,7 +28,7 @@ import { UjcPSJCApi } from './api.js';
 import { createEmptyData } from './common.js';
 
 
-export interface UjcPSJCConf extends TileConf {
+export interface UjcPSJCTileConf extends TileConf {
     apiURL:string;
 }
 
@@ -52,13 +52,13 @@ export class UjcPSJCTile implements ITileProvider {
 
     constructor({
         tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
-        queryMatches}:TileFactoryArgs<UjcPSJCConf>
+        queryMatches}:TileFactoryArgs<UjcPSJCTileConf>
     ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.api = new UjcPSJCApi(conf.apiURL, appServices);
+        this.api = new UjcPSJCApi(conf.apiURL, conf.useDataStream, appServices);
         this.model = new UjcPSJCModel({
             dispatcher,
             appServices,
@@ -142,9 +142,13 @@ export class UjcPSJCTile implements ITileProvider {
     getIssueReportingUrl():null {
         return null;
     }
+
+    getReadDataFrom():number|null {
+        return null;
+    }
 }
 
-export const init:TileFactory<UjcPSJCConf> = {
+export const init:TileFactory<UjcPSJCTileConf> = {
 
     sanityCheck: (args) => [],
 

@@ -27,7 +27,7 @@ import { UjcCJAApi } from './api.js';
 import { createEmptyData } from './common.js';
 
 
-export interface UjcCJAConf extends TileConf {
+export interface UjcCJATileConf extends TileConf {
     apiURL:string;
 }
 
@@ -51,13 +51,13 @@ export class UjcCJATile implements ITileProvider {
 
     constructor({
         tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
-        queryMatches}:TileFactoryArgs<UjcCJAConf>
+        queryMatches}:TileFactoryArgs<UjcCJATileConf>
     ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.api = new UjcCJAApi(conf.apiURL, appServices);
+        this.api = new UjcCJAApi(conf.apiURL, conf.useDataStream, appServices);
         this.model = new UjcCJAModel({
             dispatcher,
             appServices,
@@ -141,9 +141,13 @@ export class UjcCJATile implements ITileProvider {
     getIssueReportingUrl():null {
         return null;
     }
+
+    getReadDataFrom():number|null {
+        return null;
+    }
 }
 
-export const init:TileFactory<UjcCJAConf> = {
+export const init:TileFactory<UjcCJATileConf> = {
 
     sanityCheck: (args) => [],
 
