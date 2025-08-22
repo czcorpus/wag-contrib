@@ -44,7 +44,7 @@ export function init(
     }> = (props) => {
 
         return (
-            <S.DataTable>
+            <S.DataTable theme={theme}>
                 <caption>{ut.translate('lguide__comparison')}</caption>
                 <thead>
                     <tr>
@@ -71,7 +71,7 @@ export function init(
     }> = (props) => {
 
         return (
-            <S.DataTable>
+            <S.DataTable theme={theme}>
                 <caption>{ut.translate('lguide__case')}:</caption>
                 <thead>
                     <tr>
@@ -102,7 +102,7 @@ export function init(
     }> = (props) => {
 
         return (
-            <S.DataTable>
+            <S.DataTable theme={theme}>
                 <caption>{ut.translate('lguide__conjugation')}</caption>
                 <thead>
                     <tr>
@@ -192,7 +192,7 @@ export function init(
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'UJC'}}>
                 <S.UjcLangRefBookTileView>
-                    <S.Overview>
+                    <S.Overview theme={theme}>
                         <p className="langbook-heading">
                             <span className="langbook-key">{props.data.heading}</span>
                             <span className="langbook-pronunciation">{props.data.pronunciation}</span><br/>

@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
+import { Theme } from '../../../page/theme.js';
 import { styled } from 'styled-components';
-import * as theme from '../../../views/common/theme.js';
 
 export const UjcLangRefBookTileView = styled.div`
     display: flex;
@@ -25,7 +25,7 @@ export const UjcLangRefBookTileView = styled.div`
     justify-content: space-between;
 `;
 
-export const Overview = styled.div`
+export const Overview = styled.div<{theme:Theme}>`
     p.langbook-heading {
         font-size: 1.5em;
 
@@ -49,8 +49,8 @@ export const Overview = styled.div`
     dl.info {
         dt {
             margin-bottom: 0.4em;
-            color: ${theme.colorLightText};
-            font-family: ${theme.condensedFontFamily};
+            color: ${props => props.theme.colorLightText};
+            font-family: ${props => props.theme.condensedFontFamily};
         }
 
         dd {
@@ -58,7 +58,7 @@ export const Overview = styled.div`
             margin-left: 1em;
 
             span.squareb {
-                color: ${theme.colorLightText};
+                color: ${props => props.theme.colorLightText};
             }
         }
 
@@ -73,13 +73,13 @@ export const Overview = styled.div`
         dd.word-list {
             font-size: 1.3em;
             a {
-                color: ${theme.colorDefaultText};
+                color: ${props => props.theme.colorDefaultText};
                 cursor: pointer;
                 text-decoration: none;
             }
 
             a:hover {
-                color: ${theme.colorLogoBlue};
+                color: ${props => props.theme.colorLogoBlue};
                 text-decoration: underline;
             }
         }
@@ -87,7 +87,7 @@ export const Overview = styled.div`
 
 `;
 
-export const DataTable = styled.table`
+export const DataTable = styled.table<{theme:Theme}>`
     width: 100%;
     border-collapse: collapse;
     border-spacing: 0em;
@@ -95,7 +95,7 @@ export const DataTable = styled.table`
     caption {
         font-size: 1em;
         text-align: left;
-        color: ${theme.colorLightText};
+        color: ${props => props.theme.colorLightText};
     }
 
     td, th {
