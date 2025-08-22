@@ -146,6 +146,10 @@ export class UjcPSJCTile implements ITileProvider {
     getReadDataFrom():number|null {
         return null;
     }
+
+    hideOnNoData():boolean {
+        return false;
+    }
 }
 
 export const init:TileFactory<UjcPSJCTileConf> = {
