@@ -17,13 +17,13 @@
  */
 
 import { styled } from 'styled-components';
-import * as theme from '../../../views/common/theme.js';
+import { Theme } from '../../../page/theme.js';
 
 // ---------------- <Keyword /> --------------------------------------
 
-export const Keyword = styled.div`
+export const Keyword = styled.div<{theme:Theme}>`
     margin-bottom: 0.5em;
-    color: ${theme.colorDefaultText};
+    color: ${props => props.theme.colorDefaultText};
 
     &.hidden-items {
         font-size: 0.8em;
