@@ -40,7 +40,7 @@ export function init(
     const UjcDictionaryTileView: React.FC<UjcDictionaryModelState & CoreTileComponentProps> = (props) => {
 
         const renderDataItem = (item: DataItem) => {
-            return <S.Keyword key={item.key} theme={theme}>
+            return <S.Keyword key={item.key}>
                 <p className = 'dict-heading'>
                     <span className='dict-key'>{item.key}</span>
                     <span className='dict-pronunciation'>{item.pronunciation}</span>
@@ -96,7 +96,7 @@ export function init(
                 <S.UjcDictionaryTileView>
                     {List.map(item => renderDataItem(item), props.data.items.slice(0, props.maxItems))}
                     {props.data.items.length > props.maxItems ?
-                        <S.Keyword className='hidden-items' theme={theme}>
+                        <S.Keyword className='hidden-items'>
                             <p className = 'dict-heading'>
                                 <span className='dict-key'>...{ut.translate(
                                     'ujc_dict__more_data_{num_hidden}',
