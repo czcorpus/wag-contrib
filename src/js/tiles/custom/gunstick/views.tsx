@@ -113,11 +113,11 @@ export function init(
                                         widthFract={props.widthFract} render={(width:number, height:number) => (
                 <ScatterChart width={Math.max(100, width)} height={Math.max(350, height)} margin={{ top: 20, right: 20, bottom: 10, left: 10 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="x" name="year" type="number" unit="" domain ={rangeOf(props.data)} />
+                    <XAxis dataKey="x" name="year" type="number" unit="" domain ={rangeOf(props.data)} tick={{ fill: theme.chartTextColor }} />
                     <YAxis dataKey="y" name={ut.translate('gunstick__abs_freq')} unit="" type="number"
-                        label={{ value: ut.translate('gunstick__abs_freq'), angle: -90, position: 'insideLeft' }} />
+                        label={{ value: ut.translate('gunstick__abs_freq'), angle: -90, position: 'insideLeft' }} tick={{ fill: theme.chartTextColor }} />
                     <Tooltip cursor={{ strokeDasharray: '3 3' }} labelStyle={{display: 'none'}} />
-                    <Legend formatter={(value) => <span style={{ color: 'black' }}>{value}</span>} />
+                    <Legend formatter={(value) => <span style={{ color: theme.chartTextColor }}>{value}</span>} />
                     {pipe(
                         props.data,
                         Dict.toEntries(),
