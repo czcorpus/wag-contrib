@@ -113,22 +113,19 @@ export class HexKspApi implements DataApi<KSPRequestArgs, Data> {
 
     private readonly customHeaders:HTTPHeaders;
 
-    protected readonly useDataStream:boolean;
-
     protected apiServices:IApiServices;
 
 
-    constructor(apiURL:string, useDataStream:boolean, apiServices:IApiServices) {
+    constructor(apiURL:string, apiServices:IApiServices) {
         this.apiURL = apiURL;
-        this.useDataStream = useDataStream;
         this.apiServices = apiServices;
         this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
     }
 
-    call(dataStreaming:IDataStreaming, tileId:number, queryIdx:number, args:KSPRequestArgs|null):Observable<Data> {
+    call(dataStreaming:IDataStreaming|null, tileId:number, queryIdx:number, args:KSPRequestArgs|null):Observable<Data> {
 
         return (
-            this.useDataStream ?
+            dataStreaming ?
                 dataStreaming.registerTileRequest<string>(
                     {
                         tileId,

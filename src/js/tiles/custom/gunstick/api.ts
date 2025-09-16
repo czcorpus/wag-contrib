@@ -73,21 +73,18 @@ export class GunstickApi implements DataApi<RequestArgs, Data> {
 
     private readonly customHeaders:HTTPHeaders;
 
-    protected readonly useDataStream:boolean;
-
     private readonly apiServices:IApiServices;
 
 
-    constructor(apiURL:string, useDataStream:boolean, apiServices:IApiServices) {
+    constructor(apiURL:string, apiServices:IApiServices) {
         this.apiURL = apiURL;
         this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
-        this.useDataStream = useDataStream;
         this.apiServices = apiServices;
     }
 
-    call(dataStreaming:IDataStreaming, tileId:number, queryIdx:number, args:RequestArgs|null):Observable<Data> {
+    call(dataStreaming:IDataStreaming|null, tileId:number, queryIdx:number, args:RequestArgs|null):Observable<Data> {
         return (
-            this.useDataStream ?
+            dataStreaming ?
             dataStreaming.registerTileRequest<HTTPResponse>(
                 {
                     tileId,
@@ -173,13 +170,10 @@ export class GunstickKspApi implements DataApi<KSPRequestArgs, Data> {
 
     private readonly customHeaders:HTTPHeaders;
 
-    protected readonly useDataStream:boolean;
 
-
-    constructor(apiURL:string, useDataStream:boolean, apiServices:IApiServices) {
+    constructor(apiURL:string, apiServices:IApiServices) {
         this.apiURL = apiURL;
         this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
-        this.useDataStream = useDataStream;
     }
 
     call(dataStreaming:IDataStreaming, tileId:number, queryIdx:number, args:KSPRequestArgs):Observable<Data> {

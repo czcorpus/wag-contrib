@@ -62,14 +62,14 @@ export class GunstickTile implements ITileProvider {
     private view:TileComponent;
 
     constructor({
-        tileId, dispatcher, appServices, useDataStream, ut, theme, widthFract, conf, isBusy,
+        tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
         queryMatches}:TileFactoryArgs<GunstickTileConf>
     ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.api = new GunstickApi(conf.apiURL, useDataStream, appServices);
+        this.api = new GunstickApi(conf.apiURL, appServices);
         this.model = new GunstickModel({
             dispatcher,
             appServices,
