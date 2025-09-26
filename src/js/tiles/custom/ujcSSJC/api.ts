@@ -37,15 +37,12 @@ export class UjcSSJCApi implements ResourceApi<UjcSSJCArgs, DataStructure> {
 
     private readonly customHeaders:HTTPHeaders;
 
-    private readonly useDataStream:boolean;
-
     private readonly apiServices:IApiServices;
 
 
-    constructor(apiURL:string, useDataStream:boolean, apiServices:IApiServices) {
+    constructor(apiURL:string, apiServices:IApiServices) {
         this.apiURL = apiURL;
         this.customHeaders = apiServices.getApiHeaders(apiURL) || {};
-        this.useDataStream = useDataStream;
         this.apiServices = apiServices;
     }
 
@@ -65,9 +62,9 @@ export class UjcSSJCApi implements ResourceApi<UjcSSJCArgs, DataStructure> {
         )
     }
 
-    call(streaming:IDataStreaming, tileId:number, queryIdx:number, queryArgs:UjcSSJCArgs):Observable<DataStructure> {
-        if (this.useDataStream) {
-            return streaming.registerTileRequest<DataStructure>(
+    call(streaming:IDataStreaming|null, tileId:number, queryIdx:number, queryArgs:UjcSSJCArgs):Observable<DataStructure> {
+        return streaming ?
+            streaming.registerTileRequest<DataStructure>(
                 {
                     tileId,
                     queryIdx,
@@ -76,14 +73,12 @@ export class UjcSSJCApi implements ResourceApi<UjcSSJCArgs, DataStructure> {
                     body: {},
                     contentType: 'application/json',
                 }
+            ) :
+            ajax$<DataStructure>(
+                HTTP.Method.GET,
+                this.apiURL,
+                queryArgs,
             );
-        }
-
-        return ajax$<DataStructure>(
-            HTTP.Method.GET,
-            this.apiURL,
-            queryArgs,
-        );
     }
 
     getSourceDescription(streaming:IDataStreaming, tileId:number, lang:string, corpname:string):Observable<SourceDetails> {
