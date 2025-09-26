@@ -74,10 +74,11 @@ export const Note = styled.div`
 
 // ---------------- <Tooltiped /> --------------------------------------
 
-export const Tooltiped = styled.div<{}>`
+export const Tooltiped = styled.div<{theme:Theme}>`
     & > *{
         width: fit-content;
         border-bottom: 1px dotted black;
+        border-color: ${props => props.theme.colorDefaultText};
     }
 `;
 
