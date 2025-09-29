@@ -24,6 +24,7 @@ import { styled } from 'styled-components';
 export const Entry = styled.table`
     width: 100%;
     border-collapse: collapse;
+    color: #010101;
 
     .sz_0{width:30px;padding-top:18px;}
     .sz_1{background-color:#4767de;padding:20px;width:400px; color:#fff;font-family:my-roboto-bold;font-size:12pt;}

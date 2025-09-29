@@ -59,7 +59,7 @@ export class UjcDictionaryTile implements ITileProvider {
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.api = new UjcDictionaryApi(conf.apiURL, conf.useDataStream, appServices);
+        this.api = new UjcDictionaryApi(conf.apiURL, appServices);
         this.model = new UjcDictionaryModel({
             dispatcher,
             appServices,

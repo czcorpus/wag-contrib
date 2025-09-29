@@ -58,7 +58,7 @@ export class UjcNeomatTile implements ITileProvider {
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.api = new UjcNeomatApi(conf.apiURL, conf.useDataStream, appServices);
+        this.api = new UjcNeomatApi(conf.apiURL, appServices);
         this.model = new UjcNeomatModel({
             dispatcher,
             appServices,

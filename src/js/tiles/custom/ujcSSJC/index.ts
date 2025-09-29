@@ -58,7 +58,7 @@ export class UjcSSJCTile implements ITileProvider {
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.api = new UjcSSJCApi(conf.apiURL, conf.useDataStream, appServices);
+        this.api = new UjcSSJCApi(conf.apiURL, appServices);
         this.model = new UjcSSJCModel({
             dispatcher,
             appServices,
