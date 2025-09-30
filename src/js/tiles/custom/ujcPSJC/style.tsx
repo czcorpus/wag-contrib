@@ -21,6 +21,10 @@ import { styled } from 'styled-components';
 // ---------------- <UjcPSJCTileView /> --------------------------------------
 
 export const UjcPSJCTileView = styled.div`
+
+    max-height: 40em;
+    overflow-y: scroll;
+
     ul li {
         .e {
             font-size: 12pt;
