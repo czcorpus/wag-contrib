@@ -59,7 +59,7 @@ export function init(
     // -------------------- <LexOverviewBasics /> -----------------------------------------------
 
     const LexOverviewBasics: React.FC<{
-        pronounciation: string;
+        pronunciation: string;
         partOfSpeach: string;
         source: string;
 
@@ -67,7 +67,7 @@ export function init(
         return (
             <S.Subtile color='#d4e2f4'>
                 <S.SubtileRow>
-                    <span className='key'>výslovnost:</span><span className='value'>{props.pronounciation}</span>
+                    <span className='key'>výslovnost:</span><span className='value'>{props.pronunciation}</span>
                 </S.SubtileRow>
                 <S.SubtileRow>
                     <span className='key'>slovní druh:</span><span className='value'>{props.partOfSpeach}</span>
@@ -99,7 +99,7 @@ export function init(
                 <S.LexOverviewTileView>
                     <LexOverviewHeader title={props.data.heading} />
                     <LexOverviewBasics
-                        pronounciation={'TODO'}
+                        pronunciation={'TODO'}
                         partOfSpeach={'TODO'}
                         source={'Akademický slovník češtiny'}
                     />

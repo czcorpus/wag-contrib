@@ -23,6 +23,7 @@ import { Theme } from '../../../page/theme.js';
 
 export const MeaningTileView = styled.div`
     position: relative;
+    min-height: 30em;
     height: 100%;
     width: 100%;
 `;
