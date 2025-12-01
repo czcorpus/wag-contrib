@@ -22,12 +22,22 @@ import { Theme } from '../../../page/theme.js';
 // ---------------- <MeaningTileView /> --------------------------------------
 
 export const MeaningTileView = styled.div`
+    position: relative;
+    height: 100%;
+    width: 100%;
+`;
+
+export const MeaningBox = styled.div`
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    overflow-y: auto;
     background-color: #d4e2f4;
     padding: 1em;
+    overflow-y: auto;
 `;
 
 export const MeaningHeading = styled.div`

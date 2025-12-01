@@ -65,7 +65,9 @@ export function init(
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.MeaningTileView>
-                    {List.map((item, i) => renderDataItem(item, i), props.data.items)}
+                    <S.MeaningBox>
+                        {List.map((item, i) => renderDataItem(item, i), props.data.items)}
+                    </S.MeaningBox>
                 </S.MeaningTileView>
             </globalComponents.TileWrapper>
         );
