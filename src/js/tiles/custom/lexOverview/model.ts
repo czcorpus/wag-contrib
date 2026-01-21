@@ -20,17 +20,22 @@ import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
 import { findCurrQueryMatch, QueryMatch, RecognizedQueries } from '../../../query/index.js';
-import { DataStructure, mkEmptyData } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
-import { UjcLGuideApi, UjcLGuideRequestArgs } from './api.js';
+import { LexApi, LexArgs } from './api.js';
+import { AggregateData, createEmptyData } from './common.js';
 
 
 export interface LexOverviewModelState {
     isBusy:boolean;
     queryMatch:QueryMatch;
-    data:DataStructure;
+    selectedVariant:{
+        id:string;
+        value: string;
+    };
+    mainSource:string;
+    data:AggregateData;
     error:string;
     backlink:Backlink;
 }
@@ -39,7 +44,8 @@ export interface LexOverviewModelArgs {
     dispatcher:IActionQueue;
     initState:LexOverviewModelState;
     tileId:number;
-    api:UjcLGuideApi,
+    // api:UjcLGuideApi,
+    api: LexApi;
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
 }
@@ -48,7 +54,7 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
 
     private readonly tileId:number;
 
-    private readonly api:UjcLGuideApi;
+    private readonly api:LexApi;
 
     private readonly appServices:IAppServices;
 
@@ -64,12 +70,12 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                 const match = findCurrQueryMatch(List.head(queryMatches));
                 state.isBusy = true;
                 state.error = null;
-                state.data = {...mkEmptyData(), rawQuery: match.lemma || match.word};
+                state.data = {...createEmptyData(), query: match.lemma || match.word};
                 state.backlink = null;
             },
             (state, action, dispatch) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
-                this.loadData(dispatch, state, match.lemma || match.word, false);
+                this.loadData(dispatch, match.lemma || match.word);
             }
         );
 
@@ -78,14 +84,10 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
             (state, action) => {
                 state.isBusy = true;
                 state.error = null;
-                state.data = {
-                    ...mkEmptyData(),
-                    rawQuery: action.payload.id,
-                    alternatives: state.data.alternatives
-                };
+                state.data = null;
             },
             (state, action, dispatch) => {
-                this.loadData(dispatch, state, action.payload.id, true);
+                this.loadData(dispatch, action.payload.id);
             }
         );
 
@@ -98,7 +100,12 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                     state.error = action.error.message;
 
                 } else {
-                    state.data = action.payload.data;
+                    state.data = action.payload.aggregate;
+                    state.selectedVariant = {
+                        id: action.payload.aggregate.variants[0]?.[0]?.value,
+                        value: action.payload.aggregate.variants[0]?.[0]?.value,
+                    };
+                    state.mainSource = 'assc';
                     state.backlink = this.api.getBacklink(0);
                 }
             }
@@ -141,17 +148,50 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
             null,
             (state, action, dispatch) => {
                 const backlinkUrl = new URL('https://prirucka.ujc.cas.cz/');
+                /* --- TODO ---
                 if (state.data.isDirect) {
                     backlinkUrl.searchParams.set('id', state.data.rawQuery);
                 } else {
                     backlinkUrl.searchParams.set('slovo', state.data.rawQuery);
                 }
+                */
                 window.open(backlinkUrl.toString(), '_blank');
             }
         );
     }
 
-    private loadData(dispatch:SEDispatcher, state:LexOverviewModelState, q:string, direct:boolean) {
+    private loadData(dispatch:SEDispatcher, term:string) {
+        const args:LexArgs = {
+            term,
+        };
+        this.api.call(this.appServices.dataStreaming(), this.tileId, 0, args).subscribe({
+            next: data => {
+                dispatch<typeof Actions.TileDataLoaded>({
+                    name: Actions.TileDataLoaded.name,
+                    payload: {
+                        tileId: this.tileId,
+                        isEmpty: false,
+                        aggregate: data
+                    }
+                });
+            },
+            error: error => {
+                console.error(error);
+                dispatch<typeof Actions.TileDataLoaded>({
+                    name: Actions.TileDataLoaded.name,
+                    error,
+                    payload: {
+                        tileId: this.tileId,
+                        isEmpty: true,
+                        aggregate: createEmptyData(),
+                    }
+                });
+            }
+        });
+    }
+
+    /*
+    private loadDataLguide(dispatch:SEDispatcher, state:LexOverviewModelState, q:string, direct:boolean) {
         const args:UjcLGuideRequestArgs = {
             q,
             direct: direct ? 1 : 0
@@ -169,7 +209,7 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                     payload: {
                         tileId: this.tileId,
                         isEmpty: false,
-                        data
+                        aggregate: data
                     }
                 });
             },
@@ -181,7 +221,7 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                     payload: {
                         tileId: this.tileId,
                         isEmpty: true,
-                        data: {
+                        aggregate: {
                             ...mkEmptyData(),
                             isDirect: true,
                             rawQuery: q
@@ -191,5 +231,5 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
             }
         });
     }
-
+    */
 }

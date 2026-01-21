@@ -63,20 +63,21 @@ export class UjcDictionaryApi implements ResourceApi<UjcDictionaryArgs, DataStru
     }
 
     call(streaming:IDataStreaming|null, tileId:number, queryIdx:number, queryArgs:UjcDictionaryArgs):Observable<DataStructure> {
+        const url = this.apiURL.replace(/\/$/, '') + '/aggregate';
         return streaming ?
             streaming.registerTileRequest<DataStructure>(
                 {
                     tileId,
                     queryIdx,
                     method: HTTP.Method.GET,
-                    url: this.apiURL + '?' + this.prepareArgs(queryArgs),
+                    url: url + '?' + this.prepareArgs(queryArgs),
                     body: {},
                     contentType: 'application/json',
                 }
             ) :
             ajax$<DataStructure>(
                 HTTP.Method.GET,
-                this.apiURL,
+                url,
                 queryArgs,
             );
     }

@@ -21,16 +21,18 @@ import { Observable, of as rxOf } from 'rxjs';
 import { IApiServices } from '../../../appServices.js';
 import { ajax$ } from '../../../page/ajax.js';
 import { ResourceApi, SourceDetails, HTTPHeaders } from '../../../types.js';
+import { DataStructure } from './commonLguide.js';
 import { Backlink } from '../../../page/tile.js';
 import { IDataStreaming } from '../../../page/streaming.js';
-import { AggregateData } from './common.js';
 
 
-export interface LexArgs {
-    term:string;
+export interface UjcLGuideRequestArgs {
+    q:string;
+    direct?:number;
 }
 
-export class LexApi implements ResourceApi<LexArgs, AggregateData> {
+
+export class UjcLGuideApi implements ResourceApi<UjcLGuideRequestArgs, DataStructure> {
 
     private readonly apiURL:string;
 
@@ -61,22 +63,21 @@ export class LexApi implements ResourceApi<LexArgs, AggregateData> {
         )
     }
 
-    call(streaming:IDataStreaming|null, tileId:number, queryIdx:number, queryArgs:LexArgs):Observable<AggregateData> {
-        const url = this.apiURL.replace(/\/$/, '') + '/aggregate';
+    call(streaming:IDataStreaming|null, tileId:number, queryIdx:number, queryArgs:UjcLGuideRequestArgs):Observable<DataStructure> {
         return streaming ?
-            streaming.registerTileRequest<AggregateData>(
+            streaming.registerTileRequest<DataStructure>(
                 {
                     tileId,
                     queryIdx,
                     method: HTTP.Method.GET,
-                    url: url + '?' + this.prepareArgs(queryArgs),
+                    url: this.apiURL + '?' + this.prepareArgs(queryArgs),
                     body: {},
                     contentType: 'application/json',
                 }
             ) :
-            ajax$<AggregateData>(
+            ajax$<DataStructure>(
                 HTTP.Method.GET,
-                url,
+                this.apiURL,
                 queryArgs,
             );
     }
@@ -85,22 +86,22 @@ export class LexApi implements ResourceApi<LexArgs, AggregateData> {
         return rxOf({
             tileId,
             title: this.apiServices.importExternalMessage({
-                'cs-CZ': 'Akademický slovník současné češtiny',
-                'en-US': 'Academic Dictionary of Contemporary Czech'
+                'cs-CZ': 'Internetová jazyková příručka',
+                'en-US': 'Internet Language Reference Book'
             }),
             description: this.apiServices.importExternalMessage({
-                'cs-CZ': 'Původní webová aplikace vznikla v rámci grantového projektu Programu aplikovaného výzkumu a vývoje národní a kulturní identity (NAKI) Ministerstva kultury ČR – Nová cesta k modernímu jednojazyčnému výkladovému slovníku současné češtiny (DF13P01OVV011). Její nová verze je rozvíjena a financována z institucionálních prostředků Ústavu pro jazyk český AV ČR, v. v. i.',
-                'en-US': 'Původní webová aplikace vznikla v rámci grantového projektu Programu aplikovaného výzkumu a vývoje národní a kulturní identity (NAKI) Ministerstva kultury ČR – Nová cesta k modernímu jednojazyčnému výkladovému slovníku současné češtiny (DF13P01OVV011). Její nová verze je rozvíjena a financována z institucionálních prostředků Ústavu pro jazyk český AV ČR, v. v. i. UNTRANSLATED'
+                'cs-CZ': 'Internetová jazyková příručka (IJP) vznikla a byla rozvíjena s podporou projektu Jazyková poradna na internetu, č. 1ET200610406, řešeného v letech 2004–2008, projektu LINDAT/CLARIN Institut pro analýzu, zpracování a distribuci lingvistických dat, č. LM2010013, řešeného v letech 2013–2015, a projektu LINDAT/CLARIN Jazyková výzkumná infrastruktura v ČR, č. LM2015071, řešeného v letech 2016–2019. Jde o první jazykovou pomůcku svého druhu.',
+                'en-US': 'Internetová jazyková příručka (IJP) vznikla a byla rozvíjena s podporou projektu Jazyková poradna na internetu, č. 1ET200610406, řešeného v letech 2004–2008, projektu LINDAT/CLARIN Institut pro analýzu, zpracování a distribuci lingvistických dat, č. LM2010013, řešeného v letech 2013–2015, a projektu LINDAT/CLARIN Jazyková výzkumná infrastruktura v ČR, č. LM2015071, řešeného v letech 2016–2019. Jde o první jazykovou pomůcku svého druhu. UNTRANSLATED'
             }),
             author: 'Ústav pro jazyk český AV ČR',
-            href: 'https://slovnikcestiny.cz/o_slovniku.php'
+            href: 'https://prirucka.ujc.cas.cz/?id=_about'
         })
     }
 
     getBacklink(queryId:number, subqueryId?:number):Backlink|null {
         return {
             queryId,
-            label: 'heslo v Akademickém slovníku současné češtiny',
+            label: 'heslo v Internetové jazykové příručce',
         };
     }
 }

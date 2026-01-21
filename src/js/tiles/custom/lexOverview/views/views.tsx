@@ -26,7 +26,8 @@ import { LexOverviewModel, LexOverviewModelState } from '../model.js';
 import { init as initLangGuideViews } from './langGuide/views.js';
 import { init as initCorpusViews } from './corpus/views.js';
 import * as S from './style.js';
-import { List } from 'cnc-tskit';
+import { List, pipe } from 'cnc-tskit';
+import { Variant } from '../common.js';
 
 
 export function init(
@@ -44,13 +45,13 @@ export function init(
 
     const LexOverviewHeader: React.FC<{
         title: string;
-        variants?: Array<string>;
+        variants: Array<Variant>;
     }> = (props) => {
         return (
             <S.Header>
                 <h2>{props.title}</h2>
                 {props.variants ?
-                    List.map(variant => <h4>{variant}</h4>, props.variants) :
+                    List.map(variant => <h4>{variant.value}</h4>, props.variants) :
                     null}
             </S.Header>
         );
@@ -92,18 +93,21 @@ export function init(
 
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
-                hasData={props.data !== null && !!props.data.heading}
+                hasData={props.data !== null && !!props.selectedVariant?.value}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.LexOverviewTileView>
-                    <LexOverviewHeader title={props.data.heading} />
+                    <LexOverviewHeader
+                        title={props.selectedVariant?.value}
+                        variants={props.data.variants}
+                    />
                     <LexOverviewBasics
-                        pronunciation={'TODO'}
-                        partOfSpeach={'TODO'}
+                        pronunciation={props.data.asscData.items[0]?.pronunciation}
+                        partOfSpeach={props.data.asscData.items[0]?.pos}
                         source={'Akademický slovník češtiny'}
                     />
-                    <langGuideViews.Subtile data={props.data} />
+                    <langGuideViews.Subtile data={null} />
                     <corpusViews.Subtile data={props.queryMatch} />
                 </S.LexOverviewTileView>
             </globalComponents.TileWrapper>

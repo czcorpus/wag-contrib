@@ -24,8 +24,8 @@ import {
     TileConf, ITileProvider, TileComponent, TileFactory,
     TileFactoryArgs, DEFAULT_ALT_VIEW_ICON, ITileReloader, AltViewIconProps } from '../../../page/tile.js';
 import { LexOverviewModel } from './model.js';
-import { UjcLGuideApi } from './api.js';
-import { mkEmptyData } from './common.js';
+import { LexApi } from './api.js';
+import { createEmptyData } from './common.js';
 
 
 export interface LexOverviewTileConf extends TileConf {
@@ -44,7 +44,7 @@ export class LexOverviewBookTile implements ITileProvider {
 
     private readonly widthFract:number;
 
-    private readonly api:UjcLGuideApi;
+    private readonly api:LexApi;
 
     private view:TileComponent;
 
@@ -56,7 +56,7 @@ export class LexOverviewBookTile implements ITileProvider {
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.api = new UjcLGuideApi(conf.apiURL, appServices);
+        this.api = new LexApi(conf.apiURL, appServices);
         this.model = new LexOverviewModel({
             dispatcher,
             appServices,
@@ -66,7 +66,9 @@ export class LexOverviewBookTile implements ITileProvider {
             initState: {
                 isBusy: isBusy,
                 queryMatch: findCurrQueryMatch(queryMatches[0]),
-                data: mkEmptyData(),
+                selectedVariant: null,
+                mainSource: null,
+                data: createEmptyData(),
                 error: null,
                 backlink: null,
             }

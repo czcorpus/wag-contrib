@@ -21,10 +21,10 @@ import { IActionDispatcher, ViewUtils } from 'kombo';
 import * as React from 'react';
 import { GlobalComponents } from '../../../../../views/common/index.js';
 import { Actions } from '../../actions.js';
-import { CaseData, ComparisonData, ConjugationData } from '../../common.js';
+import { CaseData, ComparisonData, ConjugationData } from '../../commonLguide.js';
 import * as S from '../style.js';
 import * as LS from './style.js';
-import { DataStructure } from '../../common.js';
+import { DataStructure } from '../../commonLguide.js';
 
 
 export function init(
