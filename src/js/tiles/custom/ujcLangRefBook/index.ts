@@ -149,6 +149,10 @@ export class UjcLangRefBookTile implements ITileProvider {
     hideOnNoData():boolean {
         return false;
     }
+
+    supportsSublemma(): boolean {
+        return false;
+    }
 }
 
 export const init:TileFactory<UjcLangRefBookTileConf> = {

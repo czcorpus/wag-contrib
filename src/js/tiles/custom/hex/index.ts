@@ -157,6 +157,10 @@ export class HexTile implements ITileProvider {
     hideOnNoData():boolean {
         return false;
     }
+
+    supportsSublemma(): boolean {
+        return false;
+    }
 }
 
 export const init:TileFactory<HexTileConf> = {
