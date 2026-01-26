@@ -93,13 +93,13 @@ export function init(
 
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
-                hasData={props.data !== null && !!props.selectedVariant?.value}
+                hasData={props.data !== null && !!props.data.current}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.LexOverviewTileView>
                     <LexOverviewHeader
-                        title={props.selectedVariant?.value}
+                        title={props.data.current?.value}
                         variants={props.data.variants}
                     />
                     <LexOverviewBasics
@@ -107,7 +107,7 @@ export function init(
                         partOfSpeach={props.data.asscData.items[0]?.pos}
                         source={'Akademický slovník češtiny'}
                     />
-                    <langGuideViews.Subtile data={null} />
+                    <langGuideViews.Subtile data={props.data.lguideData} />
                     <corpusViews.Subtile data={props.queryMatch} />
                 </S.LexOverviewTileView>
             </globalComponents.TileWrapper>

@@ -37,4 +37,11 @@ export class Actions {
         name: 'LEX_OVERVIEW_TILE_REQUEST_ALTERNATIVE'
     };
 
+    static ActiveMeaningData:Action<{
+        tileId: number;
+        type: string;
+        data: any;
+    }> = {
+        name: 'LEX_OVERVIEW_ACTIVE_MEANING_DATA'
+    };
 }

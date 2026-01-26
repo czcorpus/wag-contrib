@@ -44,7 +44,6 @@ export interface LexOverviewModelArgs {
     dispatcher:IActionQueue;
     initState:LexOverviewModelState;
     tileId:number;
-    // api:UjcLGuideApi,
     api: LexApi;
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
@@ -102,8 +101,8 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                 } else {
                     state.data = action.payload.aggregate;
                     state.selectedVariant = {
-                        id: action.payload.aggregate.variants[0]?.[0]?.value,
-                        value: action.payload.aggregate.variants[0]?.[0]?.value,
+                        id: action.payload.aggregate.variants[0]?.id,
+                        value: action.payload.aggregate.variants[0]?.value,
                     };
                     state.mainSource = 'assc';
                     state.backlink = this.api.getBacklink(0);
@@ -166,6 +165,8 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
         };
         this.api.call(this.appServices.dataStreaming(), this.tileId, 0, args).subscribe({
             next: data => {
+                console.log(data);
+                
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
                     payload: {
@@ -189,47 +190,4 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
             }
         });
     }
-
-    /*
-    private loadDataLguide(dispatch:SEDispatcher, state:LexOverviewModelState, q:string, direct:boolean) {
-        const args:UjcLGuideRequestArgs = {
-            q,
-            direct: direct ? 1 : 0
-        };
-        this.api.call(this.appServices.dataStreaming(), this.tileId, 0, args).subscribe({
-            next: data => {
-                if (direct) {
-                    data.alternatives = state.data.alternatives;
-                }
-                data.isDirect = direct;
-                data.rawQuery = q;
-
-                dispatch<typeof Actions.TileDataLoaded>({
-                    name: Actions.TileDataLoaded.name,
-                    payload: {
-                        tileId: this.tileId,
-                        isEmpty: false,
-                        aggregate: data
-                    }
-                });
-            },
-            error: error => {
-                console.error(error);
-                dispatch<typeof Actions.TileDataLoaded>({
-                    name: Actions.TileDataLoaded.name,
-                    error,
-                    payload: {
-                        tileId: this.tileId,
-                        isEmpty: true,
-                        aggregate: {
-                            ...mkEmptyData(),
-                            isDirect: true,
-                            rawQuery: q
-                        },
-                    }
-                });
-            }
-        });
-    }
-    */
 }

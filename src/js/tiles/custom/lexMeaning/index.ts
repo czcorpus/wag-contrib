@@ -52,7 +52,7 @@ export class LexMeaningTile implements ITileProvider {
 
     constructor({
         tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
-        queryMatches}:TileFactoryArgs<LexMeaningTileConf>
+        queryMatches, readDataFromTile}:TileFactoryArgs<LexMeaningTileConf>
     ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
@@ -71,7 +71,8 @@ export class LexMeaningTile implements ITileProvider {
                 data: createEmptyData(),
                 error: null,
                 backlink: null,
-            }
+            },
+            readDataFromTile
         });
         this.label = appServices.importExternalMessage(conf.label || 'lex_meaning__main_label');
         this.view = viewInit(

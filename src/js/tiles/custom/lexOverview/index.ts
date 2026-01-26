@@ -50,7 +50,7 @@ export class LexOverviewBookTile implements ITileProvider {
 
     constructor({
         tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
-        queryMatches}:TileFactoryArgs<LexOverviewTileConf>
+        queryMatches, readDataFromTile}:TileFactoryArgs<LexOverviewTileConf>
     ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;

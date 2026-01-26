@@ -62,21 +62,20 @@ export class LexApi implements ResourceApi<LexArgs, AggregateData> {
     }
 
     call(streaming:IDataStreaming|null, tileId:number, queryIdx:number, queryArgs:LexArgs):Observable<AggregateData> {
-        const url = this.apiURL.replace(/\/$/, '') + '/aggregate';
         return streaming ?
             streaming.registerTileRequest<AggregateData>(
                 {
                     tileId,
                     queryIdx,
                     method: HTTP.Method.GET,
-                    url: url + '?' + this.prepareArgs(queryArgs),
+                    url: this.apiURL + '?' + this.prepareArgs(queryArgs),
                     body: {},
                     contentType: 'application/json',
                 }
             ) :
             ajax$<AggregateData>(
                 HTTP.Method.GET,
-                url,
+                this.apiURL,
                 queryArgs,
             );
     }
