@@ -22,24 +22,26 @@ import * as lguide from "./commonLguide.js";
 export interface Variant {
 	id: string;
 	value: string;
-	pos: string;
+	info: string;
 	link: string;
 }
 
 export interface AggregateData {
-	current: Variant;
-	variants: Array<Variant>;
+	variants: {
+		source: string;
+		items: Array<Variant>;
+	};
 	asscData: assc.DataStructure;
 	lguideData: lguide.DataStructure;
-	query: string;
 }
 
 export function createEmptyData():AggregateData {
 	return {
-		current: null,
-		variants: [],
+		variants: {
+			source: "",
+			items: [],
+		},
 		asscData: assc.createEmptyData(),
 		lguideData: lguide.mkEmptyData(),
-		query: null,
 	}
 }

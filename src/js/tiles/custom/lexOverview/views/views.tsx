@@ -91,23 +91,59 @@ export function init(
             })
         }
 
+        let overview: {
+            pronunciation: string;
+            partOfSpeach: string;
+            source: string;
+        };
+        switch (props.data.variants.source) {
+            case 'assc':
+                overview = {
+                    pronunciation: props.data.asscData.items[0]?.pronunciation,
+                    partOfSpeach: props.data.asscData.items[0]?.pos,
+                    source: 'Akademický slovník češtiny',
+                };
+                break;
+            case 'lguide':
+                overview = {
+                    pronunciation: props.data.lguideData.pronunciation,
+                    source: 'Internetová jazyková příručka',
+                    partOfSpeach: null,
+                };
+                break;
+            default:
+                overview = null;
+        }
+        
+        const overviewHasData =
+            overview !== null &&
+            (!!overview.pronunciation ||
+             !!overview.partOfSpeach);
+
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
-                hasData={props.data !== null && !!props.data.current}
+                hasData={!props.isBusy}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.LexOverviewTileView>
                     <LexOverviewHeader
-                        title={props.data.current?.value}
-                        variants={props.data.variants}
+                        title={props.selectedVariant?.value || props.queryMatch.lemma}
+                        variants={props.data.variants.items}
                     />
-                    <LexOverviewBasics
-                        pronunciation={props.data.asscData.items[0]?.pronunciation}
-                        partOfSpeach={props.data.asscData.items[0]?.pos}
-                        source={'Akademický slovník češtiny'}
-                    />
-                    <langGuideViews.Subtile data={props.data.lguideData} />
+                    {overviewHasData ?
+                        <LexOverviewBasics
+                            pronunciation={overview.pronunciation}
+                            partOfSpeach={overview.partOfSpeach}
+                            source={overview.source}
+                        /> :
+                        null
+                    }
+                    
+                    {props.data.lguideData ?
+                        <langGuideViews.Subtile data={props.data.lguideData} /> :
+                        null
+                    }
                     <corpusViews.Subtile data={props.queryMatch} />
                 </S.LexOverviewTileView>
             </globalComponents.TileWrapper>

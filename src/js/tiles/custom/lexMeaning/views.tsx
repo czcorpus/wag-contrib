@@ -39,7 +39,7 @@ export function init(
 
     const LexMeaningTileView: React.FC<LexMeaningModelState & CoreTileComponentProps> = (props) => {
 
-        const renderDataItem = (item: DataItem, i) => {
+        const renderDataItem = (item: DataItem, i: number) => {
             return <div>
                 {i > 0 ? <hr/> : null}
                 <S.MeaningHeading>
@@ -60,13 +60,13 @@ export function init(
 
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
-                hasData={props.data.items.length > 0}
+                hasData={!!props.data}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.MeaningTileView>
                     <S.MeaningBox>
-                        {List.map((item, i) => renderDataItem(item, i), props.data.items)}
+                        {props.data ? renderDataItem(props.data, 0) : null}
                     </S.MeaningBox>
                 </S.MeaningTileView>
             </globalComponents.TileWrapper>

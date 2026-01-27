@@ -213,23 +213,6 @@ export function init(
                     </S.SubtileRow> :
                     null
                 }
-                {props.data.alternatives ?
-                    <S.SubtileRow>
-                        <span className='key'>{ut.translate('lex_overview__overview_alternatives')}:</span>
-                        {
-                            List.map(
-                                (alt, i) => (
-                                    <span className='value alternative' key={`alt:${i}:${alt.id}`}>
-                                        {props.data.rawQuery === alt.id && props.data.isDirect ? '\u2713' : ''}
-                                        <a onClick={e => handleAlternative(alt.id)}>{props.data.heading}{alt.info}</a>
-                                    </span>
-                                ),
-                                props.data.alternatives
-                            )
-                        }
-                    </S.SubtileRow> :
-                    null
-                }
 
             {!!props.data.comparison.comparative || !!props.data.comparison.superlative ?
                 <S.SubtileRow>

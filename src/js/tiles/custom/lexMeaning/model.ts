@@ -29,12 +29,13 @@ import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
 import { IDataStreaming } from 'src/js/page/streaming.js';
 import { AggregateData } from '../lexOverview/common.js';
 import { map, Observable } from 'rxjs';
+import { DataItem } from '../lexOverview/commonAssc.js';
 
 
 export interface LexMeaningModelState {
     isBusy:boolean;
     queries:Array<string>;
-    data:DataStructure;
+    data:DataItem;
     error:string;
     backlink:Backlink;
 }
@@ -73,7 +74,7 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                 state.queries = [match.lemma||match.word];
                 state.isBusy = true;
                 state.error = null;
-                state.data = createEmptyData();
+                state.data = null;
                 state.backlink = null;
             },
             (state, action, dispatch) => {
@@ -90,7 +91,7 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                     state.error = action.error.message;
 
                 } else {
-                    state.data = action.payload.data;
+                    state.data = action.payload.data?.items[0];
                     state.backlink = this.api.getBacklink(0);
                 }
             }
@@ -132,7 +133,7 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
             action => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
-                window.open(`https://slovnikcestiny.cz/heslo/${state.data.query}/`, '_blank');
+                window.open(`https://slovnikcestiny.cz/heslo/state.data.query/`, '_blank');
             }
         );
 
@@ -160,9 +161,7 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                     )
             : this.api.call(streaming, this.tileId, 0, {q: state.queries})
         ).subscribe({
-            next: data => {
-                console.log(data);
-                
+            next: data => {                
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
                     payload: {

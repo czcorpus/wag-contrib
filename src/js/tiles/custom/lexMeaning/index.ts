@@ -68,7 +68,7 @@ export class LexMeaningTile implements ITileProvider {
             initState: {
                 isBusy: isBusy,
                 queries: [],
-                data: createEmptyData(),
+                data: null,
                 error: null,
                 backlink: null,
             },

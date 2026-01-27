@@ -24,17 +24,13 @@ import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
 import { LexApi, LexArgs } from './api.js';
-import { AggregateData, createEmptyData } from './common.js';
+import { AggregateData, createEmptyData, Variant } from './common.js';
 
 
 export interface LexOverviewModelState {
     isBusy:boolean;
     queryMatch:QueryMatch;
-    selectedVariant:{
-        id:string;
-        value: string;
-    };
-    mainSource:string;
+    selectedVariant:Variant;
     data:AggregateData;
     error:string;
     backlink:Backlink;
@@ -66,10 +62,10 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
         this.addActionHandler(
             GlobalActions.RequestQueryResponse,
             (state, action) => {
-                const match = findCurrQueryMatch(List.head(queryMatches));
+                
                 state.isBusy = true;
                 state.error = null;
-                state.data = {...createEmptyData(), query: match.lemma || match.word};
+                state.data = createEmptyData();
                 state.backlink = null;
             },
             (state, action, dispatch) => {
@@ -100,11 +96,7 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
 
                 } else {
                     state.data = action.payload.aggregate;
-                    state.selectedVariant = {
-                        id: action.payload.aggregate.variants[0]?.id,
-                        value: action.payload.aggregate.variants[0]?.value,
-                    };
-                    state.mainSource = 'assc';
+                    state.selectedVariant = action.payload.aggregate.variants.items[0];
                     state.backlink = this.api.getBacklink(0);
                 }
             }
