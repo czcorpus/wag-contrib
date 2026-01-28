@@ -74,18 +74,6 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
             }
         );
 
-        this.addActionHandler(
-            Actions.RequestAlternative,
-            (state, action) => {
-                state.isBusy = true;
-                state.error = null;
-                state.data = null;
-            },
-            (state, action, dispatch) => {
-                this.loadData(dispatch, action.payload.id);
-            }
-        );
-
         this.addActionSubtypeHandler(
             Actions.TileDataLoaded,
             action => action.payload.tileId === this.tileId,
@@ -147,6 +135,24 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                 }
                 */
                 window.open(backlinkUrl.toString(), '_blank');
+            }
+        );
+
+        this.addActionSubtypeHandler(
+            Actions.SelectVariant,
+            action => action.payload.tileId === this.tileId,
+            (state, action) => {
+                state.selectedVariant = state.data.variants.items[action.payload.idx];
+            },
+            (state, action, dispatch) => {
+                dispatch<typeof Actions.SendActiveMeaningData>({
+                    name: Actions.SendActiveMeaningData.name,
+                    payload: {
+                        tileId: this.tileId,
+                        type: state.data.variants.source,
+                        data: state.selectedVariant.itemIdx >= 0 ? state.data.asscData.items[state.selectedVariant.itemIdx] : null,
+                    }
+                });
             }
         );
     }

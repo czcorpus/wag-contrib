@@ -180,13 +180,6 @@ export function init(
         color?: string;
     }> = (props) => {
 
-        const handleAlternative = (id:string) => {
-            dispatcher.dispatch<typeof Actions.RequestAlternative>({
-                name: Actions.RequestAlternative.name,
-                payload: {id: id},
-            })
-        }
-
         return <S.Subtile color={props.color || defaultColor}>
             <S.SubtileRow>
                 <span className='key'>{ut.translate('lex_overview__overview_syllabification')}:</span>

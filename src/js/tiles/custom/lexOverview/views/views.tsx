@@ -44,14 +44,22 @@ export function init(
     // -------------------- <LexOverviewHeader /> -----------------------------------------------
 
     const LexOverviewHeader: React.FC<{
+        tileId: number;
         title: string;
         variants: Array<Variant>;
     }> = (props) => {
+        const handleVariantClick = (idx: number) => {
+            dispatcher.dispatch(
+                Actions.SelectVariant,
+                {tileId: props.tileId, idx},
+            );
+        }
+
         return (
             <S.Header>
                 <h2>{props.title}</h2>
                 {props.variants ?
-                    List.map(variant => <h4>{variant.value}</h4>, props.variants) :
+                    List.map((variant, i) => <h4 className="variant" onClick={() => handleVariantClick(i)}>{variant.value}</h4>, props.variants) :
                     null}
             </S.Header>
         );
@@ -84,13 +92,6 @@ export function init(
 
     const LexOverviewTileView: React.FC<LexOverviewModelState & CoreTileComponentProps> = (props) => {
 
-        const handleAlternative = (id:string) => {
-            dispatcher.dispatch<typeof Actions.RequestAlternative>({
-                name: Actions.RequestAlternative.name,
-                payload: {id: id},
-            })
-        }
-
         let overview: {
             pronunciation: string;
             partOfSpeach: string;
@@ -98,11 +99,13 @@ export function init(
         };
         switch (props.data.variants.source) {
             case 'assc':
-                overview = {
-                    pronunciation: props.data.asscData.items[0]?.pronunciation,
-                    partOfSpeach: props.data.asscData.items[0]?.pos,
-                    source: 'Akademický slovník češtiny',
-                };
+                overview = props.selectedVariant.itemIdx >= 0 ?
+                    {
+                        pronunciation: props.data.asscData.items[props.selectedVariant.itemIdx]?.pronunciation,
+                        partOfSpeach: props.data.asscData.items[props.selectedVariant.itemIdx]?.pos,
+                        source: 'Akademický slovník češtiny',
+                    } :
+                    null;
                 break;
             case 'lguide':
                 overview = {
@@ -128,6 +131,7 @@ export function init(
             >
                 <S.LexOverviewTileView>
                     <LexOverviewHeader
+                        tileId={props.tileId}
                         title={props.selectedVariant?.value || props.queryMatch.lemma}
                         variants={props.data.variants.items}
                     />

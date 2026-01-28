@@ -18,7 +18,7 @@
 
 import { Action } from 'kombo';
 import { Actions as GlobalActions } from '../../../models/actions.js';
-import { AggregateData } from './common.js';
+import { AggregateData, Variant } from './common.js';
 
 
 export interface DataLoadedPayload {
@@ -31,17 +31,18 @@ export class Actions {
         name: GlobalActions.TileDataLoaded.name
     };
 
-    static RequestAlternative:Action<{
-        id: string
+    static SelectVariant:Action<{
+        tileId: number;
+        idx: number;
     }> = {
-        name: 'LEX_OVERVIEW_TILE_REQUEST_ALTERNATIVE'
+        name: 'LEX_OVERVIEW_SELECT_VARIANT'
     };
 
-    static ActiveMeaningData:Action<{
+    static SendActiveMeaningData:Action<{
         tileId: number;
         type: string;
         data: any;
     }> = {
-        name: 'LEX_OVERVIEW_ACTIVE_MEANING_DATA'
+        name: 'LEX_OVERVIEW_SEND_ACTIVE_MEANING_DATA'
     };
 }

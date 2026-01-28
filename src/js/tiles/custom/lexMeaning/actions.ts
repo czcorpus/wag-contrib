@@ -18,11 +18,11 @@
 
 import { Action } from 'kombo';
 import { Actions as GlobalActions } from '../../../models/actions.js';
-import { ASSCDataStructure } from './common.js';
+import { DataItem } from './common.js';
 
 
 export interface DataLoadedPayload {
-    data:ASSCDataStructure;
+    data:DataItem;
 }
 
 export class Actions {

@@ -24,6 +24,7 @@ export interface Variant {
 	value: string;
 	info: string;
 	link: string;
+	itemIdx: number;
 }
 
 export interface AggregateData {

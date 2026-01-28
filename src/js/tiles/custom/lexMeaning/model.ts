@@ -91,8 +91,7 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                     state.error = action.error.message;
 
                 } else {
-                    state.data = action.payload.data?.items[0];
-                    state.backlink = this.api.getBacklink(0);
+                    state.data = action.payload.data;
                 }
             }
         );
@@ -138,7 +137,7 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
         );
 
         this.addActionSubtypeHandler(
-            LexActions.ActiveMeaningData,
+            LexActions.SendActiveMeaningData,
             action => typeof this.readDataFromTile === 'number' && action.payload.tileId === this.readDataFromTile,
             (state, action) => {
                 state.data = action.payload.data;
@@ -157,9 +156,12 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                         contentType: 'application/json',
                     })
                     .pipe(
-                        map(resp => ({...resp.asscData}))
+                        map(resp => resp.asscData.items[resp.variants.items[0]?.itemIdx])
                     )
             : this.api.call(streaming, this.tileId, 0, {q: state.queries})
+            .pipe(
+                map(resp => resp.items[0])
+            )
         ).subscribe({
             next: data => {                
                 dispatch<typeof Actions.TileDataLoaded>({
@@ -167,7 +169,7 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                     payload: {
                         tileId: this.tileId,
                         isEmpty: false,
-                        data
+                        data,
                     }
                 });
             },
@@ -179,7 +181,7 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                     payload: {
                         tileId: this.tileId,
                         isEmpty: true,
-                        data: createEmptyData(),
+                        data: null,
                     }
                 });
             }
