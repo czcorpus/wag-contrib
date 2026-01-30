@@ -60,7 +60,7 @@ export function init(
 
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
-                hasData={!!props.data}
+                hasData={!!props.data && props.data.meaning.length > 0}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
             >

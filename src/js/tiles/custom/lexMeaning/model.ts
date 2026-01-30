@@ -137,9 +137,18 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
         );
 
         this.addActionSubtypeHandler(
+            LexActions.SelectVariant,
+            action => typeof this.readDataFromTile === 'number' && action.payload.tileId === this.readDataFromTile,
+            (state, action) => {
+                state.isBusy = true;
+            },
+        );
+
+        this.addActionSubtypeHandler(
             LexActions.SendActiveMeaningData,
             action => typeof this.readDataFromTile === 'number' && action.payload.tileId === this.readDataFromTile,
             (state, action) => {
+                state.isBusy = false;
                 state.data = action.payload.data;
             },
         );
@@ -156,7 +165,8 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                         contentType: 'application/json',
                     })
                     .pipe(
-                        map(resp => resp.asscData.items[resp.variants.items[0]?.itemIdx])
+                        map(resp => resp.variants.source === 'assc' ?
+                                resp.asscData.items[resp.variants.items[0]?.itemIdx] : null)
                     )
             : this.api.call(streaming, this.tileId, 0, {q: state.queries})
             .pipe(

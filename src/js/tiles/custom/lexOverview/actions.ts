@@ -19,6 +19,7 @@
 import { Action } from 'kombo';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { AggregateData, Variant } from './common.js';
+import { DataItem, DataStructure } from './commonAssc.js';
 
 
 export interface DataLoadedPayload {
@@ -29,6 +30,15 @@ export class Actions {
 
     static TileDataLoaded:Action<typeof GlobalActions.TileDataLoaded.payload & DataLoadedPayload> = {
         name: GlobalActions.TileDataLoaded.name
+    };
+
+    static ASSCDataLoaded:Action<{
+        tileId: number;
+        selectedVariantIdx: number;
+        items: Array<DataItem>;
+        variants: Array<Variant>;
+    }> = {
+        name: 'LEX_OVERVIEW_ASSC_DATA_LOADED'
     };
 
     static SelectVariant:Action<{

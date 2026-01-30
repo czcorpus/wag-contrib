@@ -17,6 +17,7 @@
  */
 
 export interface DataItem {
+	id: string;
 	key: string;
 	pronunciation: string;
 	audioFile: string;

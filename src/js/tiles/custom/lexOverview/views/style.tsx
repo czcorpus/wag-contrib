@@ -40,10 +40,8 @@ export const Header = styled.div<{ theme: Theme }>`
         margin: 0.1em 1em;
         cursor: pointer;
 
-        &.selected {
-            font-weight: bold;
-            text-decoration: underline;
-            cursor: default;
+        a {
+            text-decoration: none;
         }
     }
 `;

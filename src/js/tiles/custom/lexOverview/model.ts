@@ -22,7 +22,7 @@ import { Backlink } from '../../../page/tile.js';
 import { findCurrQueryMatch, QueryMatch, RecognizedQueries } from '../../../query/index.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
-import { List } from 'cnc-tskit';
+import { List, pipe } from 'cnc-tskit';
 import { LexApi, LexArgs } from './api.js';
 import { AggregateData, createEmptyData, Variant } from './common.js';
 
@@ -30,7 +30,7 @@ import { AggregateData, createEmptyData, Variant } from './common.js';
 export interface LexOverviewModelState {
     isBusy:boolean;
     queryMatch:QueryMatch;
-    selectedVariant:Variant;
+    selectedVariantIdx:number;
     data:AggregateData;
     error:string;
     backlink:Backlink;
@@ -84,7 +84,7 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
 
                 } else {
                     state.data = action.payload.aggregate;
-                    state.selectedVariant = action.payload.aggregate.variants.items[0];
+                    state.selectedVariantIdx = 0;
                     state.backlink = this.api.getBacklink(0);
                 }
             }
@@ -142,17 +142,42 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
             Actions.SelectVariant,
             action => action.payload.tileId === this.tileId,
             (state, action) => {
-                state.selectedVariant = state.data.variants.items[action.payload.idx];
+                const selectedVariant = state.data.variants.items[action.payload.idx];
+                if (selectedVariant.itemIdx >= 0) {
+                    state.selectedVariantIdx = action.payload.idx;
+                } else {
+                    state.isBusy = true;
+                }
             },
             (state, action, dispatch) => {
-                dispatch<typeof Actions.SendActiveMeaningData>({
-                    name: Actions.SendActiveMeaningData.name,
-                    payload: {
-                        tileId: this.tileId,
-                        type: state.data.variants.source,
-                        data: state.selectedVariant.itemIdx >= 0 ? state.data.asscData.items[state.selectedVariant.itemIdx] : null,
-                    }
-                });
+                const selectedVariant = state.data.variants.items[action.payload.idx];
+                if (selectedVariant.itemIdx >= 0 && state.data.variants.source === 'assc') {
+                    dispatch<typeof Actions.SendActiveMeaningData>({
+                        name: Actions.SendActiveMeaningData.name,
+                        payload: {
+                            tileId: this.tileId,
+                            type: state.data.variants.source,
+                            data: selectedVariant.itemIdx >= 0 ? state.data.asscData.items[selectedVariant.itemIdx] : null,
+                        }
+                    });
+                } else if (state.data.variants.source === 'assc') {
+                    this.loadASSCData(dispatch, state, action.payload.idx);
+                }
+            }
+        );
+
+        this.addActionSubtypeHandler(
+            Actions.ASSCDataLoaded,
+            action => action.payload.tileId === this.tileId,
+            (state, action) => {
+                state.isBusy = false;
+                if (action.error) {
+                    state.error = action.error.message;
+                } else {
+                    state.data.asscData.items = action.payload.items;
+                    state.data.variants.items = action.payload.variants;
+                    state.selectedVariantIdx = action.payload.selectedVariantIdx;
+                }
             }
         );
     }
@@ -161,10 +186,13 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
         const args:LexArgs = {
             term,
         };
-        this.api.call(this.appServices.dataStreaming(), this.tileId, 0, args).subscribe({
+        this.api.call(
+            this.appServices.dataStreaming(),
+            this.tileId,
+            0,
+            args,
+        ).subscribe({
             next: data => {
-                console.log(data);
-                
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
                     payload: {
@@ -183,6 +211,75 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                         tileId: this.tileId,
                         isEmpty: true,
                         aggregate: createEmptyData(),
+                    }
+                });
+            }
+        });
+    }
+
+    private loadASSCData(dispatch:SEDispatcher, state:LexOverviewModelState, selectedVariantIdx:number): void {
+        const selectedVariant = state.data.variants.items[selectedVariantIdx];
+        this.api.loadASSC(
+            this.appServices.dataStreaming().startNewSubgroup(this.tileId),
+            this.tileId,
+            0,
+            selectedVariant.link,
+        ).subscribe({
+            next: data => {
+                const newItems = [...state.data.asscData.items];
+                List.forEach(item => {
+                    if (!List.some(existingItem => existingItem.id === item.id && existingItem.key === item.key, newItems)) {
+                        newItems.push(item);
+                    }
+                }, data.items);
+                const newVariants = List.map(item => {
+                    const newItem = {...item}
+                    if (item.itemIdx === -1) {
+                        let count = 0;
+                        for (let i = 0; i < newItems.length; i++) {
+                            if (item.id === newItems[i].id) {
+                                newItem.itemIdx = i;
+                                return newItem;
+                            } else if (item.id.startsWith(newItems[i].id)) {
+                                count++;
+                                if (item.id === newItems[i].id + '-' + count) {
+                                    newItem.itemIdx = i;
+                                    return newItem;
+                                }
+                            }
+                        }
+                    }
+                    return newItem;
+                }, state.data.variants.items);                
+
+                dispatch<typeof Actions.ASSCDataLoaded>({
+                    name: Actions.ASSCDataLoaded.name,
+                    payload: {
+                        tileId: this.tileId,
+                        selectedVariantIdx,
+                        items: newItems,
+                        variants: newVariants,
+                    }
+                });
+                dispatch<typeof Actions.SendActiveMeaningData>({
+                    name: Actions.SendActiveMeaningData.name,
+                    payload: {
+                        tileId: this.tileId,
+                        type: state.data.variants.source,
+                        data: newItems[newVariants[selectedVariantIdx].itemIdx],
+                    }
+                });
+            },
+            error: error => {
+                console.error(error);
+                dispatch<typeof Actions.ASSCDataLoaded>({
+                    name: Actions.ASSCDataLoaded.name,
+                    error,
+                    payload: {
+                        tileId: this.tileId,
+                        selectedVariantIdx: null,
+                        items: null,
+                        variants: null,
                     }
                 });
             }

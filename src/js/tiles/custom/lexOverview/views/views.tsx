@@ -26,7 +26,7 @@ import { LexOverviewModel, LexOverviewModelState } from '../model.js';
 import { init as initLangGuideViews } from './langGuide/views.js';
 import { init as initCorpusViews } from './corpus/views.js';
 import * as S from './style.js';
-import { List, pipe } from 'cnc-tskit';
+import { List } from 'cnc-tskit';
 import { Variant } from '../common.js';
 
 
@@ -46,6 +46,7 @@ export function init(
     const LexOverviewHeader: React.FC<{
         tileId: number;
         title: string;
+        selectedVariantIdx: number;
         variants: Array<Variant>;
     }> = (props) => {
         const handleVariantClick = (idx: number) => {
@@ -58,9 +59,9 @@ export function init(
         return (
             <S.Header>
                 <h2>{props.title}</h2>
-                {props.variants ?
-                    List.map((variant, i) => <h4 className="variant" onClick={() => handleVariantClick(i)}>{variant.value}</h4>, props.variants) :
-                    null}
+                {List.map((variant, i) => i === props.selectedVariantIdx ? null :
+                    <h4 className="variant"><a onClick={() => handleVariantClick(i)}>{variant.value}</a></h4>, props.variants)
+                }
             </S.Header>
         );
     }
@@ -96,26 +97,29 @@ export function init(
             pronunciation: string;
             partOfSpeach: string;
             source: string;
-        };
-        switch (props.data.variants.source) {
-            case 'assc':
-                overview = props.selectedVariant.itemIdx >= 0 ?
-                    {
-                        pronunciation: props.data.asscData.items[props.selectedVariant.itemIdx]?.pronunciation,
-                        partOfSpeach: props.data.asscData.items[props.selectedVariant.itemIdx]?.pos,
-                        source: 'Akademický slovník češtiny',
-                    } :
-                    null;
-                break;
-            case 'lguide':
-                overview = {
-                    pronunciation: props.data.lguideData.pronunciation,
-                    source: 'Internetová jazyková příručka',
-                    partOfSpeach: null,
-                };
-                break;
-            default:
-                overview = null;
+        } = null;
+        const selectedVariant = props.selectedVariantIdx !== null ? props.data.variants.items[props.selectedVariantIdx] : null;
+        if (selectedVariant !== null ) {
+            switch (props.data.variants.source) {
+                case 'assc':
+                    overview = selectedVariant.itemIdx >= 0 ?
+                        {
+                            pronunciation: props.data.asscData.items[selectedVariant.itemIdx]?.pronunciation,
+                            partOfSpeach: props.data.asscData.items[selectedVariant.itemIdx]?.pos,
+                            source: 'Akademický slovník češtiny',
+                        } :
+                        null;
+                    break;
+                case 'lguide':
+                    overview = {
+                        pronunciation: props.data.lguideData.pronunciation,
+                        source: 'Internetová jazyková příručka',
+                        partOfSpeach: null,
+                    };
+                    break;
+                default:
+                    overview = null;
+            }
         }
         
         const overviewHasData =
@@ -125,14 +129,15 @@ export function init(
 
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
-                hasData={!props.isBusy}
+                hasData={true}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.LexOverviewTileView>
                     <LexOverviewHeader
                         tileId={props.tileId}
-                        title={props.selectedVariant?.value || props.queryMatch.lemma}
+                        title={selectedVariant?.value || props.queryMatch.lemma}
+                        selectedVariantIdx={props.selectedVariantIdx}
                         variants={props.data.variants.items}
                     />
                     {overviewHasData ?

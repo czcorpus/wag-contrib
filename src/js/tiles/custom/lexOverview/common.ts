@@ -42,7 +42,7 @@ export function createEmptyData():AggregateData {
 			source: "",
 			items: [],
 		},
-		asscData: assc.createEmptyData(),
-		lguideData: lguide.mkEmptyData(),
+		asscData: null,
+		lguideData: null,
 	}
 }

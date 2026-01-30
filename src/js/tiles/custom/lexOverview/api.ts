@@ -24,6 +24,7 @@ import { ResourceApi, SourceDetails, HTTPHeaders } from '../../../types.js';
 import { Backlink } from '../../../page/tile.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { AggregateData } from './common.js';
+import { DataStructure as ASSCDataStructure } from './commonAssc.js';
 
 
 export interface LexArgs {
@@ -77,6 +78,25 @@ export class LexApi implements ResourceApi<LexArgs, AggregateData> {
                 HTTP.Method.GET,
                 this.apiURL,
                 queryArgs,
+            );
+    }
+
+    loadASSC(streaming:IDataStreaming|null, tileId:number, queryIdx:number, link:string):Observable<ASSCDataStructure> {
+        return streaming ?
+            streaming.registerTileRequest<ASSCDataStructure>(
+                {
+                    tileId,
+                    queryIdx,
+                    method: HTTP.Method.GET,
+                    url: this.apiURL + '/assc?link=' + link,
+                    body: {},
+                    contentType: 'application/json',
+                }
+            ) :
+            ajax$<ASSCDataStructure>(
+                HTTP.Method.GET,
+                this.apiURL + '/assc?link=' + link,
+                {}
             );
     }
 

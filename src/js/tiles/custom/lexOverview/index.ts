@@ -66,7 +66,7 @@ export class LexOverviewBookTile implements ITileProvider {
             initState: {
                 isBusy: isBusy,
                 queryMatch: findCurrQueryMatch(queryMatches[0]),
-                selectedVariant: null,
+                selectedVariantIdx: null,
                 data: createEmptyData(),
                 error: null,
                 backlink: null,
