@@ -19,13 +19,13 @@
 import { Theme } from '../../../../page/theme.js';
 import { styled } from 'styled-components';
 
-export const LexOverviewTileView = styled.div`
+export const LexOverviewTileView = styled.div<{ theme: Theme }>`
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 `;
 
-export const Header = styled.div`
+export const Header = styled.div<{ theme: Theme }>`
     padding: 0.5em;
     display: flex;
     flex-direction: row;
@@ -36,12 +36,22 @@ export const Header = styled.div`
         margin: 0.1em 0;
     }
 
-    h4 {
+    .variant {
         margin: 0.1em 1em;
+        cursor: pointer;
+
+        a {
+            text-decoration: none;
+        }
+    }
+
+    .small {
+        font-size: 0.8em;
+        font-style: italic;
     }
 `;
 
-export const Subtile = styled.div<{color: string}>`
+export const Subtile = styled.div<{ theme: Theme; color: string}>`
     margin-top: 1em;
     padding: 0.5em;
     background-color: ${props => props.color};
@@ -70,7 +80,7 @@ export const Subtile = styled.div<{color: string}>`
     }
 `;
 
-export const SubtileRow = styled.div`
+export const SubtileRow = styled.div<{ theme: Theme }>`
     margin-bottom: 0.5em;
 
     .key {

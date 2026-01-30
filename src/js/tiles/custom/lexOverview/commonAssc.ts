@@ -49,13 +49,11 @@ export interface DataItem {
 export interface DataStructure {
 	items: Array<DataItem>;
 	notes: Array<string>;
-	query: string;
 }
 
 export function createEmptyData():DataStructure {
 	return {
 		items: [],
 		notes: [],
-		query: null,
 	}
 }

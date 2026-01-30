@@ -21,18 +21,18 @@ import { Observable, of as rxOf } from 'rxjs';
 import { IApiServices } from '../../../appServices.js';
 import { ajax$ } from '../../../page/ajax.js';
 import { ResourceApi, SourceDetails, HTTPHeaders } from '../../../types.js';
-import { DataStructure } from './common.js';
 import { Backlink } from '../../../page/tile.js';
 import { IDataStreaming } from '../../../page/streaming.js';
+import { AggregateData } from './common.js';
+import { DataStructure as ASSCDataStructure } from './commonAssc.js';
+import { DataStructure as LGuideDataStructure } from './commonLguide.js';
 
 
-export interface UjcLGuideRequestArgs {
-    q:string;
-    direct?:number;
+export interface LexArgs {
+    term:string;
 }
 
-
-export class UjcLGuideApi implements ResourceApi<UjcLGuideRequestArgs, DataStructure> {
+export class LexApi implements ResourceApi<LexArgs, AggregateData> {
 
     private readonly apiURL:string;
 
@@ -63,9 +63,9 @@ export class UjcLGuideApi implements ResourceApi<UjcLGuideRequestArgs, DataStruc
         )
     }
 
-    call(streaming:IDataStreaming|null, tileId:number, queryIdx:number, queryArgs:UjcLGuideRequestArgs):Observable<DataStructure> {
+    call(streaming:IDataStreaming|null, tileId:number, queryIdx:number, queryArgs:LexArgs):Observable<AggregateData> {
         return streaming ?
-            streaming.registerTileRequest<DataStructure>(
+            streaming.registerTileRequest<AggregateData>(
                 {
                     tileId,
                     queryIdx,
@@ -75,10 +75,48 @@ export class UjcLGuideApi implements ResourceApi<UjcLGuideRequestArgs, DataStruc
                     contentType: 'application/json',
                 }
             ) :
-            ajax$<DataStructure>(
+            ajax$<AggregateData>(
                 HTTP.Method.GET,
                 this.apiURL,
                 queryArgs,
+            );
+    }
+
+    loadASSC(streaming:IDataStreaming|null, tileId:number, queryIdx:number, link:string):Observable<ASSCDataStructure> {
+        return streaming ?
+            streaming.registerTileRequest<ASSCDataStructure>(
+                {
+                    tileId,
+                    queryIdx,
+                    method: HTTP.Method.GET,
+                    url: this.apiURL + '/assc?link=' + link,
+                    body: {},
+                    contentType: 'application/json',
+                }
+            ) :
+            ajax$<ASSCDataStructure>(
+                HTTP.Method.GET,
+                this.apiURL + '/assc?link=' + link,
+                {}
+            );
+    }
+
+    loadLGuide(streaming:IDataStreaming|null, tileId:number, queryIdx:number, id:string):Observable<LGuideDataStructure> {
+        return streaming ?
+            streaming.registerTileRequest<LGuideDataStructure>(
+                {
+                    tileId,
+                    queryIdx,
+                    method: HTTP.Method.GET,
+                    url: this.apiURL + '/lguide?id=' + id,
+                    body: {},
+                    contentType: 'application/json',
+                }
+            ) :
+            ajax$<LGuideDataStructure>(
+                HTTP.Method.GET,
+                this.apiURL + '/assc?id=' + id,
+                {}
             );
     }
 
@@ -86,22 +124,22 @@ export class UjcLGuideApi implements ResourceApi<UjcLGuideRequestArgs, DataStruc
         return rxOf({
             tileId,
             title: this.apiServices.importExternalMessage({
-                'cs-CZ': 'Internetová jazyková příručka',
-                'en-US': 'Internet Language Reference Book'
+                'cs-CZ': 'Akademický slovník současné češtiny',
+                'en-US': 'Academic Dictionary of Contemporary Czech'
             }),
             description: this.apiServices.importExternalMessage({
-                'cs-CZ': 'Internetová jazyková příručka (IJP) vznikla a byla rozvíjena s podporou projektu Jazyková poradna na internetu, č. 1ET200610406, řešeného v letech 2004–2008, projektu LINDAT/CLARIN Institut pro analýzu, zpracování a distribuci lingvistických dat, č. LM2010013, řešeného v letech 2013–2015, a projektu LINDAT/CLARIN Jazyková výzkumná infrastruktura v ČR, č. LM2015071, řešeného v letech 2016–2019. Jde o první jazykovou pomůcku svého druhu.',
-                'en-US': 'Internetová jazyková příručka (IJP) vznikla a byla rozvíjena s podporou projektu Jazyková poradna na internetu, č. 1ET200610406, řešeného v letech 2004–2008, projektu LINDAT/CLARIN Institut pro analýzu, zpracování a distribuci lingvistických dat, č. LM2010013, řešeného v letech 2013–2015, a projektu LINDAT/CLARIN Jazyková výzkumná infrastruktura v ČR, č. LM2015071, řešeného v letech 2016–2019. Jde o první jazykovou pomůcku svého druhu. UNTRANSLATED'
+                'cs-CZ': 'Původní webová aplikace vznikla v rámci grantového projektu Programu aplikovaného výzkumu a vývoje národní a kulturní identity (NAKI) Ministerstva kultury ČR – Nová cesta k modernímu jednojazyčnému výkladovému slovníku současné češtiny (DF13P01OVV011). Její nová verze je rozvíjena a financována z institucionálních prostředků Ústavu pro jazyk český AV ČR, v. v. i.',
+                'en-US': 'Původní webová aplikace vznikla v rámci grantového projektu Programu aplikovaného výzkumu a vývoje národní a kulturní identity (NAKI) Ministerstva kultury ČR – Nová cesta k modernímu jednojazyčnému výkladovému slovníku současné češtiny (DF13P01OVV011). Její nová verze je rozvíjena a financována z institucionálních prostředků Ústavu pro jazyk český AV ČR, v. v. i. UNTRANSLATED'
             }),
             author: 'Ústav pro jazyk český AV ČR',
-            href: 'https://prirucka.ujc.cas.cz/?id=_about'
+            href: 'https://slovnikcestiny.cz/o_slovniku.php'
         })
     }
 
     getBacklink(queryId:number, subqueryId?:number):Backlink|null {
         return {
             queryId,
-            label: 'heslo v Internetové jazykové příručce',
+            label: 'heslo v Akademickém slovníku současné češtiny',
         };
     }
 }

@@ -18,11 +18,13 @@
 
 import { Action } from 'kombo';
 import { Actions as GlobalActions } from '../../../models/actions.js';
-import { DataStructure } from './common.js';
+import { AggregateData, Variant } from './common.js';
+import { DataItem } from './commonAssc.js';
+import { DataStructure as LGuideDataStructure} from './commonLguide.js';
 
 
 export interface DataLoadedPayload {
-    data:DataStructure;
+    aggregate:AggregateData;
 }
 
 export class Actions {
@@ -31,10 +33,36 @@ export class Actions {
         name: GlobalActions.TileDataLoaded.name
     };
 
-    static RequestAlternative:Action<{
-        id: string
+    static ASSCDataLoaded:Action<{
+        tileId: number;
+        selectedVariantIdx: number;
+        items: Array<DataItem>;
+        variants: Array<Variant>;
     }> = {
-        name: 'LEX_OVERVIEW_TILE_REQUEST_ALTERNATIVE'
+        name: 'LEX_OVERVIEW_ASSC_DATA_LOADED'
     };
 
+    static LGuideDataLoaded:Action<{
+        tileId: number;
+        selectedVariantIdx: number;
+        data: LGuideDataStructure;
+    }> = {
+        name: 'LEX_OVERVIEW_LGUIDE_DATA_LOADED'
+    };
+
+    static SelectVariant:Action<{
+        tileId: number;
+        source: string;
+        idx: number;
+    }> = {
+        name: 'LEX_OVERVIEW_SELECT_VARIANT'
+    };
+
+    static SendActiveMeaningData:Action<{
+        tileId: number;
+        type: string;
+        data: any;
+    }> = {
+        name: 'LEX_OVERVIEW_SEND_ACTIVE_MEANING_DATA'
+    };
 }

@@ -22,15 +22,20 @@ import { Backlink } from '../../../page/tile.js';
 import { createEmptyData, DataStructure } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
+import { Actions as LexActions } from '../lexOverview/actions.js';
 import { List } from 'cnc-tskit';
 import { UjcDictionaryArgs, UjcDictionaryApi } from './api.js';
 import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
+import { IDataStreaming } from 'src/js/page/streaming.js';
+import { AggregateData } from '../lexOverview/common.js';
+import { map, Observable } from 'rxjs';
+import { DataItem } from '../lexOverview/commonAssc.js';
 
 
 export interface LexMeaningModelState {
     isBusy:boolean;
     queries:Array<string>;
-    data:DataStructure;
+    data:DataItem;
     error:string;
     backlink:Backlink;
 }
@@ -42,6 +47,7 @@ export interface LexMeaningModelArgs {
     api:UjcDictionaryApi,
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
+    readDataFromTile: number | null;
 }
 
 export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
@@ -52,11 +58,14 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
 
     private readonly appServices:IAppServices;
 
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches}:LexMeaningModelArgs) {
+    private readonly readDataFromTile: number | null;
+
+    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, readDataFromTile}:LexMeaningModelArgs) {
         super(dispatcher, initState);
         this.tileId = tileId;
         this.appServices = appServices;
         this.api = api;
+        this.readDataFromTile = readDataFromTile;
 
         this.addActionHandler(
             GlobalActions.RequestQueryResponse,
@@ -65,11 +74,11 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                 state.queries = [match.lemma||match.word];
                 state.isBusy = true;
                 state.error = null;
-                state.data = createEmptyData();
+                state.data = null;
                 state.backlink = null;
             },
             (state, action, dispatch) => {
-                this.loadData(dispatch, state);
+                this.loadData(dispatch, state, this.appServices.dataStreaming());
             }
         );
 
@@ -83,7 +92,6 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
 
                 } else {
                     state.data = action.payload.data;
-                    state.backlink = this.api.getBacklink(0);
                 }
             }
         );
@@ -124,23 +132,56 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
             action => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
-                window.open(`https://slovnikcestiny.cz/heslo/${state.data.query}/`, '_blank');
+                window.open(`https://slovnikcestiny.cz/heslo/state.data.query/`, '_blank');
             }
+        );
+
+        this.addActionSubtypeHandler(
+            LexActions.SelectVariant,
+            action => typeof this.readDataFromTile === 'number' && action.payload.tileId === this.readDataFromTile,
+            (state, action) => {
+                if (action.payload.source === 'assc') {
+                    state.isBusy = true;
+                }
+            },
+        );
+
+        this.addActionSubtypeHandler(
+            LexActions.SendActiveMeaningData,
+            action => typeof this.readDataFromTile === 'number' && action.payload.tileId === this.readDataFromTile,
+            (state, action) => {
+                state.isBusy = false;
+                state.data = action.payload.data;
+            },
         );
     }
 
-    private loadData(dispatch:SEDispatcher, state:LexMeaningModelState) {
-        const args:UjcDictionaryArgs = {
-            q: state.queries
-        };
-        this.api.call(this.appServices.dataStreaming(), this.tileId, 0, args).subscribe({
-            next: data => {
+    private loadData(dispatch:SEDispatcher, state: LexMeaningModelState, streaming: IDataStreaming): void {
+        (typeof this.readDataFromTile === 'number'
+            ? streaming
+                    .registerTileRequest<AggregateData>({
+                        tileId: this.tileId,
+                        queryIdx: 0, // TODO
+                        otherTileId: this.readDataFromTile,
+                        otherTileQueryIdx: 0, // TODO
+                        contentType: 'application/json',
+                    })
+                    .pipe(
+                        map(resp => resp.variants.source === 'assc' ?
+                                resp.asscData.items[resp.variants.items[0]?.itemIdx] : null)
+                    )
+            : this.api.call(streaming, this.tileId, 0, {q: state.queries})
+            .pipe(
+                map(resp => resp.items[0])
+            )
+        ).subscribe({
+            next: data => {                
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
                     payload: {
                         tileId: this.tileId,
                         isEmpty: false,
-                        data
+                        data,
                     }
                 });
             },
@@ -152,11 +193,10 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                     payload: {
                         tileId: this.tileId,
                         isEmpty: true,
-                        data: createEmptyData(),
+                        data: null,
                     }
                 });
             }
         });
     }
-
 }

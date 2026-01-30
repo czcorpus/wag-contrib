@@ -21,10 +21,10 @@ import { IActionDispatcher, ViewUtils } from 'kombo';
 import * as React from 'react';
 import { GlobalComponents } from '../../../../../views/common/index.js';
 import { Actions } from '../../actions.js';
-import { CaseData, ComparisonData, ConjugationData } from '../../common.js';
+import { CaseData, ComparisonData, ConjugationData } from '../../commonLguide.js';
 import * as S from '../style.js';
 import * as LS from './style.js';
-import { DataStructure } from '../../common.js';
+import { DataStructure } from '../../commonLguide.js';
 
 
 export function init(
@@ -180,13 +180,6 @@ export function init(
         color?: string;
     }> = (props) => {
 
-        const handleAlternative = (id:string) => {
-            dispatcher.dispatch<typeof Actions.RequestAlternative>({
-                name: Actions.RequestAlternative.name,
-                payload: {id: id},
-            })
-        }
-
         return <S.Subtile color={props.color || defaultColor}>
             <S.SubtileRow>
                 <span className='key'>{ut.translate('lex_overview__overview_syllabification')}:</span>
@@ -210,23 +203,6 @@ export function init(
                     <S.SubtileRow>
                         <span className='key'>{ut.translate('lex_overview__overview_notes')}:</span>
                         <span className='value'>{props.data.notes}</span>
-                    </S.SubtileRow> :
-                    null
-                }
-                {props.data.alternatives ?
-                    <S.SubtileRow>
-                        <span className='key'>{ut.translate('lex_overview__overview_alternatives')}:</span>
-                        {
-                            List.map(
-                                (alt, i) => (
-                                    <span className='value alternative' key={`alt:${i}:${alt.id}`}>
-                                        {props.data.rawQuery === alt.id && props.data.isDirect ? '\u2713' : ''}
-                                        <a onClick={e => handleAlternative(alt.id)}>{props.data.heading}{alt.info}</a>
-                                    </span>
-                                ),
-                                props.data.alternatives
-                            )
-                        }
                     </S.SubtileRow> :
                     null
                 }
