@@ -19,7 +19,8 @@
 import { Action } from 'kombo';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { AggregateData, Variant } from './common.js';
-import { DataItem, DataStructure } from './commonAssc.js';
+import { DataItem } from './commonAssc.js';
+import { DataStructure as LGuideDataStructure} from './commonLguide.js';
 
 
 export interface DataLoadedPayload {
@@ -41,8 +42,17 @@ export class Actions {
         name: 'LEX_OVERVIEW_ASSC_DATA_LOADED'
     };
 
+    static LGuideDataLoaded:Action<{
+        tileId: number;
+        selectedVariantIdx: number;
+        data: LGuideDataStructure;
+    }> = {
+        name: 'LEX_OVERVIEW_LGUIDE_DATA_LOADED'
+    };
+
     static SelectVariant:Action<{
         tileId: number;
+        source: string;
         idx: number;
     }> = {
         name: 'LEX_OVERVIEW_SELECT_VARIANT'

@@ -46,21 +46,26 @@ export function init(
     const LexOverviewHeader: React.FC<{
         tileId: number;
         title: string;
+        source: string;
         selectedVariantIdx: number;
         variants: Array<Variant>;
     }> = (props) => {
         const handleVariantClick = (idx: number) => {
             dispatcher.dispatch(
                 Actions.SelectVariant,
-                {tileId: props.tileId, idx},
+                {tileId: props.tileId, idx, source: props.source},
             );
         }
 
         return (
             <S.Header>
-                <h2>{props.title}</h2>
+                {props.selectedVariantIdx === null ?
+                    <h2>{props.title}</h2> :
+                    <h2>{props.variants[props.selectedVariantIdx].value} <span className='small'>({props.variants[props.selectedVariantIdx].info})</span></h2>
+                }
+                
                 {List.map((variant, i) => i === props.selectedVariantIdx ? null :
-                    <h4 className="variant"><a onClick={() => handleVariantClick(i)}>{variant.value}</a></h4>, props.variants)
+                    <h4 className="variant"><a onClick={() => handleVariantClick(i)}>{variant.value} <span className='small'>({variant.info})</span></a></h4>, props.variants)
                 }
             </S.Header>
         );
@@ -137,6 +142,7 @@ export function init(
                     <LexOverviewHeader
                         tileId={props.tileId}
                         title={selectedVariant?.value || props.queryMatch.lemma}
+                        source={props.data.variants.source}
                         selectedVariantIdx={props.selectedVariantIdx}
                         variants={props.data.variants.items}
                     />

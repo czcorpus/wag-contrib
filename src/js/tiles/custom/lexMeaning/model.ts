@@ -140,7 +140,9 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
             LexActions.SelectVariant,
             action => typeof this.readDataFromTile === 'number' && action.payload.tileId === this.readDataFromTile,
             (state, action) => {
-                state.isBusy = true;
+                if (action.payload.source === 'assc') {
+                    state.isBusy = true;
+                }
             },
         );
 

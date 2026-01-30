@@ -25,6 +25,7 @@ import { Backlink } from '../../../page/tile.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { AggregateData } from './common.js';
 import { DataStructure as ASSCDataStructure } from './commonAssc.js';
+import { DataStructure as LGuideDataStructure } from './commonLguide.js';
 
 
 export interface LexArgs {
@@ -96,6 +97,25 @@ export class LexApi implements ResourceApi<LexArgs, AggregateData> {
             ajax$<ASSCDataStructure>(
                 HTTP.Method.GET,
                 this.apiURL + '/assc?link=' + link,
+                {}
+            );
+    }
+
+    loadLGuide(streaming:IDataStreaming|null, tileId:number, queryIdx:number, id:string):Observable<LGuideDataStructure> {
+        return streaming ?
+            streaming.registerTileRequest<LGuideDataStructure>(
+                {
+                    tileId,
+                    queryIdx,
+                    method: HTTP.Method.GET,
+                    url: this.apiURL + '/lguide?id=' + id,
+                    body: {},
+                    contentType: 'application/json',
+                }
+            ) :
+            ajax$<LGuideDataStructure>(
+                HTTP.Method.GET,
+                this.apiURL + '/assc?id=' + id,
                 {}
             );
     }

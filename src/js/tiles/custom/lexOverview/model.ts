@@ -84,8 +84,9 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
 
                 } else {
                     state.data = action.payload.aggregate;
-                    state.selectedVariantIdx = 0;
-                    state.backlink = this.api.getBacklink(0);
+                    if (state.data.variants !== null) {
+                        state.selectedVariantIdx = 0;
+                    }
                 }
             }
         );
@@ -160,8 +161,13 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                             data: selectedVariant.itemIdx >= 0 ? state.data.asscData.items[selectedVariant.itemIdx] : null,
                         }
                     });
+
                 } else if (state.data.variants.source === 'assc') {
                     this.loadASSCData(dispatch, state, action.payload.idx);
+
+                } else if (state.data.variants.source === 'lguide') {
+                    this.loadLGuideData(dispatch, state, action.payload.idx);
+
                 }
             }
         );
@@ -176,6 +182,20 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                 } else {
                     state.data.asscData.items = action.payload.items;
                     state.data.variants.items = action.payload.variants;
+                    state.selectedVariantIdx = action.payload.selectedVariantIdx;
+                }
+            }
+        );
+
+        this.addActionSubtypeHandler(
+            Actions.LGuideDataLoaded,
+            action => action.payload.tileId === this.tileId,
+            (state, action) => {
+                state.isBusy = false;
+                if (action.error) {
+                    state.error = action.error.message;
+                } else {
+                    state.data.lguideData = action.payload.data;
                     state.selectedVariantIdx = action.payload.selectedVariantIdx;
                 }
             }
@@ -280,6 +300,39 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                         selectedVariantIdx: null,
                         items: null,
                         variants: null,
+                    }
+                });
+            }
+        });
+    }
+
+    private loadLGuideData(dispatch:SEDispatcher, state:LexOverviewModelState, selectedVariantIdx:number): void {
+        const selectedVariant = state.data.variants.items[selectedVariantIdx];
+        this.api.loadLGuide(
+            this.appServices.dataStreaming().startNewSubgroup(this.tileId),
+            this.tileId,
+            0,
+            selectedVariant.id,
+        ).subscribe({
+            next: data => {          
+                dispatch<typeof Actions.LGuideDataLoaded>({
+                    name: Actions.LGuideDataLoaded.name,
+                    payload: {
+                        tileId: this.tileId,
+                        selectedVariantIdx,
+                        data: data,
+                    }
+                });
+            },
+            error: error => {
+                console.error(error);
+                dispatch<typeof Actions.LGuideDataLoaded>({
+                    name: Actions.LGuideDataLoaded.name,
+                    error,
+                    payload: {
+                        tileId: this.tileId,
+                        selectedVariantIdx: null,
+                        data: null,
                     }
                 });
             }

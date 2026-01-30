@@ -44,6 +44,11 @@ export const Header = styled.div<{ theme: Theme }>`
             text-decoration: none;
         }
     }
+
+    .small {
+        font-size: 0.8em;
+        font-style: italic;
+    }
 `;
 
 export const Subtile = styled.div<{ theme: Theme; color: string}>`
