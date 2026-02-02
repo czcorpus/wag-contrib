@@ -61,11 +61,11 @@ export function init(
             <S.Header>
                 {props.selectedVariantIdx === null ?
                     <h2>{props.title}</h2> :
-                    <h2>{props.variants[props.selectedVariantIdx].value} <span className='small'>({props.variants[props.selectedVariantIdx].info})</span></h2>
+                    <h2>{props.variants[props.selectedVariantIdx].value} {props.variants[props.selectedVariantIdx].info ? <span className='small'>({props.variants[props.selectedVariantIdx].info})</span> : null}</h2>
                 }
                 
                 {List.map((variant, i) => i === props.selectedVariantIdx ? null :
-                    <h4 className="variant"><a onClick={() => handleVariantClick(i)}>{variant.value} <span className='small'>({variant.info})</span></a></h4>, props.variants)
+                    <h4 className="variant"><a onClick={() => handleVariantClick(i)}>{variant.value} {variant.info ? <span className='small'>({variant.info})</span> : null}</a></h4>, props.variants)
                 }
             </S.Header>
         );
