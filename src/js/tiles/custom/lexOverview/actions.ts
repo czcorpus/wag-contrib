@@ -52,7 +52,6 @@ export class Actions {
 
     static SelectVariant:Action<{
         tileId: number;
-        source: string;
         idx: number;
     }> = {
         name: 'LEX_OVERVIEW_SELECT_VARIANT'

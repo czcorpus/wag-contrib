@@ -45,28 +45,32 @@ export function init(
 
     const LexOverviewHeader: React.FC<{
         tileId: number;
-        title: string;
-        source: string;
         selectedVariantIdx: number;
         variants: Array<Variant>;
+        backupTitle: string;
     }> = (props) => {
         const handleVariantClick = (idx: number) => {
             dispatcher.dispatch(
                 Actions.SelectVariant,
-                {tileId: props.tileId, idx, source: props.source},
+                {tileId: props.tileId, idx},
             );
         }
 
+        const renderVariant = (variant: Variant) => <>
+            {variant.value || variant.id} {variant.info ? <span className='small'>({variant.info})</span> : null}
+        </>
+
         return (
             <S.Header>
-                {props.selectedVariantIdx === null ?
-                    <h2>{props.title}</h2> :
-                    <h2>{props.variants[props.selectedVariantIdx].value} {props.variants[props.selectedVariantIdx].info ? <span className='small'>({props.variants[props.selectedVariantIdx].info})</span> : null}</h2>
+                {props.selectedVariantIdx !== null ?
+                    <h2>{renderVariant(props.variants[props.selectedVariantIdx])}</h2> :
+                    <h2>{props.backupTitle}</h2>
                 }
                 
                 {List.map((variant, i) => i === props.selectedVariantIdx ? null :
-                    <h4 className="variant"><a onClick={() => handleVariantClick(i)}>{variant.value} {variant.info ? <span className='small'>({variant.info})</span> : null}</a></h4>, props.variants)
-                }
+                    <h4 className="variant"><a onClick={() => handleVariantClick(i)}>{renderVariant(variant)}</a></h4>,
+                    props.variants,
+                )}
             </S.Header>
         );
     }
@@ -132,6 +136,7 @@ export function init(
             (!!overview.pronunciation ||
              !!overview.partOfSpeach);
 
+             
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
                 hasData={true}
@@ -141,10 +146,9 @@ export function init(
                 <S.LexOverviewTileView>
                     <LexOverviewHeader
                         tileId={props.tileId}
-                        title={selectedVariant?.value || props.queryMatch.lemma}
-                        source={props.data.variants.source}
                         selectedVariantIdx={props.selectedVariantIdx}
                         variants={props.data.variants.items}
+                        backupTitle={props.queryMatch.lemma}
                     />
                     {overviewHasData ?
                         <LexOverviewBasics
