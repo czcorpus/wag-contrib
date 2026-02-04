@@ -26,7 +26,7 @@ import { Actions as LexActions } from '../lexOverview/actions.js';
 import { List } from 'cnc-tskit';
 import { UjcDictionaryArgs, UjcDictionaryApi } from './api.js';
 import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
-import { IDataStreaming } from 'src/js/page/streaming.js';
+import { IDataStreaming } from '../../../page/streaming.js';
 import { AggregateData } from '../lexOverview/common.js';
 import { map, Observable } from 'rxjs';
 import { DataItem } from '../lexOverview/commonAssc.js';
@@ -175,7 +175,7 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                 map(resp => resp.items[0])
             )
         ).subscribe({
-            next: data => {                
+            next: data => {
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
                     payload: {
