@@ -17,13 +17,15 @@
  */
 
 export interface DataItem {
-	id: string;
-	key: string;
-	pronunciation: string;
-	audioFile: string;
-	quality: string;
-	forms: {[key:string]:string};
-	pos: string;
+	variants: Array<{
+		id: string;
+		key: string;
+		pronunciation: string;
+		audioFile: string;
+		quality: string;
+		forms: {[key:string]:string};
+		pos: string;
+	}>;
 	meaning: Array<{
 		explanation: string;
 		metaExplanation: string;
@@ -56,6 +58,6 @@ export function createEmptyData():DataStructure {
 	return {
 		items: [],
 		notes: [],
-		query: null,
+		query: '',
 	}
 }

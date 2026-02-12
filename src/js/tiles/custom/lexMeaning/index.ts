@@ -25,7 +25,6 @@ import {
     TileFactoryArgs, ITileReloader, DEFAULT_ALT_VIEW_ICON, AltViewIconProps } from '../../../page/tile.js';
 import { LexMeaningModel } from './model.js';
 import { UjcDictionaryApi } from './api.js';
-import { createEmptyData } from './common.js';
 
 
 export interface LexMeaningTileConf extends TileConf {
@@ -68,7 +67,8 @@ export class LexMeaningTile implements ITileProvider {
             initState: {
                 isBusy: isBusy,
                 queries: [],
-                data: null,
+                variant: undefined,
+                meaning: [],
                 error: null,
                 backlink: null,
             },

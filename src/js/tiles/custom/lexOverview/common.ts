@@ -19,18 +19,19 @@
 import * as assc from "./commonAssc.js";
 import * as lguide from "./commonLguide.js";
 
-export interface Variant {
+export interface SearchVariant {
 	id: string;
 	value: string;
 	info: string;
 	link: string;
 	itemIdx: number;
+	variantIdx: number;
 }
 
 export interface AggregateData {
-	variants: {
+	search: {
 		source: string;
-		items: Array<Variant>;
+		items: Array<Array<SearchVariant>>;
 	};
 	asscData: assc.DataStructure;
 	lguideData: lguide.DataStructure;
@@ -38,7 +39,7 @@ export interface AggregateData {
 
 export function createEmptyData():AggregateData {
 	return {
-		variants: {
+		search: {
 			source: "",
 			items: [],
 		},

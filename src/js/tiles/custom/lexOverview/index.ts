@@ -66,10 +66,11 @@ export class LexOverviewBookTile implements ITileProvider {
             initState: {
                 isBusy: isBusy,
                 queryMatch: findCurrQueryMatch(queryMatches[0]),
-                selectedVariantIdx: null,
+                selectedSrchItemIdx: -1,
+                selectedSrchVariantIdx: -1,
                 data: createEmptyData(),
-                error: null,
-                backlink: null,
+                error: undefined,
+                backlink: undefined,
             }
         });
         this.view = viewInit(

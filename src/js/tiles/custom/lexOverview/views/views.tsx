@@ -27,7 +27,7 @@ import { init as initLangGuideViews } from './langGuide/views.js';
 import { init as initCorpusViews } from './corpus/views.js';
 import * as S from './style.js';
 import { List } from 'cnc-tskit';
-import { Variant } from '../common.js';
+import { SearchVariant } from '../common.js';
 
 
 export function init(
@@ -45,31 +45,40 @@ export function init(
 
     const LexOverviewHeader: React.FC<{
         tileId: number;
+        selectedItemIdx: number;
         selectedVariantIdx: number;
-        variants: Array<Variant>;
+        items: Array<Array<SearchVariant>>;
         backupTitle: string;
     }> = (props) => {
-        const handleVariantClick = (idx: number) => {
+        const handleVariantClick = (itemIdx: number, variantIdx: number) => {
             dispatcher.dispatch(
-                Actions.SelectVariant,
-                {tileId: props.tileId, idx},
+                Actions.SelectItemVariant,
+                {tileId: props.tileId, itemIdx, variantIdx},
             );
         }
 
-        const renderVariant = (variant: Variant) => <>
+        const renderVariant = (variant: SearchVariant) => <>
             {variant.value || variant.id} {variant.info ? <span className='small'>({variant.info})</span> : null}
         </>
 
         return (
             <S.Header>
-                {props.selectedVariantIdx !== null ?
-                    <h2>{renderVariant(props.variants[props.selectedVariantIdx])}</h2> :
+                {props.selectedItemIdx !== -1 ?
+                    <h2>{renderVariant(props.items[props.selectedItemIdx][props.selectedVariantIdx])}</h2> :
                     <h2>{props.backupTitle}</h2>
                 }
                 
-                {List.map((variant, i) => i === props.selectedVariantIdx ? null :
-                    <h4 className="variant"><a onClick={() => handleVariantClick(i)}>{renderVariant(variant)}</a></h4>,
-                    props.variants,
+                {List.map((item, i) => i === props.selectedItemIdx && item.length === 1 ? null :
+                    <h4 className="variant">
+                        {List.map((variant, j) =>
+                            <>
+                                {j > 0 ? ' / ' : null}
+                                <a onClick={() => handleVariantClick(i, j)}>{renderVariant(variant)}</a>
+                            </>
+                        , item)}
+                        
+                    </h4>,
+                    props.items,
                 )}
             </S.Header>
         );
@@ -106,36 +115,31 @@ export function init(
             pronunciation: string;
             partOfSpeach: string;
             source: string;
-        } = null;
-        const selectedVariant = props.selectedVariantIdx !== null ? props.data.variants.items[props.selectedVariantIdx] : null;
+        }|undefined;
+        const selectedVariant = props.selectedSrchItemIdx !== -1 ? props.data.search.items[props.selectedSrchItemIdx][props.selectedSrchVariantIdx] : null;
         if (selectedVariant !== null ) {
-            switch (props.data.variants.source) {
+            switch (props.data.search.source) {
                 case 'assc':
-                    overview = selectedVariant.itemIdx >= 0 ?
+                    const data = props.data.asscData.items[selectedVariant.itemIdx].variants[selectedVariant.variantIdx];
+                    overview = selectedVariant.itemIdx !== -1 ?
                         {
-                            pronunciation: props.data.asscData.items[selectedVariant.itemIdx]?.pronunciation,
-                            partOfSpeach: props.data.asscData.items[selectedVariant.itemIdx]?.pos,
+                            pronunciation: data?.pronunciation,
+                            partOfSpeach: data?.pos,
                             source: 'Akademický slovník češtiny',
                         } :
-                        null;
+                        undefined;
                     break;
                 case 'lguide':
                     overview = {
                         pronunciation: props.data.lguideData.pronunciation,
                         source: 'Internetová jazyková příručka',
-                        partOfSpeach: null,
+                        partOfSpeach: '',
                     };
                     break;
                 default:
-                    overview = null;
+                    overview = undefined;
             }
         }
-        
-        const overviewHasData =
-            overview !== null &&
-            (!!overview.pronunciation ||
-             !!overview.partOfSpeach);
-
              
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
@@ -146,11 +150,12 @@ export function init(
                 <S.LexOverviewTileView>
                     <LexOverviewHeader
                         tileId={props.tileId}
-                        selectedVariantIdx={props.selectedVariantIdx}
-                        variants={props.data.variants.items}
+                        selectedItemIdx={props.selectedSrchItemIdx}
+                        selectedVariantIdx={props.selectedSrchVariantIdx}
+                        items={props.data.search.items}
                         backupTitle={props.queryMatch.lemma}
                     />
-                    {overviewHasData ?
+                    {overview ?
                         <LexOverviewBasics
                             pronunciation={overview.pronunciation}
                             partOfSpeach={overview.partOfSpeach}

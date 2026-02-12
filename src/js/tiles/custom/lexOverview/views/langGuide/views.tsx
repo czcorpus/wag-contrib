@@ -192,20 +192,6 @@ export function init(
                     </S.SubtileRow> :
                     null
                 }
-                {props.data.examples ?
-                    <S.SubtileRow>
-                        <span className='key'>{ut.translate('lex_overview__overview_examples')}:</span>
-                        {List.map((e, i) => <span className='value example' key={`dd:${i}:${e}`}>{e}</span>, props.data.examples)}
-                    </S.SubtileRow> :
-                    null
-                }
-                {props.data.notes ?
-                    <S.SubtileRow>
-                        <span className='key'>{ut.translate('lex_overview__overview_notes')}:</span>
-                        <span className='value'>{props.data.notes}</span>
-                    </S.SubtileRow> :
-                    null
-                }
 
             {!!props.data.comparison.comparative || !!props.data.comparison.superlative ?
                 <S.SubtileRow>
