@@ -67,8 +67,9 @@ export class LexMeaningTile implements ITileProvider {
             initState: {
                 isBusy: isBusy,
                 queries: [],
-                variant: undefined,
-                meaning: [],
+                itemId: -1,
+                variants: null,
+                meanings: null,
                 error: null,
                 backlink: null,
             },

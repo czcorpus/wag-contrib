@@ -34,8 +34,8 @@ export interface LexOverviewModelState {
     selectedSrchItemIdx:number;
     selectedSrchVariantIdx:number;
     data:AggregateData;
-    error?:string;
-    backlink?:Backlink;
+    error:string;
+    backlink:Backlink;
 }
 
 export interface LexOverviewModelArgs {
@@ -145,37 +145,32 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
             Actions.SelectItemVariant,
             action => action.payload?.tileId === this.tileId,
             (state, action) => {
-                if (action.payload) {
-                    const selectedVariant = state.data.search.items[action.payload.itemIdx][action.payload.variantIdx];
-                    if (selectedVariant.itemIdx >= 0) {
-                        state.selectedSrchItemIdx = action.payload.itemIdx;
-                        state.selectedSrchVariantIdx = action.payload.variantIdx;
-                    } else {
-                        state.isBusy = true;
-                    }
+                const selectedVariant = state.data.search.items[action.payload.itemIdx][action.payload.variantIdx];
+                if (selectedVariant.itemIdx >= 0) {
+                    state.selectedSrchItemIdx = action.payload.itemIdx;
+                    state.selectedSrchVariantIdx = action.payload.variantIdx;
+                } else {
+                    state.isBusy = true;
                 }
             },
             (state, action, dispatch) => {
-                if (action.payload) {
-                    const selectedVariant = state.data.search.items[action.payload.itemIdx][action.payload.variantIdx];
-                    if (selectedVariant.itemIdx >= 0 && state.data.search.source === 'assc') {
-                        dispatch<typeof Actions.SendActiveMeaningData>({
-                            name: Actions.SendActiveMeaningData.name,
-                            payload: {
-                                tileId: this.tileId,
-                                type: state.data.search.source,
-                                variant: state.data.asscData.items[selectedVariant.itemIdx].variants[selectedVariant.variantIdx],
-                                meaning: state.data.asscData.items[selectedVariant.itemIdx].meanings,
-                            }
-                        });
+                const selectedVariant = state.data.search.items[action.payload.itemIdx][action.payload.variantIdx];
+                if (selectedVariant.itemIdx >= 0 && state.data.search.source === 'assc') {
+                    dispatch<typeof Actions.SendActiveMeaningData>({
+                        name: Actions.SendActiveMeaningData.name,
+                        payload: {
+                            tileId: this.tileId,
+                            variants: [state.data.asscData.items[selectedVariant.itemIdx].variants[selectedVariant.variantIdx]],
+                            meanings: state.data.asscData.items[selectedVariant.itemIdx].meanings,
+                        }
+                    });
 
-                    } else if (state.data.search.source === 'assc') {
-                        this.loadASSCData(dispatch, state, action.payload?.itemIdx, action.payload?.variantIdx);
+                } else if (state.data.search.source === 'assc') {
+                    this.loadASSCData(dispatch, state, action.payload?.itemIdx, action.payload?.variantIdx);
 
-                    } else if (state.data.search.source === 'lguide') {
-                        this.loadLGuideData(dispatch, state, action.payload?.itemIdx, action.payload?.variantIdx);
+                } else if (state.data.search.source === 'lguide') {
+                    this.loadLGuideData(dispatch, state, action.payload?.itemIdx, action.payload?.variantIdx);
 
-                    }
                 }
             }
         );
@@ -191,7 +186,8 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                 } if (action.payload) {
                     state.data.asscData.items = action.payload.items;
                     state.data.search.items = action.payload.variants;
-                    state.selectedSrchItemIdx = action.payload.selectedVariantIdx;
+                    state.selectedSrchItemIdx = action.payload.selectedItemIdx;
+                    state.selectedSrchVariantIdx = action.payload.selectedVariantIdx;
                 }
             }
         );
@@ -306,9 +302,8 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                     name: Actions.SendActiveMeaningData.name,
                     payload: {
                         tileId: this.tileId,
-                        type: state.data.search.source,
-                        variant: newItems[dataItemIdx].variants[dataVariantIdx],
-                        meaning: newItems[dataItemIdx].meanings,
+                        variants: [newItems[dataItemIdx].variants[dataVariantIdx]],
+                        meanings: newItems[dataItemIdx].meanings,
                     }
                 });
             },

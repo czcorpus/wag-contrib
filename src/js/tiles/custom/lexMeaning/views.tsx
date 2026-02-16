@@ -39,13 +39,18 @@ export function init(
 
     const LexMeaningTileView: React.FC<LexMeaningModelState & CoreTileComponentProps> = (props) => {
 
-        const renderDataItem = (variant: VariantData, meanings: Array<MeaningData>, i: number) => {
+        const renderDataItem = (variants: Array<VariantData>, meanings: Array<MeaningData>, i: number) => {
             return <div>
                 {i > 0 ? <hr/> : null}
                 <S.MeaningHeading>
                     <span className='key'>pro slovo:</span>
-                    <span className='word'>{variant.key}</span>
-                    <span className='pos'>{variant.pos}</span>
+                    {List.map((variant, i) =>
+                        <>
+                            {i>0 ? <span> /</span> : null}
+                            <span className='word'>{variant.key}</span>
+                            <span className='pos'>{variant.pos}</span>
+                        </>
+                    , variants)}
                 </S.MeaningHeading>
                 {List.map((v, i) => <S.MeaningBlock>
                     <div>{i+1}. <span className='attachement'>{v.attachement}</span></div>
@@ -60,13 +65,13 @@ export function init(
 
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
-                hasData={!!props.variant && props.meaning.length > 0}
+                hasData={!!props.variants && props.meanings.length > 0}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.MeaningTileView>
                     <S.MeaningBox>
-                        {props.variant ? renderDataItem(props.variant, props.meaning, 0) : null}
+                        {props.variants ? renderDataItem(props.variants, props.meanings, 0) : null}
                     </S.MeaningBox>
                 </S.MeaningTileView>
             </globalComponents.TileWrapper>

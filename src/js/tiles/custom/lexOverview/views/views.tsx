@@ -57,29 +57,30 @@ export function init(
             );
         }
 
-        const renderVariant = (variant: SearchVariant) => <>
-            {variant.value || variant.id} {variant.info ? <span className='small'>({variant.info})</span> : null}
+        const renderVariants = (itemIdx: number, variants: Array<SearchVariant>, withInfo: boolean) => <>
+            {List.map((variant, i) =>
+                <>
+                    {i > 0 ? ' / ' : null}
+                    {itemIdx === props.selectedItemIdx && i === props.selectedVariantIdx ?
+                        <span>{variant.value || variant.id} {withInfo && variant.info ? <span className='small'>({variant.info})</span> : null}</span> :
+                        <a onClick={() => handleVariantClick(itemIdx, i)}>{variant.value || variant.id} {withInfo && variant.info ? <span className='small'>({variant.info})</span> : null}</a>
+                    }
+                </>
+            , variants)}
         </>
 
+        const currentVariants = props.selectedItemIdx !== -1 ? props.items[props.selectedItemIdx] : null;
         return (
             <S.Header>
-                {props.selectedItemIdx !== -1 ?
-                    <h2>{renderVariant(props.items[props.selectedItemIdx][props.selectedVariantIdx])}</h2> :
+                {currentVariants ?
+                    <h2>{renderVariants(props.selectedItemIdx, currentVariants, false)}</h2> :
                     <h2>{props.backupTitle}</h2>
                 }
                 
-                {List.map((item, i) => i === props.selectedItemIdx && item.length === 1 ? null :
-                    <h4 className="variant">
-                        {List.map((variant, j) =>
-                            <>
-                                {j > 0 ? ' / ' : null}
-                                <a onClick={() => handleVariantClick(i, j)}>{renderVariant(variant)}</a>
-                            </>
-                        , item)}
-                        
-                    </h4>,
-                    props.items,
-                )}
+                {List.map((variants, i) => i === props.selectedItemIdx ?
+                    null :
+                    <h4 className="variant">{renderVariants(i, variants, true)}</h4>
+                , props.items)}
             </S.Header>
         );
     }

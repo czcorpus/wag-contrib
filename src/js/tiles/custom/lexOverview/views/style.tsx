@@ -34,6 +34,10 @@ export const Header = styled.div<{ theme: Theme }>`
     h2 {
         width: 100%;
         margin: 0.1em 0;
+
+        a {
+            cursor: pointer;
+        }
     }
 
     .variant {

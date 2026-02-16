@@ -22,8 +22,8 @@ import { VariantData, MeaningData } from '../lexOverview/commonAssc.js';
 
 
 export interface DataLoadedPayload {
-    variant?: VariantData; 
-    meaning: Array<MeaningData>;
+    variants: Array<VariantData>; 
+    meanings: Array<MeaningData>;
 }
 
 export class Actions {

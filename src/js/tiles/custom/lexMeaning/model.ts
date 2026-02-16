@@ -34,8 +34,9 @@ import { VariantData, MeaningData } from '../lexOverview/commonAssc.js';
 export interface LexMeaningModelState {
     isBusy:boolean;
     queries:Array<string>;
-    variant?:VariantData;
-    meaning:Array<MeaningData>;
+    itemId:number;
+    variants:Array<VariantData>;
+    meanings:Array<MeaningData>;
     error:string;
     backlink:Backlink;
 }
@@ -74,9 +75,9 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                 state.queries = [match.lemma||match.word];
                 state.isBusy = true;
                 state.error = null;
-                state.variant = undefined;
-                state.meaning = [];
                 state.backlink = null;
+                state.variants = undefined;
+                state.meanings = undefined;
             },
             (state, action, dispatch) => {
                 this.loadData(dispatch, state, this.appServices.dataStreaming());
@@ -92,8 +93,9 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                     state.error = action.error.message;
 
                 } else {
-                    state.variant = action.payload?.variant;
-                    state.meaning = action.payload?.meaning || [];
+                    state.itemId = 0;
+                    state.variants = action.payload.variants;
+                    state.meanings = action.payload.meanings;
                 }
             }
         );
@@ -142,7 +144,10 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
             LexActions.SelectItemVariant,
             action => typeof this.readDataFromTile === 'number' && action.payload.tileId === this.readDataFromTile,
             (state, action) => {
-                state.isBusy = true;
+                if (state.itemId !== action.payload.itemIdx) {
+                    state.isBusy = true;
+                    state.itemId = action.payload.itemIdx;
+                }
             },
         );
 
@@ -151,8 +156,8 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
             action => typeof this.readDataFromTile === 'number' && action.payload.tileId === this.readDataFromTile,
             (state, action) => {
                 state.isBusy = false;
-                state.variant = action.payload?.variant;
-                state.meaning = action.payload?.meaning || [];
+                state.variants = action.payload.variants;
+                state.meanings = action.payload.meanings;
             },
         );
     }
@@ -168,24 +173,35 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                         contentType: 'application/json',
                     })
                     .pipe(
-                        map(resp => resp.search.source === 'assc' ?
-                                resp.asscData : null)
+                        map(resp => {
+                            const variant = resp.search.items[0][0];
+                            return resp.asscData ? resp.asscData.items[variant.itemIdx] : null;
+                        })
                     )
-            : this.api.call(streaming, this.tileId, 0, {q: state.queries})
-            .pipe(
-                map(resp => resp.items[0])
-            )
+            : this.api.call(streaming, this.tileId, 0, {q: state.queries}).pipe(map(resp => resp.items[0]))
         ).subscribe({
             next: data => {
-                dispatch<typeof Actions.TileDataLoaded>({
-                    name: Actions.TileDataLoaded.name,
-                    payload: {
-                        tileId: this.tileId,
-                        isEmpty: false,
-                        variant: data.variants[0],
-                        meaning: data.meanings,
-                    }
-                });
+                if (data) {
+                    dispatch<typeof Actions.TileDataLoaded>({
+                        name: Actions.TileDataLoaded.name,
+                        payload: {
+                            tileId: this.tileId,
+                            isEmpty: false,
+                            variants: [data.variants[0]],
+                            meanings: data.meanings,
+                        }
+                    });
+                } else {
+                    dispatch<typeof Actions.TileDataLoaded>({
+                        name: Actions.TileDataLoaded.name,
+                        payload: {
+                            tileId: this.tileId,
+                            isEmpty: true,
+                            variants: undefined,
+                            meanings: undefined,
+                        }
+                    });
+                }
             },
             error: error => {
                 console.error(error);
@@ -195,8 +211,8 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                     payload: {
                         tileId: this.tileId,
                         isEmpty: true,
-                        variant: undefined,
-                        meaning: [],
+                        variants: undefined,
+                        meanings: undefined
                     }
                 });
             }

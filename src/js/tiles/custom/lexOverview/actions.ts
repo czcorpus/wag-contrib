@@ -62,9 +62,8 @@ export class Actions {
 
     static SendActiveMeaningData:Action<{
         tileId: number;
-        type: string;
-        variant: VariantData;
-        meaning: Array<MeaningData>;
+        variants: Array<VariantData>;
+        meanings: Array<MeaningData>;
     }> = {
         name: 'LEX_OVERVIEW_SEND_ACTIVE_MEANING_DATA'
     };
