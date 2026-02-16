@@ -18,11 +18,12 @@
 
 import { Action } from 'kombo';
 import { Actions as GlobalActions } from '../../../models/actions.js';
-import { DataItem } from './common.js';
+import { VariantData, MeaningData } from '../lexOverview/commonAssc.js';
 
 
 export interface DataLoadedPayload {
-    data:DataItem;
+    variants: Array<VariantData>; 
+    meanings: Array<MeaningData>;
 }
 
 export class Actions {

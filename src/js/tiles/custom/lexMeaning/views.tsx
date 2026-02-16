@@ -21,10 +21,10 @@ import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
 import * as React from 'react';
 import { Theme } from '../../../page/theme.js';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
-import { DataItem } from './common.js';
 import { LexMeaningModel, LexMeaningModelState } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
+import { VariantData, MeaningData } from '../lexOverview/commonAssc.js';
 
 
 export function init(
@@ -39,13 +39,18 @@ export function init(
 
     const LexMeaningTileView: React.FC<LexMeaningModelState & CoreTileComponentProps> = (props) => {
 
-        const renderDataItem = (item: DataItem, i: number) => {
+        const renderDataItem = (variants: Array<VariantData>, meanings: Array<MeaningData>, i: number) => {
             return <div>
                 {i > 0 ? <hr/> : null}
                 <S.MeaningHeading>
                     <span className='key'>pro slovo:</span>
-                    <span className='word'>{item.key}</span>
-                    <span className='pos'>{item.pos}</span>
+                    {List.map((variant, i) =>
+                        <>
+                            {i>0 ? <span> /</span> : null}
+                            <span className='word'>{variant.key}</span>
+                            <span className='pos'>{variant.pos}</span>
+                        </>
+                    , variants)}
                 </S.MeaningHeading>
                 {List.map((v, i) => <S.MeaningBlock>
                     <div>{i+1}. <span className='attachement'>{v.attachement}</span></div>
@@ -54,19 +59,19 @@ export function init(
                         {List.flatMap(e => List.map(x => <div className='example'>{x}</div>, e.data), v.examples)}
                     </div>
                 </S.MeaningBlock>,
-                item.meaning)}
+                meanings)}
             </div>
         }
 
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
-                hasData={!!props.data && props.data.meaning.length > 0}
+                hasData={!!props.variants && props.meanings.length > 0}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.MeaningTileView>
                     <S.MeaningBox>
-                        {props.data ? renderDataItem(props.data, 0) : null}
+                        {props.variants ? renderDataItem(props.variants, props.meanings, 0) : null}
                     </S.MeaningBox>
                 </S.MeaningTileView>
             </globalComponents.TileWrapper>

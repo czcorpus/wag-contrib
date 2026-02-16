@@ -19,23 +19,24 @@
 import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
-import { createEmptyData, DataStructure } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { Actions as LexActions } from '../lexOverview/actions.js';
 import { List } from 'cnc-tskit';
-import { UjcDictionaryArgs, UjcDictionaryApi } from './api.js';
+import { UjcDictionaryApi } from './api.js';
 import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { AggregateData } from '../lexOverview/common.js';
-import { map, Observable } from 'rxjs';
-import { DataItem } from '../lexOverview/commonAssc.js';
+import { map } from 'rxjs';
+import { VariantData, MeaningData } from '../lexOverview/commonAssc.js';
 
 
 export interface LexMeaningModelState {
     isBusy:boolean;
     queries:Array<string>;
-    data:DataItem;
+    itemId:number;
+    variants:Array<VariantData>;
+    meanings:Array<MeaningData>;
     error:string;
     backlink:Backlink;
 }
@@ -74,8 +75,9 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                 state.queries = [match.lemma||match.word];
                 state.isBusy = true;
                 state.error = null;
-                state.data = null;
                 state.backlink = null;
+                state.variants = undefined;
+                state.meanings = undefined;
             },
             (state, action, dispatch) => {
                 this.loadData(dispatch, state, this.appServices.dataStreaming());
@@ -91,7 +93,9 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                     state.error = action.error.message;
 
                 } else {
-                    state.data = action.payload.data;
+                    state.itemId = 0;
+                    state.variants = action.payload.variants;
+                    state.meanings = action.payload.meanings;
                 }
             }
         );
@@ -137,10 +141,13 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
         );
 
         this.addActionSubtypeHandler(
-            LexActions.SelectVariant,
+            LexActions.SelectItemVariant,
             action => typeof this.readDataFromTile === 'number' && action.payload.tileId === this.readDataFromTile,
             (state, action) => {
-                state.isBusy = true;
+                if (state.itemId !== action.payload.itemIdx) {
+                    state.isBusy = true;
+                    state.itemId = action.payload.itemIdx;
+                }
             },
         );
 
@@ -149,7 +156,8 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
             action => typeof this.readDataFromTile === 'number' && action.payload.tileId === this.readDataFromTile,
             (state, action) => {
                 state.isBusy = false;
-                state.data = action.payload.data;
+                state.variants = action.payload.variants;
+                state.meanings = action.payload.meanings;
             },
         );
     }
@@ -165,23 +173,35 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                         contentType: 'application/json',
                     })
                     .pipe(
-                        map(resp => resp.variants.source === 'assc' ?
-                                resp.asscData.items[resp.variants.items[0]?.itemIdx] : null)
+                        map(resp => {
+                            const variant = resp.search.items[0][0];
+                            return resp.asscData ? resp.asscData.items[variant.itemIdx] : null;
+                        })
                     )
-            : this.api.call(streaming, this.tileId, 0, {q: state.queries})
-            .pipe(
-                map(resp => resp.items[0])
-            )
+            : this.api.call(streaming, this.tileId, 0, {q: state.queries}).pipe(map(resp => resp.items[0]))
         ).subscribe({
             next: data => {
-                dispatch<typeof Actions.TileDataLoaded>({
-                    name: Actions.TileDataLoaded.name,
-                    payload: {
-                        tileId: this.tileId,
-                        isEmpty: false,
-                        data,
-                    }
-                });
+                if (data) {
+                    dispatch<typeof Actions.TileDataLoaded>({
+                        name: Actions.TileDataLoaded.name,
+                        payload: {
+                            tileId: this.tileId,
+                            isEmpty: false,
+                            variants: [data.variants[0]],
+                            meanings: data.meanings,
+                        }
+                    });
+                } else {
+                    dispatch<typeof Actions.TileDataLoaded>({
+                        name: Actions.TileDataLoaded.name,
+                        payload: {
+                            tileId: this.tileId,
+                            isEmpty: true,
+                            variants: undefined,
+                            meanings: undefined,
+                        }
+                    });
+                }
             },
             error: error => {
                 console.error(error);
@@ -191,7 +211,8 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                     payload: {
                         tileId: this.tileId,
                         isEmpty: true,
-                        data: null,
+                        variants: undefined,
+                        meanings: undefined
                     }
                 });
             }

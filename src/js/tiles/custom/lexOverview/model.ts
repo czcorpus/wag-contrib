@@ -24,13 +24,15 @@ import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { List, pipe } from 'cnc-tskit';
 import { LexApi, LexArgs } from './api.js';
-import { AggregateData, createEmptyData, Variant } from './common.js';
+import { AggregateData, createEmptyData } from './common.js';
+import { DataStructure as LGuideDataStructure} from './commonLguide.js';
 
 
 export interface LexOverviewModelState {
     isBusy:boolean;
     queryMatch:QueryMatch;
-    selectedVariantIdx:number;
+    selectedSrchItemIdx:number;
+    selectedSrchVariantIdx:number;
     data:AggregateData;
     error:string;
     backlink:Backlink;
@@ -62,11 +64,10 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
         this.addActionHandler(
             GlobalActions.RequestQueryResponse,
             (state, action) => {
-                
                 state.isBusy = true;
-                state.error = null;
                 state.data = createEmptyData();
-                state.backlink = null;
+                state.error = undefined;
+                state.backlink = undefined;
             },
             (state, action, dispatch) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
@@ -76,16 +77,17 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
 
         this.addActionSubtypeHandler(
             Actions.TileDataLoaded,
-            action => action.payload.tileId === this.tileId,
+            action => action.payload?.tileId === this.tileId,
             (state, action) => {
                 state.isBusy = false;
                 if (action.error) {
                     state.error = action.error.message;
 
-                } else {
+                } if (action.payload) {
                     state.data = action.payload.aggregate;
-                    if (state.data.variants !== null) {
-                        state.selectedVariantIdx = 0;
+                    if (state.data.search !== null) {
+                        state.selectedSrchItemIdx = 0;
+                        state.selectedSrchVariantIdx = 0;
                     }
                 }
             }
@@ -93,7 +95,7 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
 
         this.addActionSubtypeHandler(
             GlobalActions.GetSourceInfo,
-            action => action.payload.tileId === this.tileId,
+            action => action.payload?.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
                 this.api.getSourceDescription(
@@ -124,7 +126,7 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
 
         this.addActionSubtypeHandler(
             GlobalActions.FollowBacklink,
-            action => action.payload.tileId === this.tileId,
+            action => action.payload?.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
                 const backlinkUrl = new URL('https://prirucka.ujc.cas.cz/');
@@ -140,33 +142,34 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
         );
 
         this.addActionSubtypeHandler(
-            Actions.SelectVariant,
-            action => action.payload.tileId === this.tileId,
+            Actions.SelectItemVariant,
+            action => action.payload?.tileId === this.tileId,
             (state, action) => {
-                const selectedVariant = state.data.variants.items[action.payload.idx];
+                const selectedVariant = state.data.search.items[action.payload.itemIdx][action.payload.variantIdx];
                 if (selectedVariant.itemIdx >= 0) {
-                    state.selectedVariantIdx = action.payload.idx;
+                    state.selectedSrchItemIdx = action.payload.itemIdx;
+                    state.selectedSrchVariantIdx = action.payload.variantIdx;
                 } else {
                     state.isBusy = true;
                 }
             },
             (state, action, dispatch) => {
-                const selectedVariant = state.data.variants.items[action.payload.idx];
-                if (selectedVariant.itemIdx >= 0 && state.data.variants.source === 'assc') {
+                const selectedVariant = state.data.search.items[action.payload.itemIdx][action.payload.variantIdx];
+                if (selectedVariant.itemIdx >= 0 && state.data.search.source === 'assc') {
                     dispatch<typeof Actions.SendActiveMeaningData>({
                         name: Actions.SendActiveMeaningData.name,
                         payload: {
                             tileId: this.tileId,
-                            type: state.data.variants.source,
-                            data: selectedVariant.itemIdx >= 0 ? state.data.asscData.items[selectedVariant.itemIdx] : null,
+                            variants: [state.data.asscData.items[selectedVariant.itemIdx].variants[selectedVariant.variantIdx]],
+                            meanings: state.data.asscData.items[selectedVariant.itemIdx].meanings,
                         }
                     });
 
-                } else if (state.data.variants.source === 'assc') {
-                    this.loadASSCData(dispatch, state, action.payload.idx);
+                } else if (state.data.search.source === 'assc') {
+                    this.loadASSCData(dispatch, state, action.payload?.itemIdx, action.payload?.variantIdx);
 
-                } else if (state.data.variants.source === 'lguide') {
-                    this.loadLGuideData(dispatch, state, action.payload.idx);
+                } else if (state.data.search.source === 'lguide') {
+                    this.loadLGuideData(dispatch, state, action.payload?.itemIdx, action.payload?.variantIdx);
 
                 }
             }
@@ -174,29 +177,33 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
 
         this.addActionSubtypeHandler(
             Actions.ASSCDataLoaded,
-            action => action.payload.tileId === this.tileId,
+            action => action.payload?.tileId === this.tileId,
             (state, action) => {
                 state.isBusy = false;
                 if (action.error) {
                     state.error = action.error.message;
-                } else {
+
+                } if (action.payload) {
                     state.data.asscData.items = action.payload.items;
-                    state.data.variants.items = action.payload.variants;
-                    state.selectedVariantIdx = action.payload.selectedVariantIdx;
+                    state.data.search.items = action.payload.variants;
+                    state.selectedSrchItemIdx = action.payload.selectedItemIdx;
+                    state.selectedSrchVariantIdx = action.payload.selectedVariantIdx;
                 }
             }
         );
 
         this.addActionSubtypeHandler(
             Actions.LGuideDataLoaded,
-            action => action.payload.tileId === this.tileId,
+            action => action.payload?.tileId === this.tileId,
             (state, action) => {
                 state.isBusy = false;
                 if (action.error) {
                     state.error = action.error.message;
-                } else {
+
+                } if (action.payload) {
                     state.data.lguideData = action.payload.data;
-                    state.selectedVariantIdx = action.payload.selectedVariantIdx;
+                    state.selectedSrchItemIdx = action.payload.selectedItemIdx;
+                    state.selectedSrchVariantIdx = action.payload.selectedVariantIdx;
                 }
             }
         );
@@ -237,8 +244,8 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
         });
     }
 
-    private loadASSCData(dispatch:SEDispatcher, state:LexOverviewModelState, selectedVariantIdx:number): void {
-        const selectedVariant = state.data.variants.items[selectedVariantIdx];
+    private loadASSCData(dispatch:SEDispatcher, state:LexOverviewModelState, selectedItemIdx:number, selectedVariantIdx:number): void {
+        const selectedVariant = state.data.search.items[selectedItemIdx][selectedVariantIdx];
         this.api.loadASSC(
             this.appServices.dataStreaming().startNewSubgroup(this.tileId),
             this.tileId,
@@ -246,36 +253,46 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
             selectedVariant.link,
         ).subscribe({
             next: data => {
-                const newItems = [...state.data.asscData.items];
+                const newItems = state.data.asscData ? [...state.data.asscData?.items] : [];
                 List.forEach(item => {
-                    if (!List.some(existingItem => existingItem.id === item.id && existingItem.key === item.key, newItems)) {
+                    if (!List.some(existingItem => existingItem.variants[0].id === item.variants[0].id && existingItem.variants[0].key === item.variants[0].key, newItems)) {
                         newItems.push(item);
                     }
                 }, data.items);
                 const newVariants = List.map(item => {
-                    const newItem = {...item}
-                    if (item.itemIdx === -1) {
-                        let count = 0;
-                        for (let i = 0; i < newItems.length; i++) {
-                            if (item.id === newItems[i].id) {
-                                newItem.itemIdx = i;
-                                return newItem;
-                            } else if (item.id.startsWith(newItems[i].id)) {
-                                count++;
-                                if (item.id === newItems[i].id + '-' + count) {
-                                    newItem.itemIdx = i;
-                                    return newItem;
+                    return List.map(variant => {
+                        const newVariant = {...variant}
+                        if (variant.itemIdx === -1) {
+                            let count = 0;
+                            for (let i = 0; i < newItems.length; i++) {
+                                for (let j = 0; j < newItems[i].variants.length; j++) {
+                                    if (variant.id === newItems[i].variants[j].id) {
+                                        newVariant.itemIdx = i;
+                                        newVariant.variantIdx = j;
+                                        return newVariant;
+
+                                    } else if (variant.id.startsWith(newItems[i].variants[j].id)) {
+                                        count++;
+                                        if (variant.id === newItems[i].variants[j].id + '-' + count) {
+                                            newVariant.itemIdx = i;
+                                            newVariant.variantIdx = j;
+                                            return newVariant;
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
-                    return newItem;
-                }, state.data.variants.items);                
+                        return newVariant;
+                    }, item);
+                }, state.data.search.items);                
 
+                const dataItemIdx = newVariants[selectedItemIdx][selectedVariantIdx].itemIdx;
+                const dataVariantIdx = newVariants[selectedItemIdx][selectedVariantIdx].variantIdx;
                 dispatch<typeof Actions.ASSCDataLoaded>({
                     name: Actions.ASSCDataLoaded.name,
                     payload: {
                         tileId: this.tileId,
+                        selectedItemIdx,
                         selectedVariantIdx,
                         items: newItems,
                         variants: newVariants,
@@ -285,8 +302,8 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                     name: Actions.SendActiveMeaningData.name,
                     payload: {
                         tileId: this.tileId,
-                        type: state.data.variants.source,
-                        data: newItems[newVariants[selectedVariantIdx].itemIdx],
+                        variants: [newItems[dataItemIdx].variants[dataVariantIdx]],
+                        meanings: newItems[dataItemIdx].meanings,
                     }
                 });
             },
@@ -297,17 +314,18 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                     error,
                     payload: {
                         tileId: this.tileId,
-                        selectedVariantIdx: null,
-                        items: null,
-                        variants: null,
+                        selectedItemIdx: -1,
+                        selectedVariantIdx: -1,
+                        items: [],
+                        variants: [],
                     }
                 });
             }
         });
     }
 
-    private loadLGuideData(dispatch:SEDispatcher, state:LexOverviewModelState, selectedVariantIdx:number): void {
-        const selectedVariant = state.data.variants.items[selectedVariantIdx];
+    private loadLGuideData(dispatch:SEDispatcher, state:LexOverviewModelState, selectedItemIdx:number, selectedVariantIdx:number): void {
+        const selectedVariant = state.data.search.items[selectedItemIdx][selectedVariantIdx];
         this.api.loadLGuide(
             this.appServices.dataStreaming().startNewSubgroup(this.tileId),
             this.tileId,
@@ -319,6 +337,7 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                     name: Actions.LGuideDataLoaded.name,
                     payload: {
                         tileId: this.tileId,
+                        selectedItemIdx,
                         selectedVariantIdx,
                         data: data,
                     }
@@ -331,8 +350,9 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                     error,
                     payload: {
                         tileId: this.tileId,
-                        selectedVariantIdx: null,
-                        data: null,
+                        selectedItemIdx: -1,
+                        selectedVariantIdx: -1,
+                        data: {} as LGuideDataStructure,
                     }
                 });
             }

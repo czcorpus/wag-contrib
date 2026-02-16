@@ -18,8 +18,8 @@
 
 import { Action } from 'kombo';
 import { Actions as GlobalActions } from '../../../models/actions.js';
-import { AggregateData, Variant } from './common.js';
-import { DataItem } from './commonAssc.js';
+import { AggregateData, SearchVariant } from './common.js';
+import { DataItem, MeaningData, VariantData } from './commonAssc.js';
 import { DataStructure as LGuideDataStructure} from './commonLguide.js';
 
 
@@ -35,32 +35,35 @@ export class Actions {
 
     static ASSCDataLoaded:Action<{
         tileId: number;
+        selectedItemIdx: number;
         selectedVariantIdx: number;
         items: Array<DataItem>;
-        variants: Array<Variant>;
+        variants: Array<Array<SearchVariant>>;
     }> = {
         name: 'LEX_OVERVIEW_ASSC_DATA_LOADED'
     };
 
     static LGuideDataLoaded:Action<{
         tileId: number;
+        selectedItemIdx: number;
         selectedVariantIdx: number;
         data: LGuideDataStructure;
     }> = {
         name: 'LEX_OVERVIEW_LGUIDE_DATA_LOADED'
     };
 
-    static SelectVariant:Action<{
+    static SelectItemVariant:Action<{
         tileId: number;
-        idx: number;
+        itemIdx: number;
+        variantIdx: number;
     }> = {
-        name: 'LEX_OVERVIEW_SELECT_VARIANT'
+        name: 'LEX_OVERVIEW_SELECT_ITEM_VARIANT'
     };
 
     static SendActiveMeaningData:Action<{
         tileId: number;
-        type: string;
-        data: any;
+        variants: Array<VariantData>;
+        meanings: Array<MeaningData>;
     }> = {
         name: 'LEX_OVERVIEW_SEND_ACTIVE_MEANING_DATA'
     };
