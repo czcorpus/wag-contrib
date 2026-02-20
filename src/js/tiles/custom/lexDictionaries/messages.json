@@ -1,0 +1,16 @@
+{
+    "cs-CZ": {
+        "lex_dictionaries__main_label": "Slovníky",
+        "lex_dictionaries__label_ssjc": "Slovník spisovného jazyka českého",
+        "lex_dictionaries__label_psjc": "Příruční slovník jazyka českého",
+        "lex_dictionaries__short_label_ssjc": "SSJČ",
+        "lex_dictionaries__short_label_psjc": "PSJČ"
+    },
+    "en-US": {
+        "lex_dictionaries__main_label": "Dictionaries",
+        "lex_dictionaries__label_ssjc": "Slovník spisovného jazyka českého UNTRANSLATED",
+        "lex_dictionaries__label_psjc": "Příruční slovník jazyka českého UNTRANSLATED",
+        "lex_dictionaries__short_label_ssjc": "SSJČ",
+        "lex_dictionaries__short_label_psjc": "PSJČ"
+    }
+}
