@@ -35,7 +35,9 @@ export interface LexDictionariesModelState {
         type:ApiType;
         loaded:boolean;
         data:SSJCDataStructure|PSJCDataStructure;
+        backlink:Backlink;
     }>;
+    selectedDataIndex:number;
     error:string;
     backlink:Backlink;
 }
@@ -101,6 +103,14 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
             (state, action) => {
                 state.data[action.payload.queryId].loaded = true;
                 state.data[action.payload.queryId].data = action.payload.data;
+            }
+        );
+
+        this.addActionSubtypeHandler(
+            Actions.SelectTab,
+            action => action.payload.tileId === this.tileId,
+            (state, action) => {
+                state.selectedDataIndex = action.payload.dataIdx;
             }
         );
 

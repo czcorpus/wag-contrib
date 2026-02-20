@@ -79,9 +79,11 @@ export class LexDictionariesTile implements ITileProvider {
                         type: serviceConf.type,
                         data: null,
                         loaded: false,
+                        backlink: null
                     }),
                     conf.services
                 ),
+                selectedDataIndex: 0,
                 error: null,
                 backlink: null,
             }

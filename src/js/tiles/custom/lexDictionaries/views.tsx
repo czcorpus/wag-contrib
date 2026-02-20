@@ -26,6 +26,7 @@ import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
 import { PSJCDataStructure, SSJCDataStructure } from './api/basicApi.js';
 import { isPSJCDataStructure, isSSJCDataStructure } from './api/types.js';
+import { Actions } from './actions.js';
 
 
 export function init(
@@ -35,6 +36,20 @@ export function init(
 ):TileComponent {
 
     const globalComponents = ut.getComponents();
+
+    const TabButton: React.FC<{label:string, onClick: () => void, selected?: boolean, disabled?: boolean}> = (props) => {
+        const classes = ['item'];
+        if (props.disabled) classes.push('disabled');
+        if (props.selected) classes.push('current');
+
+        return <S.TabButton>
+            <span className={classes.join(' ')}>{
+                <a onClick={_ => props.onClick()}>
+                    {props.label}
+                </a>
+            }</span>
+        </S.TabButton>;
+    }
 
     // -------------------- <PSJCDataView /> -----------------------------------------------
 
@@ -56,6 +71,17 @@ export function init(
 
     const LexDictionariesTileView: React.FC<LexDictionariesModelState & CoreTileComponentProps> = (props) => {
 
+        const tabOnClick = (index: number) => {
+            dispatcher.dispatch({
+                name: Actions.SelectTab.name,
+                payload: {
+                    tileId: props.tileId,
+                    dataIdx: index,
+                }
+            });
+        };
+
+        const current = props.data[props.selectedDataIndex];
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
                 hasData={true}
@@ -64,23 +90,26 @@ export function init(
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'UJC'}}>
                 <S.LexDictionariesTileView>
-                    {
-                        List.map((serviceData, i) => (
-                            <div key={i}>
-                                {serviceData.data && isPSJCDataStructure(serviceData.type, serviceData.data) ?
-                                    <>
-                                        <h3>{ut.translate('lex_dictionaries__psjc_label')}</h3>
-                                        <PSJCDataView data={serviceData.data}/>
-                                    </> : null}
-                                {serviceData.data && isSSJCDataStructure(serviceData.type, serviceData.data) ?
-                                    <>
-                                        <h3>{ut.translate('lex_dictionaries__ssjc_label')}</h3>
-                                        <SSJCDataView data={serviceData.data}/>
-                                    </>
-                                    : null}
-                            </div>
-                        ), props.data)
-                    }
+
+                    <S.Tabs>{
+                        List.map((item, i) =>
+                            <>
+                                {i > 0 ? <span className="separator">|</span> : null}
+                                <TabButton label={ut.translate(`lex_dictionaries__label_${item.type}`)}
+                                    onClick={() => tabOnClick(i)} selected={i === props.selectedDataIndex}
+                                    disabled={!item.loaded}
+                                />
+                            </>,
+                        props.data)
+                    }</S.Tabs>
+
+                    {current.data ? (
+                        isPSJCDataStructure(current.type, current.data) ?
+                            <PSJCDataView data={current.data}/> :
+                        isSSJCDataStructure(current.type, current.data) ?
+                            <SSJCDataView data={current.data}/> :
+                            null
+                    ):null}
                 </S.LexDictionariesTileView>
             </globalComponents.TileWrapper>
         );

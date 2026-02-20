@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+import { Theme } from '../../../page/theme.js';
 import { styled } from 'styled-components';
 
 // ---------------- <SSJCEntry /> --------------------------------------
@@ -123,6 +124,47 @@ export const PSJCEntry = styled.li`
     .nazev {
         font-size: 150%;
         font-weight: bold;
+    }
+`;
+
+// ---------------- <Tabs /> --------------------------------------
+
+export const Tabs = styled.div`
+    .separator {
+        margin: 0 5px;
+        font-size: 1.5em;
+        color: ${(props) => props.theme.colorLogoBlue};
+    }
+`;
+
+// ---------------- <TabButton /> --------------------------------------
+
+export const TabButton = styled.span<{theme: Theme}>`
+    color: ${(props) => props.theme.colorDefaultText};
+
+    span.item {
+        margin: 0 5px;
+        padding: 0 3px;
+    }
+
+    span.item.disabled {
+        color: ${(props) => props.theme.colorLightText};
+        opacity: 0.5;
+        cursor: default;
+    }
+
+    span.item a {
+        text-decoration: none;
+        color: ${(props) => props.theme.colorDefaultText};
+    }
+
+    span.item a:hover {
+        cursor: pointer;
+        color: ${(props) => props.theme.colorLogoBlue};
+    }
+
+    span.item.current {
+        border-bottom: 2px solid ${props => props.theme.colorLogoBlue};
     }
 `;
 

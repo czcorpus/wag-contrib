@@ -22,7 +22,7 @@ import { PSJCDataStructure, SSJCDataStructure } from './api/basicApi.js';
 
 
 export interface DataLoadedPayload {
-    tileId: number;
+    tileId:number;
     queryId:number;
     data:SSJCDataStructure|PSJCDataStructure;
 }
@@ -31,6 +31,13 @@ export class Actions {
 
     static PartialTileDataLoaded:Action<DataLoadedPayload> = {
         name: 'LEX_DICTIONARIES_PARTIAL_TILE_DATA_LOADED'
+    };
+
+    static SelectTab:Action<{
+        tileId:number;
+        dataIdx:number;
+    }> = {
+        name: 'LEX_DICTIONARIES_SELECT_TAB'
     };
 
     static TileDataLoaded:Action<typeof GlobalActions.TileDataLoaded.payload> = {
