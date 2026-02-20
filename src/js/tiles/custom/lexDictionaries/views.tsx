@@ -95,7 +95,7 @@ export function init(
                         List.map((item, i) =>
                             <>
                                 {i > 0 ? <span className="separator">|</span> : null}
-                                <TabButton label={ut.translate(`lex_dictionaries__label_${item.type}`)}
+                                <TabButton label={ut.translate(`lex_dictionaries__short_label_${item.type}`)}
                                     onClick={() => tabOnClick(i)} selected={i === props.selectedDataIndex}
                                     disabled={!item.loaded}
                                 />
