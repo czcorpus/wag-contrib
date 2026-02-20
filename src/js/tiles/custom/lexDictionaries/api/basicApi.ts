@@ -93,15 +93,21 @@ class UjcBasicApi<T> implements LexDictApi<UjcBasicArgs, T> {
             );
     }
 
+    getBacklink(queryId:number, subqueryId?:number):Backlink|null {
+        return {
+            queryId,
+            label: this.apiServices.importExternalMessage({
+                'cs-CZ': 'slovo ve slovníku',
+                'en-US': 'word in dictionary',
+            }),
+        };
+    }
+
     getSourceDescription(streaming:IDataStreaming, tileId:number, lang:string, corpname:string):Observable<SourceDetails> {
         throw new Error('Method not implemented.');
     }
 
-    getBacklink(queryId:number, subqueryId?:number):Backlink|null {
-        throw new Error('Method not implemented.');
-    }
-
-    apiType():ApiType {
+    getBacklinkURL(term:string):URL {
         throw new Error('Method not implemented.');
     }
 }
@@ -124,17 +130,15 @@ export class UjcPSJCApi extends UjcBasicApi<PSJCDataStructure> {
         })
     }
 
-    getBacklink(queryId:number, subqueryId?:number):Backlink|null {
-        return {
-            queryId,
-            label: 'heslo v Příručním slovníku jazyka českého',
-        };
+    getBacklinkURL(term:string):URL {
+        const backlinkUrl = new URL('https://psjc.ujc.cas.cz/search.php');
+        backlinkUrl.searchParams.set('hledej', 'Hledej');
+        backlinkUrl.searchParams.set('heslo', term);
+        backlinkUrl.searchParams.set('where', 'hesla');
+        backlinkUrl.searchParams.set('zobraz_ps', 'ps');
+        backlinkUrl.searchParams.set('not_initial', '1');
+        return backlinkUrl;
     }
-
-    apiType():ApiType {
-        return 'psjc';
-    }
-
 }
 
 export class UjcSSJCApi extends UjcBasicApi<SSJCDataStructure> {
@@ -155,15 +159,12 @@ export class UjcSSJCApi extends UjcBasicApi<SSJCDataStructure> {
         })
     }
 
-    getBacklink(queryId:number, subqueryId?:number):Backlink|null {
-        return {
-            queryId,
-            label: 'heslo ve Slovníku spisovného jazyka českého',
-        };
+    getBacklinkURL(term:string):URL {
+        const backlinkUrl = new URL('https://ssjc.ujc.cas.cz/search.php');
+        backlinkUrl.searchParams.set('hledej', 'Hledat');
+        backlinkUrl.searchParams.set('heslo', term);
+        backlinkUrl.searchParams.set('where', 'hesla');
+        backlinkUrl.searchParams.set('hsubstr', 'no');
+        return backlinkUrl;
     }
-
-    apiType():ApiType {
-        return 'ssjc';
-    }
-
 }

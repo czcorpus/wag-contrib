@@ -22,7 +22,7 @@ import { SSJCDataStructure, PSJCDataStructure } from './basicApi.js';
 export type ApiType = 'ssjc'|'psjc';
 
 export interface LexDictApi<U = any, V = any> extends ResourceApi<U, V> {
-    apiType(): ApiType;
+    getBacklinkURL(term:string):URL;
 }
 
 export function isSSJCDataStructure(type: ApiType, data: any): data is SSJCDataStructure {

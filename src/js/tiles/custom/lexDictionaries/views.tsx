@@ -82,15 +82,15 @@ export function init(
         };
 
         const current = props.data[props.selectedDataIndex];
+        const source = ut.translate(`lex_dictionaries__label_${current.type}`)
         return (
             <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
                 hasData={true}
-                backlink={props.backlink}
+                backlink={current.backlink}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
-                sourceIdent={{corp: 'UJC'}}>
+                sourceIdent={{corp: source}}>
                 <S.LexDictionariesTileView>
-
                     <S.Tabs>{
                         List.map((item, i) =>
                             <>

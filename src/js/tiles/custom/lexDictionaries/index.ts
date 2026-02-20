@@ -85,7 +85,6 @@ export class LexDictionariesTile implements ITileProvider {
                 ),
                 selectedDataIndex: 0,
                 error: null,
-                backlink: null,
             }
         });
         this.label = appServices.importExternalMessage(conf.label || 'lex_dictionaries__main_label');

@@ -39,7 +39,6 @@ export interface LexDictionariesModelState {
     }>;
     selectedDataIndex:number;
     error:string;
-    backlink:Backlink;
 }
 
 export interface LexDictionariesModelArgs {
@@ -78,8 +77,7 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
                 */
                 state.isBusy = true;
                 state.error = null;
-                state.data = List.map(d => ({...d, data: null, loaded: false}), state.data);
-                state.backlink = null;
+                state.data = List.map(d => ({type: d.type, data: null, loaded: false, backlink: null}), state.data);
             },
             (state, action, dispatch) => {
                 this.loadData(dispatch, state);
@@ -103,6 +101,7 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
             (state, action) => {
                 state.data[action.payload.queryId].loaded = true;
                 state.data[action.payload.queryId].data = action.payload.data;
+                state.data[action.payload.queryId].backlink = this.apis[action.payload.queryId].getBacklink(action.payload.queryId);
             }
         );
 
@@ -119,6 +118,29 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
             action => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
+                this.apis[state.selectedDataIndex].getSourceDescription(
+                    this.appServices.dataStreaming(),
+                    this.tileId,
+                    this.appServices.getISO639UILang(),
+                    ''
+                ).subscribe({
+                    next: (data) => {
+                        dispatch({
+                            name: GlobalActions.GetSourceInfoDone.name,
+                            payload: {
+                                data: data
+                            }
+                        });
+                    },
+                    error: (err) => {
+                        console.error(err);
+                        dispatch({
+                            name: GlobalActions.GetSourceInfoDone.name,
+                            error: err
+
+                        });
+                    }
+                });
             }
         );
 
@@ -127,7 +149,9 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
             action => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
-            }
+                const url = this.apis[action.payload.backlink.queryId].getBacklinkURL(state.queries[0]);
+                window.open(url.toString(), '_blank');
+            },
         );
     }
 
