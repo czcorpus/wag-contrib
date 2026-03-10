@@ -58,7 +58,7 @@ export function init(
         return (
             <globalComponents.ResponsiveWrapper minWidth={props.isMobile ? undefined : 250}
                                         widthFract={props.widthFract} render={(width:number, height:number) => (
-                <ScatterChart width={Math.max(100, width)} height={Math.max(350, height)} margin={{ top: 20, right: 20, bottom: 10, left: 10 }}>
+                <ScatterChart width={Math.max(100, width * 0.9)} height={Math.max(350, height)} margin={{ top: 20, right: 20, bottom: 10, left: 10 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="x" name={ut.translate('hex__label_year')} type="number" unit=""
                             domain={range} tick={{ fill: theme.chartTextColor }} />
