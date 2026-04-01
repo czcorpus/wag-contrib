@@ -19,64 +19,61 @@
 import { Dict, List, pipe } from 'cnc-tskit';
 
 export interface DataTableItem {
-    af:number;
-    author:string;
-    bookId:string;
-    bookName:string;
-    phi:number;
-    poemId:number;
-    poemName:string;
-    rf:number;
-    year:number;
+    af: number;
+    author: string;
+    bookId: string;
+    bookName: string;
+    phi: number;
+    poemId: number;
+    poemName: string;
+    rf: number;
+    year: number;
 }
 
 export interface Data {
-        count:number;
-        size:{
-            lemma:{[k:string]:number};
-            line:{[k:string]:number};
-            poem:{[k:string]:number};
-        };
-        countY:{[y:string]:number};
-        table:Array<DataTableItem>;
-        sorting:{
-            author:{[name:string]:number};
-            bookName:{[name:string]:number};
-            poemName:{[name:string]:number};
-        };
-    }
+    count: number;
+    size: {
+        lemma: { [k: string]: number };
+        line: { [k: string]: number };
+        poem: { [k: string]: number };
+    };
+    countY: { [y: string]: number };
+    table: Array<DataTableItem>;
+    sorting: {
+        author: { [name: string]: number };
+        bookName: { [name: string]: number };
+        poemName: { [name: string]: number };
+    };
+}
 
-export type ChartData = Array<{x: number; y: number}>;
+export type ChartData = Array<{ year: number; count: number }>;
 
-
-export function transformDataForCharts(data:Data):ChartData {
+export function transformDataForCharts(data: Data): ChartData {
     return pipe(
         data.countY,
         Dict.toEntries(),
-        List.sortedBy(([year,]) => parseInt(year)),
-        List.map(
-            ([year, count]) => ({
-                x: parseInt(year),
-                y: count
-            })
-        )
+        List.sortedBy(([year]) => parseInt(year)),
+        List.map(([year, count]) => ({
+            year: parseInt(year),
+            count,
+        }))
     );
 }
 
-export function mkEmptyData():Data {
+export function mkEmptyData(): Data {
     return {
         count: 0,
         size: {
             lemma: {},
             line: {},
-            poem: {}
+            poem: {},
         },
         countY: {},
         table: [],
         sorting: {
             author: {},
             bookName: {},
-            poemName: {}
-        }
+            poemName: {},
+        },
     };
 }

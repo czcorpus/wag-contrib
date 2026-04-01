@@ -30,7 +30,7 @@ export const GunstickTileView = styled.div`
 export const DataListTable = styled.table`
     th.word {
         text-align: left;
-        color: #e2007a;
+        color: ${(props) => props.theme.colorLogoPink};
     }
 `;
 

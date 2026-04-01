@@ -45,6 +45,11 @@ import {
 import { Actions } from '../actions.js';
 import * as S from '../style.js';
 import { Examples } from './examples.js';
+import {
+    Formatter,
+    NameType,
+    ValueType,
+} from 'recharts/types/component/DefaultTooltipContent.js';
 
 function getYearIdxMapping(data: SummedSizes): Array<string> {
     return pipe(
@@ -110,9 +115,12 @@ export function init(
             List.flatMap(([, counts]) => counts),
             List.foldl(
                 ([min, max], curr) => {
-                    return tuple(Math.min(min, curr.x), Math.max(max, curr.x));
+                    return tuple(
+                        Math.min(min, curr.year),
+                        Math.max(max, curr.year)
+                    );
                 },
-                tuple(item.x, item.x)
+                tuple(item.year, item.year)
             )
         );
     };
@@ -121,9 +129,23 @@ export function init(
         data: ChartData;
         isMobile: boolean;
         widthFract: number;
-        handleScatterClick: (word: string, year: number) => void;
+        handleScatterClick: (verse: string, year: number) => void;
     }> = (props) => {
         const mapping = createColorMapping(props.data);
+        const tooltipFormatter: Formatter<ValueType, NameType> = (
+            value,
+            name,
+            item
+        ) => {
+            if (typeof value === 'number') {
+                if (item.dataKey === 'year') {
+                    return [value.toString(), name];
+                }
+                return [ut.formatNumber(value), name];
+            }
+            return [value, name];
+        };
+
         return (
             <globalComponents.ResponsiveWrapper
                 minWidth={props.isMobile ? undefined : 250}
@@ -136,15 +158,15 @@ export function init(
                     >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis
-                            dataKey="x"
-                            name="year"
+                            dataKey="year"
+                            name={ut.translate('gunstick__year')}
                             type="number"
                             unit=""
                             domain={rangeOf(props.data)}
                             tick={{ fill: theme.chartTextColor }}
                         />
                         <YAxis
-                            dataKey="y"
+                            dataKey="count"
                             name={ut.translate('gunstick__abs_freq')}
                             unit=""
                             type="number"
@@ -157,7 +179,17 @@ export function init(
                         />
                         <Tooltip
                             cursor={{ strokeDasharray: '3 3' }}
-                            labelStyle={{ display: 'none' }}
+                            isAnimationActive={false}
+                            formatter={tooltipFormatter}
+                            content={
+                                <globalComponents.AlignedRechartsTooltip
+                                    labelFormatter={(label, payload) =>
+                                        payload.length > 0
+                                            ? payload[0].payload.verse
+                                            : null
+                                    }
+                                />
+                            }
                         />
                         <Legend
                             formatter={(value) => (
@@ -179,7 +211,7 @@ export function init(
                                     onClick={(v) =>
                                         props.handleScatterClick(
                                             verse,
-                                            v.payload['x']
+                                            v.payload['year']
                                         )
                                     }
                                 />
@@ -195,7 +227,8 @@ export function init(
         data: Data;
         page: number;
         pageSize: number;
-    }> = ({ data, page, pageSize }) => {
+        handleCellClick: (verse: string, year: number) => void;
+    }> = ({ data, page, pageSize, handleCellClick }) => {
         const [years, tableData] = transformDataForTableView(data.countRY);
 
         return (
@@ -228,7 +261,19 @@ export function init(
                                     {List.map(
                                         (f, i) => (
                                             <td key={`f:${word}:${i}:${f}`}>
-                                                {f}
+                                                <a
+                                                    style={{
+                                                        cursor: 'pointer',
+                                                    }}
+                                                    onClick={() =>
+                                                        handleCellClick(
+                                                            word,
+                                                            parseInt(years[i])
+                                                        )
+                                                    }
+                                                >
+                                                    {f}
+                                                </a>
                                             </td>
                                         ),
                                         freqs
@@ -273,7 +318,7 @@ export function init(
             }
         };
 
-        const handleScatterClick = (word: string, year: number) => {
+        const handleShowExamplesClick = (word: string, year: number) => {
             dispatcher.dispatch<typeof Actions.ShowExampleWindow>({
                 name: Actions.ShowExampleWindow.name,
                 payload: {
@@ -339,6 +384,7 @@ export function init(
                             data={props.data}
                             page={props.page}
                             pageSize={props.pageSize}
+                            handleCellClick={handleShowExamplesClick}
                         />
                     ) : (
                         <Chart
@@ -349,7 +395,7 @@ export function init(
                             )}
                             isMobile={props.isMobile}
                             widthFract={props.widthFract}
-                            handleScatterClick={handleScatterClick}
+                            handleScatterClick={handleShowExamplesClick}
                         />
                     )}
                 </S.GunstickTileView>

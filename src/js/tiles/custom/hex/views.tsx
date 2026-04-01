@@ -18,7 +18,15 @@
 
 import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
 import * as React from 'react';
-import { ScatterChart, CartesianGrid, XAxis, YAxis, Legend, Scatter, Tooltip } from 'recharts';
+import {
+    ScatterChart,
+    CartesianGrid,
+    XAxis,
+    YAxis,
+    Legend,
+    Scatter,
+    Tooltip,
+} from 'recharts';
 import { Dict, List, pipe, tuple } from 'cnc-tskit';
 
 import { Theme } from '../../../page/theme.js';
@@ -27,57 +35,120 @@ import { GlobalComponents } from '../../../views/common/index.js';
 import { HexModel, HexModelState } from './model.js';
 import { ChartData, Data, transformDataForCharts } from './common.js';
 import * as S from './style.js';
-
+import {
+    Formatter,
+    NameType,
+    ValueType,
+} from 'recharts/types/component/DefaultTooltipContent.js';
 
 export function init(
-    dispatcher:IActionDispatcher,
-    ut:ViewUtils<GlobalComponents>,
-    theme:Theme, model:HexModel
-):TileComponent {
-
+    dispatcher: IActionDispatcher,
+    ut: ViewUtils<GlobalComponents>,
+    theme: Theme,
+    model: HexModel
+): TileComponent {
     const globalComponents = ut.getComponents();
 
     // ---------------------- <Chart /> ------------------------------------
 
-    const Chart:React.FC<{
-        data:ChartData;
-        isMobile:boolean;
-        widthFract:number;
-        word:string;
-
+    const Chart: React.FC<{
+        data: ChartData;
+        isMobile: boolean;
+        widthFract: number;
+        word: string;
     }> = (props) => {
-
         const range = pipe(
             props.data,
             List.foldl(
-                ([accMin, accMax], curr) => tuple(Math.min(accMin, curr.x), Math.max(accMax, curr.x)),
-                tuple(List.head(props.data).x, List.head(props.data).x)
+                ([accMin, accMax], curr) =>
+                    tuple(
+                        Math.min(accMin, curr.year),
+                        Math.max(accMax, curr.year)
+                    ),
+                tuple(List.head(props.data).year, List.head(props.data).year)
             )
         );
+        const tooltipFormatter: Formatter<ValueType, NameType> = (
+            value,
+            name,
+            item
+        ) => {
+            if (typeof value === 'number') {
+                if (item.dataKey === 'year') {
+                    return [value.toString(), name];
+                }
+                return [ut.formatNumber(value), name];
+            }
+            return [value, name];
+        };
 
         return (
-            <globalComponents.ResponsiveWrapper minWidth={props.isMobile ? undefined : 250}
-                                        widthFract={props.widthFract} render={(width:number, height:number) => (
-                <ScatterChart width={Math.max(100, width * 0.9)} height={Math.max(350, height)} margin={{ top: 20, right: 20, bottom: 10, left: 10 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="x" name={ut.translate('hex__label_year')} type="number" unit=""
-                            domain={range} tick={{ fill: theme.chartTextColor }} />
-                    <YAxis dataKey="y" name={ut.translate('hex__abs_freq')} unit="" type="number" tick={{ fill: theme.chartTextColor }}
-                            label={{ value: ut.translate('hex__abs_freq'), angle: -90, position: 'insideLeft' }} />
-                    <Tooltip cursor={{ strokeDasharray: '3 3' }} labelStyle={{display: 'none'}} />
-                    <Legend formatter={(value) => <span style={{ color: theme.chartTextColor }}>{value}</span>} />
-                    <Scatter name={props.word} data={props.data} fill={theme.categoryColor(0)} />
-                </ScatterChart>)} />
+            <globalComponents.ResponsiveWrapper
+                minWidth={props.isMobile ? undefined : 250}
+                widthFract={props.widthFract}
+                render={(width: number, height: number) => (
+                    <ScatterChart
+                        width={Math.max(100, width * 0.9)}
+                        height={Math.max(350, height)}
+                        margin={{ top: 20, right: 20, bottom: 10, left: 10 }}
+                    >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
+                            dataKey="year"
+                            name={ut.translate('hex__label_year')}
+                            type="number"
+                            unit=""
+                            domain={range}
+                            tick={{ fill: theme.chartTextColor }}
+                        />
+                        <YAxis
+                            dataKey="count"
+                            name={ut.translate('hex__abs_freq')}
+                            unit=""
+                            type="number"
+                            tick={{ fill: theme.chartTextColor }}
+                            label={{
+                                value: ut.translate('hex__abs_freq'),
+                                angle: -90,
+                                position: 'insideLeft',
+                            }}
+                        />
+                        <Tooltip
+                            cursor={{ strokeDasharray: '3 3' }}
+                            isAnimationActive={false}
+                            formatter={tooltipFormatter}
+                            content={
+                                <globalComponents.AlignedRechartsTooltip />
+                            }
+                        />
+                        <Legend
+                            formatter={(value) => (
+                                <span style={{ color: theme.chartTextColor }}>
+                                    {value}
+                                </span>
+                            )}
+                        />
+                        <Scatter
+                            name={props.word}
+                            data={props.data}
+                            fill={theme.categoryColor(0)}
+                        />
+                    </ScatterChart>
+                )}
+            />
         );
     };
 
     // ---------------------- <Table /> ------------------------------------
 
-    const Table:React.FC<{
+    const Table: React.FC<{
         data: Data;
     }> = (props) => (
-        <div style={{maxHeight: '20em', overflowY: 'auto'}}>
-            <p>{ut.translate('hex__freq_found_occurrences')}: <strong>{props.data.count}</strong></p>
+        <div style={{ maxHeight: '20em', overflowY: 'auto' }}>
+            <p>
+                {ut.translate('hex__freq_found_occurrences')}:{' '}
+                <strong>{props.data.count}</strong>
+            </p>
             <table className="data">
                 <thead>
                     <tr>
@@ -86,16 +157,16 @@ export function init(
                     </tr>
                 </thead>
                 <tbody>
-                {pipe(
-                    props.data.countY,
-                    Dict.toEntries(),
-                    List.map(([year, freq]) => (
-                        <tr key={`year:${year}`}>
-                            <td>{year}</td>
-                            <td>{freq}</td>
-                        </tr>
-                    ))
-                )}
+                    {pipe(
+                        props.data.countY,
+                        Dict.toEntries(),
+                        List.map(([year, freq]) => (
+                            <tr key={`year:${year}`}>
+                                <td>{year}</td>
+                                <td>{freq}</td>
+                            </tr>
+                        ))
+                    )}
                 </tbody>
             </table>
         </div>
@@ -103,26 +174,34 @@ export function init(
 
     // -------------------- <HexTileView /> -----------------------------------------------
 
-    const HexTileView: React.FC<HexModelState & CoreTileComponentProps> = (props) => {
-
+    const HexTileView: React.FC<HexModelState & CoreTileComponentProps> = (
+        props
+    ) => {
         return (
-            <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
+            <globalComponents.TileWrapper
+                tileId={props.tileId}
+                isBusy={props.isBusy}
+                error={props.error}
                 hasData={props.data.count > 0}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
-                sourceIdent={{ corp: 'HEX', url: props.serviceInfoUrl }}>
+                sourceIdent={{ corp: 'HEX', url: props.serviceInfoUrl }}
+            >
                 <S.HexTileView>
-                    {props.isAltViewMode ?
-                        <Table data={props.data} /> :
-                        <Chart data={transformDataForCharts(props.data)}
+                    {props.isAltViewMode ? (
+                        <Table data={props.data} />
+                    ) : (
+                        <Chart
+                            data={transformDataForCharts(props.data)}
                             isMobile={props.isMobile}
                             widthFract={props.widthFract}
-                            word={props.word} />
-                    }
+                            word={props.word}
+                        />
+                    )}
                 </S.HexTileView>
             </globalComponents.TileWrapper>
         );
-    }
+    };
 
     return BoundWithProps(HexTileView, model);
 }

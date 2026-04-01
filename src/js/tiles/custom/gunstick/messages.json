@@ -2,14 +2,14 @@
     "cs-CZ": {
         "gunstick__total_occurrences": "celkem nalezeno",
         "gunstick__only_most_freq_displayed": "Zobrazují se pouze nejfrekventovanější položky",
-        "gunstick__label_year": "rok",
+        "gunstick__year": "rok",
         "gunstick__abs_freq": "abs. frekvence",
         "gunstick__conc_examples": "konkrétní příklady"
     },
     "en-US": {
         "gunstick__total_occurrences": "total found",
         "gunstick__only_most_freq_displayed": "Only the most frequent items are displayed",
-        "gunstick__label_year": "year",
+        "gunstick__year": "year",
         "gunstick__abs_freq": "abs. frequency",
         "gunstick__conc_examples": "concrete examples"
     }

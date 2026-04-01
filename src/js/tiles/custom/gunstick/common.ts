@@ -19,66 +19,70 @@
 import { Dict, List, pipe, tuple } from 'cnc-tskit';
 
 export interface DataTableItem {
-    author:string;
-    poemName:string;
-    bookId:string;
-    bookName:string;
-    year:number;
-    line1:string;
-    line2:string;
-    ending:string;
+    author: string;
+    poemName: string;
+    bookId: string;
+    bookName: string;
+    year: number;
+    line1: string;
+    line2: string;
+    ending: string;
 }
 
-
 export interface SummedSizes {
-    [k:string]:{[year:string]:number};
+    [k: string]: { [year: string]: number };
 }
 
 export interface Data {
-    count:number;
-    countRY:SummedSizes;
-    dataSize:{[year:string]:number};
-    table:{
-        [k:string]:Array<DataTableItem>
+    count: number;
+    countRY: SummedSizes;
+    dataSize: { [year: string]: number };
+    table: {
+        [k: string]: Array<DataTableItem>;
     };
 }
 
-export type ChartData = {[verse:string]:Array<{x: number; y: number; z: number}>};
+export type ChartData = {
+    [verse: string]: Array<{ year: number; count: number; verse: string }>;
+};
 
-
-export function transformDataForCharts(data:Data, page:number, pageSize:number):ChartData {
+export function transformDataForCharts(
+    data: Data,
+    page: number,
+    pageSize: number
+): ChartData {
     return pipe(
         data.countRY,
         Dict.toEntries(),
-        List.map(([verse, counts]) => tuple(
-            verse,
-            pipe(
-                counts,
-                Dict.toEntries(),
-                List.sortedBy(([year,]) => parseInt(year)),
-                List.map(
-                    ([year, count]) => ({
-                        x: parseInt(year),
-                        y: count,
-                        z: 2
-                    })
+        List.map(([verse, counts]) =>
+            tuple(
+                verse,
+                pipe(
+                    counts,
+                    Dict.toEntries(),
+                    List.sortedBy(([year]) => parseInt(year)),
+                    List.map(([year, count]) => ({
+                        year: parseInt(year),
+                        count: count,
+                        verse,
+                    }))
                 )
             )
-        )),
-        List.sortedBy(
-            ([verse, counts]) => List.foldl((acc, curr) => acc + curr.y, 0, counts),
+        ),
+        List.sortedBy(([verse, counts]) =>
+            List.foldl((acc, curr) => acc + curr.count, 0, counts)
         ),
         List.reverse(),
-        List.slice(pageSize*(page-1), pageSize*page),
+        List.slice(pageSize * (page - 1), pageSize * page),
         Dict.fromEntries()
     );
 }
 
-export function mkEmptyData():Data {
+export function mkEmptyData(): Data {
     return {
         count: 0,
         countRY: {},
         dataSize: {},
-        table: {}
+        table: {},
     };
 }
