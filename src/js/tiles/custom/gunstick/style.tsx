@@ -17,6 +17,7 @@
  */
 
 import { styled } from 'styled-components';
+import { Theme } from '../../../page/theme.js';
 
 // ----------- <GunstickTileView /> -------------------------
 
@@ -27,7 +28,6 @@ export const GunstickTileView = styled.div`
 // ----------- <DataListTable /> -------------------------
 
 export const DataListTable = styled.table`
-
     th.word {
         text-align: left;
         color: #e2007a;
@@ -44,5 +44,55 @@ export const Controls = styled.form`
     label {
         margin-right: 0.7em;
         display: inline-block;
+    }
+`;
+
+// ------------------------ <Examples /> --------------------------
+
+export const Examples = styled.div<{ theme: Theme }>`
+    background-color: ${(props) => props.theme.tileBackgroundColor};
+    border: ${(props) => props.theme.defaultBorderStyle};
+    border-radius: ${(props) => props.theme.tileBorderRadius};
+    box-shadow: 0.05em 0.05em 0.15em 0.05em rgba(0, 0, 0, 0.2);
+    padding: 0.5em;
+
+    > div.texts {
+        display: flex;
+        flex-direction: column;
+        max-height: 30em;
+        overflow-y: scroll;
+
+        > p {
+            margin: 0;
+            padding: 0.5em 1em 0.5em 1em;
+
+            strong {
+                color: ${(props) => props.theme.colorLogoPink};
+            }
+        }
+
+        > p:not(:first-child) {
+            border-top: 1px solid #cfcfcf;
+            border-top: 1px solid ${(props) => props.theme.colorWhitelikeBlue};
+        }
+
+        .separator {
+            margin: 0 0.5em;
+        }
+    }
+
+    h3 {
+        text-align: center;
+        margin: 0 0 1em 0;
+        font-size: 1.6em;
+
+        span.words {
+            color: ${(props) => props.theme.colorLogoPink};
+            font-weight: normal;
+
+            span.plus {
+                color: ${(props) => props.theme.colorDefaultText};
+            }
+        }
     }
 `;

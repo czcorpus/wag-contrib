@@ -20,26 +20,40 @@ import { Action } from 'kombo';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Data } from './common.js';
 
-
 export interface DataLoadedPayload {
-    data:Data;
+    data: Data;
 }
 
 export class Actions {
-
-    static TileDataLoaded:Action<typeof GlobalActions.TileDataLoaded.payload & DataLoadedPayload> = {
-        name: GlobalActions.TileDataLoaded.name
+    static TileDataLoaded: Action<
+        typeof GlobalActions.TileDataLoaded.payload & DataLoadedPayload
+    > = {
+        name: GlobalActions.TileDataLoaded.name,
     };
 
-    static NextPage:Action<{
-        tileId:number;
+    static NextPage: Action<{
+        tileId: number;
     }> = {
-        name: 'GUNSTICK_LOAD_NEXT_PAGE'
+        name: 'GUNSTICK_LOAD_NEXT_PAGE',
     };
 
-    static PrevPage:Action<{
-        tileId:number;
+    static PrevPage: Action<{
+        tileId: number;
     }> = {
-        name: 'GUNSTICK_LOAD_PREV_PAGE'
+        name: 'GUNSTICK_LOAD_PREV_PAGE',
+    };
+
+    static ShowExampleWindow: Action<{
+        tileId: number;
+        verse: string;
+        year: number;
+    }> = {
+        name: 'GUNSTICK_SHOW_EXAMPLE_WINDOW',
+    };
+
+    static HideExampleWindow: Action<{
+        tileId: number;
+    }> = {
+        name: 'HIDE_SHOW_EXAMPLE_WINDOW',
     };
 }

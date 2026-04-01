@@ -16,11 +16,14 @@
  * limitations under the License.
  */
 
-import { List } from 'cnc-tskit';
 import { IActionQueue, StatelessModel } from 'kombo';
 
 import { IAppServices } from '../../../appServices.js';
-import { RecognizedQueries, findCurrQueryMatch, testIsDictMatch } from '../../../query/index.js';
+import {
+    QueryMatch,
+    RecognizedQueries,
+    testIsDictMatch,
+} from '../../../query/index.js';
 import { KSPRequestArgs } from './api.js';
 import { Data, mkEmptyData } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
@@ -28,32 +31,36 @@ import { Actions } from './actions.js';
 import { DataApi } from '../../../types.js';
 
 export interface GunstickModelState {
-    isBusy:boolean;
-    error:string;
-    data:Data;
+    isBusy: boolean;
+    error: string;
+    currMatch: QueryMatch;
+    data: Data;
     isAltViewMode: boolean;
-    isTweakMode:boolean;
-    serviceInfoUrl:string;
-    page:number;
-    pageSize:number;
-    y1:number;
-    y2:number;
+    isTweakMode: boolean;
+    serviceInfoUrl: string;
+    page: number;
+    pageSize: number;
+    y1: number;
+    y2: number;
+    exampleWindowData?: {
+        verse: string;
+        year: number;
+    };
 }
 
 export interface GunstickModelArgs {
-    dispatcher:IActionQueue;
-    initState:GunstickModelState;
-    tileId:number;
-    api:DataApi<KSPRequestArgs, Data>,
-    appServices:IAppServices;
-    queryMatches:RecognizedQueries;
+    dispatcher: IActionQueue;
+    initState: GunstickModelState;
+    tileId: number;
+    api: DataApi<KSPRequestArgs, Data>;
+    appServices: IAppServices;
+    queryMatches: RecognizedQueries;
 }
 
 export class GunstickModel extends StatelessModel<GunstickModelState> {
+    private readonly tileId: number;
 
-    private readonly tileId:number;
-
-    private readonly api:DataApi<KSPRequestArgs, Data>;
+    private readonly api: DataApi<KSPRequestArgs, Data>;
 
     constructor({
         dispatcher,
@@ -61,13 +68,11 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
         api,
         tileId,
         appServices,
-        queryMatches
-    }:GunstickModelArgs
-    ) {
+        queryMatches,
+    }: GunstickModelArgs) {
         super(dispatcher, initState);
         this.tileId = tileId;
         this.api = api;
-
 
         this.addActionHandler(
             GlobalActions.RequestQueryResponse,
@@ -77,45 +82,46 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
                 state.data = mkEmptyData();
             },
             (state, action, dispatch) => {
-                const currMatch = findCurrQueryMatch(List.head(queryMatches));
-                this.api.call(
-                    appServices.dataStreaming(),
-                    this.tileId,
-                    0,
-                    testIsDictMatch(currMatch) ?
-                        {
-                            q: currMatch.lemma,
-                            unit: 'lemma',
-                            src: 'all',
-                            lang: 'cz',
-                            y1: state.y1,
-                            y2: state.y2
-                        } :
-                        null
-                ).subscribe({
-                    next: (data) => {
-                        dispatch<typeof Actions.TileDataLoaded>({
-                            name: Actions.TileDataLoaded.name,
-                            payload: {
-                                tileId: this.tileId,
-                                isEmpty: false,
-                                data: data
-                            }
-                        });
-                    },
-                    error: (error) => {
-                        console.error(error);
-                        dispatch<typeof Actions.TileDataLoaded>({
-                            name: Actions.TileDataLoaded.name,
-                            error,
-                            payload: {
-                                tileId: this.tileId,
-                                isEmpty: true,
-                                data: mkEmptyData()
-                            }
-                        });
-                    }
-                });
+                this.api
+                    .call(
+                        appServices.dataStreaming(),
+                        this.tileId,
+                        0,
+                        testIsDictMatch(state.currMatch)
+                            ? {
+                                  q: state.currMatch.lemma,
+                                  unit: 'lemma',
+                                  src: 'all',
+                                  lang: 'cz',
+                                  y1: state.y1,
+                                  y2: state.y2,
+                              }
+                            : null
+                    )
+                    .subscribe({
+                        next: (data) => {
+                            dispatch<typeof Actions.TileDataLoaded>({
+                                name: Actions.TileDataLoaded.name,
+                                payload: {
+                                    tileId: this.tileId,
+                                    isEmpty: false,
+                                    data: data,
+                                },
+                            });
+                        },
+                        error: (error) => {
+                            console.error(error);
+                            dispatch<typeof Actions.TileDataLoaded>({
+                                name: Actions.TileDataLoaded.name,
+                                error,
+                                payload: {
+                                    tileId: this.tileId,
+                                    isEmpty: true,
+                                    data: mkEmptyData(),
+                                },
+                            });
+                        },
+                    });
             }
         );
         this.addActionHandler<typeof Actions.TileDataLoaded>(
@@ -125,7 +131,6 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
                     state.isBusy = false;
                     if (action.error) {
                         state.error = action.error.message;
-
                     } else {
                         state.data = action.payload.data;
                     }
@@ -183,6 +188,24 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
                 }
             }
         );
-    }
 
+        this.addActionSubtypeHandler(
+            Actions.ShowExampleWindow,
+            (action) => action.payload.tileId === this.tileId,
+            (state, action) => {
+                state.exampleWindowData = {
+                    verse: action.payload.verse,
+                    year: action.payload.year,
+                };
+            }
+        );
+
+        this.addActionSubtypeHandler(
+            Actions.HideExampleWindow,
+            (action) => action.payload.tileId === this.tileId,
+            (state, action) => {
+                state.exampleWindowData = undefined;
+            }
+        );
+    }
 }
