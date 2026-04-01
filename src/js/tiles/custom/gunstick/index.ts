@@ -18,24 +18,30 @@
 import { IActionDispatcher } from 'kombo';
 
 import { IAppServices } from '../../../appServices.js';
-import { QueryType } from '../../../query/index.js';
-import { init as viewInit } from './views.js';
+import { findCurrQueryMatch, QueryType } from '../../../query/index.js';
+import { init as viewInit } from './views/views.js';
 import {
-    TileConf, ITileProvider, TileComponent, TileFactoryArgs, TileFactory,
-    DEFAULT_ALT_VIEW_ICON, ITileReloader, AltViewIconProps
+    TileConf,
+    ITileProvider,
+    TileComponent,
+    TileFactoryArgs,
+    TileFactory,
+    DEFAULT_ALT_VIEW_ICON,
+    ITileReloader,
+    AltViewIconProps,
 } from '../../../page/tile.js';
 import { GunstickModel } from './model.js';
 import { GunstickApi, KSPRequestArgs } from './api.js';
 import { mkEmptyData, Data } from './common.js';
 import { LocalizedConfMsg, DataApi } from '../../../types.js';
-
+import { List } from 'cnc-tskit';
 
 export interface GunstickTileConf extends TileConf {
-    apiURL:string;
-    serviceInfoUrl:LocalizedConfMsg;
-    pageSize:number;
-    y1:number;
-    y2:number;
+    apiURL: string;
+    serviceInfoUrl: LocalizedConfMsg;
+    pageSize: number;
+    y1: number;
+    y2: number;
 }
 
 /**
@@ -44,27 +50,33 @@ export interface GunstickTileConf extends TileConf {
  * services.
  */
 export class GunstickTile implements ITileProvider {
+    private readonly tileId: number;
 
-    private readonly tileId:number;
+    private readonly dispatcher: IActionDispatcher;
 
-    private readonly dispatcher:IActionDispatcher;
+    private readonly appServices: IAppServices;
 
-    private readonly appServices:IAppServices;
+    private readonly model: GunstickModel;
 
-    private readonly model:GunstickModel;
+    private readonly widthFract: number;
 
-    private readonly widthFract:number;
+    private readonly label: string;
 
-    private readonly label:string;
+    private readonly api: DataApi<KSPRequestArgs, Data>;
 
-    private readonly api:DataApi<KSPRequestArgs, Data>;
-
-    private view:TileComponent;
+    private view: TileComponent;
 
     constructor({
-        tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
-        queryMatches}:TileFactoryArgs<GunstickTileConf>
-    ) {
+        tileId,
+        dispatcher,
+        appServices,
+        ut,
+        theme,
+        widthFract,
+        conf,
+        isBusy,
+        queryMatches,
+    }: TileFactoryArgs<GunstickTileConf>) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
@@ -78,51 +90,56 @@ export class GunstickTile implements ITileProvider {
             tileId,
             initState: {
                 isBusy: isBusy,
+                currMatch: findCurrQueryMatch(List.head(queryMatches)),
                 data: mkEmptyData(),
                 error: null,
                 isAltViewMode: false,
                 isTweakMode: false,
-                serviceInfoUrl: appServices.importExternalMessage(conf.serviceInfoUrl),
+                serviceInfoUrl: appServices.importExternalMessage(
+                    conf.serviceInfoUrl
+                ),
                 page: 1,
                 pageSize: conf.pageSize || 10,
                 y1: conf.y1,
-                y2: conf.y2
-            }
+                y2: conf.y2,
+                exampleWindowData: undefined,
+            },
         });
-        this.label = appServices.importExternalMessage(conf.label || 'html__main_label');
-        this.view = viewInit(
-            this.dispatcher,
-            ut,
-            theme,
-            this.model
+        this.label = appServices.importExternalMessage(
+            conf.label || 'html__main_label'
         );
+        this.view = viewInit(this.dispatcher, ut, theme, this.model);
     }
 
-    getIdent():number {
+    getIdent(): number {
         return this.tileId;
     }
 
-    getLabel():string {
+    getLabel(): string {
         return this.label;
     }
 
-    getView():TileComponent {
+    getView(): TileComponent {
         return this.view;
     }
 
-    getSourceInfoComponent():null {
+    getSourceInfoComponent(): null {
         return null;
     }
 
-    supportsQueryType(qt:QueryType, domain1:string, domain2?:string):boolean {
+    supportsQueryType(
+        qt: QueryType,
+        domain1: string,
+        domain2?: string
+    ): boolean {
         return qt === QueryType.SINGLE_QUERY || qt === QueryType.TRANSLAT_QUERY;
     }
 
-    disable():void {
-        this.model.waitForAction({}, (_, syncData)=>syncData);
+    disable(): void {
+        this.model.waitForAction({}, (_, syncData) => syncData);
     }
 
-    getWidthFract():number {
+    getWidthFract(): number {
         return this.widthFract;
     }
 
@@ -130,48 +147,46 @@ export class GunstickTile implements ITileProvider {
         return true;
     }
 
-    supportsAltView():boolean {
+    supportsAltView(): boolean {
         return true;
     }
 
-    supportsSVGFigureSave():boolean {
+    supportsSVGFigureSave(): boolean {
         return false;
     }
 
-    getAltViewIcon():AltViewIconProps {
+    getAltViewIcon(): AltViewIconProps {
         return DEFAULT_ALT_VIEW_ICON;
     }
 
-    registerReloadModel(model:ITileReloader):boolean {
+    registerReloadModel(model: ITileReloader): boolean {
         model.registerModel(this, this.model);
         return true;
     }
 
-    supportsMultiWordQueries():boolean {
+    supportsMultiWordQueries(): boolean {
         return false;
     }
 
-    getIssueReportingUrl():null {
+    getIssueReportingUrl(): null {
         return null;
     }
 
-    getReadDataFrom():number|null {
+    getReadDataFrom(): number | null {
         return null;
     }
 
-    hideOnNoData():boolean {
+    hideOnNoData(): boolean {
         return false;
     }
 
     supportsSublemma(): boolean {
         return false;
     }
-
 }
 
-export const init:TileFactory<GunstickTileConf> = {
-
+export const init: TileFactory<GunstickTileConf> = {
     sanityCheck: (args) => [],
 
-    create: (args) => new GunstickTile(args)
+    create: (args) => new GunstickTile(args),
 };
