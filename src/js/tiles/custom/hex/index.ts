@@ -18,12 +18,12 @@
 import { IActionDispatcher } from 'kombo';
 
 import { IAppServices } from '../../../appServices.js';
-import { QueryType } from '../../../query/index.js';
+import { LemmatizationLevel, QueryType } from '../../../query/index.js';
 import { init as viewInit } from './views.js';
 import {
     TileConf, ITileProvider, TileComponent, TileFactory,
     TileFactoryArgs, DEFAULT_ALT_VIEW_ICON, ITileReloader,
-    AltViewIconProps } from '../../../page/tile.js';
+    AltViewIconProps, lemLevelSupport } from '../../../page/tile.js';
 import { HexModel } from './model.js';
 import { mkEmptyData } from './common.js';
 import { HexKspApi } from './api.js';
@@ -59,6 +59,8 @@ export class HexTile implements ITileProvider {
 
     private view:TileComponent;
 
+    private readonly configuredLemLevels:Array<LemmatizationLevel>;
+
     constructor({
         tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
         queryMatches}:TileFactoryArgs<HexTileConf>
@@ -67,6 +69,7 @@ export class HexTile implements ITileProvider {
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
+        this.configuredLemLevels = conf.lemmatizationLevels || [];
         this.api = new HexKspApi(conf.apiURL, appServices);
         this.model = new HexModel({
             dispatcher,
@@ -158,8 +161,8 @@ export class HexTile implements ITileProvider {
         return false;
     }
 
-    supportsSublemma(): boolean {
-        return false;
+    supportsLemmatizationLevel(ll:LemmatizationLevel):boolean {
+        return lemLevelSupport(this.configuredLemLevels, ll);
     }
 }
 

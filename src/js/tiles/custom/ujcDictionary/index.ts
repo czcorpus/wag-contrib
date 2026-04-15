@@ -18,11 +18,11 @@
 import { IActionDispatcher } from 'kombo';
 
 import { IAppServices } from '../../../appServices.js';
-import { QueryType } from '../../../query/index.js';
+import { LemmatizationLevel, QueryType } from '../../../query/index.js';
 import { init as viewInit } from './views.js';
 import {
     TileConf, ITileProvider, TileComponent, TileFactory,
-    TileFactoryArgs, ITileReloader, DEFAULT_ALT_VIEW_ICON, AltViewIconProps } from '../../../page/tile.js';
+    TileFactoryArgs, ITileReloader, DEFAULT_ALT_VIEW_ICON, AltViewIconProps, lemLevelSupport } from '../../../page/tile.js';
 import { UjcDictionaryModel } from './model.js';
 import { UjcDictionaryApi } from './api.js';
 import { createEmptyData } from './common.js';
@@ -51,6 +51,8 @@ export class UjcDictionaryTile implements ITileProvider {
 
     private view:TileComponent;
 
+    private readonly configuredLemLevels:Array<LemmatizationLevel>;
+
     constructor({
         tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
         queryMatches}:TileFactoryArgs<UjcDictionaryTileConf>
@@ -59,6 +61,7 @@ export class UjcDictionaryTile implements ITileProvider {
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
+        this.configuredLemLevels = conf.lemmatizationLevels || [];
         this.api = new UjcDictionaryApi(conf.apiURL, appServices);
         this.model = new UjcDictionaryModel({
             dispatcher,
@@ -153,8 +156,8 @@ export class UjcDictionaryTile implements ITileProvider {
         return false;
     }
 
-    supportsSublemma(): boolean {
-        return false;
+    supportsLemmatizationLevel(ll:LemmatizationLevel):boolean {
+        return lemLevelSupport(this.configuredLemLevels, ll);
     }
 }
 

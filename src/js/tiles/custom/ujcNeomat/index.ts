@@ -18,11 +18,11 @@
 import { IActionDispatcher } from 'kombo';
 
 import { IAppServices } from '../../../appServices.js';
-import { QueryType } from '../../../query/index.js';
+import { LemmatizationLevel, QueryType } from '../../../query/index.js';
 import { init as viewInit } from './views.js';
 import {
     TileConf, ITileProvider, TileComponent, TileFactory,
-    TileFactoryArgs, DEFAULT_ALT_VIEW_ICON, ITileReloader, AltViewIconProps } from '../../../page/tile.js';
+    TileFactoryArgs, DEFAULT_ALT_VIEW_ICON, ITileReloader, AltViewIconProps, lemLevelSupport } from '../../../page/tile.js';
 import { UjcNeomatModel } from './model.js';
 import { UjcNeomatApi } from './api.js';
 
@@ -50,6 +50,8 @@ export class UjcNeomatTile implements ITileProvider {
 
     private view:TileComponent;
 
+    private readonly configuredLemLevels:Array<LemmatizationLevel>;
+
     constructor({
         tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
         queryMatches}:TileFactoryArgs<UjcNeomatTileConf>
@@ -58,6 +60,7 @@ export class UjcNeomatTile implements ITileProvider {
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
+        this.configuredLemLevels = conf.lemmatizationLevels || [];
         this.api = new UjcNeomatApi(conf.apiURL, appServices);
         this.model = new UjcNeomatModel({
             dispatcher,
@@ -154,8 +157,8 @@ export class UjcNeomatTile implements ITileProvider {
         return false;
     }
 
-    supportsSublemma(): boolean {
-        return false;
+    supportsLemmatizationLevel(ll:LemmatizationLevel):boolean {
+        return lemLevelSupport(this.configuredLemLevels, ll);
     }
 }
 
