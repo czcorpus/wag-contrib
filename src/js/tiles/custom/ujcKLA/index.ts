@@ -18,11 +18,11 @@
 import { IActionDispatcher } from 'kombo';
 
 import { IAppServices } from '../../../appServices.js';
-import { QueryType } from '../../../query/index.js';
+import { LemmatizationLevel, QueryType } from '../../../query/index.js';
 import { init as viewInit } from './views.js';
 import {
     TileConf, ITileProvider, TileComponent, TileFactory,
-    TileFactoryArgs, DEFAULT_ALT_VIEW_ICON, ITileReloader, AltViewIconProps } from '../../../page/tile.js';
+    TileFactoryArgs, DEFAULT_ALT_VIEW_ICON, ITileReloader, AltViewIconProps, lemLevelSupport } from '../../../page/tile.js';
 import { UjcKLAModel } from './model.js';
 import { UjcKLAApi } from './api.js';
 import { createEmptyData } from './common.js';
@@ -51,6 +51,8 @@ export class UjcKLATile implements ITileProvider {
 
     private view:TileComponent;
 
+    private readonly configuredLemLevels:Array<LemmatizationLevel>;
+
     constructor({
         tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
         queryMatches}:TileFactoryArgs<UjcKLATileConf>
@@ -59,6 +61,7 @@ export class UjcKLATile implements ITileProvider {
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
+        this.configuredLemLevels = conf.lemmatizationLevels || [];
         this.api = new UjcKLAApi(conf.apiURL, appServices);
         this.model = new UjcKLAModel({
             dispatcher,
@@ -153,8 +156,8 @@ export class UjcKLATile implements ITileProvider {
         return false;
     }
 
-    supportsSublemma(): boolean {
-        return false;
+    supportsLemmatizationLevel(ll:LemmatizationLevel):boolean {
+        return lemLevelSupport(this.configuredLemLevels, ll);
     }
 }
 
