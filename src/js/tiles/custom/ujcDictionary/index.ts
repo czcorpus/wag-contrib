@@ -104,7 +104,7 @@ export class UjcDictionaryTile implements ITileProvider {
     }
 
     supportsQueryType(qt:QueryType, domain1:string, domain2?:string):boolean {
-        return qt === QueryType.SINGLE_QUERY;
+        return qt === 'single';
     }
 
     disable():void {

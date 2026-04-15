@@ -136,7 +136,7 @@ export class GunstickTile implements ITileProvider {
         domain1: string,
         domain2?: string
     ): boolean {
-        return qt === QueryType.SINGLE_QUERY || qt === QueryType.TRANSLAT_QUERY;
+        return qt === 'single' || qt === 'translat';
     }
 
     disable(): void {
