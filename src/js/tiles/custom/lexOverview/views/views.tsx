@@ -16,13 +16,13 @@
  * limitations under the License.
  */
 
-import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
+import { IActionDispatcher, ViewUtils, useModel } from 'kombo';
 import * as React from 'react';
 import { Theme } from '../../../../page/theme.js';
 import { CoreTileComponentProps, TileComponent } from '../../../../page/tile.js';
 import { GlobalComponents } from '../../../../views/common/index.js';
 import { Actions } from '../actions.js';
-import { LexOverviewModel, LexOverviewModelState } from '../model.js';
+import { LexOverviewModel } from '../model.js';
 import { init as initLangGuideViews } from './langGuide/views.js';
 import { init as initCorpusViews } from './corpus/views.js';
 import * as S from './style.js';
@@ -50,6 +50,7 @@ export function init(
         items: Array<Array<SearchVariant>>;
         backupTitle: string;
     }> = (props) => {
+
         const handleVariantClick = (itemIdx: number, variantIdx: number) => {
             dispatcher.dispatch(
                 Actions.SelectItemVariant,
@@ -76,7 +77,7 @@ export function init(
                     <h2>{renderVariants(props.selectedItemIdx, currentVariants, false)}</h2> :
                     <h2>{props.backupTitle}</h2>
                 }
-                
+
                 {List.map((variants, i) => i === props.selectedItemIdx ?
                     null :
                     <h4 className="variant">{renderVariants(i, variants, true)}</h4>
@@ -110,18 +111,20 @@ export function init(
 
     // -------------------- <LexOverviewTileView /> -----------------------------------------------
 
-    const LexOverviewTileView: React.FC<LexOverviewModelState & CoreTileComponentProps> = (props) => {
+    const LexOverviewTileView: React.FC<CoreTileComponentProps> = (props) => {
+
+        const state = useModel(model);
 
         let overview: {
             pronunciation: string;
             partOfSpeach: string;
             source: string;
         }|undefined;
-        const selectedVariant = props.selectedSrchItemIdx !== -1 ? props.data.search.items[props.selectedSrchItemIdx][props.selectedSrchVariantIdx] : null;
+        const selectedVariant = state.selectedSrchItemIdx !== -1 ? state.data.search.items[state.selectedSrchItemIdx][state.selectedSrchVariantIdx] : null;
         if (selectedVariant !== null ) {
-            switch (props.data.search.source) {
+            switch (state.data.search.source) {
                 case 'assc':
-                    const data = props.data.asscData.items[selectedVariant.itemIdx].variants[selectedVariant.variantIdx];
+                    const data = state.data.asscData.items[selectedVariant.itemIdx].variants[selectedVariant.variantIdx];
                     overview = selectedVariant.itemIdx !== -1 ?
                         {
                             pronunciation: data?.pronunciation,
@@ -132,7 +135,7 @@ export function init(
                     break;
                 case 'lguide':
                     overview = {
-                        pronunciation: props.data.lguideData.pronunciation,
+                        pronunciation: state.data.lguideData.pronunciation,
                         source: 'Internetová jazyková příručka',
                         partOfSpeach: '',
                     };
@@ -141,9 +144,9 @@ export function init(
                     overview = undefined;
             }
         }
-             
+
         return (
-            <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
+            <globalComponents.TileWrapper tileId={props.tileId} isBusy={state.isBusy} error={state.error}
                 hasData={true}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
@@ -151,10 +154,10 @@ export function init(
                 <S.LexOverviewTileView>
                     <LexOverviewHeader
                         tileId={props.tileId}
-                        selectedItemIdx={props.selectedSrchItemIdx}
-                        selectedVariantIdx={props.selectedSrchVariantIdx}
-                        items={props.data.search.items}
-                        backupTitle={props.queryMatch.lemma}
+                        selectedItemIdx={state.selectedSrchItemIdx}
+                        selectedVariantIdx={state.selectedSrchVariantIdx}
+                        items={state.data.search.items}
+                        backupTitle={state.queryMatch.lemma}
                     />
                     {overview ?
                         <LexOverviewBasics
@@ -164,16 +167,16 @@ export function init(
                         /> :
                         null
                     }
-                    
-                    {props.data.lguideData ?
-                        <langGuideViews.Subtile data={props.data.lguideData} /> :
+
+                    {state.data.lguideData ?
+                        <langGuideViews.Subtile data={state.data.lguideData} /> :
                         null
                     }
-                    <corpusViews.Subtile data={props.queryMatch} />
+                    <corpusViews.Subtile data={state.queryMatch} />
                 </S.LexOverviewTileView>
             </globalComponents.TileWrapper>
         );
     }
 
-    return BoundWithProps(LexOverviewTileView, model);
+    return LexOverviewTileView;
 }

@@ -17,11 +17,11 @@
  */
 
 import { List } from 'cnc-tskit';
-import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
+import { IActionDispatcher, ViewUtils, useModel } from 'kombo';
 import * as React from 'react';
 import { Theme } from '../../../page/theme.js';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
-import { UjcPSJCModel, UjcPSJCModelState } from './model.js';
+import { UjcPSJCModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
 
@@ -29,30 +29,33 @@ import { GlobalComponents } from '../../../views/common/index.js';
 export function init(
     dispatcher:IActionDispatcher,
     ut:ViewUtils<GlobalComponents>,
-    theme:Theme, model:UjcPSJCModel
+    theme:Theme,
+    model:UjcPSJCModel
 ):TileComponent {
 
     const globalComponents = ut.getComponents();
 
     // -------------------- <UjcPSJCTileView /> -----------------------------------------------
 
-    const UjcPSJCTileView: React.FC<UjcPSJCModelState & CoreTileComponentProps> = (props) => {
+    const UjcPSJCTileView: React.FC<CoreTileComponentProps> = (props) => {
+
+        const state = useModel(model);
 
         return (
-            <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
-                hasData={props.data.entries.length > 0}
-                backlink={props.backlink}
+            <globalComponents.TileWrapper tileId={props.tileId} isBusy={state.isBusy} error={state.error}
+                hasData={state.data.entries.length > 0}
+                backlink={state.backlink}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'UJC'}}>
                 <S.UjcPSJCTileView>
                     <ul>
-                        {List.map((entry, i) => <li key={i} dangerouslySetInnerHTML={{__html: entry}}/>, props.data.entries)}
+                        {List.map((entry, i) => <li key={i} dangerouslySetInnerHTML={{__html: entry}}/>, state.data.entries)}
                     </ul>
                 </S.UjcPSJCTileView>
             </globalComponents.TileWrapper>
         );
     }
 
-    return BoundWithProps(UjcPSJCTileView, model);
+    return UjcPSJCTileView;
 }

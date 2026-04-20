@@ -17,11 +17,11 @@
  */
 
 import { List } from 'cnc-tskit';
-import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
+import { IActionDispatcher, ViewUtils, useModel } from 'kombo';
 import * as React from 'react';
 import { Theme } from '../../../page/theme.js';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
-import { LexDictionariesModel, LexDictionariesModelState } from './model.js';
+import { LexDictionariesModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
 import { PSJCDataStructure, SSJCDataStructure } from './api/basicApi.js';
@@ -32,7 +32,8 @@ import { Actions } from './actions.js';
 export function init(
     dispatcher:IActionDispatcher,
     ut:ViewUtils<GlobalComponents>,
-    theme:Theme, model:LexDictionariesModel
+    theme:Theme,
+    model:LexDictionariesModel
 ):TileComponent {
 
     const globalComponents = ut.getComponents();
@@ -69,7 +70,9 @@ export function init(
 
     // -------------------- <LexDictionariesTileView /> -----------------------------------------------
 
-    const LexDictionariesTileView: React.FC<LexDictionariesModelState & CoreTileComponentProps> = (props) => {
+    const LexDictionariesTileView: React.FC<CoreTileComponentProps> = (props) => {
+
+        const state = useModel(model);
 
         const tabOnClick = (index: number) => {
             dispatcher.dispatch({
@@ -81,10 +84,10 @@ export function init(
             });
         };
 
-        const current = props.data[props.selectedDataIndex];
+        const current = state.data[state.selectedDataIndex];
         const source = ut.translate(`lex_dictionaries__label_${current.type}`)
         return (
-            <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
+            <globalComponents.TileWrapper tileId={props.tileId} isBusy={state.isBusy} error={state.error}
                 hasData={true}
                 backlink={current.backlink}
                 supportsTileReload={props.supportsReloadOnError}
@@ -96,11 +99,11 @@ export function init(
                             <>
                                 {i > 0 ? <span className="separator">|</span> : null}
                                 <TabButton label={ut.translate(`lex_dictionaries__short_label_${item.type}`)}
-                                    onClick={() => tabOnClick(i)} selected={i === props.selectedDataIndex}
+                                    onClick={() => tabOnClick(i)} selected={i === state.selectedDataIndex}
                                     disabled={!item.loaded}
                                 />
                             </>,
-                        props.data)
+                        state.data)
                     }</S.Tabs>
 
                     {current.data ? (
@@ -115,5 +118,5 @@ export function init(
         );
     }
 
-    return BoundWithProps(LexDictionariesTileView, model);
+    return LexDictionariesTileView;
 }

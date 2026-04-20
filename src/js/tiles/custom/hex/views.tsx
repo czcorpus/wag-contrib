@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
+import { IActionDispatcher, ViewUtils, useModel } from 'kombo';
 import * as React from 'react';
 import {
     ScatterChart,
@@ -32,7 +32,7 @@ import { Dict, List, pipe, tuple } from 'cnc-tskit';
 import { Theme } from '../../../page/theme.js';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
 import { GlobalComponents } from '../../../views/common/index.js';
-import { HexModel, HexModelState } from './model.js';
+import { HexModel } from './model.js';
 import { ChartData, Data, transformDataForCharts } from './common.js';
 import * as S from './style.js';
 import {
@@ -174,28 +174,31 @@ export function init(
 
     // -------------------- <HexTileView /> -----------------------------------------------
 
-    const HexTileView: React.FC<HexModelState & CoreTileComponentProps> = (
+    const HexTileView: React.FC<CoreTileComponentProps> = (
         props
     ) => {
+
+        const state = useModel(model);
+
         return (
             <globalComponents.TileWrapper
                 tileId={props.tileId}
-                isBusy={props.isBusy}
-                error={props.error}
-                hasData={props.data.count > 0}
+                isBusy={state.isBusy}
+                error={state.error}
+                hasData={state.data.count > 0}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
-                sourceIdent={{ corp: 'HEX', url: props.serviceInfoUrl }}
+                sourceIdent={{ corp: 'HEX', url: state.serviceInfoUrl }}
             >
                 <S.HexTileView>
-                    {props.isAltViewMode ? (
-                        <Table data={props.data} />
+                    {state.isAltViewMode ? (
+                        <Table data={state.data} />
                     ) : (
                         <Chart
-                            data={transformDataForCharts(props.data)}
+                            data={transformDataForCharts(state.data)}
                             isMobile={props.isMobile}
                             widthFract={props.widthFract}
-                            word={props.word}
+                            word={state.word}
                         />
                     )}
                 </S.HexTileView>
@@ -203,5 +206,5 @@ export function init(
         );
     };
 
-    return BoundWithProps(HexTileView, model);
+    return HexTileView;
 }

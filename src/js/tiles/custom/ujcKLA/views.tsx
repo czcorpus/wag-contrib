@@ -17,11 +17,11 @@
  */
 
 import { List } from 'cnc-tskit';
-import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
+import { IActionDispatcher, ViewUtils, useModel } from 'kombo';
 import * as React from 'react';
 import { Theme } from '../../../page/theme.js';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
-import { UjcKLAModel, UjcKLAModelState } from './model.js';
+import { UjcKLAModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
 
@@ -29,28 +29,31 @@ import { GlobalComponents } from '../../../views/common/index.js';
 export function init(
     dispatcher:IActionDispatcher,
     ut:ViewUtils<GlobalComponents>,
-    theme:Theme, model:UjcKLAModel
+    theme:Theme,
+    model:UjcKLAModel
 ):TileComponent {
 
     const globalComponents = ut.getComponents();
 
     // -------------------- <UjcKLATileView /> -----------------------------------------------
 
-    const UjcKLATileView: React.FC<UjcKLAModelState & CoreTileComponentProps> = (props) => {
+    const UjcKLATileView: React.FC<CoreTileComponentProps> = (props) => {
+
+        const state = useModel(model);
 
         return (
-            <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
-                hasData={props.data.images.length > 0}
-                backlink={props.backlink}
+            <globalComponents.TileWrapper tileId={props.tileId} isBusy={state.isBusy} error={state.error}
+                hasData={state.data.images.length > 0}
+                backlink={state.backlink}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'UJC'}}>
                 <S.UjcKLATileView>
-                    {List.map((image, i) => <S.Ticket key={i} src={image}/>, props.data.images)}
+                    {List.map((image, i) => <S.Ticket key={i} src={image}/>, state.data.images)}
                 </S.UjcKLATileView>
             </globalComponents.TileWrapper>
         );
     }
 
-    return BoundWithProps(UjcKLATileView, model);
+    return UjcKLATileView;
 }

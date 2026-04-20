@@ -16,11 +16,11 @@
  * limitations under the License.
  */
 
-import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
+import { IActionDispatcher, ViewUtils, useModel } from 'kombo';
 import * as React from 'react';
 import { Theme } from '../../../page/theme.js';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
-import { UjcCJAModel, UjcCJAModelState } from './model.js';
+import { UjcCJAModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
 
@@ -35,20 +35,21 @@ export function init(
 
     // -------------------- <UjcCJATileView /> -----------------------------------------------
 
-    const UjcCJATileView: React.FC<UjcCJAModelState & CoreTileComponentProps> = (props) => {
+    const UjcCJATileView: React.FC<CoreTileComponentProps> = (props) => {
         const MAX_HEIGHT = 400;
         let [overflows, setOverflows] =  React.useState(false);
+        const state = useModel(model);
 
         return (
-            <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
-                hasData={!!props.data.content}
-                backlink={props.backlink}
+            <globalComponents.TileWrapper tileId={props.tileId} isBusy={state.isBusy} error={state.error}
+                hasData={!!state.data.content}
+                backlink={state.backlink}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'UJC'}}>
                 <S.UjcCJATileView>
                     <S.Preview maxHeight={MAX_HEIGHT}>
-                        <div className='container' dangerouslySetInnerHTML={{__html: props.data.content}}
+                        <div className='container' dangerouslySetInnerHTML={{__html: state.data.content}}
                             ref={el => {
                                 if (!el) return;
                                 if (el.getBoundingClientRect().height > MAX_HEIGHT) {
@@ -62,11 +63,11 @@ export function init(
                             <div id='hidden-data-label'>...{ut.translate("ujc_cja__hidden_data_label")}</div>
                         </S.Rollover>
                     </S.Preview>
-                    {props.data.image ? <img src={props.data.image} /> : null}
+                    {state.data.image ? <img src={state.data.image} /> : null}
                 </S.UjcCJATileView>
             </globalComponents.TileWrapper>
         );
     }
 
-    return BoundWithProps(UjcCJATileView, model);
+    return UjcCJATileView;
 }
