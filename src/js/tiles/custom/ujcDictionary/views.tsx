@@ -17,7 +17,7 @@
  */
 
 import { List } from 'cnc-tskit';
-import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
+import { IActionDispatcher, BoundWithProps, ViewUtils, useModel } from 'kombo';
 import * as React from 'react';
 import { Theme } from '../../../page/theme.js';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
@@ -30,14 +30,17 @@ import { GlobalComponents } from '../../../views/common/index.js';
 export function init(
     dispatcher:IActionDispatcher,
     ut:ViewUtils<GlobalComponents>,
-    theme:Theme, model:UjcDictionaryModel
+    theme:Theme,
+    model:UjcDictionaryModel
 ):TileComponent {
 
     const globalComponents = ut.getComponents();
 
     // -------------------- <UjcDictionaryTileView /> -----------------------------------------------
 
-    const UjcDictionaryTileView: React.FC<UjcDictionaryModelState & CoreTileComponentProps> = (props) => {
+    const UjcDictionaryTileView: React.FC<CoreTileComponentProps> = (props) => {
+
+        const state = useModel(model);
 
         const renderDataItem = (item: DataItem) => {
             return <S.Keyword key={item.key}>
@@ -70,13 +73,13 @@ export function init(
                                     </S.Tooltip>
                                 </td>
                             </S.MeaningRow>
-                        , item.meaning.slice(0, props.maxItems))}
-                        {item.meaning.length > props.maxItems ?
+                        , item.meaning.slice(0, state.maxItems))}
+                        {item.meaning.length > state.maxItems ?
                             <S.MeaningRow key={"..."} className="hidden-items">
                                 <td className='meaning-count'>...</td>
                                 <td>{ut.translate(
                                     'ujc_dict__more_data_{num_hidden}',
-                                    {num_hidden: item.meaning.length-props.maxItems}
+                                    {num_hidden: item.meaning.length-state.maxItems}
                                 )}</td>
                             </S.MeaningRow> :
                             null
@@ -87,31 +90,31 @@ export function init(
         }
 
         return (
-            <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
-                hasData={props.data.items.length > 0}
-                backlink={props.backlink}
+            <globalComponents.TileWrapper tileId={props.tileId} isBusy={state.isBusy} error={state.error}
+                hasData={state.data.items.length > 0}
+                backlink={state.backlink}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'UJC'}}>
                 <S.UjcDictionaryTileView>
-                    {List.map(item => renderDataItem(item), props.data.items.slice(0, props.maxItems))}
-                    {props.data.items.length > props.maxItems ?
+                    {List.map(item => renderDataItem(item), state.data.items.slice(0, state.maxItems))}
+                    {state.data.items.length > state.maxItems ?
                         <S.Keyword className='hidden-items'>
                             <p className = 'dict-heading'>
                                 <span className='dict-key'>...{ut.translate(
                                     'ujc_dict__more_data_{num_hidden}',
-                                    {num_hidden: props.data.items.length-props.maxItems}
+                                    {num_hidden: state.data.items.length-state.maxItems}
                                 )}</span>
                             </p>
                         </S.Keyword> : null
                     }
-                    {props.data.notes ?
+                    {state.data.notes ?
                         List.map((note, i) =>
                             <S.Note key={i}>
                                 <span className='dict-note-label'>{ut.translate('ujc_dict__note')}</span>
                                 <span dangerouslySetInnerHTML={{__html: note}}/>
                             </S.Note>
-                        , props.data.notes) :
+                        , state.data.notes) :
                         null
                     }
                 </S.UjcDictionaryTileView>
@@ -119,5 +122,5 @@ export function init(
         );
     }
 
-    return BoundWithProps(UjcDictionaryTileView, model);
+    return UjcDictionaryTileView;
 }

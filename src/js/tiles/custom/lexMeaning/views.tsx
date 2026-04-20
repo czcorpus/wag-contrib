@@ -17,11 +17,11 @@
  */
 
 import { List } from 'cnc-tskit';
-import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
+import { IActionDispatcher, ViewUtils, useModel } from 'kombo';
 import * as React from 'react';
 import { Theme } from '../../../page/theme.js';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
-import { LexMeaningModel, LexMeaningModelState } from './model.js';
+import { LexMeaningModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
 import { VariantData, MeaningData } from '../lexOverview/commonAssc.js';
@@ -30,14 +30,17 @@ import { VariantData, MeaningData } from '../lexOverview/commonAssc.js';
 export function init(
     dispatcher:IActionDispatcher,
     ut:ViewUtils<GlobalComponents>,
-    theme:Theme, model:LexMeaningModel
+    theme:Theme,
+    model:LexMeaningModel
 ):TileComponent {
 
     const globalComponents = ut.getComponents();
 
     // -------------------- <UjcDictionaryTileView /> -----------------------------------------------
 
-    const LexMeaningTileView: React.FC<LexMeaningModelState & CoreTileComponentProps> = (props) => {
+    const LexMeaningTileView: React.FC<CoreTileComponentProps> = (props) => {
+
+        const state = useModel(model);
 
         const renderDataItem = (variants: Array<VariantData>, meanings: Array<MeaningData>, i: number) => {
             return <div>
@@ -64,19 +67,19 @@ export function init(
         }
 
         return (
-            <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
-                hasData={!!props.variants && props.meanings.length > 0}
+            <globalComponents.TileWrapper tileId={props.tileId} isBusy={state.isBusy} error={state.error}
+                hasData={!!state.variants && state.meanings.length > 0}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.MeaningTileView>
                     <S.MeaningBox>
-                        {props.variants ? renderDataItem(props.variants, props.meanings, 0) : null}
+                        {state.variants ? renderDataItem(state.variants, state.meanings, 0) : null}
                     </S.MeaningBox>
                 </S.MeaningTileView>
             </globalComponents.TileWrapper>
         );
     }
 
-    return BoundWithProps(LexMeaningTileView, model);
+    return LexMeaningTileView;
 }

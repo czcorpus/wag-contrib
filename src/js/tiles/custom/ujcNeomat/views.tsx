@@ -17,11 +17,11 @@
  */
 
 import { List } from 'cnc-tskit';
-import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
+import { IActionDispatcher, ViewUtils, useModel } from 'kombo';
 import * as React from 'react';
 import { Theme } from '../../../page/theme.js';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
-import { UjcNeomatModel, UjcNeomatModelState } from './model.js';
+import { UjcNeomatModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
 
@@ -29,28 +29,31 @@ import { GlobalComponents } from '../../../views/common/index.js';
 export function init(
     dispatcher:IActionDispatcher,
     ut:ViewUtils<GlobalComponents>,
-    theme:Theme, model:UjcNeomatModel
+    theme:Theme,
+    model:UjcNeomatModel
 ):TileComponent {
 
     const globalComponents = ut.getComponents();
 
     // -------------------- <UjcNeomatTileView /> -----------------------------------------------
 
-    const UjcNeomatTileView: React.FC<UjcNeomatModelState & CoreTileComponentProps> = (props) => {
+    const UjcNeomatTileView: React.FC<CoreTileComponentProps> = (props) => {
+
+        const state = useModel(model);
 
         return (
-            <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
-                hasData={props.data.entries.length > 0}
-                backlink={props.backlink}
+            <globalComponents.TileWrapper tileId={props.tileId} isBusy={state.isBusy} error={state.error}
+                hasData={state.data.entries.length > 0}
+                backlink={state.backlink}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'UJC'}}>
                 <S.UjcNeomatTileView>
-                    {List.map((entry, i) => <S.Entry key={i} dangerouslySetInnerHTML={{__html: entry}} />, props.data.entries)}
+                    {List.map((entry, i) => <S.Entry key={i} dangerouslySetInnerHTML={{__html: entry}} />, state.data.entries)}
                 </S.UjcNeomatTileView>
             </globalComponents.TileWrapper>
         );
     }
 
-    return BoundWithProps(UjcNeomatTileView, model);
+    return UjcNeomatTileView;
 }

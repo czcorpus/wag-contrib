@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { IApiServices } from 'src/js/appServices.js';
+import { IApiServices } from '../../../../appServices.js';
 import { UjcSSJCApi, UjcPSJCApi } from './basicApi.js';
 import { ApiType, LexDictApi } from './types.js';
 

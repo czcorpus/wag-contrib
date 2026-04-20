@@ -17,21 +17,22 @@
  */
 
 import { Dict, List, pipe } from 'cnc-tskit';
-import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
+import { IActionDispatcher, ViewUtils, useModel } from 'kombo';
 import * as React from 'react';
 import { Theme } from '../../../page/theme.js';
 import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
 import { GlobalComponents } from '../../../views/common/index.js';
 import { Actions } from './actions.js';
 import { CaseData, ComparisonData, ConjugationData } from './common.js';
-import { UjcLGuideModel, UjcLGuideModelState } from './model.js';
+import { UjcLGuideModel } from './model.js';
 import * as S from './style.js';
 
 
 export function init(
     dispatcher:IActionDispatcher,
     ut:ViewUtils<GlobalComponents>,
-    theme:Theme, model:UjcLGuideModel
+    theme:Theme,
+    model:UjcLGuideModel
 ):TileComponent {
 
     const globalComponents = ut.getComponents();
@@ -175,7 +176,9 @@ export function init(
 
     // -------------------- <UjcLangRefBookTileView /> -----------------------------------------------
 
-    const UjcLangRefBookTileView: React.FC<UjcLGuideModelState & CoreTileComponentProps> = (props) => {
+    const UjcLangRefBookTileView: React.FC<CoreTileComponentProps> = (props) => {
+
+        const state = useModel(model);
 
         const handleAlternative = (id:string) => {
             dispatcher.dispatch<typeof Actions.RequestAlternative>({
@@ -185,53 +188,53 @@ export function init(
         }
 
         return (
-            <globalComponents.TileWrapper tileId={props.tileId} isBusy={props.isBusy} error={props.error}
-                hasData={props.data !== null && !!props.data.heading}
-                backlink={props.backlink}
+            <globalComponents.TileWrapper tileId={props.tileId} isBusy={state.isBusy} error={state.error}
+                hasData={state.data !== null && !!state.data.heading}
+                backlink={state.backlink}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'UJC'}}>
                 <S.UjcLangRefBookTileView>
                     <S.Overview>
                         <p className="langbook-heading">
-                            <span className="langbook-key">{props.data.heading}</span>
-                            <span className="langbook-pronunciation">{props.data.pronunciation}</span><br/>
-                            <span className="langbook-meaning">{props.data.meaning}</span>
+                            <span className="langbook-key">{state.data.heading}</span>
+                            <span className="langbook-pronunciation">{state.data.pronunciation}</span><br/>
+                            <span className="langbook-meaning">{state.data.meaning}</span>
                         </p>
                         <dl className='info'>
                             <dt>{ut.translate('lguide__overview_syllabification')}:</dt>
-                            <dd>{props.data.syllabification}</dd>
-                            {props.data.gender ?
+                            <dd>{state.data.syllabification}</dd>
+                            {state.data.gender ?
                                 <>
                                     <dt>{ut.translate('lguide__overview_gender')}:</dt>
-                                    <dd>{props.data.gender}</dd>
+                                    <dd>{state.data.gender}</dd>
                                 </> :
                                 null
                             }
-                            {props.data.examples ?
+                            {state.data.examples ?
                                 <>
                                     <dt>{ut.translate('lguide__overview_examples')}:</dt>
-                                    {List.map((e, i) => <dd key={`dd:${i}:${e}`} className="example">{e}</dd>, props.data.examples)}
+                                    {List.map((e, i) => <dd key={`dd:${i}:${e}`} className="example">{e}</dd>, state.data.examples)}
                                 </> :null
                             }
-                            {props.data.notes ?
+                            {state.data.notes ?
                                 <>
                                     <dt>{ut.translate('lguide__overview_notes')}:</dt>
-                                    <dd>{props.data.notes}</dd>
+                                    <dd>{state.data.notes}</dd>
                                 </> :null
                             }
-                            {props.data.alternatives ?
+                            {state.data.alternatives ?
                                 <>
                                     <dt>{ut.translate('lguide__overview_alternatives')}:</dt>
                                     {
                                         List.map(
                                             (alt, i) => (
                                                 <dd key={`alt:${i}:${alt.id}`} className="alternative">
-                                                    {props.data.rawQuery === alt.id && props.data.isDirect ? '\u2713' : ''}
-                                                    <a onClick={e => handleAlternative(alt.id)}>{props.data.heading}{alt.info}</a>
+                                                    {state.data.rawQuery === alt.id && state.data.isDirect ? '\u2713' : ''}
+                                                    <a onClick={e => handleAlternative(alt.id)}>{state.data.heading}{alt.info}</a>
                                                 </dd>
                                             ),
-                                            props.data.alternatives
+                                            state.data.alternatives
                                         )
                                     }
                                 </> :
@@ -240,19 +243,19 @@ export function init(
                         </dl>
                     </S.Overview>
 
-                    {!!props.data.comparison.comparative || !!props.data.comparison.superlative ?
-                        <ComparisonTable positive={props.data.heading} comparisonData={props.data.comparison} /> : null}
+                    {!!state.data.comparison.comparative || !!state.data.comparison.superlative ?
+                        <ComparisonTable positive={state.data.heading} comparisonData={state.data.comparison} /> : null}
 
-                    {Dict.some(item => !!item.singular || !!item.plural , props.data.grammarCase) ?
-                        <CaseTable caseData={props.data.grammarCase} /> : null}
+                    {Dict.some(item => !!item.singular || !!item.plural , state.data.grammarCase) ?
+                        <CaseTable caseData={state.data.grammarCase} /> : null}
 
-                    {Dict.some(item => !!item.singular || !!item.plural , props.data.conjugation.person) ?
-                        <ConjugationTable conjugationData={props.data.conjugation} /> : null}
+                    {Dict.some(item => !!item.singular || !!item.plural , state.data.conjugation.person) ?
+                        <ConjugationTable conjugationData={state.data.conjugation} /> : null}
 
                 </S.UjcLangRefBookTileView>
             </globalComponents.TileWrapper>
         );
     }
 
-    return BoundWithProps(UjcLangRefBookTileView, model);
+    return UjcLangRefBookTileView;
 }
