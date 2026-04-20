@@ -46,6 +46,7 @@ export interface GunstickModelState {
         verse: string;
         year: number;
     };
+    freqType: 'abs' | 'rel';
 }
 
 export interface GunstickModelArgs {
@@ -205,6 +206,14 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
                 state.exampleWindowData = undefined;
+            }
+        );
+
+        this.addActionSubtypeHandler(
+            Actions.SetFreqType,
+            action => action.payload.tileId === this.tileId,
+            (state, action) => {
+                state.freqType = action.payload.ftype;
             }
         );
     }

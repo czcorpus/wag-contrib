@@ -107,6 +107,7 @@ export class GunstickTile implements ITileProvider {
                 y1: conf.y1,
                 y2: conf.y2,
                 exampleWindowData: undefined,
+                freqType: 'rel'
             },
         });
         this.label = appServices.importExternalMessage(

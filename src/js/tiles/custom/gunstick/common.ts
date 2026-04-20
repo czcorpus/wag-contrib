@@ -49,7 +49,8 @@ export type ChartData = {
 export function transformDataForCharts(
     data: Data,
     page: number,
-    pageSize: number
+    pageSize: number,
+    freqType: 'abs' | 'rel'
 ): ChartData {
     return pipe(
         data.countRY,
@@ -63,7 +64,7 @@ export function transformDataForCharts(
                     List.sortedBy(([year]) => parseInt(year)),
                     List.map(([year, count]) => ({
                         year: parseInt(year),
-                        count: count,
+                        count: freqType === 'abs' ? count : count / data.dataSize[year] * 1e6,
                         verse,
                     }))
                 )

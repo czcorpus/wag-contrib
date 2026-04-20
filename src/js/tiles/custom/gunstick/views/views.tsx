@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { IActionDispatcher, BoundWithProps, ViewUtils } from 'kombo';
+import { IActionDispatcher,  ViewUtils, useModel } from 'kombo';
 import * as React from 'react';
 import {
     ScatterChart,
@@ -35,7 +35,7 @@ import {
     TileComponent,
 } from '../../../../page/tile.js';
 import { GlobalComponents } from '../../../../views/common/index.js';
-import { GunstickModel, GunstickModelState } from '../model.js';
+import { GunstickModel } from '../model.js';
 import {
     ChartData,
     Data,
@@ -62,7 +62,9 @@ function getYearIdxMapping(data: SummedSizes): Array<string> {
 }
 
 function transformDataForTableView(
-    data: SummedSizes
+    data: SummedSizes,
+    dataSize: { [year: string]: number },
+    freqType: 'abs' | 'rel'
 ): [Array<string>, Array<[string, Array<number | undefined>]>] {
     const years = getYearIdxMapping(data);
     return tuple(
@@ -75,7 +77,7 @@ function transformDataForTableView(
                     keyword,
                     pipe(
                         years,
-                        List.map((year) => freqs[year])
+                        List.map((year) => freqType === 'abs' ? freqs[year] : freqs[year] / dataSize[year] * 1e6)
                     )
                 )
             ),
@@ -127,6 +129,7 @@ export function init(
 
     const Chart: React.FC<{
         data: ChartData;
+        freqType: 'abs' | 'rel';
         isMobile: boolean;
         widthFract: number;
         handleScatterClick: (verse: string, year: number) => void;
@@ -167,11 +170,11 @@ export function init(
                         />
                         <YAxis
                             dataKey="count"
-                            name={ut.translate('gunstick__abs_freq')}
+                            name={props.freqType === 'abs' ? ut.translate('gunstick__abs_freq') : ut.translate('gunstick__rel_freq')}
                             unit=""
                             type="number"
                             label={{
-                                value: ut.translate('gunstick__abs_freq'),
+                                value: props.freqType === 'abs' ? ut.translate('gunstick__abs_freq') : ut.translate('gunstick__rel_freq'),
                                 angle: -90,
                                 position: 'insideLeft',
                             }}
@@ -227,9 +230,10 @@ export function init(
         data: Data;
         page: number;
         pageSize: number;
+        freqType: 'abs' | 'rel';
         handleCellClick: (verse: string, year: number) => void;
-    }> = ({ data, page, pageSize, handleCellClick }) => {
-        const [years, tableData] = transformDataForTableView(data.countRY);
+    }> = ({ data, page, pageSize, freqType, handleCellClick }) => {
+        const [years, tableData] = transformDataForTableView(data.countRY, data.dataSize, freqType);
 
         return (
             <div style={{ maxHeight: '20em', overflowY: 'auto' }}>
@@ -287,17 +291,46 @@ export function init(
         );
     };
 
+    // -------------------- <FreqTypeSelector /> --------------------------------------
+
+    const FreqTypeSelector:React.FC<{
+        tileId: number;
+        value: 'abs' | 'rel';
+    }> = (props) => {
+
+        const handleChange = (evt:React.ChangeEvent<HTMLSelectElement>) => {
+            dispatcher.dispatch(
+                Actions.SetFreqType,
+                {
+                    tileId: props.tileId,
+                    ftype: evt.currentTarget.value
+                }
+            )
+        };
+
+        return (
+            <div>
+                <select name="freq-type-selector" onChange={handleChange}>
+                    <option value="rel">{ut.translate('gunstick__rel_freq')}</option>
+                    <option value="abs">{ut.translate('gunstick__abs_freq')}</option>
+                </select>
+            </div>
+        )
+    };
+
     // -------------------- <GunstickTileView /> -----------------------------------------------
 
-    const GunstickTileView: React.FC<
-        GunstickModelState & CoreTileComponentProps
-    > = (props) => {
+    const GunstickTileView: React.FC<CoreTileComponentProps> = (props) => {
+
+        const state = useModel(model);
+
+
         const numPages = Math.ceil(
-            Dict.size(props.data.countRY) / props.pageSize
+            Dict.size(state.data.countRY) / state.pageSize
         );
 
         const handlePrevPage = () => {
-            if (props.page > 1) {
+            if (state.page > 1) {
                 dispatcher.dispatch<typeof Actions.PrevPage>({
                     name: Actions.PrevPage.name,
                     payload: {
@@ -308,7 +341,7 @@ export function init(
         };
 
         const handleNextPage = () => {
-            if (props.page < numPages) {
+            if (state.page < numPages) {
                 dispatcher.dispatch<typeof Actions.NextPage>({
                     name: Actions.NextPage.name,
                     payload: {
@@ -341,15 +374,15 @@ export function init(
         return (
             <globalComponents.TileWrapper
                 tileId={props.tileId}
-                isBusy={props.isBusy}
-                error={props.error}
-                hasData={props.data.count > 0}
+                isBusy={state.isBusy}
+                error={state.error}
+                hasData={state.data.count > 0}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
-                sourceIdent={{ corp: 'Gunstick', url: props.serviceInfoUrl }}
+                sourceIdent={{ corp: 'Gunstick', url: state.serviceInfoUrl }}
             >
                 <S.GunstickTileView>
-                    {props.exampleWindowData ? (
+                    {state.exampleWindowData ? (
                         <globalComponents.ModalBox
                             onCloseClick={handleCloseExamplesClick}
                             scrollableContents={true}
@@ -357,44 +390,49 @@ export function init(
                             tileClass="text"
                         >
                             <Examples
-                                word={props.currMatch.lemma}
-                                verse={props.exampleWindowData.verse}
-                                year={props.exampleWindowData.year}
+                                word={state.currMatch.lemma}
+                                verse={state.exampleWindowData.verse}
+                                year={state.exampleWindowData.year}
                                 data={
-                                    props.data.table[
-                                        props.exampleWindowData.verse
+                                    state.data.table[
+                                        state.exampleWindowData.verse
                                     ]
                                 }
                             />
                         </globalComponents.ModalBox>
                     ) : null}
 
-                    {props.isTweakMode ? (
+                    {state.isTweakMode ? (
                         <div className="tweak-box">
                             <globalComponents.Paginator
-                                page={props.page}
+                                page={state.page}
                                 numPages={numPages}
                                 onNext={handleNextPage}
                                 onPrev={handlePrevPage}
                             />
+                            <FreqTypeSelector value={state.freqType} tileId={props.tileId} />
+
                         </div>
                     ) : null}
-                    {props.isAltViewMode ? (
+                    {state.isAltViewMode ? (
                         <Table
-                            data={props.data}
-                            page={props.page}
-                            pageSize={props.pageSize}
+                            data={state.data}
+                            page={state.page}
+                            pageSize={state.pageSize}
+                            freqType={state.freqType}
                             handleCellClick={handleShowExamplesClick}
                         />
                     ) : (
                         <Chart
                             data={transformDataForCharts(
-                                props.data,
-                                props.page,
-                                props.pageSize
+                                state.data,
+                                state.page,
+                                state.pageSize,
+                                state.freqType
                             )}
                             isMobile={props.isMobile}
                             widthFract={props.widthFract}
+                            freqType={state.freqType}
                             handleScatterClick={handleShowExamplesClick}
                         />
                     )}
@@ -403,5 +441,5 @@ export function init(
         );
     };
 
-    return BoundWithProps(GunstickTileView, model);
+    return GunstickTileView;
 }

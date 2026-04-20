@@ -4,6 +4,7 @@
         "gunstick__only_most_freq_displayed": "Zobrazují se pouze nejfrekventovanější položky",
         "gunstick__year": "rok",
         "gunstick__abs_freq": "abs. frekvence",
+        "gunstick__rel_freq": "rel. frekvence (ipm)",
         "gunstick__conc_examples": "konkrétní příklady"
     },
     "en-US": {
@@ -11,6 +12,7 @@
         "gunstick__only_most_freq_displayed": "Only the most frequent items are displayed",
         "gunstick__year": "year",
         "gunstick__abs_freq": "abs. frequency",
+        "gunstick__rel_freq": "rel. frekvence (ipm)",
         "gunstick__conc_examples": "concrete examples"
     }
 }
