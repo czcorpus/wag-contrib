@@ -54,6 +54,13 @@ export class Actions {
     static HideExampleWindow: Action<{
         tileId: number;
     }> = {
-        name: 'HIDE_SHOW_EXAMPLE_WINDOW',
+        name: 'GUNSTICK_HIDE_SHOW_EXAMPLE_WINDOW',
+    };
+
+    static SetFreqType: Action<{
+        tileId: number;
+        ftype:'abs' | 'rel';
+    }> = {
+        name: 'GUNSTICK_SET_FREQ_TYPE'
     };
 }

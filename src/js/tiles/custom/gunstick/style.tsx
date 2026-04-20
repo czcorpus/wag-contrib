@@ -22,7 +22,18 @@ import { Theme } from '../../../page/theme.js';
 // ----------- <GunstickTileView /> -------------------------
 
 export const GunstickTileView = styled.div`
-    // here comes the style
+    .tweak-box {
+        display: flex;
+        align-items: center;
+
+        > *:not(:first-child) {
+            margin-left: 1rem;
+        }
+
+        select, input[type=text] {
+            padding: 0.2rem 0.6rem;
+        }
+    }
 `;
 
 // ----------- <DataListTable /> -------------------------
