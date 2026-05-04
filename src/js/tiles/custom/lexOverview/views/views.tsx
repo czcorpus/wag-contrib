@@ -169,19 +169,18 @@ export function init(
         const basicOverview = {} as BasicOverviewStruct;
 
         const currentVariant =
-            state.variants && state.selectedVariantIdx > -1
+            state.variants && state.selectedVariantIdx !== undefined
                 ? state.variants[state.selectedVariantIdx]
                 : null;
         if (currentVariant !== null) {
-            const variant = state.variants[state.selectedVariantIdx];
-            basicOverview.partOfSpeach = variant.pos;
+            basicOverview.partOfSpeach = currentVariant.pos;
             switch (state.mainSource) {
                 case Source.ASSC:
                     basicOverview.source =
                         'Akademický slovník současné češtiny';
                     if (state.data.assc) {
                         const asscVariant = List.find(
-                            (v) => v.key.startsWith(variant.lemma),
+                            (v) => v.key.startsWith(currentVariant.lemma),
                             state.data.assc.variants
                         );
                         basicOverview.pronunciation = asscVariant.pronunciation;
@@ -205,7 +204,7 @@ export function init(
                 tileId={props.tileId}
                 isBusy={state.isBusy}
                 error={state.error}
-                hasData={true}
+                hasData={true} // this tile will always have some data
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
             >

@@ -87,6 +87,7 @@ export class LexOverviewBookTile implements ITileProvider {
         var variants: Array<LexItem> = null;
         var mainSource: Source = null;
         if (isLexQueryMatch(currQueryMatch)) {
+            // choose variants according to source priority
             for (const source of conf.sourcePriority) {
                 const sourceItems = currQueryMatch.extraData.filter((item) =>
                     Dict.hasKey(source, item.sources)
@@ -111,7 +112,11 @@ export class LexOverviewBookTile implements ITileProvider {
                 queryMatch: currQueryMatch,
                 mainSource,
                 variants,
-                selectedVariantIdx: variants && !List.empty(variants) ? 0 : -1,
+                selectedVariantIdx:
+                    isLexQueryMatch(currQueryMatch) &&
+                    !List.empty(currQueryMatch.extraData)
+                        ? 0
+                        : undefined,
                 requestedIds: null,
                 data: {
                     assc: null,

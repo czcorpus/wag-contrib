@@ -23,12 +23,13 @@ import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { Actions as LexActions } from '../lexOverview/actions.js';
 import { List } from 'cnc-tskit';
-import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
+import { RecognizedQueries } from '../../../query/index.js';
 import { IDataStreaming } from '../../../page/streaming.js';
-import { isLexQueryMatch, LexItem, Source } from '../lexOverview/common.js';
+import { getCurrentVariant, LexItem } from '../lexOverview/common.js';
 import { HTMLBlock } from '../lexOverview/api/asscTypes.js';
 import {
     isAsscData,
+    isEmptyArgs,
     LexApi,
     LexArgs,
     LexResponse,
@@ -86,13 +87,15 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
         this.addActionHandler(
             GlobalActions.RequestQueryResponse,
             (state, action) => {
-                state.isBusy = true;
                 state.error = null;
                 state.backlink = null;
                 state.data = [];
-                state.requestedIds = this.getRequestIds(
-                    this.getCurrentVariant(state.selectedVariantIdx)
+                const currentVariant = getCurrentVariant(
+                    this.queryMatches,
+                    state.selectedVariantIdx
                 );
+                state.requestedIds = this.getRequestIds(currentVariant);
+                state.isBusy = true;
             },
             (state, action, dispatch) => {
                 this.loadData(
@@ -179,9 +182,11 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                     state.isBusy = true;
                     state.data = [];
                     state.selectedVariantIdx = action.payload.variantIdx;
-                    state.requestedIds = this.getRequestIds(
-                        this.getCurrentVariant(state.selectedVariantIdx)
+                    const currentVariant = getCurrentVariant(
+                        this.queryMatches,
+                        state.selectedVariantIdx
                     );
+                    state.requestedIds = this.getRequestIds(currentVariant);
                 }
             },
             (state, action, dispatch) => {
@@ -220,16 +225,8 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
         );
     }
 
-    private getCurrentVariant(variantIdx: number): LexItem {
-        const currentQueryMatch = findCurrQueryMatch(
-            List.head(this.queryMatches)
-        );
-        return isLexQueryMatch(currentQueryMatch)
-            ? currentQueryMatch.extraData[variantIdx]
-            : null;
-    }
-
     private getRequestIds(variant: LexItem): LexArgs {
+        // requires only assc data for variant
         return {
             asscIds:
                 variant && variant.sources['assc']
@@ -275,7 +272,7 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                         name: Actions.TileDataLoaded.name,
                         payload: {
                             tileId: this.tileId,
-                            isEmpty: false,
+                            isEmpty: isEmptyArgs(requestIds),
                         },
                     });
                 },

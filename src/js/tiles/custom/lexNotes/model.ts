@@ -23,12 +23,13 @@ import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { Actions as LexActions } from '../lexOverview/actions.js';
 import { List, pipe } from 'cnc-tskit';
-import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
+import { RecognizedQueries } from '../../../query/index.js';
 import { IDataStreaming } from '../../../page/streaming.js';
-import { isLexQueryMatch, LexItem, Source } from '../lexOverview/common.js';
+import { getCurrentVariant, LexItem, Source } from '../lexOverview/common.js';
 import { HTMLBlock } from '../lexOverview/api/asscTypes.js';
 import {
     isAsscData,
+    isEmptyArgs,
     isIjpData,
     LexApi,
     LexArgs,
@@ -88,17 +89,18 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
         this.addActionHandler(
             GlobalActions.RequestQueryResponse,
             (state, action) => {
-                state.isBusy = true;
                 state.error = null;
                 state.backlink = null;
                 state.notes = {
                     ijp: [],
                     assc: [],
                 };
-                const currentVariant = this.getCurrentVariant(
+                const currentVariant = getCurrentVariant(
+                    this.queryMatches,
                     state.selectedVariantIdx
                 );
                 state.requestedIds = this.getRequestIds(currentVariant);
+                state.isBusy = true;
             },
             (state, action, dispatch) => {
                 this.loadData(
@@ -189,7 +191,8 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
                         assc: [],
                     };
                     state.selectedVariantIdx = action.payload.variantIdx;
-                    const currentVariant = this.getCurrentVariant(
+                    const currentVariant = getCurrentVariant(
+                        this.queryMatches,
                         state.selectedVariantIdx
                     );
                     state.requestedIds = this.getRequestIds(currentVariant);
@@ -229,18 +232,6 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
                 }
             }
         );
-    }
-
-    private getCurrentVariant(variantIdx: number): LexItem {
-        if (List.empty(this.queryMatches)) {
-            return null;
-        }
-        const currentQueryMatch = findCurrQueryMatch(
-            List.head(this.queryMatches)
-        );
-        return isLexQueryMatch(currentQueryMatch)
-            ? currentQueryMatch.extraData[variantIdx]
-            : null;
     }
 
     private loadData(
@@ -294,7 +285,7 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
                         name: Actions.TileDataLoaded.name,
                         payload: {
                             tileId: this.tileId,
-                            isEmpty: false,
+                            isEmpty: isEmptyArgs(requestIds),
                         },
                     });
                 },
@@ -313,6 +304,7 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
     }
 
     private getRequestIds(variant: LexItem): LexArgs {
+        // requires all assc and ijp data for variant
         return {
             asscIds:
                 variant && variant.sources['assc']

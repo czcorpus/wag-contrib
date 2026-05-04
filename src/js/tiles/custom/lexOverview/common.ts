@@ -17,7 +17,11 @@
  */
 
 import { List } from 'cnc-tskit';
-import { QueryMatch } from '../../../query/index.js';
+import {
+    findCurrQueryMatch,
+    QueryMatch,
+    RecognizedQueries,
+} from '../../../query/index.js';
 
 export enum Source {
     ASSC = 'assc',
@@ -109,4 +113,17 @@ export function isLexQueryMatch(
             qm.extraData
         )
     );
+}
+
+export function getCurrentVariant(
+    queryMatches: RecognizedQueries,
+    variantIdx?: number
+): LexItem {
+    if (List.empty(queryMatches) || variantIdx === undefined) {
+        return null;
+    }
+    const currentQueryMatch = findCurrQueryMatch(List.head(queryMatches));
+    return isLexQueryMatch(currentQueryMatch)
+        ? currentQueryMatch.extraData[variantIdx || 0]
+        : null;
 }

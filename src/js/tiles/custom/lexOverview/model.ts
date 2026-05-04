@@ -19,14 +19,10 @@
 import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
-import {
-    findCurrQueryMatch,
-    QueryMatch,
-    RecognizedQueries,
-} from '../../../query/index.js';
+import { QueryMatch, RecognizedQueries } from '../../../query/index.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
-import { isLexQueryMatch, LexItem, Source } from './common.js';
+import { getCurrentVariant, LexItem, Source } from './common.js';
 
 import { HTMLBlock as ASSCData } from './api/asscTypes.js';
 import { IJPData as IJPData } from './api/ijpTypes.js';
@@ -44,7 +40,7 @@ export interface LexOverviewModelState {
     queryMatch: QueryMatch;
     mainSource: Source;
     variants: Array<LexItem>;
-    selectedVariantIdx: number;
+    selectedVariantIdx?: number;
     requestedIds: LexArgs;
     data: Data;
     error: string;
@@ -88,16 +84,17 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
         this.addActionHandler(
             GlobalActions.RequestQueryResponse,
             (state, action) => {
-                state.isBusy = true;
                 state.error = undefined;
                 state.backlink = undefined;
-                const currentVariant = this.getCurrentVariant(
+                const currentVariant = getCurrentVariant(
+                    this.queryMatches,
                     state.selectedVariantIdx
                 );
                 state.requestedIds = this.getRequestIds(
                     currentVariant,
                     !List.empty(dependentTiles)
                 );
+                state.isBusy = true;
             },
             (state, action, dispatch) => {
                 this.loadData(
@@ -210,7 +207,8 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
                 state.selectedVariantIdx = action.payload.variantIdx;
-                const currentVariant = this.getCurrentVariant(
+                const currentVariant = getCurrentVariant(
+                    this.queryMatches,
                     state.selectedVariantIdx
                 );
                 state.requestedIds = this.getRequestIds(
@@ -236,31 +234,21 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
         );
     }
 
-    private getCurrentVariant(variantIdx: number): LexItem {
-        if (List.empty(this.queryMatches)) {
-            return null;
-        }
-        const currentQueryMatch = findCurrQueryMatch(
-            List.head(this.queryMatches)
-        );
-        return isLexQueryMatch(currentQueryMatch)
-            ? currentQueryMatch.extraData[variantIdx]
-            : null;
-    }
-
-    private getRequestIds(variant: LexItem, requestAll: boolean): LexArgs {
+    private getRequestIds(variant: LexItem, dependentTiles: boolean): LexArgs {
+        // tile itself requires only first available general data from assc or ijp
+        // if there are dependent tiles, request all available data
         return {
             asscIds:
                 variant && variant.sources['assc']
-                    ? requestAll
+                    ? dependentTiles
                         ? List.map((v) => v.id, variant.sources['assc'])
-                        : [variant.sources['assc'][0].id]
+                        : [List.head(variant.sources['assc']).id]
                     : [],
             ijpIds:
                 variant && variant.sources['ijp']
-                    ? requestAll
+                    ? dependentTiles
                         ? List.map((v) => v.id, variant.sources['ijp'])
-                        : [variant.sources['ijp'][0].id]
+                        : [List.head(variant.sources['ijp']).id]
                     : [],
         };
     }
@@ -296,7 +284,7 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                     error,
                     payload: {
                         tileId: this.tileId,
-                        isEmpty: true,
+                        isEmpty: false,
                     },
                 });
             },

@@ -32,6 +32,10 @@ export interface LexArgs {
     ijpIds: string[];
 }
 
+export function isEmptyArgs(args: LexArgs): boolean {
+    return Dict.every((v) => List.empty(v), args);
+}
+
 export interface LexResponse<T = IJPData | Array<HTMLBlock>> {
     source: Source;
     id: string;
@@ -78,7 +82,7 @@ export class LexApi implements ResourceApi<LexArgs, LexResponse> {
             ...this.prepareArgs('ijp_id', queryArgs.ijpIds),
             this.prepareArgs('event', [`DataTile-${tileId}.${queryIdx}`]),
         ];
-        const emptyArgs = Dict.every((v) => List.empty(v), queryArgs);
+        const emptyArgs = isEmptyArgs(queryArgs);
         return streaming
             ? streaming.registerTileRequest<LexResponse>({
                   tileId,

@@ -38,6 +38,7 @@ import {
 import { LexNotesModel } from './model.js';
 import { isLexQueryMatch } from '../lexOverview/common.js';
 import { LexApi } from '../lexOverview/api/lex.js';
+import { List } from 'cnc-tskit';
 
 export interface LexNotesTileConf extends TileConf {
     apiURL: string;
@@ -94,9 +95,9 @@ export class LexNotesTile implements ITileProvider {
                 isBusy: isBusy,
                 selectedVariantIdx:
                     isLexQueryMatch(currQueryMatch) &&
-                    currQueryMatch.extraData.length > 0
+                    !List.empty(currQueryMatch.extraData)
                         ? 0
-                        : -1,
+                        : undefined,
                 requestedIds: null,
                 notes: {
                     ijp: [],
@@ -182,7 +183,7 @@ export class LexNotesTile implements ITileProvider {
     }
 
     hideOnNoData(): boolean {
-        return false;
+        return true;
     }
 
     supportsLemmatizationLevel(ll: LemmatizationLevel): boolean {
