@@ -28,6 +28,7 @@ import {
 import * as LS from './style.js';
 import { IJPData } from '../../api/ijpTypes.js';
 import { Subtile, SubtileRow } from '../../commonStyle.js';
+import { Source } from '../../common.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -35,7 +36,6 @@ export function init(
 ): {
     Subtile: React.FC<{
         data: IJPData;
-        color?: string;
     }>;
 } {
     // -------------------- <ComparisonTable /> -----------------------------------------------
@@ -281,10 +281,9 @@ export function init(
 
     const IjpSubtileView: React.FC<{
         data: IJPData;
-        color?: string;
     }> = (props) => {
         return (
-            <Subtile className="ijp-box">
+            <Subtile source={Source.IJP}>
                 <SubtileRow>
                     <span className="key">
                         {ut.translate('lex_overview__overview_syllabification')}

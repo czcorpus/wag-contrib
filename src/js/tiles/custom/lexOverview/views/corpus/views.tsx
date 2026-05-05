@@ -22,18 +22,18 @@ import { GlobalComponents } from '../../../../../views/common/index.js';
 import { init as commonViewInit } from './common.js';
 import { calcFreqBand } from '../../../../../query/index.js';
 import { Subtile, SubtileRow } from '../../commonStyle.js';
+import { Source } from '../../common.js';
 
 export function init(
     dispatcher: IActionDispatcher,
     ut: ViewUtils<GlobalComponents>
 ): {
     Subtile: React.FC<{
-        source: string;
+        corpname: string;
         data?: {
             abs: number;
             ipm: number;
         };
-        color?: string;
     }>;
 } {
     const commonViews = commonViewInit(dispatcher, ut);
@@ -41,14 +41,13 @@ export function init(
     // -------------------- <SrchWordInfo /> ---------------------------------------------------
 
     const SrchWordInfo: React.FC<{
-        source: string;
+        corpname: string;
         data?: {
             abs: number;
             ipm: number;
         };
-        color?: string;
     }> = (props) => (
-        <Subtile className="corpus-box" color={props.color}>
+        <Subtile source={Source.Corpus}>
             {props.data ? (
                 props.data.abs > 0 ? (
                     <>
@@ -104,7 +103,7 @@ export function init(
                 <span className="key">
                     {ut.translate('lex_common__source')}:
                 </span>
-                <span className="value">{props.source}</span>
+                <span className="value">{props.corpname}</span>
             </SubtileRow>
         </Subtile>
     );

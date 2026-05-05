@@ -25,6 +25,8 @@ import { LexMeaningModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
 import { HTMLBlock } from '../lexOverview/api/asscTypes.js';
+import { Subtile, SubtileRow } from '../lexOverview/commonStyle.js';
+import { Source } from '../lexOverview/common.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -83,25 +85,37 @@ export function init(
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.MeaningTileView>
-                    <S.MeaningBox className="assc-box">
-                        {List.flatMap(
-                            (d, i) =>
-                                List.map((block, j) => {
-                                    const isParent = j > 0;
-                                    return (
-                                        <>
-                                            {i > 0 && j === 0 ? <hr /> : null}
-                                            {renderDataItem(
-                                                `item-${i}-${j}`,
-                                                block,
-                                                isParent
-                                            )}
-                                        </>
-                                    );
-                                }, d.blocks),
-                            state.data
-                        )}
-                    </S.MeaningBox>
+                    <Subtile source={Source.ASSC} className="stretch">
+                        <SubtileRow className="scroller">
+                            {List.flatMap(
+                                (d, i) =>
+                                    List.map((block, j) => {
+                                        const isParent = j > 0;
+                                        return (
+                                            <>
+                                                {i > 0 && j === 0 ? (
+                                                    <hr />
+                                                ) : null}
+                                                {renderDataItem(
+                                                    `item-${i}-${j}`,
+                                                    block,
+                                                    isParent
+                                                )}
+                                            </>
+                                        );
+                                    }, d.blocks),
+                                state.data
+                            )}
+                        </SubtileRow>
+                        <SubtileRow className="footer">
+                            <span className="key">
+                                {ut.translate('lex_common__source')}:
+                            </span>
+                            <span className="value">
+                                {ut.translate(`lex_common__source_assc`)}
+                            </span>
+                        </SubtileRow>
+                    </Subtile>
                 </S.MeaningTileView>
             </globalComponents.TileWrapper>
         );

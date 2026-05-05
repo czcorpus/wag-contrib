@@ -27,17 +27,18 @@ export const MeaningTileView = styled(LexTileBase)`
     min-height: 30em;
     height: 100%;
     width: 100%;
-`;
 
-export const MeaningBox = styled.div`
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #d4e2f4;
-    padding: 1em;
-    overflow-y: auto;
+    .stretch {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+
+        .scroller {
+            overflow-y: auto;
+        }
+    }
 `;
 
 export const MeaningItem = styled.div`

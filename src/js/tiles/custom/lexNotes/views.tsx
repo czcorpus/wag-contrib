@@ -25,6 +25,7 @@ import { LexNotesModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
 import { Subtile, SubtileRow } from '../lexOverview/commonStyle.js';
+import { Source } from '../lexOverview/common.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -53,7 +54,7 @@ export function init(
             >
                 <S.NotesTileView>
                     {!List.empty(state.notes.ijp) ? (
-                        <Subtile className="ijp-box">
+                        <Subtile source={Source.IJP}>
                             {List.map(
                                 (note, i) => (
                                     <SubtileRow
@@ -76,7 +77,7 @@ export function init(
                     ) : null}
 
                     {!List.empty(state.notes.assc) ? (
-                        <Subtile className="assc-box">
+                        <Subtile source={Source.ASSC}>
                             {List.map(
                                 (note, i) => (
                                     <SubtileRow

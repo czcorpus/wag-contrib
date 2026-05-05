@@ -18,25 +18,31 @@
 
 import { Theme } from '../../../page/theme.js';
 import { styled } from 'styled-components';
+import { Source } from './common.js';
 
-export const LexTileBase = styled.div<{ theme: Theme }>`
-    .assc-box {
-        background-color: #d4e2f4;
+function getSourceColor(source: string): string {
+    switch (source) {
+        case Source.ASSC:
+            return '#d4e2f4';
+        case Source.IJP:
+            return '#e5eef8';
+        case Source.Corpus:
+            return '#fae9da';
+        default:
+            return null;
     }
+}
 
-    .ijp-box {
-        background-color: #e5eef8;
-    }
+export const LexTileBase = styled.div<{ theme: Theme }>``;
 
-    .corpus-box {
-        background-color: #fae9da;
-    }
-`;
-
-export const Subtile = styled.div<{ theme: Theme; color?: string }>`
+export const Subtile = styled.div<{
+    theme: Theme;
+    source?: string;
+    color?: string;
+}>`
     margin-top: 1em;
     padding: 0.5em;
-    background-color: ${(props) => props.color};
+    background-color: ${(props) => getSourceColor(props.source) || props.color};
     display: flex;
     flex-direction: column;
     justify-content: space-between;

@@ -131,7 +131,7 @@ export function init(
         basicOverview: BasicOverviewStruct;
     }> = (props) => {
         return (
-            <Subtile className={`${props.basicOverview.source}-box`}>
+            <Subtile source={props.basicOverview.source}>
                 {props.basicOverview.pronunciation ? (
                     <SubtileRow>
                         <span className="key">
@@ -227,7 +227,7 @@ export function init(
 
                     {!currentVariant ? (
                         <corpusViews.Subtile
-                            source={'syn2020'}
+                            corpname={'syn2020'}
                             data={{
                                 abs: state.queryMatch.abs,
                                 ipm: state.queryMatch.ipm,
@@ -235,14 +235,14 @@ export function init(
                         />
                     ) : currentVariant.corpusEntry ? (
                         <corpusViews.Subtile
-                            source={'syn2020'}
+                            corpname={'syn2020'}
                             data={{
                                 abs: currentVariant.corpusEntry.count,
                                 ipm: currentVariant.corpusEntry.ipm,
                             }}
                         />
                     ) : (
-                        <corpusViews.Subtile source={'syn2020'} />
+                        <corpusViews.Subtile corpname={'syn2020'} />
                     )}
                 </S.LexOverviewTileView>
             </globalComponents.TileWrapper>
