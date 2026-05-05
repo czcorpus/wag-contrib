@@ -25,9 +25,9 @@ import {
     ComparisonData,
     ConjugationData,
 } from '../../api/ijpTypes.js';
-import * as S from '../style.js';
 import * as LS from './style.js';
 import { IJPData } from '../../api/ijpTypes.js';
+import { Subtile, SubtileRow } from '../../commonStyle.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -284,26 +284,26 @@ export function init(
         color?: string;
     }> = (props) => {
         return (
-            <S.Subtile className="ijp-box">
-                <S.SubtileRow>
+            <Subtile className="ijp-box">
+                <SubtileRow>
                     <span className="key">
                         {ut.translate('lex_overview__overview_syllabification')}
                         :
                     </span>
                     <span className="value">{props.data.syllabification}</span>
-                </S.SubtileRow>
+                </SubtileRow>
                 {props.data.gender ? (
-                    <S.SubtileRow>
+                    <SubtileRow>
                         <span className="key">
                             {ut.translate('lex_overview__overview_gender')}:
                         </span>
                         <span className="value">{props.data.gender}</span>
-                    </S.SubtileRow>
+                    </SubtileRow>
                 ) : null}
 
                 {!!props.data.comparison.comparative ||
                 !!props.data.comparison.superlative ? (
-                    <S.SubtileRow>
+                    <SubtileRow>
                         <span className="key">
                             {ut.translate('lex_overview__comparison')}
                         </span>
@@ -311,44 +311,44 @@ export function init(
                             positive={props.data.heading}
                             comparisonData={props.data.comparison}
                         />
-                    </S.SubtileRow>
+                    </SubtileRow>
                 ) : null}
 
                 {Dict.some(
                     (item) => !!item.singular || !!item.plural,
                     props.data.grammarCase
                 ) ? (
-                    <S.SubtileRow>
+                    <SubtileRow>
                         <span className="key">
                             {ut.translate('lex_overview__case')}:
                         </span>
                         <CaseTable caseData={props.data.grammarCase} />
-                    </S.SubtileRow>
+                    </SubtileRow>
                 ) : null}
 
                 {Dict.some(
                     (item) => !!item.singular || !!item.plural,
                     props.data.conjugation.person
                 ) ? (
-                    <S.SubtileRow>
+                    <SubtileRow>
                         <span className="key">
                             {ut.translate('lex_overview__conjugation')}
                         </span>
                         <ConjugationTable
                             conjugationData={props.data.conjugation}
                         />
-                    </S.SubtileRow>
+                    </SubtileRow>
                 ) : null}
 
-                <S.SubtileRow className="footer">
+                <SubtileRow className="footer">
                     <span className="key">
                         {ut.translate('lex_common__source')}:
                     </span>
                     <span className="value">
                         {ut.translate('lex_common__source_ijp')}
                     </span>
-                </S.SubtileRow>
-            </S.Subtile>
+                </SubtileRow>
+            </Subtile>
         );
     };
 

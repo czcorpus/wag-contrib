@@ -124,7 +124,8 @@ export function getCurrentVariant(
         return null;
     }
     const currentQueryMatch = findCurrQueryMatch(List.head(queryMatches));
-    return isLexQueryMatch(currentQueryMatch)
+    return isLexQueryMatch(currentQueryMatch) &&
+        !List.empty(currentQueryMatch.extraData)
         ? currentQueryMatch.extraData[variantIdx || 0]
         : null;
 }

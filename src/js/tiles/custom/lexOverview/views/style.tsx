@@ -18,20 +18,7 @@
 
 import { Theme } from '../../../../page/theme.js';
 import { styled } from 'styled-components';
-
-export const LexTileBase = styled.div<{ theme: Theme }>`
-    .assc-box {
-        background-color: #d4e2f4;
-    }
-
-    .ijp-box {
-        background-color: #e5eef8;
-    }
-
-    .corpus-box {
-        background-color: #fae9da;
-    }
-`;
+import { LexTileBase } from '../commonStyle.js';
 
 export const LexOverviewTileView = styled(LexTileBase)`
     display: flex;
@@ -62,53 +49,5 @@ export const Header = styled.div<{ theme: Theme }>`
     .small {
         font-size: 0.8em;
         font-style: italic;
-    }
-`;
-
-export const Subtile = styled.div<{ theme: Theme; color?: string }>`
-    margin-top: 1em;
-    padding: 0.5em;
-    background-color: ${(props) => props.color};
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-
-    .content {
-        margin: 0;
-        padding: 0;
-        line-height: 2em;
-
-        .key {
-            color: ${(props) => props.theme.colorLightText};
-            font-family: ${(props) => props.theme.condensedFontFamily};
-        }
-
-        .value {
-            margin-left: 0.5em;
-        }
-    }
-
-    .footer {
-        font-size: 0.9em;
-        text-align: right;
-    }
-`;
-
-export const SubtileRow = styled.div<{ theme: Theme }>`
-    margin-bottom: 0.5em;
-
-    .key {
-        color: ${(props) => props.theme.colorLightText};
-        font-family: ${(props) => props.theme.condensedFontFamily};
-    }
-
-    .value {
-        margin-left: 0.5em;
-    }
-
-    &.footer {
-        margin-top: 0em;
-        font-size: 0.9em;
-        text-align: right;
     }
 `;

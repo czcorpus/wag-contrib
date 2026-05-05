@@ -31,6 +31,7 @@ import { init as initCorpusViews } from './corpus/views.js';
 import * as S from './style.js';
 import { List } from 'cnc-tskit';
 import { LexItem, Source } from '../common.js';
+import { Subtile, SubtileRow } from '../commonStyle.js';
 
 interface BasicOverviewStruct {
     pronunciation?: string;
@@ -130,9 +131,9 @@ export function init(
         basicOverview: BasicOverviewStruct;
     }> = (props) => {
         return (
-            <S.Subtile className={`${props.basicOverview.source}-box`}>
+            <Subtile className={`${props.basicOverview.source}-box`}>
                 {props.basicOverview.pronunciation ? (
-                    <S.SubtileRow>
+                    <SubtileRow>
                         <span className="key">
                             {ut.translate(
                                 'lex_overview__overview_pronunciation'
@@ -142,17 +143,17 @@ export function init(
                         <span className="value">
                             {props.basicOverview.pronunciation}
                         </span>
-                    </S.SubtileRow>
+                    </SubtileRow>
                 ) : null}
-                <S.SubtileRow>
+                <SubtileRow>
                     <span className="key">
                         {ut.translate('lex_overview__overview_part_of_speech')}:
                     </span>
                     <span className="value">
                         {props.basicOverview.partOfSpeach}
                     </span>
-                </S.SubtileRow>
-                <S.SubtileRow className="footer">
+                </SubtileRow>
+                <SubtileRow className="footer">
                     <span className="key">
                         {ut.translate('lex_common__source')}:
                     </span>
@@ -161,8 +162,8 @@ export function init(
                             `lex_common__source_${props.basicOverview.source}`
                         )}
                     </span>
-                </S.SubtileRow>
-            </S.Subtile>
+                </SubtileRow>
+            </Subtile>
         );
     };
 

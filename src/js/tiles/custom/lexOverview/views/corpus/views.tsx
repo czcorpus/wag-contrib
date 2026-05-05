@@ -20,8 +20,8 @@ import { IActionDispatcher, ViewUtils } from 'kombo';
 import * as React from 'react';
 import { GlobalComponents } from '../../../../../views/common/index.js';
 import { init as commonViewInit } from './common.js';
-import * as S from '../style.js';
 import { calcFreqBand } from '../../../../../query/index.js';
+import { Subtile, SubtileRow } from '../../commonStyle.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -48,34 +48,37 @@ export function init(
         };
         color?: string;
     }> = (props) => (
-        <S.Subtile className="corpus-box" color={props.color}>
+        <Subtile className="corpus-box" color={props.color}>
             {props.data ? (
                 props.data.abs > 0 ? (
-                    <p className="content">
-                        <span className="key">
-                            {ut.translate('wordfreq__freq_bands')}:
-                        </span>
-                        <span
-                            className="value"
-                            style={{
-                                display: 'inline-block',
-                                fontSize: '1.2em',
-                            }}
-                        >
-                            <commonViews.Stars
-                                freqBand={calcFreqBand(props.data.ipm)}
-                            />
-                        </span>
-                        <br />
-                        <span className="key">
-                            {ut.translate('wordfreq__ipm')}:
-                        </span>
-                        <span className="value">
-                            {ut.formatNumber(props.data.ipm, 2)}
-                        </span>
-                    </p>
+                    <>
+                        <SubtileRow>
+                            <span className="key">
+                                {ut.translate('wordfreq__freq_bands')}:
+                            </span>
+                            <span
+                                className="value"
+                                style={{
+                                    display: 'inline-block',
+                                    fontSize: '1.2em',
+                                }}
+                            >
+                                <commonViews.Stars
+                                    freqBand={calcFreqBand(props.data.ipm)}
+                                />
+                            </span>
+                        </SubtileRow>
+                        <SubtileRow>
+                            <span className="key">
+                                {ut.translate('wordfreq__ipm')}:
+                            </span>
+                            <span className="value">
+                                {ut.formatNumber(props.data.ipm, 2)}
+                            </span>
+                        </SubtileRow>
+                    </>
                 ) : (
-                    <p className="content">
+                    <SubtileRow>
                         <span className="key">
                             {ut.translate('wordfreq__note')}:
                         </span>
@@ -84,26 +87,26 @@ export function init(
                                 'wordfreq__word_known_but_nothing_more'
                             )}
                         </span>
-                    </p>
+                    </SubtileRow>
                 )
             ) : (
-                <p className="content">
+                <SubtileRow>
                     <span className="key">
                         {ut.translate('wordfreq__note')}:
                     </span>
                     <span className="value">
                         {ut.translate('wordfreq__not_in_dict')}
                     </span>
-                </p>
+                </SubtileRow>
             )}
 
-            <div className="content footer">
+            <SubtileRow className="footer">
                 <span className="key">
                     {ut.translate('lex_common__source')}:
                 </span>
                 <span className="value">{props.source}</span>
-            </div>
-        </S.Subtile>
+            </SubtileRow>
+        </Subtile>
     );
 
     return {

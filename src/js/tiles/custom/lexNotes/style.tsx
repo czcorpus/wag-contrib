@@ -18,12 +18,8 @@
 
 import { styled } from 'styled-components';
 import { Theme } from '../../../page/theme.js';
-import { LexTileBase } from '../lexOverview/views/style.js';
+import { LexTileBase } from '../lexOverview/commonStyle.js';
 
 // ---------------- <UsageTileView /> --------------------------------------
 
 export const NotesTileView = styled(LexTileBase)``;
-
-export const NotesBox = styled.div`
-    padding: 1em;
-`;

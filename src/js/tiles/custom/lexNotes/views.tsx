@@ -24,6 +24,7 @@ import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
 import { LexNotesModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
+import { Subtile, SubtileRow } from '../lexOverview/commonStyle.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -52,10 +53,10 @@ export function init(
             >
                 <S.NotesTileView>
                     {!List.empty(state.notes.ijp) ? (
-                        <S.NotesBox className="ijp-box">
+                        <Subtile className="ijp-box">
                             {List.map(
                                 (note, i) => (
-                                    <div
+                                    <SubtileRow
                                         dangerouslySetInnerHTML={{
                                             __html: note,
                                         }}
@@ -63,14 +64,22 @@ export function init(
                                 ),
                                 state.notes.ijp
                             )}
-                        </S.NotesBox>
+                            <SubtileRow className="footer">
+                                <span className="key">
+                                    {ut.translate('lex_common__source')}:
+                                </span>
+                                <span className="value">
+                                    {ut.translate(`lex_common__source_ijp`)}
+                                </span>
+                            </SubtileRow>
+                        </Subtile>
                     ) : null}
 
                     {!List.empty(state.notes.assc) ? (
-                        <S.NotesBox className="assc-box">
+                        <Subtile className="assc-box">
                             {List.map(
                                 (note, i) => (
-                                    <div
+                                    <SubtileRow
                                         dangerouslySetInnerHTML={{
                                             __html: note,
                                         }}
@@ -78,7 +87,15 @@ export function init(
                                 ),
                                 state.notes.assc
                             )}
-                        </S.NotesBox>
+                            <SubtileRow className="footer">
+                                <span className="key">
+                                    {ut.translate('lex_common__source')}:
+                                </span>
+                                <span className="value">
+                                    {ut.translate(`lex_common__source_assc`)}
+                                </span>
+                            </SubtileRow>
+                        </Subtile>
                     ) : null}
                 </S.NotesTileView>
             </globalComponents.TileWrapper>
