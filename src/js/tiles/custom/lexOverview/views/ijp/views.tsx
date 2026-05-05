@@ -342,9 +342,11 @@ export function init(
 
                 <S.SubtileRow className="footer">
                     <span className="key">
-                        {ut.translate('lex_overview__source')}:
+                        {ut.translate('lex_common__source')}:
                     </span>
-                    <span className="value">Internetová jazyková příručka</span>
+                    <span className="value">
+                        {ut.translate('lex_common__source_ijp')}
+                    </span>
                 </S.SubtileRow>
             </S.Subtile>
         );

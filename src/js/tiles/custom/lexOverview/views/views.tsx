@@ -154,9 +154,13 @@ export function init(
                 </S.SubtileRow>
                 <S.SubtileRow className="footer">
                     <span className="key">
-                        {ut.translate('lex_overview__source')}:
+                        {ut.translate('lex_common__source')}:
                     </span>
-                    <span className="value">{props.basicOverview.source}</span>
+                    <span className="value">
+                        {ut.translate(
+                            `lex_common__source_${props.basicOverview.source}`
+                        )}
+                    </span>
                 </S.SubtileRow>
             </S.Subtile>
         );

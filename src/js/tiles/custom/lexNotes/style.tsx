@@ -25,12 +25,5 @@ import { LexTileBase } from '../lexOverview/views/style.js';
 export const NotesTileView = styled(LexTileBase)``;
 
 export const NotesBox = styled.div`
-    &.ijp {
-        background-color: '#e5eef8';
-    }
-
-    &.assc {
-        background-color: #d4e2f4;
-    }
     padding: 1em;
 `;
