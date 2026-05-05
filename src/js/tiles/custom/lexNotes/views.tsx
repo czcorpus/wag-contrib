@@ -52,10 +52,14 @@ export function init(
             >
                 <S.NotesTileView>
                     {!List.empty(state.notes.ijp) ? (
-                        <S.NotesBox className="ijp">
+                        <S.NotesBox className="ijp-box">
                             {List.map(
                                 (note, i) => (
-                                    <div>{note}</div>
+                                    <div
+                                        dangerouslySetInnerHTML={{
+                                            __html: note,
+                                        }}
+                                    />
                                 ),
                                 state.notes.ijp
                             )}
@@ -63,7 +67,7 @@ export function init(
                     ) : null}
 
                     {!List.empty(state.notes.assc) ? (
-                        <S.NotesBox className="assc">
+                        <S.NotesBox className="assc-box">
                             {List.map(
                                 (note, i) => (
                                     <div

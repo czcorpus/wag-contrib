@@ -83,7 +83,7 @@ export function init(
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.MeaningTileView>
-                    <S.MeaningBox>
+                    <S.MeaningBox className="assc-box">
                         {List.flatMap(
                             (d, i) =>
                                 List.map((block, j) => {

@@ -82,7 +82,7 @@ export interface IJPData {
     comparison: ComparisonData;
     conjugation: ConjugationData;
     examples: Array<string>;
-    notes: string;
+    notes: Array<string>;
     alternatives: Array<Alternative>;
     isDirect: boolean;
 }
@@ -139,7 +139,7 @@ export function mkEmptyData(): IJPData {
                 },
             },
         },
-        notes: '',
+        notes: [],
         examples: [],
         alternatives: [],
         isDirect: false,

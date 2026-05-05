@@ -18,6 +18,7 @@
 
 import { Theme } from '../../../page/theme.js';
 import { styled } from 'styled-components';
+import { LexTileBase } from '../lexOverview/views/style.js';
 
 // ---------------- <SSJCEntry /> --------------------------------------
 
@@ -210,4 +211,4 @@ export const TabButton = styled.span<{ theme: Theme }>`
 
 // ---------------- <LexDictionariesTileView /> --------------------------------------
 
-export const LexDictionariesTileView = styled.div``;
+export const LexDictionariesTileView = styled(LexTileBase)``;

@@ -28,6 +28,7 @@ export enum Source {
     IJP = 'ijp',
     SSJC = 'ssjc',
     SJC = 'sjc',
+    Corpus = 'corpus',
 }
 
 export enum PoS {

@@ -275,7 +275,7 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
                             payload: {
                                 tileId: this.tileId,
                                 source: Source.IJP,
-                                notes: [resp.data.notes],
+                                notes: resp.data.notes,
                             },
                         });
                     }

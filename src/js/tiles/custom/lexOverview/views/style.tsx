@@ -19,7 +19,21 @@
 import { Theme } from '../../../../page/theme.js';
 import { styled } from 'styled-components';
 
-export const LexOverviewTileView = styled.div<{ theme: Theme }>`
+export const LexTileBase = styled.div<{ theme: Theme }>`
+    .assc-box {
+        background-color: #d4e2f4;
+    }
+
+    .ijp-box {
+        background-color: #e5eef8;
+    }
+
+    .corpus-box {
+        background-color: #fae9da;
+    }
+`;
+
+export const LexOverviewTileView = styled(LexTileBase)`
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -51,7 +65,7 @@ export const Header = styled.div<{ theme: Theme }>`
     }
 `;
 
-export const Subtile = styled.div<{ theme: Theme; color: string }>`
+export const Subtile = styled.div<{ theme: Theme; color?: string }>`
     margin-top: 1em;
     padding: 0.5em;
     background-color: ${(props) => props.color};

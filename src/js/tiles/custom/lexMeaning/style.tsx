@@ -18,10 +18,11 @@
 
 import { styled } from 'styled-components';
 import { Theme } from '../../../page/theme.js';
+import { LexTileBase } from '../lexOverview/views/style.js';
 
 // ---------------- <MeaningTileView /> --------------------------------------
 
-export const MeaningTileView = styled.div`
+export const MeaningTileView = styled(LexTileBase)`
     position: relative;
     min-height: 30em;
     height: 100%;

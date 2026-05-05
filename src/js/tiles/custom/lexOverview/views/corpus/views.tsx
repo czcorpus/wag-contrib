@@ -37,7 +37,6 @@ export function init(
     }>;
 } {
     const commonViews = commonViewInit(dispatcher, ut);
-    const defaultColor = '#fae9da';
 
     // -------------------- <SrchWordInfo /> ---------------------------------------------------
 
@@ -49,7 +48,7 @@ export function init(
         };
         color?: string;
     }> = (props) => (
-        <S.Subtile color={props.color || defaultColor}>
+        <S.Subtile className="corpus-box" color={props.color}>
             {props.data ? (
                 props.data.abs > 0 ? (
                     <p className="content">

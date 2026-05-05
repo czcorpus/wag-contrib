@@ -38,8 +38,6 @@ export function init(
         color?: string;
     }>;
 } {
-    const defaultColor = '#e5eef8';
-
     // -------------------- <ComparisonTable /> -----------------------------------------------
 
     const ComparisonTable: React.FC<{
@@ -286,7 +284,7 @@ export function init(
         color?: string;
     }> = (props) => {
         return (
-            <S.Subtile color={props.color || defaultColor}>
+            <S.Subtile className="ijp-box">
                 <S.SubtileRow>
                     <span className="key">
                         {ut.translate('lex_overview__overview_syllabification')}

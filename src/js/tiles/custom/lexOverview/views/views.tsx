@@ -130,7 +130,7 @@ export function init(
         basicOverview: BasicOverviewStruct;
     }> = (props) => {
         return (
-            <S.Subtile color="#d4e2f4">
+            <S.Subtile className={`${props.basicOverview.source}-box`}>
                 {props.basicOverview.pronunciation ? (
                     <S.SubtileRow>
                         <span className="key">
@@ -176,8 +176,7 @@ export function init(
             basicOverview.partOfSpeach = currentVariant.pos;
             switch (state.mainSource) {
                 case Source.ASSC:
-                    basicOverview.source =
-                        'Akademický slovník současné češtiny';
+                    basicOverview.source = Source.ASSC;
                     if (state.data.assc) {
                         const asscVariant = List.find(
                             (v) => v.key.startsWith(currentVariant.lemma),
@@ -187,7 +186,7 @@ export function init(
                     }
                     break;
                 case Source.IJP:
-                    basicOverview.source = 'Internetová jazyková příručka';
+                    basicOverview.source = Source.IJP;
                     if (state.data.ijp) {
                         basicOverview.pronunciation =
                             state.data.ijp.pronunciation;
@@ -195,8 +194,8 @@ export function init(
                     break;
             }
         } else if (state.queryMatch.pos[0]) {
+            basicOverview.source = Source.Corpus;
             basicOverview.partOfSpeach = state.queryMatch.pos[0].value;
-            basicOverview.source = 'Korpus';
         }
 
         return (
