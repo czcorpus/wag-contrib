@@ -27,8 +27,9 @@ import {
 } from '../../api/ijpTypes.js';
 import * as LS from './style.js';
 import { IJPData } from '../../api/ijpTypes.js';
-import { Subtile, SubtileRow } from '../../commonStyle.js';
+import { SubtileRow } from '../../commonStyle.js';
 import { Source } from '../../common.js';
+import { initViewSubtile } from '../../commonViews.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -38,6 +39,8 @@ export function init(
         data: IJPData;
     }>;
 } {
+    const Subtile = initViewSubtile(dispatcher, ut);
+
     // -------------------- <ComparisonTable /> -----------------------------------------------
 
     const ComparisonTable: React.FC<{
@@ -338,15 +341,6 @@ export function init(
                         />
                     </SubtileRow>
                 ) : null}
-
-                <SubtileRow className="footer">
-                    <span className="key">
-                        {ut.translate('lex_common__source')}:
-                    </span>
-                    <span className="value">
-                        {ut.translate('lex_common__source_ijp')}
-                    </span>
-                </SubtileRow>
             </Subtile>
         );
     };

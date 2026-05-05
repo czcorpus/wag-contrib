@@ -24,8 +24,9 @@ import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
 import { LexNotesModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
-import { Subtile, SubtileRow } from '../lexOverview/commonStyle.js';
+import { SubtileRow } from '../lexOverview/commonStyle.js';
 import { Source } from '../lexOverview/common.js';
+import { initViewSubtile } from '../lexOverview/commonViews.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -34,6 +35,7 @@ export function init(
     model: LexNotesModel
 ): TileComponent {
     const globalComponents = ut.getComponents();
+    const Subtile = initViewSubtile(dispatcher, ut);
 
     // -------------------- <LexNotesTileView /> -----------------------------------------------
 
@@ -65,14 +67,6 @@ export function init(
                                 ),
                                 state.notes.ijp
                             )}
-                            <SubtileRow className="footer">
-                                <span className="key">
-                                    {ut.translate('lex_common__source')}:
-                                </span>
-                                <span className="value">
-                                    {ut.translate(`lex_common__source_ijp`)}
-                                </span>
-                            </SubtileRow>
                         </Subtile>
                     ) : null}
 
@@ -88,14 +82,6 @@ export function init(
                                 ),
                                 state.notes.assc
                             )}
-                            <SubtileRow className="footer">
-                                <span className="key">
-                                    {ut.translate('lex_common__source')}:
-                                </span>
-                                <span className="value">
-                                    {ut.translate(`lex_common__source_assc`)}
-                                </span>
-                            </SubtileRow>
                         </Subtile>
                     ) : null}
                 </S.NotesTileView>

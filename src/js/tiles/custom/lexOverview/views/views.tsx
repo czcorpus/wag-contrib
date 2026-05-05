@@ -31,7 +31,8 @@ import { init as initCorpusViews } from './corpus/views.js';
 import * as S from './style.js';
 import { List } from 'cnc-tskit';
 import { LexItem, Source } from '../common.js';
-import { Subtile, SubtileRow } from '../commonStyle.js';
+import { SubtileRow } from '../commonStyle.js';
+import { initViewSubtile } from '../commonViews.js';
 
 interface BasicOverviewStruct {
     pronunciation?: string;
@@ -48,6 +49,7 @@ export function init(
     const globalComponents = ut.getComponents();
     const ijpViews = initIjpViews(dispatcher, ut);
     const corpusViews = initCorpusViews(dispatcher, ut);
+    const Subtile = initViewSubtile(dispatcher, ut);
 
     // -------------------- <LexOverviewHeader /> -----------------------------------------------
 
@@ -151,16 +153,6 @@ export function init(
                     </span>
                     <span className="value">
                         {props.basicOverview.partOfSpeach}
-                    </span>
-                </SubtileRow>
-                <SubtileRow className="footer">
-                    <span className="key">
-                        {ut.translate('lex_common__source')}:
-                    </span>
-                    <span className="value">
-                        {ut.translate(
-                            `lex_common__source_${props.basicOverview.source}`
-                        )}
                     </span>
                 </SubtileRow>
             </Subtile>

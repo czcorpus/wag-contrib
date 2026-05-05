@@ -35,12 +35,15 @@ function getSourceColor(source: string): string {
 
 export const LexTileBase = styled.div<{ theme: Theme }>``;
 
-export const Subtile = styled.div<{
+export const SubtileWrapper = styled.div<{
     theme: Theme;
     source?: string;
     color?: string;
 }>`
     margin-top: 1em;
+    &:first-child {
+        margin-top: 0;
+    }
     padding: 0.5em;
     background-color: ${(props) => getSourceColor(props.source) || props.color};
     display: flex;

@@ -19,10 +19,11 @@
 import { IActionDispatcher, ViewUtils } from 'kombo';
 import * as React from 'react';
 import { GlobalComponents } from '../../../../../views/common/index.js';
-import { init as commonViewInit } from './common.js';
+import { init as starsViewInit } from './stars.js';
 import { calcFreqBand } from '../../../../../query/index.js';
-import { Subtile, SubtileRow } from '../../commonStyle.js';
+import { SubtileRow } from '../../commonStyle.js';
 import { Source } from '../../common.js';
+import { initViewSubtile } from '../../commonViews.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -36,7 +37,8 @@ export function init(
         };
     }>;
 } {
-    const commonViews = commonViewInit(dispatcher, ut);
+    const Stars = starsViewInit(dispatcher, ut);
+    const Subtile = initViewSubtile(dispatcher, ut);
 
     // -------------------- <SrchWordInfo /> ---------------------------------------------------
 
@@ -47,7 +49,7 @@ export function init(
             ipm: number;
         };
     }> = (props) => (
-        <Subtile source={Source.Corpus}>
+        <Subtile source={Source.Corpus} corpname={props.corpname}>
             {props.data ? (
                 props.data.abs > 0 ? (
                     <>
@@ -62,7 +64,7 @@ export function init(
                                     fontSize: '1.2em',
                                 }}
                             >
-                                <commonViews.Stars
+                                <Stars
                                     freqBand={calcFreqBand(props.data.ipm)}
                                 />
                             </span>
@@ -98,13 +100,6 @@ export function init(
                     </span>
                 </SubtileRow>
             )}
-
-            <SubtileRow className="footer">
-                <span className="key">
-                    {ut.translate('lex_common__source')}:
-                </span>
-                <span className="value">{props.corpname}</span>
-            </SubtileRow>
         </Subtile>
     );
 

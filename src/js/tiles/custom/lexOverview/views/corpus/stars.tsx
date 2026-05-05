@@ -51,7 +51,5 @@ export function init(
         );
     };
 
-    return {
-        Stars: Stars,
-    };
+    return Stars;
 }

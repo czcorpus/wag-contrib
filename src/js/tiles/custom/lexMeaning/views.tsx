@@ -25,8 +25,9 @@ import { LexMeaningModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
 import { HTMLBlock } from '../lexOverview/api/asscTypes.js';
-import { Subtile, SubtileRow } from '../lexOverview/commonStyle.js';
+import { SubtileRow } from '../lexOverview/commonStyle.js';
 import { Source } from '../lexOverview/common.js';
+import { initViewSubtile } from '../lexOverview/commonViews.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -35,6 +36,7 @@ export function init(
     model: LexMeaningModel
 ): TileComponent {
     const globalComponents = ut.getComponents();
+    const Subtile = initViewSubtile(dispatcher, ut);
 
     // -------------------- <LexMeaningTileView /> -----------------------------------------------
 
@@ -106,14 +108,6 @@ export function init(
                                     }, d.blocks),
                                 state.data
                             )}
-                        </SubtileRow>
-                        <SubtileRow className="footer">
-                            <span className="key">
-                                {ut.translate('lex_common__source')}:
-                            </span>
-                            <span className="value">
-                                {ut.translate(`lex_common__source_assc`)}
-                            </span>
                         </SubtileRow>
                     </Subtile>
                 </S.MeaningTileView>
