@@ -53,9 +53,7 @@ export function initViewSubtile(
                             : Array.isArray(props.source)
                               ? List.map(
                                     (v) =>
-                                        ut.translate(
-                                            `lex_common__source_${props.source}`
-                                        ),
+                                        ut.translate(`lex_common__source_${v}`),
                                     props.source
                                 ).join(', ')
                               : ut.translate(

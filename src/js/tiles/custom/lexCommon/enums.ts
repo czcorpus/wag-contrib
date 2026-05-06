@@ -21,7 +21,7 @@ export enum Source {
     IJP = 'ijp',
     SSJC = 'ssjc',
     SJC = 'sjc',
-    DJP = 'djp',
+    DJD = 'djd',
     Corpus = 'corpus',
 }
 

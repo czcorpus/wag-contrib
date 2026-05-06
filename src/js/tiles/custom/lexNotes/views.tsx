@@ -62,7 +62,7 @@ export function init(
                                     (note) => note.includes('</a>'),
                                     state.notes.ijp
                                 )
-                                    ? [Source.IJP, Source.DJP]
+                                    ? [Source.IJP, Source.DJD]
                                     : Source.IJP
                             }
                         >

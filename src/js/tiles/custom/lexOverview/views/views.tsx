@@ -37,7 +37,9 @@ import { Source } from '../../lexCommon/enums.js';
 
 interface BasicOverviewStruct {
     pronunciation?: string;
-    partOfSpeach?: string;
+    partOfSpeech: string;
+    gender?: string;
+    aspect?: string;
     source: string;
 }
 
@@ -51,6 +53,20 @@ export function init(
     const ijpViews = initIjpViews(dispatcher, ut);
     const corpusViews = initCorpusViews(dispatcher, ut);
     const Subtile = initViewSubtile(dispatcher, ut);
+
+    const translateMorfology = (
+        pos: string,
+        gender: string,
+        aspect: string
+    ) => {
+        const parts = [ut.translate(`lex_common__pos_${pos}`)];
+        if (gender) {
+            parts.push(ut.translate(`lex_common__gender_${gender}`));
+        } else if (aspect) {
+            parts.push(ut.translate(`lex_common__aspect_${aspect}`));
+        }
+        return parts.join(' ');
+    };
 
     // -------------------- <LexOverviewHeader /> -----------------------------------------------
 
@@ -80,9 +96,13 @@ export function init(
                             {variant.lemma}{' '}
                             {withInfo && variant.pos ? (
                                 <span className="small">
-                                    ({variant.pos}
-                                    {variant.gender}
-                                    {variant.aspect})
+                                    (
+                                    {translateMorfology(
+                                        variant.pos,
+                                        variant.gender,
+                                        variant.aspect
+                                    )}
+                                    )
                                 </span>
                             ) : null}
                         </a>
@@ -91,9 +111,13 @@ export function init(
                             {variant.lemma}{' '}
                             {withInfo && variant.pos ? (
                                 <span className="small">
-                                    ({variant.pos}
-                                    {variant.gender}
-                                    {variant.aspect})
+                                    (
+                                    {translateMorfology(
+                                        variant.pos,
+                                        variant.gender,
+                                        variant.aspect
+                                    )}
+                                    )
                                 </span>
                             ) : null}
                         </span>
@@ -102,22 +126,36 @@ export function init(
             );
         };
 
+        const hasSameLemmaVariant = (variantIdx: number) => {
+            const lemma = props.items[variantIdx].lemma;
+            return (
+                List.findIndex(
+                    (v, i) => v.lemma === lemma && i !== variantIdx,
+                    props.items
+                ) !== -1
+            );
+        };
+
         return (
             <S.Header>
-                {props.selectedVariantIdx > -1 ? (
+                {props.selectedVariantIdx !== undefined ? (
                     <h2>
-                        {renderVariants(props.selectedVariantIdx, true, false)}
+                        {renderVariants(
+                            props.selectedVariantIdx,
+                            hasSameLemmaVariant(props.selectedVariantIdx),
+                            false
+                        )}
                     </h2>
                 ) : (
                     <h2>{props.backupTitle}</h2>
                 )}
 
                 {List.map(
-                    (variants, i) => (
+                    (_, i) => (
                         <h4 key={i} className="variant">
                             {renderVariants(
                                 i,
-                                true,
+                                hasSameLemmaVariant(i),
                                 i !== props.selectedVariantIdx
                             )}
                         </h4>
@@ -153,7 +191,11 @@ export function init(
                         {ut.translate('lex_overview__overview_part_of_speech')}:
                     </span>
                     <span className="value">
-                        {props.basicOverview.partOfSpeach}
+                        {translateMorfology(
+                            props.basicOverview.partOfSpeech,
+                            props.basicOverview.gender,
+                            props.basicOverview.aspect
+                        )}
                     </span>
                 </SubtileRow>
             </Subtile>
@@ -171,7 +213,9 @@ export function init(
                 ? state.variants[state.selectedVariantIdx]
                 : null;
         if (currentVariant !== null) {
-            basicOverview.partOfSpeach = currentVariant.pos;
+            basicOverview.partOfSpeech = currentVariant.pos;
+            basicOverview.gender = currentVariant.gender;
+            basicOverview.aspect = currentVariant.aspect;
             switch (state.mainSource) {
                 case Source.ASSC:
                     basicOverview.source = Source.ASSC;
@@ -193,7 +237,7 @@ export function init(
             }
         } else if (state.queryMatch.pos[0]) {
             basicOverview.source = Source.Corpus;
-            basicOverview.partOfSpeach = state.queryMatch.pos[0].value;
+            basicOverview.partOfSpeech = state.queryMatch.pos[0].value;
         }
 
         return (
