@@ -26,10 +26,10 @@ import {
     ConjugationData,
 } from '../../api/ijpTypes.js';
 import * as LS from './style.js';
-import { IJPData } from '../../api/ijpTypes.js';
-import { SubtileRow } from '../../commonStyle.js';
-import { Source } from '../../common.js';
-import { initViewSubtile } from '../../commonViews.js';
+import { IJPData } from '../../../lexCommon/types/ijp.js';
+import { initViewSubtile } from '../../../lexCommon/views.js';
+import { SubtileRow } from '../../../lexCommon/style.js';
+import { Source } from '../../../lexCommon/enums.js';
 
 export function init(
     dispatcher: IActionDispatcher,

@@ -22,61 +22,16 @@ import {
     QueryMatch,
     RecognizedQueries,
 } from '../../../query/index.js';
-
-export enum Source {
-    ASSC = 'assc',
-    IJP = 'ijp',
-    SSJC = 'ssjc',
-    SJC = 'sjc',
-    Corpus = 'corpus',
-}
-
-export enum PoS {
-    ADJ = 'A',
-    ABB = 'B',
-    NUM = 'C',
-    ADV = 'D',
-    FORE = 'F',
-    INTER = 'I',
-    CONJ = 'J',
-    NOUN = 'N',
-    PRON = 'P',
-    PREP = 'R',
-    SEGM = 'S',
-    PART = 'T',
-    VERB = 'V',
-    UNKN = 'X',
-    PUNC = 'Z',
-}
-
-export enum Gender {
-    MASCULINE_ANIM = 'M',
-    MASCULINE_INAN = 'I',
-    FEMININE = 'F',
-    NEUTER = 'N',
-}
-
-export enum Aspect {
-    PERF = 'P',
-    IMPERF = 'I',
-    BOTH = 'B',
-}
-
-interface LexID {
-    id: string;
-    parentId?: string;
-}
-
-interface Sublemma {
-    value: string;
-    count: number;
-}
+import { Aspect, Gender, PoS } from './enums.js';
 
 export interface CorpusEntry {
     _id: string;
     _rev: string;
     lemma: string;
-    sublemmas: Array<Sublemma>;
+    sublemmas: Array<{
+        value: string;
+        count: number;
+    }>;
     pos: string;
     datasetSize: number;
     upos: string;
@@ -91,6 +46,11 @@ export interface CorpusEntry {
         ipm: number;
         arf: number;
     }>;
+}
+
+interface LexID {
+    id: string;
+    parentId?: string;
 }
 
 export interface LexItem {

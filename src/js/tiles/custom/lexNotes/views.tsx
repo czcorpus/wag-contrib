@@ -24,9 +24,9 @@ import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
 import { LexNotesModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
-import { SubtileRow } from '../lexOverview/commonStyle.js';
-import { Source } from '../lexOverview/common.js';
-import { initViewSubtile } from '../lexOverview/commonViews.js';
+import { SubtileRow } from '../lexCommon/style.js';
+import { Source } from '../lexCommon/enums.js';
+import { initViewSubtile } from '../lexCommon/views.js';
 
 export function init(
     dispatcher: IActionDispatcher,

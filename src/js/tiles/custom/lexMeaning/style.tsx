@@ -18,7 +18,7 @@
 
 import { styled } from 'styled-components';
 import { Theme } from '../../../page/theme.js';
-import { LexTileBase } from '../lexOverview/commonStyle.js';
+import { LexTileBase } from '../lexCommon/style.js';
 
 // ---------------- <MeaningTileView /> --------------------------------------
 

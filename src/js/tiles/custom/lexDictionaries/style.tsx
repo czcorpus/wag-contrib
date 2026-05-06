@@ -18,7 +18,7 @@
 
 import { Theme } from '../../../page/theme.js';
 import { styled } from 'styled-components';
-import { LexTileBase } from '../lexOverview/commonStyle.js';
+import { LexTileBase } from '../lexCommon/style.js';
 
 // ---------------- <SSJCEntry /> --------------------------------------
 

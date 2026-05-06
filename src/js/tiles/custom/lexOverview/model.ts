@@ -22,16 +22,17 @@ import { Backlink } from '../../../page/tile.js';
 import { QueryMatch, RecognizedQueries } from '../../../query/index.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
-import { getCurrentVariant, LexItem, Source } from './common.js';
 
-import { HTMLBlock as ASSCData } from './api/asscTypes.js';
-import { IJPData as IJPData } from './api/ijpTypes.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { List } from 'cnc-tskit';
-import { isAsscData, isIjpData, LexApi, LexArgs } from './api/lex.js';
+import { HTMLBlock } from '../lexCommon/types/assc.js';
+import { IJPData } from './api/ijpTypes.js';
+import { Source } from '../lexCommon/enums.js';
+import { getCurrentVariant, LexItem } from '../lexCommon/dictionary.js';
+import { isAsscData, isIjpData, LexApi, LexArgs } from '../lexCommon/api.js';
 
 interface Data {
-    assc: ASSCData;
+    assc: HTMLBlock;
     ijp: IJPData;
 }
 

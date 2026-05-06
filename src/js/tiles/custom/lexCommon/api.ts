@@ -18,14 +18,14 @@
 
 import { Dict, HTTP, List, pipe } from 'cnc-tskit';
 import { EMPTY, from, mergeMap, Observable, of as rxOf } from 'rxjs';
-import { IApiServices } from '../../../../appServices.js';
-import { ajax$ } from '../../../../page/ajax.js';
-import { ResourceApi, SourceDetails, HTTPHeaders } from '../../../../types.js';
-import { Backlink } from '../../../../page/tile.js';
-import { IDataStreaming } from '../../../../page/streaming.js';
-import { HTMLBlock } from './asscTypes.js';
-import { IJPData as IJPData } from './ijpTypes.js';
-import { Source } from '../common.js';
+import { IApiServices } from '../../../appServices.js';
+import { ajax$ } from '../../../page/ajax.js';
+import { ResourceApi, SourceDetails, HTTPHeaders } from '../../../types.js';
+import { Backlink } from '../../../page/tile.js';
+import { IDataStreaming } from '../../../page/streaming.js';
+import { HTMLBlock } from './types/assc.js';
+import { IJPData as IJPData } from './types/ijp.js';
+import { Source } from './enums.js';
 
 export interface LexArgs {
     asscIds: string[];

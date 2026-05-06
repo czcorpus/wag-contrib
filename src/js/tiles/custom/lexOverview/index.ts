@@ -36,9 +36,10 @@ import {
     lemLevelSupport,
 } from '../../../page/tile.js';
 import { LexOverviewModel } from './model.js';
-import { isLexQueryMatch, LexItem, Source } from './common.js';
 import { Dict, List } from 'cnc-tskit';
-import { LexApi } from './api/lex.js';
+import { Source } from '../lexCommon/enums.js';
+import { LexApi } from '../lexCommon/api.js';
+import { isLexQueryMatch, LexItem } from '../lexCommon/dictionary.js';
 
 export interface LexOverviewTileConf extends TileConf {
     apiURL: string;

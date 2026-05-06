@@ -21,9 +21,9 @@ import * as React from 'react';
 import { GlobalComponents } from '../../../../../views/common/index.js';
 import { init as starsViewInit } from './stars.js';
 import { calcFreqBand } from '../../../../../query/index.js';
-import { SubtileRow } from '../../commonStyle.js';
-import { Source } from '../../common.js';
-import { initViewSubtile } from '../../commonViews.js';
+import { initViewSubtile } from '../../../lexCommon/views.js';
+import { Source } from '../../../lexCommon/enums.js';
+import { SubtileRow } from '../../../lexCommon/style.js';
 
 export function init(
     dispatcher: IActionDispatcher,

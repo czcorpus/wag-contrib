@@ -36,8 +36,8 @@ import {
     lemLevelSupport,
 } from '../../../page/tile.js';
 import { LexMeaningModel } from './model.js';
-import { isLexQueryMatch } from '../lexOverview/common.js';
-import { LexApi } from '../lexOverview/api/lex.js';
+import { isLexQueryMatch } from '../lexCommon/dictionary.js';
+import { LexApi } from '../lexCommon/api.js';
 import { List } from 'cnc-tskit';
 
 export interface LexMeaningTileConf extends TileConf {

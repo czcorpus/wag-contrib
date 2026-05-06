@@ -25,15 +25,15 @@ import { Actions as LexActions } from '../lexOverview/actions.js';
 import { List } from 'cnc-tskit';
 import { RecognizedQueries } from '../../../query/index.js';
 import { IDataStreaming } from '../../../page/streaming.js';
-import { getCurrentVariant, LexItem } from '../lexOverview/common.js';
-import { HTMLBlock } from '../lexOverview/api/asscTypes.js';
+import { getCurrentVariant, LexItem } from '../lexCommon/dictionary.js';
+import { HTMLBlock } from '../lexCommon/types/assc.js';
 import {
     isAsscData,
     isEmptyArgs,
     LexApi,
     LexArgs,
     LexResponse,
-} from '../lexOverview/api/lex.js';
+} from '../lexCommon/api.js';
 import { filter } from 'rxjs';
 
 export interface LexMeaningModelState {

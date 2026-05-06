@@ -18,9 +18,9 @@
 
 import { Action } from 'kombo';
 import { Actions as GlobalActions } from '../../../models/actions.js';
-import { HTMLBlock } from './api/asscTypes.js';
-import { IJPData } from './api/ijpTypes.js';
-import { Source } from './common.js';
+import { Source } from '../lexCommon/enums.js';
+import { IJPData } from '../lexCommon/types/ijp.js';
+import { HTMLBlock } from '../lexCommon/types/assc.js';
 
 export interface PartialDataPayload {
     source: Source;

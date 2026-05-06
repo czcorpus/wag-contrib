@@ -19,7 +19,7 @@
 import { IActionDispatcher, ViewUtils } from 'kombo';
 import * as React from 'react';
 import { GlobalComponents } from '../../../views/common/index.js';
-import { SubtileWrapper, SubtileRow } from './commonStyle.js';
+import { SubtileWrapper, SubtileRow } from './style.js';
 
 export function initViewSubtile(
     dispatcher: IActionDispatcher,

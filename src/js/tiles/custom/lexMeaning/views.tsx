@@ -24,10 +24,10 @@ import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
 import { LexMeaningModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
-import { HTMLBlock } from '../lexOverview/api/asscTypes.js';
-import { SubtileRow } from '../lexOverview/commonStyle.js';
-import { Source } from '../lexOverview/common.js';
-import { initViewSubtile } from '../lexOverview/commonViews.js';
+import { HTMLBlock } from '../lexCommon/types/assc.js';
+import { SubtileRow } from '../lexCommon/style.js';
+import { Source } from '../lexCommon/enums.js';
+import { initViewSubtile } from '../lexCommon/views.js';
 
 export function init(
     dispatcher: IActionDispatcher,

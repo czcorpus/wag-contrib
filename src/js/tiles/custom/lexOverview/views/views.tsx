@@ -30,9 +30,10 @@ import { init as initIjpViews } from './ijp/views.js';
 import { init as initCorpusViews } from './corpus/views.js';
 import * as S from './style.js';
 import { List } from 'cnc-tskit';
-import { LexItem, Source } from '../common.js';
-import { SubtileRow } from '../commonStyle.js';
-import { initViewSubtile } from '../commonViews.js';
+import { initViewSubtile } from '../../lexCommon/views.js';
+import { LexItem } from '../../lexCommon/dictionary.js';
+import { SubtileRow } from '../../lexCommon/style.js';
+import { Source } from '../../lexCommon/enums.js';
 
 interface BasicOverviewStruct {
     pronunciation?: string;

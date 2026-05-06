@@ -25,8 +25,8 @@ import { Actions as LexActions } from '../lexOverview/actions.js';
 import { List, pipe } from 'cnc-tskit';
 import { RecognizedQueries } from '../../../query/index.js';
 import { IDataStreaming } from '../../../page/streaming.js';
-import { getCurrentVariant, LexItem, Source } from '../lexOverview/common.js';
-import { HTMLBlock } from '../lexOverview/api/asscTypes.js';
+import { getCurrentVariant, LexItem } from '../lexCommon/dictionary.js';
+import { HTMLBlock } from '../lexCommon/types/assc.js';
 import {
     isAsscData,
     isEmptyArgs,
@@ -34,8 +34,9 @@ import {
     LexApi,
     LexArgs,
     LexResponse,
-} from '../lexOverview/api/lex.js';
+} from '../lexCommon/api.js';
 import { filter } from 'rxjs';
+import { Source } from '../lexCommon/enums.js';
 
 export interface LexNotesModelState {
     isBusy: boolean;
