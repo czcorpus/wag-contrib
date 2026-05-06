@@ -26,10 +26,10 @@ import { Actions } from './actions.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { List } from 'cnc-tskit';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
-import { IJPData } from './api/ijpTypes.js';
 import { Source } from '../lexCommon/enums.js';
 import { getCurrentVariant, LexItem } from '../lexCommon/dictionary.js';
 import { isAsscData, isIjpData, LexApi, LexArgs } from '../lexCommon/api.js';
+import { IJPData } from '../lexCommon/types/ijp.js';
 
 interface Data {
     assc: HTMLBlock;

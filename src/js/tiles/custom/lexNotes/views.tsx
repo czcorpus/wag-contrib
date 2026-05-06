@@ -56,7 +56,16 @@ export function init(
             >
                 <S.NotesTileView>
                     {!List.empty(state.notes.ijp) ? (
-                        <Subtile source={Source.IJP}>
+                        <Subtile
+                            source={
+                                List.some(
+                                    (note) => note.includes('</a>'),
+                                    state.notes.ijp
+                                )
+                                    ? [Source.IJP, Source.DJP]
+                                    : Source.IJP
+                            }
+                        >
                             {List.map(
                                 (note, i) => (
                                     <SubtileRow

@@ -20,6 +20,7 @@ import { IActionDispatcher, ViewUtils } from 'kombo';
 import * as React from 'react';
 import { GlobalComponents } from '../../../views/common/index.js';
 import { SubtileWrapper, SubtileRow } from './style.js';
+import { List } from 'cnc-tskit';
 
 export function initViewSubtile(
     dispatcher: IActionDispatcher,
@@ -29,12 +30,17 @@ export function initViewSubtile(
 
     const Subtile: React.FC<
         React.PropsWithChildren<{
-            source?: string;
+            source?: string | Array<string>;
             corpname?: string;
             className?: string;
         }>
     > = (props) => (
-        <SubtileWrapper className={props.className} source={props.source}>
+        <SubtileWrapper
+            className={props.className}
+            source={
+                Array.isArray(props.source) ? props.source[0] : props.source
+            }
+        >
             {props.children}
             {props.source || props.corpname ? (
                 <SubtileRow className="footer">
@@ -44,9 +50,17 @@ export function initViewSubtile(
                     <span className="value">
                         {props.corpname
                             ? props.corpname
-                            : ut.translate(
-                                  `lex_common__source_${props.source}`
-                              )}
+                            : Array.isArray(props.source)
+                              ? List.map(
+                                    (v) =>
+                                        ut.translate(
+                                            `lex_common__source_${props.source}`
+                                        ),
+                                    props.source
+                                ).join(', ')
+                              : ut.translate(
+                                    `lex_common__source_${props.source}`
+                                )}
                     </span>
                 </SubtileRow>
             ) : null}

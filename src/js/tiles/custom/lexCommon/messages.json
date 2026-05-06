@@ -6,7 +6,8 @@
         "lex_common__source_ijp": "Internetová jazyková příručka",
         "lex_common__source_ssjc": "Slovník spisovného jazyka českého",
         "lex_common__source_ssc": "Slovník spisovné češtiny",
-        "lex_common__source_kla": "Kartotéka lexikálního archivu"
+        "lex_common__source_kla": "Kartotéka lexikálního archivu",
+        "lex_common__source_djd": "Dotazy z jazykové poradny"
     },
     "en-US": {
         "lex_common__source": "Source",
@@ -15,6 +16,7 @@
         "lex_common__source_ijp": "Internetová jazyková příručka UNTRANSLATED",
         "lex_common__source_ssjc": "Slovník spisovného jazyka českého UNTRANSLATED",
         "lex_common__source_ssc": "Slovník spisovné češtiny UNTRANSLATED",
-        "lex_common__source_kla": "Kartotéka lexikálního archivu UNTRANSLATED"
+        "lex_common__source_kla": "Kartotéka lexikálního archivu UNTRANSLATED",
+        "lex_common__source_djd": "Dotazy z jazykové poradny"
     }
 }
