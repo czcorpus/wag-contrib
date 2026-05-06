@@ -29,13 +29,12 @@ import { getCurrentVariant, LexItem } from '../lexCommon/dictionary.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
 import {
     isAsscData,
-    isEmptyArgs,
     isIjpData,
     LexApi,
     LexArgs,
     LexResponse,
 } from '../lexCommon/api.js';
-import { filter } from 'rxjs';
+import { reduce } from 'rxjs';
 import { Source } from '../lexCommon/enums.js';
 
 export interface LexNotesModelState {
@@ -250,26 +249,29 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
               })
             : this.lexApi.call(streaming, this.tileId, 0, requestIds)
         )
-            .pipe(filter((resp) => isAsscData(resp) || isIjpData(resp)))
-            .subscribe({
-                next: (resp) => {
+            .pipe(
+                reduce((hasData, resp) => {
                     if (isAsscData(resp)) {
-                        let filteredData = this.filterResultsByIDs(
+                        const filteredData = this.filterResultsByIDs(
                             resp.id,
                             resp.data
                         );
-                        dispatch<typeof Actions.TilePartialDataLoaded>({
-                            name: Actions.TilePartialDataLoaded.name,
-                            payload: {
-                                tileId: this.tileId,
-                                source: Source.ASSC,
-                                notes: pipe(
-                                    filteredData,
-                                    List.flatMap((v) => v.notes),
-                                    List.filter((v) => !!v)
-                                ),
-                            },
-                        });
+                        const notes = pipe(
+                            filteredData,
+                            List.flatMap((v) => v.notes),
+                            List.filter((v) => !!v)
+                        );
+                        if (List.size(notes) > 0) {
+                            dispatch<typeof Actions.TilePartialDataLoaded>({
+                                name: Actions.TilePartialDataLoaded.name,
+                                payload: {
+                                    tileId: this.tileId,
+                                    source: Source.ASSC,
+                                    notes,
+                                },
+                            });
+                            return true;
+                        }
                     } else if (isIjpData(resp) && resp.data.notes) {
                         dispatch<typeof Actions.TilePartialDataLoaded>({
                             name: Actions.TilePartialDataLoaded.name,
@@ -279,14 +281,18 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
                                 notes: resp.data.notes,
                             },
                         });
+                        return true;
                     }
-                },
-                complete: () => {
+                    return hasData;
+                }, false)
+            )
+            .subscribe({
+                next: (hasData) => {
                     dispatch<typeof Actions.TileDataLoaded>({
                         name: Actions.TileDataLoaded.name,
                         payload: {
                             tileId: this.tileId,
-                            isEmpty: isEmptyArgs(requestIds),
+                            isEmpty: !hasData,
                         },
                     });
                 },

@@ -150,18 +150,20 @@ export function init(
                     <h2>{props.backupTitle}</h2>
                 )}
 
-                {List.map(
-                    (_, i) => (
-                        <h4 key={i} className="variant">
-                            {renderVariants(
-                                i,
-                                hasSameLemmaVariant(i),
-                                i !== props.selectedVariantIdx
-                            )}
-                        </h4>
-                    ),
-                    props.items
-                )}
+                {List.size(props.items) > 1
+                    ? List.map(
+                          (_, i) => (
+                              <h4 key={i} className="variant">
+                                  {renderVariants(
+                                      i,
+                                      hasSameLemmaVariant(i),
+                                      i !== props.selectedVariantIdx
+                                  )}
+                              </h4>
+                          ),
+                          props.items
+                      )
+                    : null}
             </S.Header>
         );
     };

@@ -27,14 +27,8 @@ import { RecognizedQueries } from '../../../query/index.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { getCurrentVariant, LexItem } from '../lexCommon/dictionary.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
-import {
-    isAsscData,
-    isEmptyArgs,
-    LexApi,
-    LexArgs,
-    LexResponse,
-} from '../lexCommon/api.js';
-import { filter } from 'rxjs';
+import { isAsscData, LexApi, LexArgs, LexResponse } from '../lexCommon/api.js';
+import { reduce } from 'rxjs';
 
 export interface LexMeaningModelState {
     isBusy: boolean;
@@ -251,28 +245,35 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
               })
             : this.lexApi.call(streaming, this.tileId, 0, requestIds)
         )
-            .pipe(filter((resp) => isAsscData(resp)))
+            .pipe(
+                reduce((hasData, resp) => {
+                    if (isAsscData(resp)) {
+                        const filteredData = this.filterResultsByIDs(
+                            resp.id,
+                            resp.data
+                        );
+                        if (List.size(filteredData) > 0) {
+                            dispatch<typeof Actions.TilePartialDataLoaded>({
+                                name: Actions.TilePartialDataLoaded.name,
+                                payload: {
+                                    tileId: this.tileId,
+                                    id: resp.id,
+                                    data: filteredData,
+                                },
+                            });
+                            return true;
+                        }
+                    }
+                    return hasData;
+                }, false)
+            )
             .subscribe({
-                next: (resp) => {
-                    let filteredData = this.filterResultsByIDs(
-                        resp.id,
-                        resp.data
-                    );
-                    dispatch<typeof Actions.TilePartialDataLoaded>({
-                        name: Actions.TilePartialDataLoaded.name,
-                        payload: {
-                            tileId: this.tileId,
-                            id: resp.id,
-                            data: filteredData,
-                        },
-                    });
-                },
-                complete: () => {
+                next: (hasData) => {
                     dispatch<typeof Actions.TileDataLoaded>({
                         name: Actions.TileDataLoaded.name,
                         payload: {
                             tileId: this.tileId,
-                            isEmpty: isEmptyArgs(requestIds),
+                            isEmpty: !hasData,
                         },
                     });
                 },
