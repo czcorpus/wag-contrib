@@ -9,6 +9,8 @@
             "items": {
                 "enum": [
                     "assc",
+                    "corpus",
+                    "djd",
                     "ijp",
                     "sjc",
                     "ssjc"

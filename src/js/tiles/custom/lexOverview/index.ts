@@ -85,8 +85,8 @@ export class LexOverviewBookTile implements ITileProvider {
         this.configuredLemLevels = conf.lemmatizationLevels || [];
 
         const currQueryMatch = findCurrQueryMatch(queryMatches[0]);
-        var variants: Array<LexItem> = null;
-        var mainSource: Source = null;
+        var variants: Array<LexItem> = [];
+        var mainSource: Source = undefined;
         if (isLexQueryMatch(currQueryMatch)) {
             // choose variants according to source priority
             for (const source of conf.sourcePriority) {
@@ -99,6 +99,28 @@ export class LexOverviewBookTile implements ITileProvider {
                     break;
                 }
             }
+
+            // in case no variants available, use corpus data
+            if (List.empty(variants)) {
+                variants = [
+                    {
+                        lemma: currQueryMatch.lemma,
+                        pos: currQueryMatch.pos[0].value,
+                        corpusEntry: {
+                            count: currQueryMatch.abs,
+                            ipm: currQueryMatch.ipm,
+                        },
+                    } as LexItem,
+                ];
+                mainSource = Source.Corpus;
+            }
+        } else if (!currQueryMatch.lemma) {
+            // empty data
+            variants = [
+                {
+                    lemma: currQueryMatch.word,
+                } as LexItem,
+            ];
         }
 
         this.model = new LexOverviewModel({
@@ -113,11 +135,7 @@ export class LexOverviewBookTile implements ITileProvider {
                 queryMatch: currQueryMatch,
                 mainSource,
                 variants,
-                selectedVariantIdx:
-                    isLexQueryMatch(currQueryMatch) &&
-                    !List.empty(currQueryMatch.extraData)
-                        ? 0
-                        : undefined,
+                selectedVariantIdx: !List.empty(variants) ? 0 : undefined,
                 requestedIds: null,
                 data: {
                     assc: null,
