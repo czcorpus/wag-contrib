@@ -80,7 +80,7 @@ export function getCurrentVariant(
     queryMatches: RecognizedQueries,
     variantIdx?: number
 ): LexItem {
-    if (List.empty(queryMatches) || variantIdx === undefined) {
+    if (variantIdx === undefined) {
         return null;
     }
     const currentQueryMatch = findCurrQueryMatch(List.head(queryMatches));

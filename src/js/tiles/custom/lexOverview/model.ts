@@ -39,6 +39,7 @@ interface Data {
 export interface LexOverviewModelState {
     isBusy: boolean;
     queryMatch: QueryMatch;
+    referenceCorpus: string;
     mainSource: Source;
     variants: Array<LexItem>;
     selectedVariantIdx?: number;

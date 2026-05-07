@@ -37,7 +37,7 @@ export function initViewSubtile(
     > = (props) => (
         <SubtileWrapper
             className={props.className}
-            source={
+            $source={
                 Array.isArray(props.source) ? props.source[0] : props.source
             }
         >

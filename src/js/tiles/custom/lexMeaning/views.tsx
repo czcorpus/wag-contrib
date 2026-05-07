@@ -66,8 +66,9 @@ export function init(
                         )}
                     </S.MeaningHeading>
                     {List.map(
-                        (v) => (
+                        (v, i) => (
                             <S.MeaningBlock
+                                key={i}
                                 dangerouslySetInnerHTML={{ __html: v }}
                             />
                         ),

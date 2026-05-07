@@ -44,6 +44,7 @@ import { isLexQueryMatch, LexItem } from '../lexCommon/dictionary.js';
 export interface LexOverviewTileConf extends TileConf {
     apiURL: string;
     sourcePriority: Array<Source>;
+    referenceCorpus: string;
 }
 
 export class LexOverviewBookTile implements ITileProvider {
@@ -133,6 +134,7 @@ export class LexOverviewBookTile implements ITileProvider {
             initState: {
                 isBusy: isBusy,
                 queryMatch: currQueryMatch,
+                referenceCorpus: conf.referenceCorpus,
                 mainSource,
                 variants,
                 selectedVariantIdx: !List.empty(variants) ? 0 : undefined,

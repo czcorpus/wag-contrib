@@ -37,15 +37,14 @@ export const LexTileBase = styled.div<{ theme: Theme }>``;
 
 export const SubtileWrapper = styled.div<{
     theme: Theme;
-    source?: string;
-    color?: string;
+    $source?: string;
 }>`
     margin-top: 1em;
     &:first-child {
         margin-top: 0;
     }
     padding: 0.5em;
-    background-color: ${(props) => getSourceColor(props.source) || props.color};
+    background-color: ${(props) => getSourceColor(props.$source)};
     display: flex;
     flex-direction: column;
     justify-content: space-between;

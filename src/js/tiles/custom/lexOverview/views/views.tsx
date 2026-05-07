@@ -133,7 +133,9 @@ export function init(
                                   {renderVariant(
                                       variant,
                                       hasSameLemmaVariant(i, variant),
-                                      () => handleVariantClick(i)
+                                      i !== props.selectedVariantIdx
+                                          ? () => handleVariantClick(i)
+                                          : undefined
                                   )}
                               </h4>
                           ),
