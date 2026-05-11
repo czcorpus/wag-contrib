@@ -18,12 +18,7 @@
 import { IActionDispatcher } from 'kombo';
 
 import { IAppServices } from '../../../appServices.js';
-import {
-    findCurrQueryMatch,
-    LemmatizationLevel,
-    QueryType,
-} from '../../../query/index.js';
-import { init as viewInit } from './views/views.js';
+import { LemmatizationLevel, QueryType } from '../../../query/index.js';
 import {
     TileConf,
     ITileProvider,
@@ -35,26 +30,21 @@ import {
     AltViewIconProps,
     lemLevelSupport,
 } from '../../../page/tile.js';
-import { LexOverviewModel } from './model.js';
-import { Dict, List, pipe, tuple } from 'cnc-tskit';
-import { Source } from '../lexCommon/enums.js';
-import { LexApi } from '../lexCommon/api.js';
-import { isLexQueryMatch, LexItem } from '../lexCommon/dictionary.js';
+import { LexCommonModel } from './model.js';
+import { LexApi } from './api.js';
 
-export interface LexOverviewTileConf extends TileConf {
+export interface LexCommonTileConf extends TileConf {
     apiURL: string;
-    sourcePriority: Array<Source>;
-    referenceCorpus: string;
 }
 
-export class LexOverviewTile implements ITileProvider {
+export class LexCommonTile implements ITileProvider {
     private readonly tileId: number;
 
     private readonly dispatcher: IActionDispatcher;
 
     private readonly appServices: IAppServices;
 
-    private readonly model: LexOverviewModel;
+    private readonly model: LexCommonModel;
 
     private readonly widthFract: number;
 
@@ -77,7 +67,7 @@ export class LexOverviewTile implements ITileProvider {
         isBusy,
         queryMatches,
         dependentTiles,
-    }: TileFactoryArgs<LexOverviewTileConf>) {
+    }: TileFactoryArgs<LexCommonTileConf>) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
@@ -85,70 +75,17 @@ export class LexOverviewTile implements ITileProvider {
         this.dependentTiles = dependentTiles;
         this.configuredLemLevels = conf.lemmatizationLevels || [];
 
-        const currQueryMatch = findCurrQueryMatch(queryMatches[0]);
-        var variants: Array<LexItem> = [];
-        var mainSource: Source = undefined;
-        if (isLexQueryMatch(currQueryMatch)) {
-            // choose variants according to source priority
-            for (const source of conf.sourcePriority) {
-                const sourceItems = pipe(
-                    currQueryMatch.extraData,
-                    List.filter((item) => Dict.hasKey(source, item.sources))
-                );
-                if (!List.empty(sourceItems)) {
-                    variants = sourceItems;
-                    mainSource = source;
-                    break;
-                }
-            }
-
-            // in case no variants available, use corpus data
-            if (List.empty(variants)) {
-                variants = [
-                    {
-                        lemma: currQueryMatch.lemma,
-                        pos: currQueryMatch.pos[0].value,
-                        corpusEntry: {
-                            count: currQueryMatch.abs,
-                            ipm: currQueryMatch.ipm,
-                        },
-                    } as LexItem,
-                ];
-                mainSource = Source.Corpus;
-            }
-        } else if (!currQueryMatch.lemma) {
-            // empty data
-            variants = [
-                {
-                    lemma: currQueryMatch.word,
-                } as LexItem,
-            ];
-        }
-
-        this.model = new LexOverviewModel({
+        this.model = new LexCommonModel({
             dispatcher,
             appServices,
-            lexApi: new LexApi(conf.apiURL, appServices),
             queryMatches,
             tileId,
             dependentTiles,
             initState: {
                 isBusy: isBusy,
-                queryMatch: currQueryMatch,
-                referenceCorpus: conf.referenceCorpus,
-                mainSource,
-                variants,
-                selectedVariantIdx: !List.empty(variants) ? 0 : undefined,
-                requestedIds: null,
-                data: {
-                    assc: null,
-                    ijp: null,
-                },
-                error: undefined,
-                backlink: undefined,
             },
         });
-        this.view = viewInit(this.dispatcher, ut, theme, this.model);
+        this.view = null;
     }
 
     getIdent(): number {
@@ -229,8 +166,8 @@ export class LexOverviewTile implements ITileProvider {
     }
 }
 
-export const init: TileFactory<LexOverviewTileConf> = {
+export const init: TileFactory<LexCommonTileConf> = {
     sanityCheck: (args) => [],
 
-    create: (args) => new LexOverviewTile(args),
+    create: (args) => new LexCommonTile(args),
 };
