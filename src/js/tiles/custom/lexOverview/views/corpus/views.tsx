@@ -22,7 +22,7 @@ import { GlobalComponents } from '../../../../../views/common/index.js';
 import { init as starsViewInit } from './stars.js';
 import { calcFreqBand } from '../../../../../query/index.js';
 import { initViewSubtile } from '../../../lexCommon/views.js';
-import { Source } from '../../../lexCommon/enums.js';
+import { Source } from '../../../lexCommon/types/enums.js';
 import { SubtileRow } from '../../../lexCommon/style.js';
 
 export function init(

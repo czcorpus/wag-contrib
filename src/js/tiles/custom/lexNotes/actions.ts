@@ -18,7 +18,7 @@
 
 import { Action } from 'kombo';
 import { Actions as GlobalActions } from '../../../models/actions.js';
-import { Source } from '../lexCommon/enums.js';
+import { Source } from '../lexCommon/types/enums.js';
 
 export interface PartialDataPayload {
     source: Source;

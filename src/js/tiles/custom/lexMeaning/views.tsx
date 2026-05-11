@@ -26,7 +26,7 @@ import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
 import { SubtileRow } from '../lexCommon/style.js';
-import { Source } from '../lexCommon/enums.js';
+import { Source } from '../lexCommon/types/enums.js';
 import { initViewSubtile } from '../lexCommon/views.js';
 
 export function init(

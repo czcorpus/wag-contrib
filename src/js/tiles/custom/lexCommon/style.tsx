@@ -18,7 +18,7 @@
 
 import { Theme } from '../../../page/theme.js';
 import { styled } from 'styled-components';
-import { Source } from './enums.js';
+import { Source } from './types/enums.js';
 
 function getSourceColor(source: string): string {
     switch (source) {

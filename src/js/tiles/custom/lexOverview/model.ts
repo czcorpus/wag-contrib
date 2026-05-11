@@ -21,14 +21,15 @@ import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
 import { QueryMatch, RecognizedQueries } from '../../../query/index.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
+import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { Actions } from './actions.js';
 
 import { IDataStreaming } from '../../../page/streaming.js';
 import { List } from 'cnc-tskit';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
-import { Source } from '../lexCommon/enums.js';
-import { getCurrentVariant, LexItem } from '../lexCommon/dictionary.js';
-import { isAsscData, isIjpData, LexApi, LexArgs } from '../lexCommon/api.js';
+import { Source } from '../lexCommon/types/enums.js';
+import { LexItem } from '../lexCommon/types/dictionary.js';
+import { isAsscData, isIjpData, LexResponse } from '../lexCommon/api.js';
 import { IJPData } from '../lexCommon/types/ijp.js';
 
 interface Data {
@@ -42,8 +43,7 @@ export interface LexOverviewModelState {
     referenceCorpus: string;
     mainSource: Source;
     variants: Array<LexItem>;
-    selectedVariantIdx?: number;
-    requestedIds: LexArgs;
+    selectedVariantIdent: string;
     data: Data;
     error: string;
     backlink: Backlink;
@@ -53,57 +53,46 @@ export interface LexOverviewModelArgs {
     dispatcher: IActionQueue;
     initState: LexOverviewModelState;
     tileId: number;
-    lexApi: LexApi;
     appServices: IAppServices;
-    queryMatches: RecognizedQueries;
-    dependentTiles: Array<number>;
+    readDataFromTile: number | null;
 }
 
 export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
     private readonly tileId: number;
 
-    private readonly lexApi: LexApi;
-
     private readonly appServices: IAppServices;
 
-    private readonly queryMatches: RecognizedQueries;
+    private readonly readDataFromTile: number | null;
 
     constructor({
         dispatcher,
         initState,
-        lexApi,
         tileId,
         appServices,
-        queryMatches,
-        dependentTiles,
+        readDataFromTile,
     }: LexOverviewModelArgs) {
         super(dispatcher, initState);
         this.tileId = tileId;
         this.appServices = appServices;
-        this.lexApi = lexApi;
-        this.queryMatches = queryMatches;
+        this.readDataFromTile = readDataFromTile;
 
         this.addActionHandler(
             GlobalActions.RequestQueryResponse,
             (state, action) => {
                 state.error = undefined;
                 state.backlink = undefined;
-                const currentVariant = getCurrentVariant(
-                    this.queryMatches,
-                    state.selectedVariantIdx
-                );
-                state.requestedIds = this.getRequestIds(
-                    currentVariant,
-                    !List.empty(dependentTiles)
-                );
                 state.isBusy = true;
             },
             (state, action, dispatch) => {
-                this.loadData(
-                    this.appServices.dataStreaming(),
-                    dispatch,
-                    state.requestedIds
-                );
+                dispatch<typeof CommonActions.SelectItemVariant>({
+                    name: CommonActions.SelectItemVariant.name,
+                    payload: {
+                        tileId: this.tileId,
+                        variantIdent: state.selectedVariantIdent,
+                        initial: true,
+                    },
+                });
+                this.loadData(this.appServices.dataStreaming(), dispatch);
             }
         );
 
@@ -133,12 +122,7 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                     state.data.ijp = action.payload.data;
                 }
 
-                if (
-                    (state.data.assc !== null ||
-                        List.empty(state.requestedIds.asscIds)) &&
-                    (state.data.ijp !== null ||
-                        List.empty(state.requestedIds.ijpIds))
-                ) {
+                if (state.data.assc !== null && state.data.ijp !== null) {
                     state.isBusy = false;
                 }
             }
@@ -152,38 +136,6 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                 if (action.error) {
                     state.error = action.error.message;
                 }
-            }
-        );
-
-        this.addActionSubtypeHandler(
-            GlobalActions.GetSourceInfo,
-            (action) => action.payload.tileId === this.tileId,
-            null,
-            (state, action, dispatch) => {
-                this.lexApi
-                    .getSourceDescription(
-                        this.appServices.dataStreaming(),
-                        this.tileId,
-                        this.appServices.getISO639UILang(),
-                        ''
-                    )
-                    .subscribe({
-                        next: (data) => {
-                            dispatch({
-                                name: GlobalActions.GetSourceInfoDone.name,
-                                payload: {
-                                    data: data,
-                                },
-                            });
-                        },
-                        error: (err) => {
-                            console.error(err);
-                            dispatch({
-                                name: GlobalActions.GetSourceInfoDone.name,
-                                error: err,
-                            });
-                        },
-                    });
             }
         );
 
@@ -205,91 +157,84 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
         );
 
         this.addActionSubtypeHandler(
-            Actions.SelectItemVariant,
+            CommonActions.SelectItemVariant,
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
-                state.selectedVariantIdx = action.payload.variantIdx;
-                const currentVariant = getCurrentVariant(
-                    this.queryMatches,
-                    state.selectedVariantIdx
-                );
-                state.requestedIds = this.getRequestIds(
-                    currentVariant,
-                    !List.empty(dependentTiles)
-                );
-                state.data = {
-                    assc: null,
-                    ijp: null,
-                };
-                state.isBusy = true;
+                state.selectedVariantIdent = action.payload.variantIdent;
+                if (!action.payload.initial) {
+                    state.data = {
+                        assc: null,
+                        ijp: null,
+                    };
+                    state.isBusy = true;
+                }
             },
             (state, action, dispatch) => {
-                const subg = appServices
-                    .dataStreaming()
-                    .startNewSubgroup(this.tileId, ...dependentTiles);
-                dispatch(GlobalActions.TileSubgroupReady, {
-                    mainTileId: this.tileId,
-                    subgroupId: subg.getId(),
-                });
-                this.loadData(subg, dispatch, state.requestedIds);
+                if (!action.payload.initial) {
+                    this.waitForAction({}, (action, data) => {
+                        if (
+                            GlobalActions.isTileSubgroupReady(action) &&
+                            action.payload.mainTileId === this.readDataFromTile
+                        ) {
+                            return null;
+                        }
+                        return data;
+                    }).subscribe({
+                        next: (action) => {
+                            if (GlobalActions.isTileSubgroupReady(action)) {
+                                this.loadData(
+                                    this.appServices
+                                        .dataStreaming()
+                                        .getSubgroup(action.payload.subgroupId),
+                                    dispatch
+                                );
+                            }
+                        },
+                    });
+                }
             }
         );
     }
 
-    private getRequestIds(variant: LexItem, dependentTiles: boolean): LexArgs {
-        // tile itself requires only first available general data from assc or ijp
-        // if there are dependent tiles, request all available data
-        return {
-            asscIds:
-                variant && variant.sources['assc']
-                    ? dependentTiles
-                        ? List.map((v) => v.id, variant.sources['assc'])
-                        : [List.head(variant.sources['assc']).id]
-                    : [],
-            ijpIds:
-                variant && variant.sources['ijp']
-                    ? dependentTiles
-                        ? List.map((v) => v.id, variant.sources['ijp'])
-                        : [List.head(variant.sources['ijp']).id]
-                    : [],
-        };
-    }
-
-    private loadData(
-        streaming: IDataStreaming,
-        dispatch: SEDispatcher,
-        args: LexArgs
-    ) {
-        this.lexApi.call(streaming, this.tileId, 0, args).subscribe({
-            next: (v) => {
-                dispatch<typeof Actions.TilePartialDataLoaded>({
-                    name: Actions.TilePartialDataLoaded.name,
-                    payload: {
-                        tileId: this.tileId,
-                        ...v,
-                    },
-                });
-            },
-            complete: () => {
-                dispatch<typeof Actions.TileDataLoaded>({
-                    name: Actions.TileDataLoaded.name,
-                    payload: {
-                        tileId: this.tileId,
-                        isEmpty: false,
-                    },
-                });
-            },
-            error: (error) => {
-                console.error(error);
-                dispatch<typeof Actions.TileDataLoaded>({
-                    name: Actions.TileDataLoaded.name,
-                    error,
-                    payload: {
-                        tileId: this.tileId,
-                        isEmpty: false,
-                    },
-                });
-            },
-        });
+    private loadData(streaming: IDataStreaming, dispatch: SEDispatcher) {
+        streaming
+            .registerTileRequest<LexResponse>({
+                tileId: this.tileId,
+                queryIdx: 0, // TODO
+                otherTileId: this.readDataFromTile,
+                otherTileQueryIdx: 0, // TODO
+                contentType: 'application/json',
+            })
+            .subscribe({
+                next: (v) => {
+                    dispatch<typeof Actions.TilePartialDataLoaded>({
+                        name: Actions.TilePartialDataLoaded.name,
+                        payload: {
+                            tileId: this.tileId,
+                            ...v,
+                        },
+                    });
+                },
+                complete: () => {
+                    dispatch<typeof Actions.TileDataLoaded>({
+                        name: Actions.TileDataLoaded.name,
+                        payload: {
+                            tileId: this.tileId,
+                            isEmpty: false,
+                        },
+                    });
+                },
+                error: (error) => {
+                    console.error(error);
+                    dispatch<typeof Actions.TileDataLoaded>({
+                        name: Actions.TileDataLoaded.name,
+                        error,
+                        payload: {
+                            tileId: this.tileId,
+                            isEmpty: false,
+                        },
+                    });
+                },
+            });
     }
 }

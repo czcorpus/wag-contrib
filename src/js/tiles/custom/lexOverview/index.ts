@@ -37,12 +37,10 @@ import {
 } from '../../../page/tile.js';
 import { LexOverviewModel } from './model.js';
 import { Dict, List, pipe, tuple } from 'cnc-tskit';
-import { Source } from '../lexCommon/enums.js';
-import { LexApi } from '../lexCommon/api.js';
-import { isLexQueryMatch, LexItem } from '../lexCommon/dictionary.js';
+import { Source } from '../lexCommon/types/enums.js';
+import { isLexQueryMatch, LexItem } from '../lexCommon/types/dictionary.js';
 
 export interface LexOverviewTileConf extends TileConf {
-    apiURL: string;
     sourcePriority: Array<Source>;
     referenceCorpus: string;
 }
@@ -58,11 +56,9 @@ export class LexOverviewTile implements ITileProvider {
 
     private readonly widthFract: number;
 
-    private readonly lexApi: LexApi;
-
     private view: TileComponent;
 
-    private readonly dependentTiles: Array<number>;
+    private readonly readDataFromTile: number;
 
     private readonly configuredLemLevels: Array<LemmatizationLevel>;
 
@@ -76,14 +72,14 @@ export class LexOverviewTile implements ITileProvider {
         conf,
         isBusy,
         queryMatches,
-        dependentTiles,
+        readDataFromTile,
     }: TileFactoryArgs<LexOverviewTileConf>) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.dependentTiles = dependentTiles;
         this.configuredLemLevels = conf.lemmatizationLevels || [];
+        this.readDataFromTile = readDataFromTile;
 
         const currQueryMatch = findCurrQueryMatch(queryMatches[0]);
         var variants: Array<LexItem> = [];
@@ -128,18 +124,18 @@ export class LexOverviewTile implements ITileProvider {
         this.model = new LexOverviewModel({
             dispatcher,
             appServices,
-            lexApi: new LexApi(conf.apiURL, appServices),
-            queryMatches,
             tileId,
-            dependentTiles,
+            readDataFromTile:
+                typeof readDataFromTile === 'number' ? readDataFromTile : null,
             initState: {
                 isBusy: isBusy,
                 queryMatch: currQueryMatch,
                 referenceCorpus: conf.referenceCorpus,
                 mainSource,
                 variants,
-                selectedVariantIdx: !List.empty(variants) ? 0 : undefined,
-                requestedIds: null,
+                selectedVariantIdent: !List.empty(variants)
+                    ? variants[0].ident
+                    : undefined,
                 data: {
                     assc: null,
                     ijp: null,
@@ -217,7 +213,7 @@ export class LexOverviewTile implements ITileProvider {
     }
 
     getReadDataFrom(): number | null {
-        return null;
+        return this.readDataFromTile;
     }
 
     hideOnNoData(): boolean {

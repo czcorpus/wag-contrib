@@ -18,7 +18,7 @@
 
 import { Action } from 'kombo';
 import { Actions as GlobalActions } from '../../../models/actions.js';
-import { Source } from '../lexCommon/enums.js';
+import { Source } from '../lexCommon/types/enums.js';
 import { IJPData } from '../lexCommon/types/ijp.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
 
@@ -38,12 +38,5 @@ export class Actions {
         typeof GlobalActions.TilePartialDataLoaded.payload & PartialDataPayload
     > = {
         name: GlobalActions.TilePartialDataLoaded.name,
-    };
-
-    static SelectItemVariant: Action<{
-        tileId: number;
-        variantIdx: number;
-    }> = {
-        name: 'LEX_OVERVIEW_SELECT_ITEM_VARIANT',
     };
 }

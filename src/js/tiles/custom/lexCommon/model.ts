@@ -16,11 +16,15 @@
  * limitations under the License.
  */
 
-import { IActionQueue, StatelessModel } from 'kombo';
+import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { RecognizedQueries } from '../../../query/index.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
+import { getCurrentVariant } from './types/dictionary.js';
+import { LexApi } from './api.js';
+import { List } from 'cnc-tskit';
+import { IDataStreaming } from 'src/js/page/streaming.js';
 
 export interface LexCommonModelState {}
 
@@ -31,6 +35,7 @@ export interface LexCommonModelArgs {
     appServices: IAppServices;
     queryMatches: RecognizedQueries;
     dependentTiles: Array<number>;
+    lexApi: LexApi;
 }
 
 export class LexCommonModel extends StatelessModel<LexCommonModelState> {
@@ -38,34 +43,118 @@ export class LexCommonModel extends StatelessModel<LexCommonModelState> {
 
     private readonly appServices: IAppServices;
 
+    private readonly queryMatches: RecognizedQueries;
+
+    private readonly lexApi: LexApi;
+
     constructor({
         dispatcher,
         initState,
         tileId,
         appServices,
+        lexApi,
         queryMatches,
         dependentTiles,
     }: LexCommonModelArgs) {
         super(dispatcher, initState);
         this.tileId = tileId;
         this.appServices = appServices;
+        this.queryMatches = queryMatches;
+        this.lexApi = lexApi;
 
         this.addActionHandler(
             GlobalActions.RequestQueryResponse,
             (state, action) => {},
-            (state, action, dispatch) => {}
+            (state, action, dispatch) => {
+                // this instantly hides tile from layout
+                dispatch<typeof Actions.TileDataLoaded>({
+                    name: Actions.TileDataLoaded.name,
+                    payload: {
+                        tileId: this.tileId,
+                        isEmpty: true,
+                    },
+                });
+                // wait variants for request
+                this.waitForAction({}, (action, data) => {
+                    if (Actions.isSelectItemVariant(action)) {
+                        return null;
+                    }
+                    return data;
+                }).subscribe({
+                    next: (action) => {
+                        if (Actions.isSelectItemVariant(action)) {
+                            this.loadData(
+                                this.appServices.dataStreaming(),
+                                dispatch,
+                                action.payload.variantIdent
+                            );
+                        }
+                    },
+                });
+            }
         );
 
-        this.addActionSubtypeHandler(
-            Actions.TilePartialDataLoaded,
-            (action) => action.payload.tileId === this.tileId,
-            (state, action) => {}
+        this.addActionHandler(
+            Actions.SelectItemVariant,
+            (state, action) => {},
+            (state, action, dispatch) => {
+                if (!action.payload.initial) {
+                    dispatch<typeof Actions.TileDataLoaded>({
+                        name: Actions.TileDataLoaded.name,
+                        payload: {
+                            tileId: this.tileId,
+                            isEmpty: true,
+                        },
+                    });
+
+                    const subg = appServices
+                        .dataStreaming()
+                        .startNewSubgroup(this.tileId, ...dependentTiles);
+                    dispatch(GlobalActions.TileSubgroupReady, {
+                        mainTileId: this.tileId,
+                        subgroupId: subg.getId(),
+                    });
+                    this.loadData(subg, dispatch, action.payload.variantIdent);
+                }
+            }
         );
 
         this.addActionSubtypeHandler(
             Actions.TileDataLoaded,
             (action) => action.payload.tileId === this.tileId,
-            (state, action) => {}
+            (state, action) => {
+                console.log(action.error);
+            }
         );
+    }
+
+    private loadData(
+        streaming: IDataStreaming,
+        dispatch: SEDispatcher,
+        variantIdent: string
+    ) {
+        const variant = getCurrentVariant(this.queryMatches, variantIdent);
+        const args = {
+            asscIds:
+                variant && variant.sources['assc']
+                    ? List.map((v) => v.id, variant.sources['assc'])
+                    : [],
+            ijpIds:
+                variant && variant.sources['ijp']
+                    ? List.map((v) => v.id, variant.sources['ijp'])
+                    : [],
+        };
+        this.lexApi.call(streaming, this.tileId, 0, args).subscribe({
+            error: (error) => {
+                dispatch<typeof Actions.TileDataLoaded>({
+                    name: Actions.TileDataLoaded.name,
+                    error,
+                    payload: {
+                        tileId: this.tileId,
+                        isEmpty: true,
+                    },
+                });
+            },
+        });
     }
 }

@@ -24,16 +24,16 @@ import {
     TileComponent,
 } from '../../../../page/tile.js';
 import { GlobalComponents } from '../../../../views/common/index.js';
-import { Actions } from '../actions.js';
+import { Actions as CommonActions } from '../../lexCommon/actions.js';
 import { LexOverviewModel } from '../model.js';
 import { init as initIjpViews } from './ijp/views.js';
 import { init as initCorpusViews } from './corpus/views.js';
 import * as S from './style.js';
 import { List } from 'cnc-tskit';
 import { initViewSubtile } from '../../lexCommon/views.js';
-import { LexItem } from '../../lexCommon/dictionary.js';
+import { LexItem } from '../../lexCommon/types/dictionary.js';
 import { SubtileRow } from '../../lexCommon/style.js';
-import { Source } from '../../lexCommon/enums.js';
+import { Source } from '../../lexCommon/types/enums.js';
 
 interface BasicOverviewData {
     pronunciation?: string;
@@ -64,14 +64,14 @@ export function init(
 
     const LexOverviewHeader: React.FC<{
         tileId: number;
-        selectedVariantIdx: number;
+        selectedVariantIdent: string;
         selectedVariant: LexItem;
         variants: Array<LexItem>;
     }> = (props) => {
-        const handleVariantClick = (variantIdx: number) => {
-            dispatcher.dispatch(Actions.SelectItemVariant, {
+        const handleVariantClick = (variantIdent: string) => {
+            dispatcher.dispatch(CommonActions.SelectItemVariant, {
                 tileId: props.tileId,
-                variantIdx,
+                variantIdent,
             });
         };
 
@@ -105,10 +105,11 @@ export function init(
             );
         };
 
-        const hasSameLemmaVariant = (variantIdx: number, variant: LexItem) => {
+        const hasSameLemmaVariant = (variant: LexItem) => {
             return (
                 List.findIndex(
-                    (v, i) => v.lemma === variant.lemma && i !== variantIdx,
+                    (v, i) =>
+                        v.lemma === variant.lemma && v.ident !== variant.ident,
                     props.variants
                 ) !== -1
             );
@@ -119,10 +120,7 @@ export function init(
                 <h2>
                     {renderVariant(
                         props.selectedVariant,
-                        hasSameLemmaVariant(
-                            props.selectedVariantIdx,
-                            props.selectedVariant
-                        )
+                        hasSameLemmaVariant(props.selectedVariant)
                     )}
                 </h2>
 
@@ -132,9 +130,13 @@ export function init(
                               <h4 key={i} className="variant">
                                   {renderVariant(
                                       variant,
-                                      hasSameLemmaVariant(i, variant),
-                                      i !== props.selectedVariantIdx
-                                          ? () => handleVariantClick(i)
+                                      hasSameLemmaVariant(variant),
+                                      variant.ident !==
+                                          props.selectedVariantIdent
+                                          ? () =>
+                                                handleVariantClick(
+                                                    variant.ident
+                                                )
                                           : undefined
                                   )}
                               </h4>
@@ -187,8 +189,11 @@ export function init(
 
         const basicOverview = {} as BasicOverviewData;
         const selectedVariant =
-            state.selectedVariantIdx !== undefined
-                ? state.variants[state.selectedVariantIdx]
+            state.selectedVariantIdent !== undefined
+                ? List.find(
+                      (item) => item.ident === state.selectedVariantIdent,
+                      state.variants
+                  )
                 : ({
                       lemma: state.queryMatch.lemma,
                       pos: state.queryMatch.pos[0].value,
@@ -228,7 +233,7 @@ export function init(
                 <S.LexOverviewTileView>
                     <LexOverviewHeader
                         tileId={props.tileId}
-                        selectedVariantIdx={state.selectedVariantIdx}
+                        selectedVariantIdent={state.selectedVariantIdent}
                         selectedVariant={selectedVariant}
                         variants={state.variants}
                     />

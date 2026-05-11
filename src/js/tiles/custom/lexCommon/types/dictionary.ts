@@ -21,7 +21,7 @@ import {
     findCurrQueryMatch,
     QueryMatch,
     RecognizedQueries,
-} from '../../../query/index.js';
+} from '../../../../query/index.js';
 import { Aspect, Gender, PoS } from './enums.js';
 
 export interface CorpusEntry {
@@ -54,6 +54,8 @@ interface LexID {
 }
 
 export interface LexItem {
+    ident: string;
+
     lemma: string;
     pos: PoS;
     gender?: Gender;
@@ -78,14 +80,14 @@ export function isLexQueryMatch(
 
 export function getCurrentVariant(
     queryMatches: RecognizedQueries,
-    variantIdx?: number
+    variantIdent: string
 ): LexItem {
-    if (variantIdx === undefined) {
-        return null;
-    }
     const currentQueryMatch = findCurrQueryMatch(List.head(queryMatches));
     return isLexQueryMatch(currentQueryMatch) &&
         !List.empty(currentQueryMatch.extraData)
-        ? currentQueryMatch.extraData[variantIdx || 0]
+        ? List.find(
+              (item) => item.ident === variantIdent,
+              currentQueryMatch.extraData
+          )
         : null;
 }

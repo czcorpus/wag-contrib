@@ -29,7 +29,7 @@ import * as LS from './style.js';
 import { IJPData } from '../../../lexCommon/types/ijp.js';
 import { initViewSubtile } from '../../../lexCommon/views.js';
 import { SubtileRow } from '../../../lexCommon/style.js';
-import { Source } from '../../../lexCommon/enums.js';
+import { Source } from '../../../lexCommon/types/enums.js';
 
 export function init(
     dispatcher: IActionDispatcher,

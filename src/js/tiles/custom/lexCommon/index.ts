@@ -74,6 +74,7 @@ export class LexCommonTile implements ITileProvider {
         this.widthFract = widthFract;
         this.dependentTiles = dependentTiles;
         this.configuredLemLevels = conf.lemmatizationLevels || [];
+        this.lexApi = new LexApi(conf.apiURL, appServices);
 
         this.model = new LexCommonModel({
             dispatcher,
@@ -81,11 +82,10 @@ export class LexCommonTile implements ITileProvider {
             queryMatches,
             tileId,
             dependentTiles,
-            initState: {
-                isBusy: isBusy,
-            },
+            lexApi: this.lexApi,
+            initState: {},
         });
-        this.view = null;
+        this.view = () => null;
     }
 
     getIdent(): number {
@@ -158,7 +158,7 @@ export class LexCommonTile implements ITileProvider {
     }
 
     hideOnNoData(): boolean {
-        return false;
+        return true;
     }
 
     supportsLemmatizationLevel(ll: LemmatizationLevel): boolean {

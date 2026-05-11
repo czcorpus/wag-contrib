@@ -18,11 +18,7 @@
 import { IActionDispatcher } from 'kombo';
 
 import { IAppServices } from '../../../appServices.js';
-import {
-    findCurrQueryMatch,
-    LemmatizationLevel,
-    QueryType,
-} from '../../../query/index.js';
+import { LemmatizationLevel, QueryType } from '../../../query/index.js';
 import { init as viewInit } from './views.js';
 import {
     TileConf,
@@ -36,13 +32,8 @@ import {
     lemLevelSupport,
 } from '../../../page/tile.js';
 import { LexNotesModel } from './model.js';
-import { isLexQueryMatch } from '../lexCommon/dictionary.js';
-import { LexApi } from '../lexCommon/api.js';
-import { List } from 'cnc-tskit';
 
-export interface LexNotesTileConf extends TileConf {
-    apiURL: string;
-}
+export interface LexNotesTileConf extends TileConf {}
 
 export class LexNotesTile implements ITileProvider {
     private readonly tileId: number;
@@ -72,7 +63,6 @@ export class LexNotesTile implements ITileProvider {
         widthFract,
         conf,
         isBusy,
-        queryMatches,
         readDataFromTile,
     }: TileFactoryArgs<LexNotesTileConf>) {
         this.tileId = tileId;
@@ -80,25 +70,16 @@ export class LexNotesTile implements ITileProvider {
         this.appServices = appServices;
         this.widthFract = widthFract;
         this.configuredLemLevels = conf.lemmatizationLevels || [];
-        this.readDataFromTile = readDataFromTile;
 
-        const currQueryMatch = findCurrQueryMatch(queryMatches[0]);
         this.model = new LexNotesModel({
             dispatcher,
             appServices,
-            lexApi: new LexApi(conf.apiURL, appServices),
-            queryMatches,
             tileId,
             readDataFromTile:
                 typeof readDataFromTile === 'number' ? readDataFromTile : null,
             initState: {
                 isBusy: isBusy,
-                selectedVariantIdx:
-                    isLexQueryMatch(currQueryMatch) &&
-                    !List.empty(currQueryMatch.extraData)
-                        ? 0
-                        : undefined,
-                requestedIds: null,
+                selectedVariantIdent: null,
                 notes: {
                     ijp: [],
                     assc: [],

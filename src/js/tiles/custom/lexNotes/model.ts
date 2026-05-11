@@ -21,26 +21,17 @@ import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
-import { Actions as LexActions } from '../lexOverview/actions.js';
+import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { List, pipe } from 'cnc-tskit';
-import { RecognizedQueries } from '../../../query/index.js';
 import { IDataStreaming } from '../../../page/streaming.js';
-import { getCurrentVariant, LexItem } from '../lexCommon/dictionary.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
-import {
-    isAsscData,
-    isIjpData,
-    LexApi,
-    LexArgs,
-    LexResponse,
-} from '../lexCommon/api.js';
+import { isAsscData, isIjpData, LexResponse } from '../lexCommon/api.js';
 import { reduce } from 'rxjs';
-import { Source } from '../lexCommon/enums.js';
+import { Source } from '../lexCommon/types/enums.js';
 
 export interface LexNotesModelState {
     isBusy: boolean;
-    selectedVariantIdx: number;
-    requestedIds: LexArgs;
+    selectedVariantIdent: string;
     notes: {
         ijp: Array<string>;
         assc: Array<string>;
@@ -53,37 +44,27 @@ export interface LexNotesModelArgs {
     dispatcher: IActionQueue;
     initState: LexNotesModelState;
     tileId: number;
-    lexApi: LexApi;
     appServices: IAppServices;
-    queryMatches: RecognizedQueries;
     readDataFromTile: number | null;
 }
 
 export class LexNotesModel extends StatelessModel<LexNotesModelState> {
     private readonly tileId: number;
 
-    private readonly lexApi: LexApi;
-
     private readonly appServices: IAppServices;
-
-    private readonly queryMatches: RecognizedQueries;
 
     private readonly readDataFromTile: number | null;
 
     constructor({
         dispatcher,
         initState,
-        lexApi,
         tileId,
         appServices,
-        queryMatches,
         readDataFromTile,
     }: LexNotesModelArgs) {
         super(dispatcher, initState);
         this.tileId = tileId;
         this.appServices = appServices;
-        this.lexApi = lexApi;
-        this.queryMatches = queryMatches;
         this.readDataFromTile = readDataFromTile;
 
         this.addActionHandler(
@@ -95,19 +76,10 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
                     ijp: [],
                     assc: [],
                 };
-                const currentVariant = getCurrentVariant(
-                    this.queryMatches,
-                    state.selectedVariantIdx
-                );
-                state.requestedIds = this.getRequestIds(currentVariant);
                 state.isBusy = true;
             },
             (state, action, dispatch) => {
-                this.loadData(
-                    this.appServices.dataStreaming(),
-                    state.requestedIds,
-                    dispatch
-                );
+                this.loadData(this.appServices.dataStreaming(), dispatch);
             }
         );
 
@@ -138,38 +110,6 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
         );
 
         this.addActionSubtypeHandler(
-            GlobalActions.GetSourceInfo,
-            (action) => action.payload.tileId === this.tileId,
-            null,
-            (state, action, dispatch) => {
-                this.lexApi
-                    .getSourceDescription(
-                        this.appServices.dataStreaming(),
-                        this.tileId,
-                        this.appServices.getISO639UILang(),
-                        ''
-                    )
-                    .subscribe({
-                        next: (data) => {
-                            dispatch({
-                                name: GlobalActions.GetSourceInfoDone.name,
-                                payload: {
-                                    data: data,
-                                },
-                            });
-                        },
-                        error: (err) => {
-                            console.error(err);
-                            dispatch({
-                                name: GlobalActions.GetSourceInfoDone.name,
-                                error: err,
-                            });
-                        },
-                    });
-            }
-        );
-
-        this.addActionSubtypeHandler(
             GlobalActions.FollowBacklink,
             (action) => action.payload.tileId === this.tileId,
             null,
@@ -182,24 +122,19 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
         );
 
         this.addActionHandler(
-            LexActions.SelectItemVariant,
+            CommonActions.SelectItemVariant,
             (state, action) => {
-                if (state.selectedVariantIdx !== action.payload.variantIdx) {
+                state.selectedVariantIdent = action.payload.variantIdent;
+                if (!action.payload.initial) {
                     state.isBusy = true;
                     state.notes = {
                         ijp: [],
                         assc: [],
                     };
-                    state.selectedVariantIdx = action.payload.variantIdx;
-                    const currentVariant = getCurrentVariant(
-                        this.queryMatches,
-                        state.selectedVariantIdx
-                    );
-                    state.requestedIds = this.getRequestIds(currentVariant);
                 }
             },
             (state, action, dispatch) => {
-                if (this.readDataFromTile !== null) {
+                if (!action.payload.initial) {
                     this.waitForAction({}, (action, data) => {
                         if (
                             GlobalActions.isTileSubgroupReady(action) &&
@@ -215,40 +150,25 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
                                     this.appServices
                                         .dataStreaming()
                                         .getSubgroup(action.payload.subgroupId),
-                                    state.requestedIds,
                                     dispatch
                                 );
                             }
                         },
                     });
-                } else {
-                    this.loadData(
-                        this.appServices
-                            .dataStreaming()
-                            .startNewSubgroup(this.tileId),
-                        state.requestedIds,
-                        dispatch
-                    );
                 }
             }
         );
     }
 
-    private loadData(
-        streaming: IDataStreaming,
-        requestIds: LexArgs,
-        dispatch: SEDispatcher
-    ): void {
-        (streaming && typeof this.readDataFromTile === 'number'
-            ? streaming.registerTileRequest<LexResponse>({
-                  tileId: this.tileId,
-                  queryIdx: 0, // TODO
-                  otherTileId: this.readDataFromTile,
-                  otherTileQueryIdx: 0, // TODO
-                  contentType: 'application/json',
-              })
-            : this.lexApi.call(streaming, this.tileId, 0, requestIds)
-        )
+    private loadData(streaming: IDataStreaming, dispatch: SEDispatcher): void {
+        streaming
+            .registerTileRequest<LexResponse>({
+                tileId: this.tileId,
+                queryIdx: 0, // TODO
+                otherTileId: this.readDataFromTile,
+                otherTileQueryIdx: 0, // TODO
+                contentType: 'application/json',
+            })
             .pipe(
                 reduce((hasData, resp) => {
                     if (isAsscData(resp)) {
@@ -308,20 +228,6 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
                     });
                 },
             });
-    }
-
-    private getRequestIds(variant: LexItem): LexArgs {
-        // requires all assc and ijp data for variant
-        return {
-            asscIds:
-                variant && variant.sources['assc']
-                    ? List.map((v) => v.id, variant.sources['assc'])
-                    : [],
-            ijpIds:
-                variant && variant.sources['ijp']
-                    ? List.map((v) => v.id, variant.sources['ijp'])
-                    : [],
-        };
     }
 
     private filterResultsByIDs(id: string, data: HTMLBlock[]): HTMLBlock[] {

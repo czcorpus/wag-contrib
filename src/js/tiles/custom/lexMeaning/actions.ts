@@ -18,7 +18,7 @@
 
 import { Action } from 'kombo';
 import { Actions as GlobalActions } from '../../../models/actions.js';
-import { HTMLBlock } from '../lexOverview/api/asscTypes.js';
+import { HTMLBlock } from '../lexCommon/types/assc.js';
 
 export interface PartialDataPayload {
     id: string;

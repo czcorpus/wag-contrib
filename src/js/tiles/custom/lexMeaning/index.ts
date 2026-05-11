@@ -36,13 +36,10 @@ import {
     lemLevelSupport,
 } from '../../../page/tile.js';
 import { LexMeaningModel } from './model.js';
-import { isLexQueryMatch } from '../lexCommon/dictionary.js';
-import { LexApi } from '../lexCommon/api.js';
+import { isLexQueryMatch } from '../lexCommon/types/dictionary.js';
 import { List } from 'cnc-tskit';
 
-export interface LexMeaningTileConf extends TileConf {
-    apiURL: string;
-}
+export interface LexMeaningTileConf extends TileConf {}
 
 export class LexMeaningTile implements ITileProvider {
     private readonly tileId: number;
@@ -86,19 +83,17 @@ export class LexMeaningTile implements ITileProvider {
         this.model = new LexMeaningModel({
             dispatcher,
             appServices,
-            lexApi: new LexApi(conf.apiURL, appServices),
             queryMatches,
             tileId,
             readDataFromTile:
                 typeof readDataFromTile === 'number' ? readDataFromTile : null,
             initState: {
                 isBusy: isBusy,
-                selectedVariantIdx:
+                selectedVariantIdent:
                     isLexQueryMatch(currQueryMatch) &&
                     !List.empty(currQueryMatch.extraData)
-                        ? 0
+                        ? currQueryMatch.extraData[0].ident
                         : undefined,
-                requestedIds: null,
                 data: [],
                 error: null,
                 backlink: null,

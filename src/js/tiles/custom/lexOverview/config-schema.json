@@ -1,9 +1,6 @@
 {
     "type": "object",
     "properties": {
-        "apiURL": {
-            "type": "string"
-        },
         "sourcePriority": {
             "type": "array",
             "items": {
@@ -17,6 +14,9 @@
                 ],
                 "type": "string"
             }
+        },
+        "referenceCorpus": {
+            "type": "string"
         },
         "tileType": {
             "description": "An identifier as defined by tiles configuration interface",
@@ -87,7 +87,7 @@
         }
     },
     "required": [
-        "apiURL",
+        "referenceCorpus",
         "sourcePriority",
         "tileType"
     ],

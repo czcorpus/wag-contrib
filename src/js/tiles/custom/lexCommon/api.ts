@@ -25,7 +25,7 @@ import { Backlink } from '../../../page/tile.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { HTMLBlock } from './types/assc.js';
 import { IJPData as IJPData } from './types/ijp.js';
-import { Source } from './enums.js';
+import { Source } from './types/enums.js';
 
 export interface LexArgs {
     asscIds: string[];
