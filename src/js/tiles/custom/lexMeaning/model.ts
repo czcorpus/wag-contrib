@@ -202,12 +202,12 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                 )
             )
             .subscribe({
-                next: (hasData) => {
+                next: (data) => {
                     dispatch<typeof Actions.TileDataLoaded>({
                         name: Actions.TileDataLoaded.name,
                         payload: {
                             tileId: this.tileId,
-                            isEmpty: !hasData,
+                            isEmpty: !data.hasData,
                         },
                     });
                 },

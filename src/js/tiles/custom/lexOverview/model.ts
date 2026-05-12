@@ -256,6 +256,15 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                 )
             )
             .subscribe({
+                next: (data) => {
+                    dispatch<typeof Actions.TileDataLoaded>({
+                        name: Actions.TileDataLoaded.name,
+                        payload: {
+                            tileId: this.tileId,
+                            isEmpty: !data.hasData,
+                        },
+                    });
+                },
                 error: (error) => {
                     console.error(error);
                     dispatch<typeof Actions.TileDataLoaded>({
