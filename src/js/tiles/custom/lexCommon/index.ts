@@ -74,7 +74,7 @@ export class LexCommonTile implements ITileProvider {
         this.widthFract = widthFract;
         this.dependentTiles = dependentTiles;
         this.configuredLemLevels = conf.lemmatizationLevels || [];
-        this.lexApi = new LexApi(conf.apiURL, appServices);
+        this.lexApi = new LexApi(conf.apiURL, conf.srcInfoURL, appServices);
 
         this.model = new LexCommonModel({
             dispatcher,

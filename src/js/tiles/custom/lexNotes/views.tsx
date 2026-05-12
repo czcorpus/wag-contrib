@@ -57,6 +57,7 @@ export function init(
                 <S.NotesTileView>
                     {!List.empty(state.notes.ijp) ? (
                         <Subtile
+                            tileId={props.tileId}
                             source={
                                 List.some(
                                     (note) => note.includes('</a>'),
@@ -80,7 +81,7 @@ export function init(
                     ) : null}
 
                     {!List.empty(state.notes.assc) ? (
-                        <Subtile source={Source.ASSC}>
+                        <Subtile tileId={props.tileId} source={Source.ASSC}>
                             {List.map(
                                 (note, i) => (
                                     <SubtileRow

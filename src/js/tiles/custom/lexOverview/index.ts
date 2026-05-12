@@ -102,6 +102,7 @@ export class LexOverviewTile implements ITileProvider {
             if (List.empty(variants)) {
                 variants = [
                     {
+                        ident: currQueryMatch.lemma,
                         lemma: currQueryMatch.lemma,
                         pos: currQueryMatch.pos[0].value,
                         corpusEntry: {
@@ -116,6 +117,7 @@ export class LexOverviewTile implements ITileProvider {
             // empty data
             variants = [
                 {
+                    ident: currQueryMatch.word,
                     lemma: currQueryMatch.word,
                 } as LexItem,
             ];

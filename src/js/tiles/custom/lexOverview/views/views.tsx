@@ -151,12 +151,13 @@ export function init(
     // -------------------- <LexOverviewBasics /> -----------------------------------------------
 
     const LexOverviewBasics: React.FC<{
+        tileId: number;
         source: Source;
         selectedVariant: LexItem;
         basicOverview: BasicOverviewData;
     }> = (props) => {
         return (
-            <Subtile source={props.source}>
+            <Subtile tileId={props.tileId} source={props.source}>
                 {props.basicOverview.pronunciation ? (
                     <SubtileRow>
                         <span className="key">
@@ -239,6 +240,7 @@ export function init(
                     />
                     {state.mainSource !== undefined ? (
                         <LexOverviewBasics
+                            tileId={props.tileId}
                             source={state.mainSource}
                             selectedVariant={selectedVariant}
                             basicOverview={basicOverview}
@@ -246,11 +248,15 @@ export function init(
                     ) : null}
 
                     {state.data.ijp ? (
-                        <ijpViews.Subtile data={state.data.ijp} />
+                        <ijpViews.Subtile
+                            tileId={props.tileId}
+                            data={state.data.ijp}
+                        />
                     ) : null}
 
                     {selectedVariant.corpusEntry ? (
                         <corpusViews.Subtile
+                            tileId={props.tileId}
                             corpname={state.referenceCorpus}
                             data={{
                                 abs: selectedVariant.corpusEntry.count,
@@ -258,7 +264,10 @@ export function init(
                             }}
                         />
                     ) : (
-                        <corpusViews.Subtile corpname={state.referenceCorpus} />
+                        <corpusViews.Subtile
+                            tileId={props.tileId}
+                            corpname={state.referenceCorpus}
+                        />
                     )}
                 </S.LexOverviewTileView>
             </globalComponents.TileWrapper>

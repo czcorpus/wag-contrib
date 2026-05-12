@@ -33,6 +33,7 @@ import { Source } from '../lexCommon/types/enums.js';
 export interface LexMeaningModelState {
     isBusy: boolean;
     selectedVariantIdent: string;
+    mainTile: number;
     data: Array<{
         blocks: HTMLBlock[];
     }>;

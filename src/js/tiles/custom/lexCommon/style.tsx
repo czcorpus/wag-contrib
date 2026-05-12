@@ -68,6 +68,11 @@ export const SubtileWrapper = styled.div<{
         font-size: 0.9em;
         text-align: right;
     }
+
+    a:hover {
+        text-decoration: none;
+        cursor: pointer;
+    }
 `;
 
 export const SubtileRow = styled.div<{ theme: Theme }>`

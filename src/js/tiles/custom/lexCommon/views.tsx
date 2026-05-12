@@ -19,6 +19,7 @@
 import { IActionDispatcher, ViewUtils } from 'kombo';
 import * as React from 'react';
 import { GlobalComponents } from '../../../views/common/index.js';
+import { Actions as GlobalActions } from '../../../models/actions.js';
 import { SubtileWrapper, SubtileRow } from './style.js';
 import { List } from 'cnc-tskit';
 
@@ -30,40 +31,61 @@ export function initViewSubtile(
 
     const Subtile: React.FC<
         React.PropsWithChildren<{
-            source?: string | Array<string>;
+            tileId: number;
+            source: string | Array<string>;
             corpname?: string;
             className?: string;
         }>
-    > = (props) => (
-        <SubtileWrapper
-            className={props.className}
-            $source={
-                Array.isArray(props.source) ? props.source[0] : props.source
-            }
-        >
-            {props.children}
-            {props.source || props.corpname ? (
-                <SubtileRow className="footer">
-                    <span className="key">
-                        {ut.translate('lex_common__source')}:
-                    </span>
-                    <span className="value">
-                        {props.corpname
-                            ? props.corpname
-                            : Array.isArray(props.source)
-                              ? List.map(
-                                    (v) =>
-                                        ut.translate(`lex_common__source_${v}`),
+    > = (props) => {
+        const handleSourceInfo = (source: string) => () => {
+            dispatcher.dispatch(GlobalActions.GetSourceInfo, {
+                tileId: props.tileId,
+                corpusId: source,
+            });
+        };
+
+        return (
+            <SubtileWrapper
+                className={props.className}
+                $source={
+                    Array.isArray(props.source) ? props.source[0] : props.source
+                }
+            >
+                {props.children}
+                {props.source || props.corpname ? (
+                    <SubtileRow className="footer">
+                        <span className="key">
+                            {ut.translate('lex_common__source')}:
+                        </span>
+                        <span className="value">
+                            {props.corpname ? (
+                                <a onClick={handleSourceInfo(props.corpname)}>
+                                    {props.corpname}
+                                </a>
+                            ) : Array.isArray(props.source) ? (
+                                List.map(
+                                    (v) => (
+                                        <a onClick={handleSourceInfo(v)}>
+                                            {ut.translate(
+                                                `lex_common__source_${v}`
+                                            )}
+                                        </a>
+                                    ),
                                     props.source
                                 ).join(', ')
-                              : ut.translate(
-                                    `lex_common__source_${props.source}`
-                                )}
-                    </span>
-                </SubtileRow>
-            ) : null}
-        </SubtileWrapper>
-    );
+                            ) : (
+                                <a onClick={handleSourceInfo(props.source)}>
+                                    {ut.translate(
+                                        `lex_common__source_${props.source}`
+                                    )}
+                                </a>
+                            )}
+                        </span>
+                    </SubtileRow>
+                ) : null}
+            </SubtileWrapper>
+        );
+    };
 
     return Subtile;
 }

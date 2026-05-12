@@ -83,11 +83,10 @@ export function getCurrentVariant(
     variantIdent: string
 ): LexItem {
     const currentQueryMatch = findCurrQueryMatch(List.head(queryMatches));
-    return isLexQueryMatch(currentQueryMatch) &&
-        !List.empty(currentQueryMatch.extraData)
+    return isLexQueryMatch(currentQueryMatch)
         ? List.find(
               (item) => item.ident === variantIdent,
               currentQueryMatch.extraData
           )
-        : null;
+        : undefined;
 }

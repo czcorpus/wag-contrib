@@ -30,6 +30,7 @@ export function init(
     ut: ViewUtils<GlobalComponents>
 ): {
     Subtile: React.FC<{
+        tileId: number;
         corpname: string;
         data?: {
             abs: number;
@@ -43,13 +44,18 @@ export function init(
     // -------------------- <SrchWordInfo /> ---------------------------------------------------
 
     const SrchWordInfo: React.FC<{
+        tileId: number;
         corpname: string;
         data?: {
             abs: number;
             ipm: number;
         };
     }> = (props) => (
-        <Subtile source={Source.Corpus} corpname={props.corpname}>
+        <Subtile
+            tileId={props.tileId}
+            source={Source.Corpus}
+            corpname={props.corpname}
+        >
             {props.data ? (
                 props.data.abs > 0 ? (
                     <>

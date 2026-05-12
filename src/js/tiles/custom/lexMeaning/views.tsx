@@ -88,7 +88,11 @@ export function init(
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.MeaningTileView>
-                    <Subtile source={Source.ASSC} className="stretch">
+                    <Subtile
+                        tileId={props.tileId}
+                        source={Source.ASSC}
+                        className="stretch"
+                    >
                         <SubtileRow className="scroller">
                             {List.flatMap(
                                 (d, i) =>

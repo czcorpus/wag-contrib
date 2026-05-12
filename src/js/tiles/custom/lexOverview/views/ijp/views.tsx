@@ -24,7 +24,7 @@ import {
     CaseData,
     ComparisonData,
     ConjugationData,
-} from '../../api/ijpTypes.js';
+} from '../../../lexCommon/types/ijp.js';
 import * as LS from './style.js';
 import { IJPData } from '../../../lexCommon/types/ijp.js';
 import { initViewSubtile } from '../../../lexCommon/views.js';
@@ -36,6 +36,7 @@ export function init(
     ut: ViewUtils<GlobalComponents>
 ): {
     Subtile: React.FC<{
+        tileId: number;
         data: IJPData;
     }>;
 } {
@@ -283,10 +284,11 @@ export function init(
     // -------------------- <IjpSubtileView /> -----------------------------------------------
 
     const IjpSubtileView: React.FC<{
+        tileId: number;
         data: IJPData;
     }> = (props) => {
         return (
-            <Subtile source={Source.IJP}>
+            <Subtile tileId={props.tileId} source={Source.IJP}>
                 <SubtileRow>
                     <span className="key">
                         {ut.translate('lex_overview__overview_syllabification')}

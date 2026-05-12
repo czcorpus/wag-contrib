@@ -126,6 +126,45 @@ export class LexCommonModel extends StatelessModel<LexCommonModelState> {
                 console.log(action.error);
             }
         );
+
+        this.addActionSubtypeHandler(
+            GlobalActions.GetSourceInfo,
+            (action) =>
+                List.some(
+                    (tileId) => tileId === action.payload.tileId,
+                    dependentTiles
+                ),
+            null,
+            (state, action, dispatch) => {
+                this.lexApi
+                    .getSourceDescription(
+                        this.appServices
+                            .dataStreaming()
+                            .startNewSubgroup(this.tileId),
+                        this.tileId,
+                        this.appServices.getISO639UILang(),
+                        action.payload.corpusId
+                    )
+                    .subscribe({
+                        next: (data) => {
+                            dispatch({
+                                name: GlobalActions.GetSourceInfoDone.name,
+                                payload: {
+                                    tileId: this.tileId,
+                                    data: data,
+                                },
+                            });
+                        },
+                        error: (err) => {
+                            console.error(err);
+                            dispatch({
+                                name: GlobalActions.GetSourceInfoDone.name,
+                                error: err,
+                            });
+                        },
+                    });
+            }
+        );
     }
 
     private loadData(
