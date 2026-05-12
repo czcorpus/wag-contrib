@@ -29,8 +29,14 @@ import { List } from 'cnc-tskit';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
 import { Source } from '../lexCommon/types/enums.js';
 import { LexItem } from '../lexCommon/types/dictionary.js';
-import { isAsscData, isIjpData, LexResponse } from '../lexCommon/api.js';
+import {
+    isAsscData,
+    isDoneData,
+    isIjpData,
+    LexResponse,
+} from '../lexCommon/api.js';
 import { IJPData } from '../lexCommon/types/ijp.js';
+import { reduce } from 'rxjs';
 
 interface Data {
     assc: HTMLBlock;
@@ -101,7 +107,7 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
                 // get only first assc data
-                if (isAsscData(action.payload) && !state.data.assc) {
+                if (isAsscData(action.payload)) {
                     // get only block containig word with the correct id
                     const block = List.find(
                         (block) =>
@@ -118,12 +124,8 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                 }
 
                 // get only first ijp data
-                if (isIjpData(action.payload) && !state.data.ijp) {
+                if (isIjpData(action.payload)) {
                     state.data.ijp = action.payload.data;
-                }
-
-                if (state.data.assc !== null && state.data.ijp !== null) {
-                    state.isBusy = false;
                 }
             }
         );
@@ -205,25 +207,55 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                 otherTileQueryIdx: 0, // TODO
                 contentType: 'application/json',
             })
+            .pipe(
+                reduce(
+                    (data, resp) => {
+                        if (data.done.assc && data.done.ijp) {
+                            return data;
+                        } else if (isDoneData(resp)) {
+                            if (resp.source === Source.ASSC) {
+                                data.done.assc = true;
+                            } else if (resp.source === Source.IJP) {
+                                data.done.ijp = true;
+                            }
+                        } else if (isAsscData(resp) && !data.done.assc) {
+                            dispatch<typeof Actions.TilePartialDataLoaded>({
+                                name: Actions.TilePartialDataLoaded.name,
+                                payload: {
+                                    tileId: this.tileId,
+                                    ...resp,
+                                },
+                            });
+                            data.hasData = true;
+                            data.done.assc = true;
+                        } else if (isIjpData(resp) && !data.done.ijp) {
+                            dispatch<typeof Actions.TilePartialDataLoaded>({
+                                name: Actions.TilePartialDataLoaded.name,
+                                payload: {
+                                    tileId: this.tileId,
+                                    ...resp,
+                                },
+                            });
+                            data.hasData = true;
+                            data.done.ijp = true;
+                        }
+
+                        if (data.done.assc && data.done.ijp) {
+                            dispatch<typeof Actions.TileDataLoaded>({
+                                name: Actions.TileDataLoaded.name,
+                                payload: {
+                                    tileId: this.tileId,
+                                    isEmpty: false, // this tile is never empty
+                                },
+                            });
+                        }
+
+                        return data;
+                    },
+                    { hasData: false, done: { assc: false, ijp: false } }
+                )
+            )
             .subscribe({
-                next: (v) => {
-                    dispatch<typeof Actions.TilePartialDataLoaded>({
-                        name: Actions.TilePartialDataLoaded.name,
-                        payload: {
-                            tileId: this.tileId,
-                            ...v,
-                        },
-                    });
-                },
-                complete: () => {
-                    dispatch<typeof Actions.TileDataLoaded>({
-                        name: Actions.TileDataLoaded.name,
-                        payload: {
-                            tileId: this.tileId,
-                            isEmpty: false,
-                        },
-                    });
-                },
                 error: (error) => {
                     console.error(error);
                     dispatch<typeof Actions.TileDataLoaded>({

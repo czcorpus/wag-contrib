@@ -25,7 +25,12 @@ import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { List, pipe } from 'cnc-tskit';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
-import { isAsscData, isIjpData, LexResponse } from '../lexCommon/api.js';
+import {
+    isAsscData,
+    isDoneData,
+    isIjpData,
+    LexResponse,
+} from '../lexCommon/api.js';
 import { reduce } from 'rxjs';
 import { Source } from '../lexCommon/types/enums.js';
 
@@ -170,52 +175,64 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
                 contentType: 'application/json',
             })
             .pipe(
-                reduce((hasData, resp) => {
-                    if (isAsscData(resp)) {
-                        const filteredData = this.filterResultsByIDs(
-                            resp.id,
-                            resp.data
-                        );
-                        const notes = pipe(
-                            filteredData,
-                            List.flatMap((v) => v.notes),
-                            List.filter((v) => !!v)
-                        );
-                        if (List.size(notes) > 0) {
+                reduce(
+                    (data, resp) => {
+                        if (data.done.assc && data.done.ijp) {
+                            return data;
+                        } else if (isDoneData(resp)) {
+                            if (resp.source === Source.ASSC) {
+                                data.done.assc = true;
+                            } else if (resp.source === Source.IJP) {
+                                data.done.ijp = true;
+                            }
+
+                            if (data.done.assc && data.done.ijp) {
+                                dispatch<typeof Actions.TileDataLoaded>({
+                                    name: Actions.TileDataLoaded.name,
+                                    payload: {
+                                        tileId: this.tileId,
+                                        isEmpty: !data.hasData,
+                                    },
+                                });
+                            }
+                        } else if (isAsscData(resp)) {
+                            const filteredData = this.filterASSCResultsByIDs(
+                                resp.id,
+                                resp.data
+                            );
+                            const notes = pipe(
+                                filteredData,
+                                List.flatMap((v) => v.notes),
+                                List.filter((v) => !!v)
+                            );
+                            if (List.size(notes) > 0) {
+                                dispatch<typeof Actions.TilePartialDataLoaded>({
+                                    name: Actions.TilePartialDataLoaded.name,
+                                    payload: {
+                                        tileId: this.tileId,
+                                        source: Source.ASSC,
+                                        notes,
+                                    },
+                                });
+                                data.hasData = true;
+                            }
+                        } else if (isIjpData(resp) && resp.data.notes) {
                             dispatch<typeof Actions.TilePartialDataLoaded>({
                                 name: Actions.TilePartialDataLoaded.name,
                                 payload: {
                                     tileId: this.tileId,
-                                    source: Source.ASSC,
-                                    notes,
+                                    source: Source.IJP,
+                                    notes: resp.data.notes,
                                 },
                             });
-                            return true;
+                            data.hasData = true;
                         }
-                    } else if (isIjpData(resp) && resp.data.notes) {
-                        dispatch<typeof Actions.TilePartialDataLoaded>({
-                            name: Actions.TilePartialDataLoaded.name,
-                            payload: {
-                                tileId: this.tileId,
-                                source: Source.IJP,
-                                notes: resp.data.notes,
-                            },
-                        });
-                        return true;
-                    }
-                    return hasData;
-                }, false)
+                        return data;
+                    },
+                    { hasData: false, done: { assc: false, ijp: false } }
+                )
             )
             .subscribe({
-                next: (hasData) => {
-                    dispatch<typeof Actions.TileDataLoaded>({
-                        name: Actions.TileDataLoaded.name,
-                        payload: {
-                            tileId: this.tileId,
-                            isEmpty: !hasData,
-                        },
-                    });
-                },
                 error: (error) => {
                     console.error(error);
                     dispatch<typeof Actions.TileDataLoaded>({
@@ -230,7 +247,7 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
             });
     }
 
-    private filterResultsByIDs(id: string, data: HTMLBlock[]): HTMLBlock[] {
+    private filterASSCResultsByIDs(id: string, data: HTMLBlock[]): HTMLBlock[] {
         const blockIdx = List.findIndex(
             (d) => List.some((x) => x.id === 'hid-' + id, d.variants),
             data

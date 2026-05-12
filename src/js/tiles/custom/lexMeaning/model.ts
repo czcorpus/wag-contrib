@@ -26,8 +26,9 @@ import { List } from 'cnc-tskit';
 import { RecognizedQueries } from '../../../query/index.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
-import { isAsscData, LexResponse } from '../lexCommon/api.js';
+import { isAsscData, isDoneData, LexResponse } from '../lexCommon/api.js';
 import { reduce } from 'rxjs';
+import { Source } from '../lexCommon/types/enums.js';
 
 export interface LexMeaningModelState {
     isBusy: boolean;
@@ -161,26 +162,43 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                 contentType: 'application/json',
             })
             .pipe(
-                reduce((hasData, resp) => {
-                    if (isAsscData(resp)) {
-                        const filteredData = this.filterResultsByIDs(
-                            resp.id,
-                            resp.data
-                        );
-                        if (List.size(filteredData) > 0) {
-                            dispatch<typeof Actions.TilePartialDataLoaded>({
-                                name: Actions.TilePartialDataLoaded.name,
+                reduce(
+                    (data, resp) => {
+                        if (data.done) {
+                            return data;
+                        } else if (
+                            isDoneData(resp) &&
+                            resp.source === Source.ASSC
+                        ) {
+                            data.done === true;
+                            dispatch<typeof Actions.TileDataLoaded>({
+                                name: Actions.TileDataLoaded.name,
                                 payload: {
                                     tileId: this.tileId,
-                                    id: resp.id,
-                                    data: filteredData,
+                                    isEmpty: !data.hasData,
                                 },
                             });
-                            return true;
+                        } else if (isAsscData(resp)) {
+                            const filteredData = this.filterASSCResultsByIDs(
+                                resp.id,
+                                resp.data
+                            );
+                            if (List.size(filteredData) > 0) {
+                                dispatch<typeof Actions.TilePartialDataLoaded>({
+                                    name: Actions.TilePartialDataLoaded.name,
+                                    payload: {
+                                        tileId: this.tileId,
+                                        id: resp.id,
+                                        data: filteredData,
+                                    },
+                                });
+                                data.hasData = true;
+                            }
                         }
-                    }
-                    return hasData;
-                }, false)
+                        return data;
+                    },
+                    { hasData: false, done: false }
+                )
             )
             .subscribe({
                 next: (hasData) => {
@@ -206,7 +224,7 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
             });
     }
 
-    private filterResultsByIDs(id: string, data: HTMLBlock[]): HTMLBlock[] {
+    private filterASSCResultsByIDs(id: string, data: HTMLBlock[]): HTMLBlock[] {
         const blockIdx = List.findIndex(
             (d) => List.some((x) => x.id === 'hid-' + id, d.variants),
             data

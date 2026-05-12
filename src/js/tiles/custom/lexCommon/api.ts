@@ -36,7 +36,7 @@ export function isEmptyArgs(args: LexArgs): boolean {
     return Dict.every((v) => List.empty(v), args);
 }
 
-export interface LexResponse<T = IJPData | Array<HTMLBlock>> {
+export interface LexResponse<T = IJPData | Array<HTMLBlock> | 'done'> {
     source: Source;
     id: string;
     data: T;
@@ -48,6 +48,10 @@ export function isAsscData(v: LexResponse): v is LexResponse<Array<HTMLBlock>> {
 
 export function isIjpData(v: LexResponse): v is LexResponse<IJPData> {
     return v && v.source === Source.IJP;
+}
+
+export function isDoneData(v: LexResponse): v is LexResponse<'done'> {
+    return v && v.data === 'done';
 }
 
 export class LexApi implements ResourceApi<LexArgs, LexResponse> {
