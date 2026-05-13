@@ -156,6 +156,7 @@ export function init(
     const PlayerIcon: React.FC<{
         tileId: number;
         audioLink: string;
+        isPlaying: boolean;
     }> = (props) => {
         const handleClick = () => {
             dispatcher.dispatch(Actions.PlayAudio, {
@@ -165,12 +166,11 @@ export function init(
         };
 
         return (
-            <S.PlayerIcon onClick={handleClick}>
-                <img
-                    src={ut.createStaticUrl('audio-3w.svg')}
-                    alt={ut.translate('global__img_alt_play_audio')}
-                />
-            </S.PlayerIcon>
+            <S.PlayerIcon
+                $crStaticUrl={ut.createStaticUrl}
+                onClick={handleClick}
+                className={props.isPlaying ? 'animate' : ''}
+            />
         );
     };
 
@@ -181,6 +181,7 @@ export function init(
         source: Source;
         selectedVariant: LexItem;
         basicOverview: BasicOverviewData;
+        playingAudio: boolean;
     }> = (props) => {
         return (
             <Subtile tileId={props.tileId} source={props.source}>
@@ -198,6 +199,7 @@ export function init(
                                 <PlayerIcon
                                     tileId={props.tileId}
                                     audioLink={props.basicOverview.audioLink}
+                                    isPlaying={props.playingAudio}
                                 />
                             ) : null}
                         </span>
@@ -297,6 +299,7 @@ export function init(
                             source={state.mainSource}
                             selectedVariant={selectedVariant}
                             basicOverview={basicOverview}
+                            playingAudio={state.playingAudio}
                         />
                     ) : null}
 

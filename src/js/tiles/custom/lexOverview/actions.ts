@@ -46,4 +46,10 @@ export class Actions {
     }> = {
         name: 'LEX_OVERVIEW_PLAY_AUDIO',
     };
+
+    static AudioStopped: Action<{
+        tileId: number;
+    }> = {
+        name: 'LEX_OVERVIEW_AUDIO_STOPPED',
+    };
 }

@@ -53,6 +53,7 @@ export interface LexOverviewModelState {
     data: Data;
     error: string;
     backlink: Backlink;
+    playingAudio: boolean;
 }
 
 export interface LexOverviewModelArgs {
@@ -200,7 +201,9 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
         this.addActionSubtypeHandler(
             Actions.PlayAudio,
             (action) => action.payload.tileId === this.tileId,
-            (state, action) => {},
+            (state, action) => {
+                state.playingAudio = true;
+            },
             (state, action, dispatch) => {
                 const player = this.appServices.getAudioPlayer();
                 player
@@ -214,10 +217,26 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                         true
                     )
                     .subscribe({
+                        complete: () => {
+                            dispatch(Actions.AudioStopped, {
+                                tileId: this.tileId,
+                            });
+                        },
                         error: (err) => {
                             console.error(err);
+                            dispatch(Actions.AudioStopped, {
+                                tileId: this.tileId,
+                            });
                         },
                     });
+            }
+        );
+
+        this.addActionSubtypeHandler(
+            Actions.AudioStopped,
+            (action) => action.payload.tileId === this.tileId,
+            (state, action) => {
+                state.playingAudio = false;
             }
         );
     }

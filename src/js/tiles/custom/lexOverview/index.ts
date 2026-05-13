@@ -144,6 +144,7 @@ export class LexOverviewTile implements ITileProvider {
                 },
                 error: undefined,
                 backlink: undefined,
+                playingAudio: false,
             },
         });
         this.view = viewInit(this.dispatcher, ut, theme, this.model);
