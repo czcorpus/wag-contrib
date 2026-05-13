@@ -34,9 +34,12 @@ import { initViewSubtile } from '../../lexCommon/views.js';
 import { LexItem } from '../../lexCommon/types/dictionary.js';
 import { SubtileRow } from '../../lexCommon/style.js';
 import { Source } from '../../lexCommon/types/enums.js';
+import { VariantData } from '../../lexCommon/types/assc.js';
+import { Actions } from '../actions.js';
 
 interface BasicOverviewData {
     pronunciation?: string;
+    audioLink?: string;
 }
 
 export function init(
@@ -148,6 +151,29 @@ export function init(
         );
     };
 
+    // ------------------------- <PlayerIcon /> -------------------------------
+
+    const PlayerIcon: React.FC<{
+        tileId: number;
+        audioLink: string;
+    }> = (props) => {
+        const handleClick = () => {
+            dispatcher.dispatch(Actions.PlayAudio, {
+                tileId: props.tileId,
+                link: props.audioLink,
+            });
+        };
+
+        return (
+            <S.PlayerIcon onClick={handleClick}>
+                <img
+                    src={ut.createStaticUrl('audio-3w.svg')}
+                    alt={ut.translate('global__img_alt_play_audio')}
+                />
+            </S.PlayerIcon>
+        );
+    };
+
     // -------------------- <LexOverviewBasics /> -----------------------------------------------
 
     const LexOverviewBasics: React.FC<{
@@ -168,6 +194,12 @@ export function init(
                         </span>
                         <span className="value">
                             {props.basicOverview.pronunciation}
+                            {props.basicOverview.audioLink ? (
+                                <PlayerIcon
+                                    tileId={props.tileId}
+                                    audioLink={props.basicOverview.audioLink}
+                                />
+                            ) : null}
                         </span>
                     </SubtileRow>
                 ) : null}
@@ -178,6 +210,25 @@ export function init(
                     <span className="value">
                         {translateMorfology(props.selectedVariant)}
                     </span>
+                </SubtileRow>
+            </Subtile>
+        );
+    };
+
+    // -------------------- <LexOverviewOrigin /> -----------------------------------------------
+
+    const LexOverviewOrigin: React.FC<{
+        tileId: number;
+        source: Source;
+        origin: string;
+    }> = (props) => {
+        return (
+            <Subtile tileId={props.tileId} source={props.source}>
+                <SubtileRow>
+                    <span className="key">
+                        {ut.translate('lex_overview__origin')}:
+                    </span>
+                    <span className="value">{props.origin}</span>
                 </SubtileRow>
             </Subtile>
         );
@@ -203,15 +254,17 @@ export function init(
                           ipm: state.queryMatch.ipm,
                       },
                   } as LexItem);
+        let asscVariant: VariantData;
 
         switch (state.mainSource) {
             case Source.ASSC:
                 if (state.data.assc) {
-                    const asscVariant = List.find(
+                    asscVariant = List.find(
                         (v) => v.key.startsWith(selectedVariant.lemma),
                         state.data.assc.variants
                     );
                     basicOverview.pronunciation = asscVariant.pronunciation;
+                    basicOverview.audioLink = asscVariant.audioFile;
                 }
                 break;
 
@@ -269,6 +322,14 @@ export function init(
                             corpname={state.referenceCorpus}
                         />
                     )}
+
+                    {asscVariant && asscVariant.origin ? (
+                        <LexOverviewOrigin
+                            tileId={props.tileId}
+                            source={Source.ASSC}
+                            origin={asscVariant.origin}
+                        />
+                    ) : null}
                 </S.LexOverviewTileView>
             </globalComponents.TileWrapper>
         );

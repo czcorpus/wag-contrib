@@ -25,6 +25,7 @@ export interface VariantData {
     quality: string;
     forms: { [key: string]: string };
     pos: string;
+    origin: string;
 }
 
 export interface MeaningData {

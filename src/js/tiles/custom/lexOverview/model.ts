@@ -196,6 +196,30 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                 }
             }
         );
+
+        this.addActionSubtypeHandler(
+            Actions.PlayAudio,
+            (action) => action.payload.tileId === this.tileId,
+            (state, action) => {},
+            (state, action, dispatch) => {
+                const player = this.appServices.getAudioPlayer();
+                player
+                    .play(
+                        [
+                            {
+                                url: action.payload.link,
+                                format: action.payload.link.split('.').pop(),
+                            },
+                        ],
+                        true
+                    )
+                    .subscribe({
+                        error: (err) => {
+                            console.error(err);
+                        },
+                    });
+            }
+        );
     }
 
     private loadData(streaming: IDataStreaming, dispatch: SEDispatcher) {

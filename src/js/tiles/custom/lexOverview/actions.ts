@@ -39,4 +39,11 @@ export class Actions {
     > = {
         name: GlobalActions.TilePartialDataLoaded.name,
     };
+
+    static PlayAudio: Action<{
+        tileId: number;
+        link: string;
+    }> = {
+        name: 'LEX_OVERVIEW_PLAY_AUDIO',
+    };
 }

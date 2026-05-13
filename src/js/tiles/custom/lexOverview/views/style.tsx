@@ -51,3 +51,16 @@ export const Header = styled.div<{ theme: Theme }>`
         font-style: italic;
     }
 `;
+
+export const PlayerIcon = styled.a<{ theme: Theme }>`
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 1em;
+    margin-bottom: 0.1em;
+    cursor: pointer;
+
+    img {
+        display: block;
+        width: 1.5em;
+    }
+`;
