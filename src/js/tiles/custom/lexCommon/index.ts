@@ -1,6 +1,6 @@
 /*
- * Copyright 2022 Martin Zimandl <martin.zimandl@gmail.com>
- * Copyright 2022 Institute of the Czech National Corpus,
+ * Copyright 2026 Martin Zimandl <martin.zimandl@gmail.com>
+ * Copyright 2026 Institute of the Czech National Corpus,
  *                Faculty of Arts, Charles University
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,36 +19,42 @@ import { IActionDispatcher } from 'kombo';
 
 import { IAppServices } from '../../../appServices.js';
 import { LemmatizationLevel, QueryType } from '../../../query/index.js';
-import { init as viewInit } from './views.js';
 import {
-    TileConf, ITileProvider, TileComponent, TileFactory,
-    TileFactoryArgs, DEFAULT_ALT_VIEW_ICON, ITileReloader, AltViewIconProps, lemLevelSupport } from '../../../page/tile.js';
-import { UjcLGuideModel } from './model.js';
-import { UjcLGuideApi } from './api.js';
-import { mkEmptyData } from './common.js';
+    TileConf,
+    ITileProvider,
+    TileComponent,
+    TileFactory,
+    TileFactoryArgs,
+    DEFAULT_ALT_VIEW_ICON,
+    ITileReloader,
+    AltViewIconProps,
+    lemLevelSupport,
+} from '../../../page/tile.js';
+import { LexCommonModel } from './model.js';
+import { LexApi } from './api.js';
 
-export interface UjcLangRefBookTileConf extends TileConf {
+export interface LexCommonTileConf extends TileConf {
     apiURL: string;
 }
 
-export class UjcLangRefBookTile implements ITileProvider {
+export class LexCommonTile implements ITileProvider {
     private readonly tileId: number;
 
     private readonly dispatcher: IActionDispatcher;
 
     private readonly appServices: IAppServices;
 
-    private readonly model: UjcLGuideModel;
+    private readonly model: LexCommonModel;
 
     private readonly widthFract: number;
 
-    private readonly label: string;
-
-    private readonly api: UjcLGuideApi;
+    private readonly lexApi: LexApi;
 
     private view: TileComponent;
 
-    private readonly configuredLemLevels:Array<LemmatizationLevel>;
+    private readonly dependentTiles: Array<number>;
+
+    private readonly configuredLemLevels: Array<LemmatizationLevel>;
 
     constructor({
         tileId,
@@ -60,30 +66,26 @@ export class UjcLangRefBookTile implements ITileProvider {
         conf,
         isBusy,
         queryMatches,
-    }: TileFactoryArgs<UjcLangRefBookTileConf>) {
+        dependentTiles,
+    }: TileFactoryArgs<LexCommonTileConf>) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
+        this.dependentTiles = dependentTiles;
         this.configuredLemLevels = conf.lemmatizationLevels || [];
-        this.api = new UjcLGuideApi(conf.apiURL, appServices);
-        this.model = new UjcLGuideModel({
+        this.lexApi = new LexApi(conf.apiURL, conf.srcInfoURL, appServices);
+
+        this.model = new LexCommonModel({
             dispatcher,
             appServices,
-            api: this.api,
             queryMatches,
             tileId,
-            initState: {
-                isBusy: isBusy,
-                data: mkEmptyData(),
-                error: null,
-                backlink: null,
-            },
+            dependentTiles,
+            lexApi: this.lexApi,
+            initState: {},
         });
-        this.label = appServices.importExternalMessage(
-            conf.label || 'lguide__main_label'
-        );
-        this.view = viewInit(this.dispatcher, ut, theme, this.model);
+        this.view = () => null;
     }
 
     getIdent(): number {
@@ -91,7 +93,7 @@ export class UjcLangRefBookTile implements ITileProvider {
     }
 
     getLabel(): string {
-        return this.label;
+        return null;
     }
 
     getView(): TileComponent {
@@ -102,7 +104,11 @@ export class UjcLangRefBookTile implements ITileProvider {
         return null;
     }
 
-    supportsQueryType(qt:QueryType, domain1:string, domain2?:string):boolean {
+    supportsQueryType(
+        qt: QueryType,
+        domain1: string,
+        domain2?: string
+    ): boolean {
         return qt === 'single';
     }
 
@@ -151,17 +157,17 @@ export class UjcLangRefBookTile implements ITileProvider {
         return null;
     }
 
-    hideOnNoData():boolean {
-        return false;
+    hideOnNoData(): boolean {
+        return true;
     }
 
-    supportsLemmatizationLevel(ll:LemmatizationLevel):boolean {
+    supportsLemmatizationLevel(ll: LemmatizationLevel): boolean {
         return lemLevelSupport(this.configuredLemLevels, ll);
     }
 }
 
-export const init: TileFactory<UjcLangRefBookTileConf> = {
+export const init: TileFactory<LexCommonTileConf> = {
     sanityCheck: (args) => [],
 
-    create: (args) => new UjcLangRefBookTile(args),
+    create: (args) => new LexCommonTile(args),
 };

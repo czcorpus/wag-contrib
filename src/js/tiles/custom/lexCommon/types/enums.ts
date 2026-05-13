@@ -16,38 +16,42 @@
  * limitations under the License.
  */
 
-import { Theme } from '../../../../page/theme.js';
-import { styled } from 'styled-components';
-import { LexTileBase } from '../../lexCommon/style.js';
+export enum Source {
+    ASSC = 'assc',
+    IJP = 'ijp',
+    SSJC = 'ssjc',
+    SJC = 'sjc',
+    DJD = 'djd',
+    Corpus = 'corpus',
+}
 
-export const LexOverviewTileView = styled(LexTileBase)`
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-`;
+export enum PoS {
+    ADJ = 'A',
+    ABB = 'B',
+    NUM = 'C',
+    ADV = 'D',
+    FORE = 'F',
+    INTER = 'I',
+    CONJ = 'J',
+    NOUN = 'N',
+    PRON = 'P',
+    PREP = 'R',
+    SEGM = 'S',
+    PART = 'T',
+    VERB = 'V',
+    UNKN = 'X',
+    PUNC = 'Z',
+}
 
-export const Header = styled.div<{ theme: Theme }>`
-    padding: 0.5em;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+export enum Gender {
+    MASCULINE_ANIM = 'M',
+    MASCULINE_INAN = 'I',
+    FEMININE = 'F',
+    NEUTER = 'N',
+}
 
-    h2 {
-        width: 100%;
-        margin: 0.1em 0;
-    }
-
-    .variant {
-        margin: 0.1em 1em;
-
-        a {
-            text-decoration: none;
-            cursor: pointer;
-        }
-    }
-
-    .small {
-        font-size: 0.8em;
-        font-style: italic;
-    }
-`;
+export enum Aspect {
+    PERF = 'P',
+    IMPERF = 'I',
+    BOTH = 'B',
+}

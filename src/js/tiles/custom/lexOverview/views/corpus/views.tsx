@@ -1,6 +1,6 @@
 /*
- * Copyright 2022 Martin Zimandl <martin.zimandl@gmail.com>
- * Copyright 2022 Institute of the Czech National Corpus,
+ * Copyright 2026 Martin Zimandl <martin.zimandl@gmail.com>
+ * Copyright 2026 Institute of the Czech National Corpus,
  *                Faculty of Arts, Charles University
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,72 +16,100 @@
  * limitations under the License.
  */
 
-import { List } from 'cnc-tskit';
 import { IActionDispatcher, ViewUtils } from 'kombo';
 import * as React from 'react';
 import { GlobalComponents } from '../../../../../views/common/index.js';
-import { QueryMatch } from '../../../../../query/index.js';
-import { init as commonViewInit } from './common.js';
-import * as S from '../style.js';
-
+import { init as starsViewInit } from './stars.js';
+import { calcFreqBand } from '../../../../../query/index.js';
+import { initViewSubtile } from '../../../lexCommon/views.js';
+import { Source } from '../../../lexCommon/types/enums.js';
+import { SubtileRow } from '../../../lexCommon/style.js';
 
 export function init(
-    dispatcher:IActionDispatcher,
-    ut:ViewUtils<GlobalComponents>,
-):{
+    dispatcher: IActionDispatcher,
+    ut: ViewUtils<GlobalComponents>
+): {
     Subtile: React.FC<{
-        data: QueryMatch;
-        color?: string;
-    }>
+        tileId: number;
+        corpname: string;
+        data?: {
+            abs: number;
+            ipm: number;
+        };
+    }>;
 } {
-    
-    const commonViews = commonViewInit(dispatcher, ut);
-    const defaultColor = '#fae9da';
+    const Stars = starsViewInit(dispatcher, ut);
+    const Subtile = initViewSubtile(dispatcher, ut);
 
     // -------------------- <SrchWordInfo /> ---------------------------------------------------
 
     const SrchWordInfo: React.FC<{
-        data: QueryMatch;
-        color?: string;
+        tileId: number;
+        corpname: string;
+        data?: {
+            abs: number;
+            ipm: number;
+        };
     }> = (props) => (
-        <S.Subtile color={props.color || defaultColor}>
-            {props.data.lemma ? (
+        <Subtile
+            tileId={props.tileId}
+            source={Source.Corpus}
+            corpname={props.corpname}
+        >
+            {props.data ? (
                 props.data.abs > 0 ? (
-                    <p className='content'>
-                        <span className='key'>{ut.translate('wordfreq__freq_bands')}:</span>
-                        <span className='value' style={{display: 'inline-block', fontSize: '1.2em'}}>
-                            <commonViews.Stars
-                                freqBand={props.data.flevel}
-                            />
-                        </span>
-                        <br/>
-                        <span className='key'>{ut.translate('wordfreq__ipm')}:</span>
-                        <span className='value'>{ut.formatNumber(props.data.ipm, 2)}</span>
-                    </p>
+                    <>
+                        <SubtileRow>
+                            <span className="key">
+                                {ut.translate('wordfreq__freq_bands')}:
+                            </span>
+                            <span
+                                className="value"
+                                style={{
+                                    display: 'inline-block',
+                                    fontSize: '1.2em',
+                                }}
+                            >
+                                <Stars
+                                    freqBand={calcFreqBand(props.data.ipm)}
+                                />
+                            </span>
+                        </SubtileRow>
+                        <SubtileRow>
+                            <span className="key">
+                                {ut.translate('wordfreq__ipm')}:
+                            </span>
+                            <span className="value">
+                                {ut.formatNumber(props.data.ipm, 2)}
+                            </span>
+                        </SubtileRow>
+                    </>
                 ) : (
-                    <p className='content'>
-                        <span className='key'>{ut.translate('wordfreq__note')}:</span>
-                        <span className='value'>
+                    <SubtileRow>
+                        <span className="key">
+                            {ut.translate('wordfreq__note')}:
+                        </span>
+                        <span className="value">
                             {ut.translate(
                                 'wordfreq__word_known_but_nothing_more'
                             )}
                         </span>
-                    </p>
+                    </SubtileRow>
                 )
             ) : (
-                <p className='content'>
-                    <span className='key'>{ut.translate('wordfreq__note')}:</span>
-                    <span className='value'>{ut.translate('wordfreq__not_in_dict')}</span>
-                </p>
+                <SubtileRow>
+                    <span className="key">
+                        {ut.translate('wordfreq__note')}:
+                    </span>
+                    <span className="value">
+                        {ut.translate('wordfreq__not_in_dict')}
+                    </span>
+                </SubtileRow>
             )}
-
-            <div className='content footer'>
-                <span className='key'>Zdroj:</span><span className='value'>Korpus SYN 2025</span>
-            </div>
-        </S.Subtile>
+        </Subtile>
     );
 
     return {
-        Subtile: SrchWordInfo
-    }
+        Subtile: SrchWordInfo,
+    };
 }

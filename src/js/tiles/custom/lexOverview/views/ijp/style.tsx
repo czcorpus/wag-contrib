@@ -16,38 +16,19 @@
  * limitations under the License.
  */
 
-import { Theme } from '../../../../page/theme.js';
+import { Theme } from '../../../../../page/theme.js';
 import { styled } from 'styled-components';
-import { LexTileBase } from '../../lexCommon/style.js';
 
-export const LexOverviewTileView = styled(LexTileBase)`
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-`;
+export const DataTable = styled.table<{ theme: Theme }>`
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0em;
 
-export const Header = styled.div<{ theme: Theme }>`
-    padding: 0.5em;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-
-    h2 {
-        width: 100%;
-        margin: 0.1em 0;
-    }
-
-    .variant {
-        margin: 0.1em 1em;
-
-        a {
-            text-decoration: none;
-            cursor: pointer;
-        }
-    }
-
-    .small {
-        font-size: 0.8em;
-        font-style: italic;
+    td,
+    th {
+        padding: 0.2em 0.5em;
+        border: 2px solid #dddddd;
+        text-align: center;
+        vertical-align: middle;
     }
 `;

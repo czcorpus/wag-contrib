@@ -16,34 +16,24 @@
  * limitations under the License.
  */
 
-import * as assc from "./commonAssc.js";
-import * as lguide from "./commonLguide.js";
+import { Action } from 'kombo';
+import { Actions as GlobalActions } from '../../../models/actions.js';
+import { Source } from '../lexCommon/types/enums.js';
 
-export interface SearchVariant {
-	id: string;
-	value: string;
-	info: string;
-	link: string;
-	itemIdx: number;
-	variantIdx: number;
+export interface PartialDataPayload {
+    source: Source;
+    notes: Array<string>;
 }
 
-export interface AggregateData {
-	search: {
-		source: string;
-		items: Array<Array<SearchVariant>>;
-	};
-	asscData: assc.DataStructure;
-	lguideData: lguide.DataStructure;
-}
+export class Actions {
+    static TileDataLoaded: Action<typeof GlobalActions.TileDataLoaded.payload> =
+        {
+            name: GlobalActions.TileDataLoaded.name,
+        };
 
-export function createEmptyData():AggregateData {
-	return {
-		search: {
-			source: "",
-			items: [],
-		},
-		asscData: null,
-		lguideData: null,
-	}
+    static TilePartialDataLoaded: Action<
+        typeof GlobalActions.TilePartialDataLoaded.payload & PartialDataPayload
+    > = {
+        name: GlobalActions.TilePartialDataLoaded.name,
+    };
 }

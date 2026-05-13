@@ -1,6 +1,9 @@
 {
     "type": "object",
     "properties": {
+        "apiURL": {
+            "type": "string"
+        },
         "tileType": {
             "description": "An identifier as defined by tiles configuration interface",
             "type": "string"
@@ -70,6 +73,7 @@
         }
     },
     "required": [
+        "apiURL",
         "tileType"
     ],
     "definitions": {

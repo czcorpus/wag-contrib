@@ -1,6 +1,6 @@
 /*
- * Copyright 2022 Martin Zimandl <martin.zimandl@gmail.com>
- * Copyright 2022 Institute of the Czech National Corpus,
+ * Copyright 2026 Martin Zimandl <martin.zimandl@gmail.com>
+ * Copyright 2026 Institute of the Czech National Corpus,
  *                Faculty of Arts, Charles University
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,24 +16,10 @@
  * limitations under the License.
  */
 
-import { Theme } from '../../../../../page/theme.js';
 import { styled } from 'styled-components';
+import { Theme } from '../../../page/theme.js';
+import { LexTileBase } from '../lexCommon/style.js';
 
+// ---------------- <UsageTileView /> --------------------------------------
 
-export const DataTable = styled.table<{theme:Theme}>`
-    width: 100%;
-    border-collapse: collapse;
-    border-spacing: 0em;
-
-    td, th {
-        padding: 0.2em 0.5em;
-        border: 2px solid #dddddd;
-    }
-
-    td.word, th {
-        text-align: center;
-        vertical-align: middle;
-    }
-
-`;
-
+export const NotesTileView = styled(LexTileBase)``;

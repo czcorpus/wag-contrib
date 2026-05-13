@@ -1,6 +1,6 @@
 /*
- * Copyright 2022 Martin Zimandl <martin.zimandl@gmail.com>
- * Copyright 2022 Institute of the Czech National Corpus,
+ * Copyright 2026 Martin Zimandl <martin.zimandl@gmail.com>
+ * Copyright 2026 Institute of the Czech National Corpus,
  *                Faculty of Arts, Charles University
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,164 +19,260 @@
 import { IActionDispatcher, ViewUtils, useModel } from 'kombo';
 import * as React from 'react';
 import { Theme } from '../../../../page/theme.js';
-import { CoreTileComponentProps, TileComponent } from '../../../../page/tile.js';
+import {
+    CoreTileComponentProps,
+    TileComponent,
+} from '../../../../page/tile.js';
 import { GlobalComponents } from '../../../../views/common/index.js';
-import { Actions } from '../actions.js';
+import { Actions as CommonActions } from '../../lexCommon/actions.js';
 import { LexOverviewModel } from '../model.js';
-import { init as initLangGuideViews } from './langGuide/views.js';
+import { init as initIjpViews } from './ijp/views.js';
 import { init as initCorpusViews } from './corpus/views.js';
 import * as S from './style.js';
 import { List } from 'cnc-tskit';
-import { SearchVariant } from '../common.js';
+import { initViewSubtile } from '../../lexCommon/views.js';
+import { LexItem } from '../../lexCommon/types/dictionary.js';
+import { SubtileRow } from '../../lexCommon/style.js';
+import { Source } from '../../lexCommon/types/enums.js';
 
+interface BasicOverviewData {
+    pronunciation?: string;
+}
 
 export function init(
-    dispatcher:IActionDispatcher,
-    ut:ViewUtils<GlobalComponents>,
-    theme:Theme,
-    model:LexOverviewModel,
-):TileComponent {
-
+    dispatcher: IActionDispatcher,
+    ut: ViewUtils<GlobalComponents>,
+    theme: Theme,
+    model: LexOverviewModel
+): TileComponent {
     const globalComponents = ut.getComponents();
-    const langGuideViews = initLangGuideViews(dispatcher, ut);
+    const ijpViews = initIjpViews(dispatcher, ut);
     const corpusViews = initCorpusViews(dispatcher, ut);
+    const Subtile = initViewSubtile(dispatcher, ut);
+
+    const translateMorfology = (variant: LexItem) => {
+        const parts = [ut.translate(`lex_common__pos_${variant.pos}`)];
+        if (variant.gender) {
+            parts.push(ut.translate(`lex_common__gender_${variant.gender}`));
+        } else if (variant.aspect) {
+            parts.push(ut.translate(`lex_common__aspect_${variant.aspect}`));
+        }
+        return parts.join(' ');
+    };
 
     // -------------------- <LexOverviewHeader /> -----------------------------------------------
 
     const LexOverviewHeader: React.FC<{
         tileId: number;
-        selectedItemIdx: number;
-        selectedVariantIdx: number;
-        items: Array<Array<SearchVariant>>;
-        backupTitle: string;
+        selectedVariantIdent: string;
+        selectedVariant: LexItem;
+        variants: Array<LexItem>;
     }> = (props) => {
+        const handleVariantClick = (variantIdent: string) => {
+            dispatcher.dispatch(CommonActions.SelectItemVariant, {
+                tileId: props.tileId,
+                variantIdent,
+            });
+        };
 
-        const handleVariantClick = (itemIdx: number, variantIdx: number) => {
-            dispatcher.dispatch(
-                Actions.SelectItemVariant,
-                {tileId: props.tileId, itemIdx, variantIdx},
-            );
-        }
-
-        const renderVariants = (itemIdx: number, variants: Array<SearchVariant>, withInfo: boolean) => <>
-            {List.map((variant, i) =>
+        const renderVariant = (
+            variant: LexItem,
+            withInfo: boolean,
+            clickHandler?: () => void
+        ) => {
+            return (
                 <>
-                    {i > 0 ? ' / ' : null}
-                    {itemIdx === props.selectedItemIdx && i === props.selectedVariantIdx ?
-                        <span>{variant.value || variant.id} {withInfo && variant.info ? <span className='small'>({variant.info})</span> : null}</span> :
-                        <a onClick={() => handleVariantClick(itemIdx, i)}>{variant.value || variant.id} {withInfo && variant.info ? <span className='small'>({variant.info})</span> : null}</a>
-                    }
+                    {clickHandler ? (
+                        <a onClick={clickHandler}>
+                            {variant.lemma}{' '}
+                            {withInfo && variant.pos ? (
+                                <span className="small">
+                                    ({translateMorfology(variant)})
+                                </span>
+                            ) : null}
+                        </a>
+                    ) : (
+                        <span>
+                            {variant.lemma}{' '}
+                            {withInfo && variant.pos ? (
+                                <span className="small">
+                                    ({translateMorfology(variant)})
+                                </span>
+                            ) : null}
+                        </span>
+                    )}
                 </>
-            , variants)}
-        </>
+            );
+        };
 
-        const currentVariants = props.selectedItemIdx !== -1 ? props.items[props.selectedItemIdx] : null;
+        const hasSameLemmaVariant = (variant: LexItem) => {
+            return (
+                List.findIndex(
+                    (v, i) =>
+                        v.lemma === variant.lemma && v.ident !== variant.ident,
+                    props.variants
+                ) !== -1
+            );
+        };
+
         return (
             <S.Header>
-                {currentVariants ?
-                    <h2>{renderVariants(props.selectedItemIdx, currentVariants, false)}</h2> :
-                    <h2>{props.backupTitle}</h2>
-                }
+                <h2>
+                    {renderVariant(
+                        props.selectedVariant,
+                        hasSameLemmaVariant(props.selectedVariant)
+                    )}
+                </h2>
 
-                {List.map((variants, i) => i === props.selectedItemIdx ?
-                    null :
-                    <h4 className="variant">{renderVariants(i, variants, true)}</h4>
-                , props.items)}
+                {List.size(props.variants) > 1
+                    ? List.map(
+                          (variant, i) => (
+                              <h4 key={i} className="variant">
+                                  {renderVariant(
+                                      variant,
+                                      hasSameLemmaVariant(variant),
+                                      variant.ident !==
+                                          props.selectedVariantIdent
+                                          ? () =>
+                                                handleVariantClick(
+                                                    variant.ident
+                                                )
+                                          : undefined
+                                  )}
+                              </h4>
+                          ),
+                          props.variants
+                      )
+                    : null}
             </S.Header>
         );
-    }
+    };
 
     // -------------------- <LexOverviewBasics /> -----------------------------------------------
 
     const LexOverviewBasics: React.FC<{
-        pronunciation: string;
-        partOfSpeach: string;
-        source: string;
-
+        tileId: number;
+        source: Source;
+        selectedVariant: LexItem;
+        basicOverview: BasicOverviewData;
     }> = (props) => {
         return (
-            <S.Subtile color='#d4e2f4'>
-                <S.SubtileRow>
-                    <span className='key'>výslovnost:</span><span className='value'>{props.pronunciation}</span>
-                </S.SubtileRow>
-                <S.SubtileRow>
-                    <span className='key'>slovní druh:</span><span className='value'>{props.partOfSpeach}</span>
-                </S.SubtileRow>
-                <S.SubtileRow className='footer'>
-                    <span className='key'>Zdroj:</span><span className='value'>{props.source}</span>
-                </S.SubtileRow>
-            </S.Subtile>
+            <Subtile tileId={props.tileId} source={props.source}>
+                {props.basicOverview.pronunciation ? (
+                    <SubtileRow>
+                        <span className="key">
+                            {ut.translate(
+                                'lex_overview__overview_pronunciation'
+                            )}
+                            :
+                        </span>
+                        <span className="value">
+                            {props.basicOverview.pronunciation}
+                        </span>
+                    </SubtileRow>
+                ) : null}
+                <SubtileRow>
+                    <span className="key">
+                        {ut.translate('lex_overview__overview_part_of_speech')}:
+                    </span>
+                    <span className="value">
+                        {translateMorfology(props.selectedVariant)}
+                    </span>
+                </SubtileRow>
+            </Subtile>
         );
-    }
+    };
 
     // -------------------- <LexOverviewTileView /> -----------------------------------------------
 
     const LexOverviewTileView: React.FC<CoreTileComponentProps> = (props) => {
-
         const state = useModel(model);
 
-        let overview: {
-            pronunciation: string;
-            partOfSpeach: string;
-            source: string;
-        }|undefined;
-        const selectedVariant = state.selectedSrchItemIdx !== -1 ? state.data.search.items[state.selectedSrchItemIdx][state.selectedSrchVariantIdx] : null;
-        if (selectedVariant !== null ) {
-            switch (state.data.search.source) {
-                case 'assc':
-                    const data = state.data.asscData.items[selectedVariant.itemIdx].variants[selectedVariant.variantIdx];
-                    overview = selectedVariant.itemIdx !== -1 ?
-                        {
-                            pronunciation: data?.pronunciation,
-                            partOfSpeach: data?.pos,
-                            source: 'Akademický slovník češtiny',
-                        } :
-                        undefined;
-                    break;
-                case 'lguide':
-                    overview = {
-                        pronunciation: state.data.lguideData.pronunciation,
-                        source: 'Internetová jazyková příručka',
-                        partOfSpeach: '',
-                    };
-                    break;
-                default:
-                    overview = undefined;
-            }
+        const basicOverview = {} as BasicOverviewData;
+        const selectedVariant =
+            state.selectedVariantIdent !== undefined
+                ? List.find(
+                      (item) => item.ident === state.selectedVariantIdent,
+                      state.variants
+                  )
+                : ({
+                      lemma: state.queryMatch.lemma,
+                      pos: state.queryMatch.pos[0].value,
+                      corpusEntry: {
+                          count: state.queryMatch.abs,
+                          ipm: state.queryMatch.ipm,
+                      },
+                  } as LexItem);
+
+        switch (state.mainSource) {
+            case Source.ASSC:
+                if (state.data.assc) {
+                    const asscVariant = List.find(
+                        (v) => v.key.startsWith(selectedVariant.lemma),
+                        state.data.assc.variants
+                    );
+                    basicOverview.pronunciation = asscVariant.pronunciation;
+                }
+                break;
+
+            case Source.IJP:
+                if (state.data.ijp) {
+                    basicOverview.pronunciation = state.data.ijp.pronunciation;
+                }
+                break;
         }
 
         return (
-            <globalComponents.TileWrapper tileId={props.tileId} isBusy={state.isBusy} error={state.error}
-                hasData={true}
+            <globalComponents.TileWrapper
+                tileId={props.tileId}
+                isBusy={state.isBusy}
+                error={state.error}
+                hasData={true} // this tile will always have some data
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.LexOverviewTileView>
                     <LexOverviewHeader
                         tileId={props.tileId}
-                        selectedItemIdx={state.selectedSrchItemIdx}
-                        selectedVariantIdx={state.selectedSrchVariantIdx}
-                        items={state.data.search.items}
-                        backupTitle={state.queryMatch.lemma}
+                        selectedVariantIdent={state.selectedVariantIdent}
+                        selectedVariant={selectedVariant}
+                        variants={state.variants}
                     />
-                    {overview ?
+                    {state.mainSource !== undefined ? (
                         <LexOverviewBasics
-                            pronunciation={overview.pronunciation}
-                            partOfSpeach={overview.partOfSpeach}
-                            source={overview.source}
-                        /> :
-                        null
-                    }
+                            tileId={props.tileId}
+                            source={state.mainSource}
+                            selectedVariant={selectedVariant}
+                            basicOverview={basicOverview}
+                        />
+                    ) : null}
 
-                    {state.data.lguideData ?
-                        <langGuideViews.Subtile data={state.data.lguideData} /> :
-                        null
-                    }
-                    <corpusViews.Subtile data={state.queryMatch} />
+                    {state.data.ijp ? (
+                        <ijpViews.Subtile
+                            tileId={props.tileId}
+                            data={state.data.ijp}
+                        />
+                    ) : null}
+
+                    {selectedVariant.corpusEntry ? (
+                        <corpusViews.Subtile
+                            tileId={props.tileId}
+                            corpname={state.referenceCorpus}
+                            data={{
+                                abs: selectedVariant.corpusEntry.count,
+                                ipm: selectedVariant.corpusEntry.ipm,
+                            }}
+                        />
+                    ) : (
+                        <corpusViews.Subtile
+                            tileId={props.tileId}
+                            corpname={state.referenceCorpus}
+                        />
+                    )}
                 </S.LexOverviewTileView>
             </globalComponents.TileWrapper>
         );
-    }
+    };
 
     return LexOverviewTileView;
 }

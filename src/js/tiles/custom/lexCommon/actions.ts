@@ -18,15 +18,6 @@
 
 import { Action } from 'kombo';
 import { Actions as GlobalActions } from '../../../models/actions.js';
-import { Source } from '../lexCommon/types/enums.js';
-import { IJPData } from '../lexCommon/types/ijp.js';
-import { HTMLBlock } from '../lexCommon/types/assc.js';
-
-export interface PartialDataPayload {
-    source: Source;
-    id: string;
-    data: IJPData | Array<HTMLBlock>;
-}
 
 export class Actions {
     static TileDataLoaded: Action<typeof GlobalActions.TileDataLoaded.payload> =
@@ -34,9 +25,21 @@ export class Actions {
             name: GlobalActions.TileDataLoaded.name,
         };
 
-    static TilePartialDataLoaded: Action<
-        typeof GlobalActions.TilePartialDataLoaded.payload & PartialDataPayload
-    > = {
-        name: GlobalActions.TilePartialDataLoaded.name,
+    static SelectItemVariant: Action<{
+        tileId: number;
+        variantIdent: string;
+        initial?: boolean;
+    }> = {
+        name: 'LEX_COMMON_SELECT_ITEM_VARIANT',
     };
+
+    static isSelectItemVariant(
+        a: Action
+    ): a is typeof Actions.SelectItemVariant {
+        return (
+            a.name === Actions.SelectItemVariant.name &&
+            typeof a.payload['tileId'] === 'number' &&
+            typeof a.payload['variantIdent'] === 'string'
+        );
+    }
 }

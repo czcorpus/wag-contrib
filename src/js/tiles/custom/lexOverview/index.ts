@@ -1,6 +1,6 @@
 /*
- * Copyright 2022 Martin Zimandl <martin.zimandl@gmail.com>
- * Copyright 2022 Institute of the Czech National Corpus,
+ * Copyright 2026 Martin Zimandl <martin.zimandl@gmail.com>
+ * Copyright 2026 Institute of the Czech National Corpus,
  *                Faculty of Arts, Charles University
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,149 +18,217 @@
 import { IActionDispatcher } from 'kombo';
 
 import { IAppServices } from '../../../appServices.js';
-import { findCurrQueryMatch, LemmatizationLevel, QueryType } from '../../../query/index.js';
+import {
+    findCurrQueryMatch,
+    LemmatizationLevel,
+    QueryType,
+} from '../../../query/index.js';
 import { init as viewInit } from './views/views.js';
 import {
-    TileConf, ITileProvider, TileComponent, TileFactory,
-    TileFactoryArgs, DEFAULT_ALT_VIEW_ICON, ITileReloader, AltViewIconProps, lemLevelSupport } from '../../../page/tile.js';
+    TileConf,
+    ITileProvider,
+    TileComponent,
+    TileFactory,
+    TileFactoryArgs,
+    DEFAULT_ALT_VIEW_ICON,
+    ITileReloader,
+    AltViewIconProps,
+    lemLevelSupport,
+} from '../../../page/tile.js';
 import { LexOverviewModel } from './model.js';
-import { LexApi } from './api.js';
-import { createEmptyData } from './common.js';
-
+import { Dict, List, pipe, tuple } from 'cnc-tskit';
+import { Source } from '../lexCommon/types/enums.js';
+import { isLexQueryMatch, LexItem } from '../lexCommon/types/dictionary.js';
 
 export interface LexOverviewTileConf extends TileConf {
-    apiURL:string;
+    sourcePriority: Array<Source>;
+    referenceCorpus: string;
 }
 
-export class LexOverviewBookTile implements ITileProvider {
+export class LexOverviewTile implements ITileProvider {
+    private readonly tileId: number;
 
-    private readonly tileId:number;
+    private readonly dispatcher: IActionDispatcher;
 
-    private readonly dispatcher:IActionDispatcher;
+    private readonly appServices: IAppServices;
 
-    private readonly appServices:IAppServices;
+    private readonly model: LexOverviewModel;
 
-    private readonly model:LexOverviewModel;
+    private readonly widthFract: number;
 
-    private readonly widthFract:number;
+    private view: TileComponent;
 
-    private readonly api:LexApi;
+    private readonly readDataFromTile: number;
 
-    private view:TileComponent;
-
-    private readonly configuredLemLevels:Array<LemmatizationLevel>;
+    private readonly configuredLemLevels: Array<LemmatizationLevel>;
 
     constructor({
-        tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
-        queryMatches, readDataFromTile}:TileFactoryArgs<LexOverviewTileConf>
-    ) {
+        tileId,
+        dispatcher,
+        appServices,
+        ut,
+        theme,
+        widthFract,
+        conf,
+        isBusy,
+        queryMatches,
+        readDataFromTile,
+    }: TileFactoryArgs<LexOverviewTileConf>) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
         this.configuredLemLevels = conf.lemmatizationLevels || [];
-        this.api = new LexApi(conf.apiURL, appServices);
+        this.readDataFromTile = readDataFromTile;
+
+        const currQueryMatch = findCurrQueryMatch(queryMatches[0]);
+        var variants: Array<LexItem> = [];
+        var mainSource: Source = undefined;
+        if (isLexQueryMatch(currQueryMatch)) {
+            // choose variants according to source priority
+            for (const source of conf.sourcePriority) {
+                const sourceItems = pipe(
+                    currQueryMatch.extraData,
+                    List.filter((item) => Dict.hasKey(source, item.sources))
+                );
+                if (!List.empty(sourceItems)) {
+                    variants = sourceItems;
+                    mainSource = source;
+                    break;
+                }
+            }
+
+            // in case no variants available, use corpus data
+            if (List.empty(variants)) {
+                variants = [
+                    {
+                        ident: currQueryMatch.lemma,
+                        lemma: currQueryMatch.lemma,
+                        pos: currQueryMatch.pos[0].value,
+                        corpusEntry: {
+                            count: currQueryMatch.abs,
+                            ipm: currQueryMatch.ipm,
+                        },
+                    } as LexItem,
+                ];
+                mainSource = Source.Corpus;
+            }
+        } else if (!currQueryMatch.lemma) {
+            // empty data
+            variants = [
+                {
+                    ident: currQueryMatch.word,
+                    lemma: currQueryMatch.word,
+                } as LexItem,
+            ];
+        }
+
         this.model = new LexOverviewModel({
             dispatcher,
             appServices,
-            api: this.api,
-            queryMatches,
             tileId,
+            readDataFromTile:
+                typeof readDataFromTile === 'number' ? readDataFromTile : null,
             initState: {
                 isBusy: isBusy,
-                queryMatch: findCurrQueryMatch(queryMatches[0]),
-                selectedSrchItemIdx: -1,
-                selectedSrchVariantIdx: -1,
-                data: createEmptyData(),
+                queryMatch: currQueryMatch,
+                referenceCorpus: conf.referenceCorpus,
+                mainSource,
+                variants,
+                selectedVariantIdent: !List.empty(variants)
+                    ? variants[0].ident
+                    : undefined,
+                data: {
+                    assc: null,
+                    ijp: null,
+                },
                 error: undefined,
                 backlink: undefined,
-            }
+            },
         });
-        this.view = viewInit(
-            this.dispatcher,
-            ut,
-            theme,
-            this.model
-        );
+        this.view = viewInit(this.dispatcher, ut, theme, this.model);
     }
 
-    getIdent():number {
+    getIdent(): number {
         return this.tileId;
     }
 
-    getLabel():string {
+    getLabel(): string {
         return null;
     }
 
-    getView():TileComponent {
+    getView(): TileComponent {
         return this.view;
     }
 
-    getSourceInfoComponent():null {
+    getSourceInfoComponent(): null {
         return null;
     }
 
-    supportsQueryType(qt:QueryType, domain1:string, domain2?:string):boolean {
+    supportsQueryType(
+        qt: QueryType,
+        domain1: string,
+        domain2?: string
+    ): boolean {
         return qt === 'single';
     }
 
-    disable():void {
-        this.model.waitForAction({}, (_, syncData)=>syncData);
+    disable(): void {
+        this.model.waitForAction({}, (_, syncData) => syncData);
     }
 
-    getWidthFract():number {
+    getWidthFract(): number {
         return this.widthFract;
     }
 
-    supportsTweakMode():boolean {
+    supportsTweakMode(): boolean {
         return false;
     }
 
-    supportsAltView():boolean {
+    supportsAltView(): boolean {
         return false;
     }
 
-    supportsSVGFigureSave():boolean {
+    supportsSVGFigureSave(): boolean {
         return false;
     }
 
-    registerReloadModel(model:ITileReloader):boolean {
+    registerReloadModel(model: ITileReloader): boolean {
         model.registerModel(this, this.model);
         return true;
     }
 
-    getBlockingTiles():Array<number> {
+    getBlockingTiles(): Array<number> {
         return [];
     }
 
-    supportsMultiWordQueries():boolean {
+    supportsMultiWordQueries(): boolean {
         return false;
     }
 
-    getIssueReportingUrl():null {
+    getIssueReportingUrl(): null {
         return null;
     }
 
-    getAltViewIcon():AltViewIconProps {
+    getAltViewIcon(): AltViewIconProps {
         return DEFAULT_ALT_VIEW_ICON;
     }
 
-    getReadDataFrom():number|null {
-        return null;
+    getReadDataFrom(): number | null {
+        return this.readDataFromTile;
     }
 
-    hideOnNoData():boolean {
+    hideOnNoData(): boolean {
         return false;
     }
 
-    supportsLemmatizationLevel(ll:LemmatizationLevel):boolean {
+    supportsLemmatizationLevel(ll: LemmatizationLevel): boolean {
         return lemLevelSupport(this.configuredLemLevels, ll);
     }
 }
 
-export const init:TileFactory<LexOverviewTileConf> = {
-
+export const init: TileFactory<LexOverviewTileConf> = {
     sanityCheck: (args) => [],
 
-    create: (args) => new LexOverviewBookTile(args)
+    create: (args) => new LexOverviewTile(args),
 };

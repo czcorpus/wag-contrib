@@ -1,6 +1,6 @@
 /*
- * Copyright 2022 Martin Zimandl <martin.zimandl@gmail.com>
- * Copyright 2022 Institute of the Czech National Corpus,
+ * Copyright 2026 Martin Zimandl <martin.zimandl@gmail.com>
+ * Copyright 2026 Institute of the Czech National Corpus,
  *                Faculty of Arts, Charles University
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,18 +18,22 @@
 
 import { Action } from 'kombo';
 import { Actions as GlobalActions } from '../../../models/actions.js';
-import { VariantData, MeaningData } from '../lexOverview/commonAssc.js';
+import { HTMLBlock } from '../lexCommon/types/assc.js';
 
-
-export interface DataLoadedPayload {
-    variants: Array<VariantData>; 
-    meanings: Array<MeaningData>;
+export interface PartialDataPayload {
+    id: string;
+    data: HTMLBlock[];
 }
 
 export class Actions {
+    static TileDataLoaded: Action<typeof GlobalActions.TileDataLoaded.payload> =
+        {
+            name: GlobalActions.TileDataLoaded.name,
+        };
 
-    static TileDataLoaded:Action<typeof GlobalActions.TileDataLoaded.payload & DataLoadedPayload> = {
-        name: GlobalActions.TileDataLoaded.name
+    static TilePartialDataLoaded: Action<
+        typeof GlobalActions.TilePartialDataLoaded.payload & PartialDataPayload
+    > = {
+        name: GlobalActions.TilePartialDataLoaded.name,
     };
-
 }

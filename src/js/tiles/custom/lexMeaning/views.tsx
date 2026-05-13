@@ -1,6 +1,6 @@
 /*
- * Copyright 2022 Martin Zimandl <martin.zimandl@gmail.com>
- * Copyright 2022 Institute of the Czech National Corpus,
+ * Copyright 2026 Martin Zimandl <martin.zimandl@gmail.com>
+ * Copyright 2026 Institute of the Czech National Corpus,
  *                Faculty of Arts, Charles University
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { List } from 'cnc-tskit';
+import { List, pipe } from 'cnc-tskit';
 import { IActionDispatcher, ViewUtils, useModel } from 'kombo';
 import * as React from 'react';
 import { Theme } from '../../../page/theme.js';
@@ -24,62 +24,101 @@ import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
 import { LexMeaningModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
-import { VariantData, MeaningData } from '../lexOverview/commonAssc.js';
-
+import { HTMLBlock } from '../lexCommon/types/assc.js';
+import { SubtileRow } from '../lexCommon/style.js';
+import { Source } from '../lexCommon/types/enums.js';
+import { initViewSubtile } from '../lexCommon/views.js';
 
 export function init(
-    dispatcher:IActionDispatcher,
-    ut:ViewUtils<GlobalComponents>,
-    theme:Theme,
-    model:LexMeaningModel
-):TileComponent {
-
+    dispatcher: IActionDispatcher,
+    ut: ViewUtils<GlobalComponents>,
+    theme: Theme,
+    model: LexMeaningModel
+): TileComponent {
     const globalComponents = ut.getComponents();
+    const Subtile = initViewSubtile(dispatcher, ut);
 
-    // -------------------- <UjcDictionaryTileView /> -----------------------------------------------
+    // -------------------- <LexMeaningTileView /> -----------------------------------------------
 
     const LexMeaningTileView: React.FC<CoreTileComponentProps> = (props) => {
-
         const state = useModel(model);
 
-        const renderDataItem = (variants: Array<VariantData>, meanings: Array<MeaningData>, i: number) => {
-            return <div>
-                {i > 0 ? <hr/> : null}
-                <S.MeaningHeading>
-                    <span className='key'>pro slovo:</span>
-                    {List.map((variant, i) =>
-                        <>
-                            {i>0 ? <span> /</span> : null}
-                            <span className='word'>{variant.key}</span>
-                            <span className='pos'>{variant.pos}</span>
-                        </>
-                    , variants)}
-                </S.MeaningHeading>
-                {List.map((v, i) => <S.MeaningBlock>
-                    <div>{i+1}. <span className='attachement'>{v.attachement}</span></div>
-                    <div className='explanation'>{v.explanation}</div>
-                    <div className='examples'>
-                        {List.flatMap(e => List.map(x => <div className='example'>{x}</div>, e.data), v.examples)}
-                    </div>
-                </S.MeaningBlock>,
-                meanings)}
-            </div>
-        }
+        const renderDataItem = (
+            key: string,
+            data: HTMLBlock,
+            isParent: boolean
+        ) => {
+            return (
+                <S.MeaningItem key={key} className={isParent ? 'parent' : ''}>
+                    <S.MeaningHeading>
+                        <span className="key">pro slovo:</span>
+                        {pipe(
+                            data.variants,
+                            List.map((variant, i) => (
+                                <>
+                                    {i > 0 ? <span> /</span> : null}
+                                    <span className="word">
+                                        {variant.key} {variant.homonym}
+                                    </span>
+                                    <span className="pos">{variant.pos}</span>
+                                </>
+                            ))
+                        )}
+                    </S.MeaningHeading>
+                    {List.map(
+                        (v, i) => (
+                            <S.MeaningBlock
+                                key={i}
+                                dangerouslySetInnerHTML={{ __html: v }}
+                            />
+                        ),
+                        data.meanings
+                    )}
+                </S.MeaningItem>
+            );
+        };
 
         return (
-            <globalComponents.TileWrapper tileId={props.tileId} isBusy={state.isBusy} error={state.error}
-                hasData={!!state.variants && state.meanings.length > 0}
+            <globalComponents.TileWrapper
+                tileId={props.tileId}
+                isBusy={state.isBusy}
+                error={state.error}
+                hasData={state.data.length > 0}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.MeaningTileView>
-                    <S.MeaningBox>
-                        {state.variants ? renderDataItem(state.variants, state.meanings, 0) : null}
-                    </S.MeaningBox>
+                    <Subtile
+                        tileId={props.tileId}
+                        source={Source.ASSC}
+                        className="stretch"
+                    >
+                        <SubtileRow className="scroller">
+                            {List.flatMap(
+                                (d, i) =>
+                                    List.map((block, j) => {
+                                        const isParent = j > 0;
+                                        return (
+                                            <>
+                                                {i > 0 && j === 0 ? (
+                                                    <hr />
+                                                ) : null}
+                                                {renderDataItem(
+                                                    `item-${i}-${j}`,
+                                                    block,
+                                                    isParent
+                                                )}
+                                            </>
+                                        );
+                                    }, d.blocks),
+                                state.data
+                            )}
+                        </SubtileRow>
+                    </Subtile>
                 </S.MeaningTileView>
             </globalComponents.TileWrapper>
         );
-    }
+    };
 
     return LexMeaningTileView;
 }

@@ -1,6 +1,6 @@
 /*
- * Copyright 2026 Martin Zimandl <martin.zimandl@gmail.com>
- * Copyright 2026 Institute of the Czech National Corpus,
+ * Copyright 2022 Martin Zimandl <martin.zimandl@gmail.com>
+ * Copyright 2022 Institute of the Czech National Corpus,
  *                Faculty of Arts, Charles University
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,40 +22,41 @@ import { Backlink } from '../../../page/tile.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { Actions as CommonActions } from '../lexCommon/actions.js';
-import { List } from 'cnc-tskit';
-import { RecognizedQueries } from '../../../query/index.js';
+import { List, pipe } from 'cnc-tskit';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
-import { isAsscData, isDoneData, LexResponse } from '../lexCommon/api.js';
+import {
+    isAsscData,
+    isDoneData,
+    isIjpData,
+    LexResponse,
+} from '../lexCommon/api.js';
 import { reduce } from 'rxjs';
 import { Source } from '../lexCommon/types/enums.js';
 
-export interface LexMeaningModelState {
+export interface LexNotesModelState {
     isBusy: boolean;
     selectedVariantIdent: string;
-    mainTile: number;
-    data: Array<{
-        blocks: HTMLBlock[];
-    }>;
+    notes: {
+        ijp: Array<string>;
+        assc: Array<string>;
+    };
     error: string;
     backlink: Backlink;
 }
 
-export interface LexMeaningModelArgs {
+export interface LexNotesModelArgs {
     dispatcher: IActionQueue;
-    initState: LexMeaningModelState;
+    initState: LexNotesModelState;
     tileId: number;
     appServices: IAppServices;
-    queryMatches: RecognizedQueries;
     readDataFromTile: number | null;
 }
 
-export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
+export class LexNotesModel extends StatelessModel<LexNotesModelState> {
     private readonly tileId: number;
 
     private readonly appServices: IAppServices;
-
-    private readonly queryMatches: RecognizedQueries;
 
     private readonly readDataFromTile: number | null;
 
@@ -64,13 +65,11 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
         initState,
         tileId,
         appServices,
-        queryMatches,
         readDataFromTile,
-    }: LexMeaningModelArgs) {
+    }: LexNotesModelArgs) {
         super(dispatcher, initState);
         this.tileId = tileId;
         this.appServices = appServices;
-        this.queryMatches = queryMatches;
         this.readDataFromTile = readDataFromTile;
 
         this.addActionHandler(
@@ -78,7 +77,10 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
             (state, action) => {
                 state.error = null;
                 state.backlink = null;
-                state.data = [];
+                state.notes = {
+                    ijp: [],
+                    assc: [],
+                };
                 state.isBusy = true;
             },
             (state, action, dispatch) => {
@@ -101,7 +103,14 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
             Actions.TilePartialDataLoaded,
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
-                state.data.push({ blocks: action.payload.data });
+                switch (action.payload.source) {
+                    case Source.IJP:
+                        state.notes.ijp.push(...action.payload.notes);
+                        break;
+                    case Source.ASSC:
+                        state.notes.assc.push(...action.payload.notes);
+                        break;
+                }
             }
         );
 
@@ -123,7 +132,10 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                 state.selectedVariantIdent = action.payload.variantIdent;
                 if (!action.payload.initial) {
                     state.isBusy = true;
-                    state.data = [];
+                    state.notes = {
+                        ijp: [],
+                        assc: [],
+                    };
                 }
             },
             (state, action, dispatch) => {
@@ -165,40 +177,59 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
             .pipe(
                 reduce(
                     (data, resp) => {
-                        if (data.done) {
+                        if (data.done.assc && data.done.ijp) {
                             return data;
-                        } else if (
-                            isDoneData(resp) &&
-                            resp.source === Source.ASSC
-                        ) {
-                            data.done === true;
-                            dispatch<typeof Actions.TileDataLoaded>({
-                                name: Actions.TileDataLoaded.name,
-                                payload: {
-                                    tileId: this.tileId,
-                                    isEmpty: !data.hasData,
-                                },
-                            });
+                        } else if (isDoneData(resp)) {
+                            if (resp.source === Source.ASSC) {
+                                data.done.assc = true;
+                            } else if (resp.source === Source.IJP) {
+                                data.done.ijp = true;
+                            }
+
+                            if (data.done.assc && data.done.ijp) {
+                                dispatch<typeof Actions.TileDataLoaded>({
+                                    name: Actions.TileDataLoaded.name,
+                                    payload: {
+                                        tileId: this.tileId,
+                                        isEmpty: !data.hasData,
+                                    },
+                                });
+                            }
                         } else if (isAsscData(resp)) {
                             const filteredData = this.filterASSCResultsByIDs(
                                 resp.id,
                                 resp.data
                             );
-                            if (List.size(filteredData) > 0) {
+                            const notes = pipe(
+                                filteredData,
+                                List.flatMap((v) => v.notes),
+                                List.filter((v) => !!v)
+                            );
+                            if (List.size(notes) > 0) {
                                 dispatch<typeof Actions.TilePartialDataLoaded>({
                                     name: Actions.TilePartialDataLoaded.name,
                                     payload: {
                                         tileId: this.tileId,
-                                        id: resp.id,
-                                        data: filteredData,
+                                        source: Source.ASSC,
+                                        notes,
                                     },
                                 });
                                 data.hasData = true;
                             }
+                        } else if (isIjpData(resp) && resp.data.notes) {
+                            dispatch<typeof Actions.TilePartialDataLoaded>({
+                                name: Actions.TilePartialDataLoaded.name,
+                                payload: {
+                                    tileId: this.tileId,
+                                    source: Source.IJP,
+                                    notes: resp.data.notes,
+                                },
+                            });
+                            data.hasData = true;
                         }
                         return data;
                     },
-                    { hasData: false, done: false }
+                    { hasData: false, done: { assc: false, ijp: false } }
                 )
             )
             .subscribe({

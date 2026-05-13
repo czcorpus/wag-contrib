@@ -1,6 +1,6 @@
 /*
- * Copyright 2022 Martin Zimandl <martin.zimandl@gmail.com>
- * Copyright 2022 Institute of the Czech National Corpus,
+ * Copyright 2026 Martin Zimandl <martin.zimandl@gmail.com>
+ * Copyright 2026 Institute of the Czech National Corpus,
  *                Faculty of Arts, Charles University
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,114 +19,131 @@
 import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
-import { findCurrQueryMatch, QueryMatch, RecognizedQueries } from '../../../query/index.js';
+import { QueryMatch, RecognizedQueries } from '../../../query/index.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
+import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { Actions } from './actions.js';
-import { List, pipe } from 'cnc-tskit';
-import { LexApi, LexArgs } from './api.js';
-import { AggregateData, createEmptyData } from './common.js';
-import { DataStructure as LGuideDataStructure} from './commonLguide.js';
 
+import { IDataStreaming } from '../../../page/streaming.js';
+import { List } from 'cnc-tskit';
+import { HTMLBlock } from '../lexCommon/types/assc.js';
+import { Source } from '../lexCommon/types/enums.js';
+import { LexItem } from '../lexCommon/types/dictionary.js';
+import {
+    isAsscData,
+    isDoneData,
+    isIjpData,
+    LexResponse,
+} from '../lexCommon/api.js';
+import { IJPData } from '../lexCommon/types/ijp.js';
+import { reduce } from 'rxjs';
+
+interface Data {
+    assc: HTMLBlock;
+    ijp: IJPData;
+}
 
 export interface LexOverviewModelState {
-    isBusy:boolean;
-    queryMatch:QueryMatch;
-    selectedSrchItemIdx:number;
-    selectedSrchVariantIdx:number;
-    data:AggregateData;
-    error:string;
-    backlink:Backlink;
+    isBusy: boolean;
+    queryMatch: QueryMatch;
+    referenceCorpus: string;
+    mainSource: Source;
+    variants: Array<LexItem>;
+    selectedVariantIdent: string;
+    data: Data;
+    error: string;
+    backlink: Backlink;
 }
 
 export interface LexOverviewModelArgs {
-    dispatcher:IActionQueue;
-    initState:LexOverviewModelState;
-    tileId:number;
-    api: LexApi;
-    appServices:IAppServices;
-    queryMatches:RecognizedQueries;
+    dispatcher: IActionQueue;
+    initState: LexOverviewModelState;
+    tileId: number;
+    appServices: IAppServices;
+    readDataFromTile: number | null;
 }
 
 export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
+    private readonly tileId: number;
 
-    private readonly tileId:number;
+    private readonly appServices: IAppServices;
 
-    private readonly api:LexApi;
+    private readonly readDataFromTile: number | null;
 
-    private readonly appServices:IAppServices;
-
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches}:LexOverviewModelArgs) {
+    constructor({
+        dispatcher,
+        initState,
+        tileId,
+        appServices,
+        readDataFromTile,
+    }: LexOverviewModelArgs) {
         super(dispatcher, initState);
         this.tileId = tileId;
         this.appServices = appServices;
-        this.api = api;
+        this.readDataFromTile = readDataFromTile;
 
         this.addActionHandler(
             GlobalActions.RequestQueryResponse,
             (state, action) => {
-                state.isBusy = true;
-                state.data = createEmptyData();
                 state.error = undefined;
                 state.backlink = undefined;
+                state.isBusy = true;
             },
             (state, action, dispatch) => {
-                const match = findCurrQueryMatch(List.head(queryMatches));
-                this.loadData(dispatch, match.lemma || match.word);
+                dispatch<typeof CommonActions.SelectItemVariant>({
+                    name: CommonActions.SelectItemVariant.name,
+                    payload: {
+                        tileId: this.tileId,
+                        variantIdent: state.selectedVariantIdent,
+                        initial: true,
+                    },
+                });
+                this.loadData(this.appServices.dataStreaming(), dispatch);
             }
         );
 
         this.addActionSubtypeHandler(
-            Actions.TileDataLoaded,
-            action => action.payload?.tileId === this.tileId,
+            Actions.TilePartialDataLoaded,
+            (action) => action.payload.tileId === this.tileId,
             (state, action) => {
-                state.isBusy = false;
-                if (action.error) {
-                    state.error = action.error.message;
-
-                } if (action.payload) {
-                    state.data = action.payload.aggregate;
-                    if (state.data.search !== null) {
-                        state.selectedSrchItemIdx = 0;
-                        state.selectedSrchVariantIdx = 0;
+                // get only first assc data
+                if (isAsscData(action.payload)) {
+                    // get only block containig word with the correct id
+                    const block = List.find(
+                        (block) =>
+                            List.some(
+                                (variant) =>
+                                    'hid-' + action.payload.id === variant.id,
+                                block.variants
+                            ),
+                        action.payload.data
+                    );
+                    if (block) {
+                        state.data.assc = block;
                     }
+                }
+
+                // get only first ijp data
+                if (isIjpData(action.payload)) {
+                    state.data.ijp = action.payload.data;
                 }
             }
         );
 
         this.addActionSubtypeHandler(
-            GlobalActions.GetSourceInfo,
-            action => action.payload?.tileId === this.tileId,
-            null,
-            (state, action, dispatch) => {
-                this.api.getSourceDescription(
-                    this.appServices.dataStreaming(),
-                    this.tileId,
-                    this.appServices.getISO639UILang(),
-                    ''
-                ).subscribe({
-                    next: (data) => {
-                        dispatch({
-                            name: GlobalActions.GetSourceInfoDone.name,
-                            payload: {
-                                data: data
-                            }
-                        });
-                    },
-                    error: (err) => {
-                        console.error(err);
-                        dispatch({
-                            name: GlobalActions.GetSourceInfoDone.name,
-                            error: err
-
-                        });
-                    }
-                });
+            Actions.TileDataLoaded,
+            (action) => action.payload.tileId === this.tileId,
+            (state, action) => {
+                state.isBusy = false;
+                if (action.error) {
+                    state.error = action.error.message;
+                }
             }
         );
 
         this.addActionSubtypeHandler(
             GlobalActions.FollowBacklink,
-            action => action.payload?.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
                 const backlinkUrl = new URL('https://prirucka.ujc.cas.cz/');
@@ -142,220 +159,123 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
         );
 
         this.addActionSubtypeHandler(
-            Actions.SelectItemVariant,
-            action => action.payload?.tileId === this.tileId,
+            CommonActions.SelectItemVariant,
+            (action) => action.payload.tileId === this.tileId,
             (state, action) => {
-                const selectedVariant = state.data.search.items[action.payload.itemIdx][action.payload.variantIdx];
-                if (selectedVariant.itemIdx >= 0) {
-                    state.selectedSrchItemIdx = action.payload.itemIdx;
-                    state.selectedSrchVariantIdx = action.payload.variantIdx;
-                } else {
+                state.selectedVariantIdent = action.payload.variantIdent;
+                if (!action.payload.initial) {
+                    state.data = {
+                        assc: null,
+                        ijp: null,
+                    };
                     state.isBusy = true;
                 }
             },
             (state, action, dispatch) => {
-                const selectedVariant = state.data.search.items[action.payload.itemIdx][action.payload.variantIdx];
-                if (selectedVariant.itemIdx >= 0 && state.data.search.source === 'assc') {
-                    dispatch<typeof Actions.SendActiveMeaningData>({
-                        name: Actions.SendActiveMeaningData.name,
+                if (!action.payload.initial) {
+                    this.waitForAction({}, (action, data) => {
+                        if (
+                            GlobalActions.isTileSubgroupReady(action) &&
+                            action.payload.mainTileId === this.readDataFromTile
+                        ) {
+                            return null;
+                        }
+                        return data;
+                    }).subscribe({
+                        next: (action) => {
+                            if (GlobalActions.isTileSubgroupReady(action)) {
+                                this.loadData(
+                                    this.appServices
+                                        .dataStreaming()
+                                        .getSubgroup(action.payload.subgroupId),
+                                    dispatch
+                                );
+                            }
+                        },
+                    });
+                }
+            }
+        );
+    }
+
+    private loadData(streaming: IDataStreaming, dispatch: SEDispatcher) {
+        streaming
+            .registerTileRequest<LexResponse>({
+                tileId: this.tileId,
+                queryIdx: 0, // TODO
+                otherTileId: this.readDataFromTile,
+                otherTileQueryIdx: 0, // TODO
+                contentType: 'application/json',
+            })
+            .pipe(
+                reduce(
+                    (data, resp) => {
+                        if (data.done.assc && data.done.ijp) {
+                            return data;
+                        } else if (isDoneData(resp)) {
+                            if (resp.source === Source.ASSC) {
+                                data.done.assc = true;
+                            } else if (resp.source === Source.IJP) {
+                                data.done.ijp = true;
+                            }
+                        } else if (isAsscData(resp) && !data.done.assc) {
+                            dispatch<typeof Actions.TilePartialDataLoaded>({
+                                name: Actions.TilePartialDataLoaded.name,
+                                payload: {
+                                    tileId: this.tileId,
+                                    ...resp,
+                                },
+                            });
+                            data.hasData = true;
+                            data.done.assc = true;
+                        } else if (isIjpData(resp) && !data.done.ijp) {
+                            dispatch<typeof Actions.TilePartialDataLoaded>({
+                                name: Actions.TilePartialDataLoaded.name,
+                                payload: {
+                                    tileId: this.tileId,
+                                    ...resp,
+                                },
+                            });
+                            data.hasData = true;
+                            data.done.ijp = true;
+                        }
+
+                        if (data.done.assc && data.done.ijp) {
+                            dispatch<typeof Actions.TileDataLoaded>({
+                                name: Actions.TileDataLoaded.name,
+                                payload: {
+                                    tileId: this.tileId,
+                                    isEmpty: false, // this tile is never empty
+                                },
+                            });
+                        }
+
+                        return data;
+                    },
+                    { hasData: false, done: { assc: false, ijp: false } }
+                )
+            )
+            .subscribe({
+                next: (data) => {
+                    dispatch<typeof Actions.TileDataLoaded>({
+                        name: Actions.TileDataLoaded.name,
                         payload: {
                             tileId: this.tileId,
-                            variants: [state.data.asscData.items[selectedVariant.itemIdx].variants[selectedVariant.variantIdx]],
-                            meanings: state.data.asscData.items[selectedVariant.itemIdx].meanings,
-                        }
+                            isEmpty: !data.hasData,
+                        },
                     });
-
-                } else if (state.data.search.source === 'assc') {
-                    this.loadASSCData(dispatch, state, action.payload?.itemIdx, action.payload?.variantIdx);
-
-                } else if (state.data.search.source === 'lguide') {
-                    this.loadLGuideData(dispatch, state, action.payload?.itemIdx, action.payload?.variantIdx);
-
-                }
-            }
-        );
-
-        this.addActionSubtypeHandler(
-            Actions.ASSCDataLoaded,
-            action => action.payload?.tileId === this.tileId,
-            (state, action) => {
-                state.isBusy = false;
-                if (action.error) {
-                    state.error = action.error.message;
-
-                } if (action.payload) {
-                    state.data.asscData.items = action.payload.items;
-                    state.data.search.items = action.payload.variants;
-                    state.selectedSrchItemIdx = action.payload.selectedItemIdx;
-                    state.selectedSrchVariantIdx = action.payload.selectedVariantIdx;
-                }
-            }
-        );
-
-        this.addActionSubtypeHandler(
-            Actions.LGuideDataLoaded,
-            action => action.payload?.tileId === this.tileId,
-            (state, action) => {
-                state.isBusy = false;
-                if (action.error) {
-                    state.error = action.error.message;
-
-                } if (action.payload) {
-                    state.data.lguideData = action.payload.data;
-                    state.selectedSrchItemIdx = action.payload.selectedItemIdx;
-                    state.selectedSrchVariantIdx = action.payload.selectedVariantIdx;
-                }
-            }
-        );
-    }
-
-    private loadData(dispatch:SEDispatcher, term:string) {
-        const args:LexArgs = {
-            term,
-        };
-        this.api.call(
-            this.appServices.dataStreaming(),
-            this.tileId,
-            0,
-            args,
-        ).subscribe({
-            next: data => {
-                dispatch<typeof Actions.TileDataLoaded>({
-                    name: Actions.TileDataLoaded.name,
-                    payload: {
-                        tileId: this.tileId,
-                        isEmpty: false,
-                        aggregate: data
-                    }
-                });
-            },
-            error: error => {
-                console.error(error);
-                dispatch<typeof Actions.TileDataLoaded>({
-                    name: Actions.TileDataLoaded.name,
-                    error,
-                    payload: {
-                        tileId: this.tileId,
-                        isEmpty: true,
-                        aggregate: createEmptyData(),
-                    }
-                });
-            }
-        });
-    }
-
-    private loadASSCData(dispatch:SEDispatcher, state:LexOverviewModelState, selectedItemIdx:number, selectedVariantIdx:number): void {
-        const selectedVariant = state.data.search.items[selectedItemIdx][selectedVariantIdx];
-        this.api.loadASSC(
-            this.appServices.dataStreaming().startNewSubgroup(this.tileId),
-            this.tileId,
-            0,
-            selectedVariant.link,
-        ).subscribe({
-            next: data => {
-                const newItems = state.data.asscData ? [...state.data.asscData?.items] : [];
-                List.forEach(item => {
-                    if (!List.some(existingItem => existingItem.variants[0].id === item.variants[0].id && existingItem.variants[0].key === item.variants[0].key, newItems)) {
-                        newItems.push(item);
-                    }
-                }, data.items);
-                const newVariants = List.map(item => {
-                    return List.map(variant => {
-                        const newVariant = {...variant}
-                        if (variant.itemIdx === -1) {
-                            let count = 0;
-                            for (let i = 0; i < newItems.length; i++) {
-                                for (let j = 0; j < newItems[i].variants.length; j++) {
-                                    if (variant.id === newItems[i].variants[j].id) {
-                                        newVariant.itemIdx = i;
-                                        newVariant.variantIdx = j;
-                                        return newVariant;
-
-                                    } else if (variant.id.startsWith(newItems[i].variants[j].id)) {
-                                        count++;
-                                        if (variant.id === newItems[i].variants[j].id + '-' + count) {
-                                            newVariant.itemIdx = i;
-                                            newVariant.variantIdx = j;
-                                            return newVariant;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        return newVariant;
-                    }, item);
-                }, state.data.search.items);                
-
-                const dataItemIdx = newVariants[selectedItemIdx][selectedVariantIdx].itemIdx;
-                const dataVariantIdx = newVariants[selectedItemIdx][selectedVariantIdx].variantIdx;
-                dispatch<typeof Actions.ASSCDataLoaded>({
-                    name: Actions.ASSCDataLoaded.name,
-                    payload: {
-                        tileId: this.tileId,
-                        selectedItemIdx,
-                        selectedVariantIdx,
-                        items: newItems,
-                        variants: newVariants,
-                    }
-                });
-                dispatch<typeof Actions.SendActiveMeaningData>({
-                    name: Actions.SendActiveMeaningData.name,
-                    payload: {
-                        tileId: this.tileId,
-                        variants: [newItems[dataItemIdx].variants[dataVariantIdx]],
-                        meanings: newItems[dataItemIdx].meanings,
-                    }
-                });
-            },
-            error: error => {
-                console.error(error);
-                dispatch<typeof Actions.ASSCDataLoaded>({
-                    name: Actions.ASSCDataLoaded.name,
-                    error,
-                    payload: {
-                        tileId: this.tileId,
-                        selectedItemIdx: -1,
-                        selectedVariantIdx: -1,
-                        items: [],
-                        variants: [],
-                    }
-                });
-            }
-        });
-    }
-
-    private loadLGuideData(dispatch:SEDispatcher, state:LexOverviewModelState, selectedItemIdx:number, selectedVariantIdx:number): void {
-        const selectedVariant = state.data.search.items[selectedItemIdx][selectedVariantIdx];
-        this.api.loadLGuide(
-            this.appServices.dataStreaming().startNewSubgroup(this.tileId),
-            this.tileId,
-            0,
-            selectedVariant.id,
-        ).subscribe({
-            next: data => {          
-                dispatch<typeof Actions.LGuideDataLoaded>({
-                    name: Actions.LGuideDataLoaded.name,
-                    payload: {
-                        tileId: this.tileId,
-                        selectedItemIdx,
-                        selectedVariantIdx,
-                        data: data,
-                    }
-                });
-            },
-            error: error => {
-                console.error(error);
-                dispatch<typeof Actions.LGuideDataLoaded>({
-                    name: Actions.LGuideDataLoaded.name,
-                    error,
-                    payload: {
-                        tileId: this.tileId,
-                        selectedItemIdx: -1,
-                        selectedVariantIdx: -1,
-                        data: {} as LGuideDataStructure,
-                    }
-                });
-            }
-        });
+                },
+                error: (error) => {
+                    console.error(error);
+                    dispatch<typeof Actions.TileDataLoaded>({
+                        name: Actions.TileDataLoaded.name,
+                        error,
+                        payload: {
+                            tileId: this.tileId,
+                            isEmpty: false,
+                        },
+                    });
+                },
+            });
     }
 }

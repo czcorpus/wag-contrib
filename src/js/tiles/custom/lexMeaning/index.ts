@@ -1,6 +1,6 @@
 /*
- * Copyright 2022 Martin Zimandl <martin.zimandl@gmail.com>
- * Copyright 2022 Institute of the Czech National Corpus,
+ * Copyright 2026 Martin Zimandl <martin.zimandl@gmail.com>
+ * Copyright 2026 Institute of the Czech National Corpus,
  *                Faculty of Arts, Charles University
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,152 +18,173 @@
 import { IActionDispatcher } from 'kombo';
 
 import { IAppServices } from '../../../appServices.js';
-import { LemmatizationLevel, QueryType } from '../../../query/index.js';
+import {
+    findCurrQueryMatch,
+    LemmatizationLevel,
+    QueryType,
+} from '../../../query/index.js';
 import { init as viewInit } from './views.js';
 import {
-    TileConf, ITileProvider, TileComponent, TileFactory,
-    TileFactoryArgs, ITileReloader, DEFAULT_ALT_VIEW_ICON, AltViewIconProps, lemLevelSupport } from '../../../page/tile.js';
+    TileConf,
+    ITileProvider,
+    TileComponent,
+    TileFactory,
+    TileFactoryArgs,
+    ITileReloader,
+    DEFAULT_ALT_VIEW_ICON,
+    AltViewIconProps,
+    lemLevelSupport,
+} from '../../../page/tile.js';
 import { LexMeaningModel } from './model.js';
-import { UjcDictionaryApi } from './api.js';
+import { isLexQueryMatch } from '../lexCommon/types/dictionary.js';
+import { List } from 'cnc-tskit';
 
-
-export interface LexMeaningTileConf extends TileConf {
-    apiURL:string;
-}
+export interface LexMeaningTileConf extends TileConf {}
 
 export class LexMeaningTile implements ITileProvider {
+    private readonly tileId: number;
 
-    private readonly tileId:number;
+    private readonly dispatcher: IActionDispatcher;
 
-    private readonly dispatcher:IActionDispatcher;
+    private readonly appServices: IAppServices;
 
-    private readonly appServices:IAppServices;
+    private readonly model: LexMeaningModel;
 
-    private readonly model:LexMeaningModel;
+    private readonly widthFract: number;
 
-    private readonly widthFract:number;
+    private readonly label: string;
 
-    private readonly label:string;
+    private view: TileComponent;
 
-    private readonly api:UjcDictionaryApi;
+    private readonly readDataFromTile: number;
 
-    private view:TileComponent;
-
-    private readonly configuredLemLevels:Array<LemmatizationLevel>;
+    private readonly configuredLemLevels: Array<LemmatizationLevel>;
 
     constructor({
-        tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
-        queryMatches, readDataFromTile}:TileFactoryArgs<LexMeaningTileConf>
-    ) {
+        tileId,
+        dispatcher,
+        appServices,
+        ut,
+        theme,
+        widthFract,
+        conf,
+        isBusy,
+        queryMatches,
+        readDataFromTile,
+    }: TileFactoryArgs<LexMeaningTileConf>) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
         this.configuredLemLevels = conf.lemmatizationLevels || [];
-        this.api = new UjcDictionaryApi(conf.apiURL, appServices);
+        this.readDataFromTile = readDataFromTile;
+
+        const currQueryMatch = findCurrQueryMatch(queryMatches[0]);
         this.model = new LexMeaningModel({
             dispatcher,
             appServices,
-            api: this.api,
             queryMatches,
             tileId,
+            readDataFromTile:
+                typeof readDataFromTile === 'number' ? readDataFromTile : null,
             initState: {
                 isBusy: isBusy,
-                queries: [],
-                itemId: -1,
-                variants: null,
-                meanings: null,
+                selectedVariantIdent:
+                    isLexQueryMatch(currQueryMatch) &&
+                    !List.empty(currQueryMatch.extraData)
+                        ? currQueryMatch.extraData[0].ident
+                        : undefined,
+                data: [],
                 error: null,
                 backlink: null,
             },
-            readDataFromTile
         });
-        this.label = appServices.importExternalMessage(conf.label || 'lex_meaning__main_label');
-        this.view = viewInit(
-            this.dispatcher,
-            ut,
-            theme,
-            this.model
+        this.label = appServices.importExternalMessage(
+            conf.label || 'lex_meaning__main_label'
         );
+        this.view = viewInit(this.dispatcher, ut, theme, this.model);
     }
 
-    getIdent():number {
+    getIdent(): number {
         return this.tileId;
     }
 
-    getLabel():string {
+    getLabel(): string {
         return this.label;
     }
 
-    getView():TileComponent {
+    getView(): TileComponent {
         return this.view;
     }
 
-    getSourceInfoComponent():null {
+    getSourceInfoComponent(): null {
         return null;
     }
 
-    supportsQueryType(qt:QueryType, domain1:string, domain2?:string):boolean {
+    supportsQueryType(
+        qt: QueryType,
+        domain1: string,
+        domain2?: string
+    ): boolean {
         return qt === 'single';
     }
 
-    disable():void {
-        this.model.waitForAction({}, (_, syncData)=>syncData);
+    disable(): void {
+        this.model.waitForAction({}, (_, syncData) => syncData);
     }
 
-    getWidthFract():number {
+    getWidthFract(): number {
         return this.widthFract;
     }
 
-    supportsTweakMode():boolean {
+    supportsTweakMode(): boolean {
         return false;
     }
 
-    supportsAltView():boolean {
+    supportsAltView(): boolean {
         return false;
     }
 
-    supportsSVGFigureSave():boolean {
+    supportsSVGFigureSave(): boolean {
         return false;
     }
 
-    getAltViewIcon():AltViewIconProps {
+    getAltViewIcon(): AltViewIconProps {
         return DEFAULT_ALT_VIEW_ICON;
     }
 
-    registerReloadModel(model:ITileReloader):boolean {
+    registerReloadModel(model: ITileReloader): boolean {
         model.registerModel(this, this.model);
         return true;
     }
 
-    getBlockingTiles():Array<number> {
+    getBlockingTiles(): Array<number> {
         return [];
     }
 
-    supportsMultiWordQueries():boolean {
+    supportsMultiWordQueries(): boolean {
         return false;
     }
 
-    getIssueReportingUrl():null {
+    getIssueReportingUrl(): null {
         return null;
     }
 
-    getReadDataFrom():number|null {
-        return null;
+    getReadDataFrom(): number | null {
+        return this.readDataFromTile;
     }
 
-    hideOnNoData():boolean {
-        return false;
+    hideOnNoData(): boolean {
+        return true;
     }
 
-    supportsLemmatizationLevel(ll:LemmatizationLevel):boolean {
+    supportsLemmatizationLevel(ll: LemmatizationLevel): boolean {
         return lemLevelSupport(this.configuredLemLevels, ll);
     }
 }
 
-export const init:TileFactory<LexMeaningTileConf> = {
-
+export const init: TileFactory<LexMeaningTileConf> = {
     sanityCheck: (args) => [],
 
-    create: (args) => new LexMeaningTile(args)
+    create: (args) => new LexMeaningTile(args),
 };
