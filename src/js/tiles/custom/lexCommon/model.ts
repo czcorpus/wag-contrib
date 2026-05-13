@@ -24,7 +24,7 @@ import { Actions } from './actions.js';
 import { getCurrentVariant } from './types/dictionary.js';
 import { LexApi } from './api.js';
 import { List } from 'cnc-tskit';
-import { IDataStreaming } from 'src/js/page/streaming.js';
+import { IDataStreaming } from '../../../page/streaming.js';
 
 export interface LexCommonModelState {}
 
