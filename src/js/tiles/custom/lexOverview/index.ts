@@ -36,14 +36,11 @@ import {
     lemLevelSupport,
 } from '../../../page/tile.js';
 import { LexOverviewModel } from './model.js';
-import { Dict, List, pipe, tuple } from 'cnc-tskit';
+import { List } from 'cnc-tskit';
 import { Source } from '../lexCommon/types/enums.js';
 import { isLexQueryMatch, LexItem } from '../lexCommon/types/dictionary.js';
 
-export interface LexOverviewTileConf extends TileConf {
-    sourcePriority: Array<Source>;
-    referenceCorpus: string;
-}
+export interface LexOverviewTileConf extends TileConf {}
 
 export class LexOverviewTile implements ITileProvider {
     private readonly tileId: number;
@@ -84,25 +81,17 @@ export class LexOverviewTile implements ITileProvider {
         const currQueryMatch = findCurrQueryMatch(queryMatches[0]);
         var variants: Array<LexItem> = [];
         var mainSource: Source = undefined;
-        if (isLexQueryMatch(currQueryMatch)) {
-            // choose variants according to source priority
-            for (const source of conf.sourcePriority) {
-                const sourceItems = pipe(
-                    currQueryMatch.extraData,
-                    List.filter((item) => Dict.hasKey(source, item.sources))
-                );
-                if (!List.empty(sourceItems)) {
-                    variants = sourceItems;
-                    mainSource = source;
-                    break;
-                }
-            }
+        var usedCorpus: string = undefined;
+        console.log(currQueryMatch.extraData.data);
 
+        if (isLexQueryMatch(currQueryMatch)) {
+            variants = currQueryMatch.extraData.variants;
+            mainSource = currQueryMatch.extraData.mainSource;
+            usedCorpus = currQueryMatch.extraData.corpusId;
             // in case no variants available, use corpus data
             if (List.empty(variants)) {
                 variants = [
                     {
-                        ident: currQueryMatch.lemma,
                         lemma: currQueryMatch.lemma,
                         pos: currQueryMatch.pos[0].value,
                         corpusEntry: {
@@ -117,11 +106,11 @@ export class LexOverviewTile implements ITileProvider {
             // empty data
             variants = [
                 {
-                    ident: currQueryMatch.word,
                     lemma: currQueryMatch.word,
                 } as LexItem,
             ];
         }
+        console.log(variants);
 
         this.model = new LexOverviewModel({
             dispatcher,
@@ -132,12 +121,10 @@ export class LexOverviewTile implements ITileProvider {
             initState: {
                 isBusy: isBusy,
                 queryMatch: currQueryMatch,
-                referenceCorpus: conf.referenceCorpus,
+                referenceCorpus: usedCorpus,
                 mainSource,
                 variants,
-                selectedVariantIdent: !List.empty(variants)
-                    ? variants[0].ident
-                    : undefined,
+                selectedVariantIdx: 0,
                 data: {
                     assc: null,
                     ijp: null,

@@ -89,11 +89,7 @@ export class LexMeaningTile implements ITileProvider {
                 typeof readDataFromTile === 'number' ? readDataFromTile : null,
             initState: {
                 isBusy: isBusy,
-                selectedVariantIdent:
-                    isLexQueryMatch(currQueryMatch) &&
-                    !List.empty(currQueryMatch.extraData)
-                        ? currQueryMatch.extraData[0].ident
-                        : undefined,
+                selectedVariantIdx: 0,
                 data: [],
                 error: null,
                 backlink: null,

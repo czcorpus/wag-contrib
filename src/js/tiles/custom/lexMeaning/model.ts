@@ -32,7 +32,7 @@ import { Source } from '../lexCommon/types/enums.js';
 
 export interface LexMeaningModelState {
     isBusy: boolean;
-    selectedVariantIdent: string;
+    selectedVariantIdx: number;
     data: Array<{
         blocks: HTMLBlock[];
     }>;
@@ -119,35 +119,31 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
         this.addActionHandler(
             CommonActions.SelectItemVariant,
             (state, action) => {
-                state.selectedVariantIdent = action.payload.variantIdent;
-                if (!action.payload.initial) {
-                    state.isBusy = true;
-                    state.data = [];
-                }
+                state.selectedVariantIdx = action.payload.variantIdx;
+                state.isBusy = true;
+                state.data = [];
             },
             (state, action, dispatch) => {
-                if (!action.payload.initial) {
-                    this.waitForAction({}, (action, data) => {
-                        if (
-                            GlobalActions.isTileSubgroupReady(action) &&
-                            action.payload.mainTileId === this.readDataFromTile
-                        ) {
-                            return null;
+                this.waitForAction({}, (action, data) => {
+                    if (
+                        GlobalActions.isTileSubgroupReady(action) &&
+                        action.payload.mainTileId === this.readDataFromTile
+                    ) {
+                        return null;
+                    }
+                    return data;
+                }).subscribe({
+                    next: (action) => {
+                        if (GlobalActions.isTileSubgroupReady(action)) {
+                            this.loadData(
+                                this.appServices
+                                    .dataStreaming()
+                                    .getSubgroup(action.payload.subgroupId),
+                                dispatch
+                            );
                         }
-                        return data;
-                    }).subscribe({
-                        next: (action) => {
-                            if (GlobalActions.isTileSubgroupReady(action)) {
-                                this.loadData(
-                                    this.appServices
-                                        .dataStreaming()
-                                        .getSubgroup(action.payload.subgroupId),
-                                    dispatch
-                                );
-                            }
-                        },
-                    });
-                }
+                    },
+                });
             }
         );
     }

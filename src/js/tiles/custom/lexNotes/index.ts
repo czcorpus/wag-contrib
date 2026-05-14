@@ -79,7 +79,7 @@ export class LexNotesTile implements ITileProvider {
                 typeof readDataFromTile === 'number' ? readDataFromTile : null,
             initState: {
                 isBusy: isBusy,
-                selectedVariantIdent: null,
+                selectedVariantIdx: null,
                 notes: {
                     ijp: [],
                     assc: [],

@@ -36,7 +36,7 @@ import { Source } from '../lexCommon/types/enums.js';
 
 export interface LexNotesModelState {
     isBusy: boolean;
-    selectedVariantIdent: string;
+    selectedVariantIdx: number;
     notes: {
         ijp: Array<string>;
         assc: Array<string>;
@@ -129,38 +129,34 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
         this.addActionHandler(
             CommonActions.SelectItemVariant,
             (state, action) => {
-                state.selectedVariantIdent = action.payload.variantIdent;
-                if (!action.payload.initial) {
-                    state.isBusy = true;
-                    state.notes = {
-                        ijp: [],
-                        assc: [],
-                    };
-                }
+                state.selectedVariantIdx = action.payload.variantIdx;
+                state.isBusy = true;
+                state.notes = {
+                    ijp: [],
+                    assc: [],
+                };
             },
             (state, action, dispatch) => {
-                if (!action.payload.initial) {
-                    this.waitForAction({}, (action, data) => {
-                        if (
-                            GlobalActions.isTileSubgroupReady(action) &&
-                            action.payload.mainTileId === this.readDataFromTile
-                        ) {
-                            return null;
+                this.waitForAction({}, (action, data) => {
+                    if (
+                        GlobalActions.isTileSubgroupReady(action) &&
+                        action.payload.mainTileId === this.readDataFromTile
+                    ) {
+                        return null;
+                    }
+                    return data;
+                }).subscribe({
+                    next: (action) => {
+                        if (GlobalActions.isTileSubgroupReady(action)) {
+                            this.loadData(
+                                this.appServices
+                                    .dataStreaming()
+                                    .getSubgroup(action.payload.subgroupId),
+                                dispatch
+                            );
                         }
-                        return data;
-                    }).subscribe({
-                        next: (action) => {
-                            if (GlobalActions.isTileSubgroupReady(action)) {
-                                this.loadData(
-                                    this.appServices
-                                        .dataStreaming()
-                                        .getSubgroup(action.payload.subgroupId),
-                                    dispatch
-                                );
-                            }
-                        },
-                    });
-                }
+                    },
+                });
             }
         );
     }

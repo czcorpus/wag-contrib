@@ -49,7 +49,7 @@ export interface LexOverviewModelState {
     referenceCorpus: string;
     mainSource: Source;
     variants: Array<LexItem>;
-    selectedVariantIdent: string;
+    selectedVariantIdx: number;
     data: Data;
     error: string;
     backlink: Backlink;
@@ -91,14 +91,6 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                 state.isBusy = true;
             },
             (state, action, dispatch) => {
-                dispatch<typeof CommonActions.SelectItemVariant>({
-                    name: CommonActions.SelectItemVariant.name,
-                    payload: {
-                        tileId: this.tileId,
-                        variantIdent: state.selectedVariantIdent,
-                        initial: true,
-                    },
-                });
                 this.loadData(this.appServices.dataStreaming(), dispatch);
             }
         );
@@ -163,38 +155,34 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
             CommonActions.SelectItemVariant,
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
-                state.selectedVariantIdent = action.payload.variantIdent;
-                if (!action.payload.initial) {
-                    state.data = {
-                        assc: null,
-                        ijp: null,
-                    };
-                    state.isBusy = true;
-                }
+                state.selectedVariantIdx = action.payload.variantIdx;
+                state.data = {
+                    assc: null,
+                    ijp: null,
+                };
+                state.isBusy = true;
             },
             (state, action, dispatch) => {
-                if (!action.payload.initial) {
-                    this.waitForAction({}, (action, data) => {
-                        if (
-                            GlobalActions.isTileSubgroupReady(action) &&
-                            action.payload.mainTileId === this.readDataFromTile
-                        ) {
-                            return null;
+                this.waitForAction({}, (action, data) => {
+                    if (
+                        GlobalActions.isTileSubgroupReady(action) &&
+                        action.payload.mainTileId === this.readDataFromTile
+                    ) {
+                        return null;
+                    }
+                    return data;
+                }).subscribe({
+                    next: (action) => {
+                        if (GlobalActions.isTileSubgroupReady(action)) {
+                            this.loadData(
+                                this.appServices
+                                    .dataStreaming()
+                                    .getSubgroup(action.payload.subgroupId),
+                                dispatch
+                            );
                         }
-                        return data;
-                    }).subscribe({
-                        next: (action) => {
-                            if (GlobalActions.isTileSubgroupReady(action)) {
-                                this.loadData(
-                                    this.appServices
-                                        .dataStreaming()
-                                        .getSubgroup(action.payload.subgroupId),
-                                    dispatch
-                                );
-                            }
-                        },
-                    });
-                }
+                    },
+                });
             }
         );
 

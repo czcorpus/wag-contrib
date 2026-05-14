@@ -67,14 +67,14 @@ export function init(
 
     const LexOverviewHeader: React.FC<{
         tileId: number;
-        selectedVariantIdent: string;
+        selectedVariantIdx: number;
         selectedVariant: LexItem;
         variants: Array<LexItem>;
     }> = (props) => {
-        const handleVariantClick = (variantIdent: string) => {
+        const handleVariantClick = (variantIdx: number) => {
             dispatcher.dispatch(CommonActions.SelectItemVariant, {
                 tileId: props.tileId,
-                variantIdent,
+                variantIdx,
             });
         };
 
@@ -112,7 +112,10 @@ export function init(
             return (
                 List.findIndex(
                     (v, i) =>
-                        v.lemma === variant.lemma && v.ident !== variant.ident,
+                        v.lemma === variant.lemma &&
+                        (v.pos !== variant.pos ||
+                            v.gender !== variant.gender ||
+                            v.aspect !== variant.aspect),
                     props.variants
                 ) !== -1
             );
@@ -134,12 +137,8 @@ export function init(
                                   {renderVariant(
                                       variant,
                                       hasSameLemmaVariant(variant),
-                                      variant.ident !==
-                                          props.selectedVariantIdent
-                                          ? () =>
-                                                handleVariantClick(
-                                                    variant.ident
-                                                )
+                                      i !== props.selectedVariantIdx
+                                          ? () => handleVariantClick(i)
                                           : undefined
                                   )}
                               </h4>
@@ -242,20 +241,16 @@ export function init(
         const state = useModel(model);
 
         const basicOverview = {} as BasicOverviewData;
-        const selectedVariant =
-            state.selectedVariantIdent !== undefined
-                ? List.find(
-                      (item) => item.ident === state.selectedVariantIdent,
-                      state.variants
-                  )
-                : ({
-                      lemma: state.queryMatch.lemma,
-                      pos: state.queryMatch.pos[0].value,
-                      corpusEntry: {
-                          count: state.queryMatch.abs,
-                          ipm: state.queryMatch.ipm,
-                      },
-                  } as LexItem);
+        const selectedVariant = state.variants[state.selectedVariantIdx]
+            ? state.variants[state.selectedVariantIdx]
+            : ({
+                  lemma: state.queryMatch.lemma,
+                  pos: state.queryMatch.pos[0].value,
+                  corpusEntry: {
+                      count: state.queryMatch.abs,
+                      ipm: state.queryMatch.ipm,
+                  },
+              } as LexItem);
         let asscVariant: VariantData;
 
         switch (state.mainSource) {
@@ -289,7 +284,7 @@ export function init(
                 <S.LexOverviewTileView>
                     <LexOverviewHeader
                         tileId={props.tileId}
-                        selectedVariantIdent={state.selectedVariantIdent}
+                        selectedVariantIdx={state.selectedVariantIdx}
                         selectedVariant={selectedVariant}
                         variants={state.variants}
                     />

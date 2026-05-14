@@ -27,19 +27,8 @@ export class Actions {
 
     static SelectItemVariant: Action<{
         tileId: number;
-        variantIdent: string;
-        initial?: boolean;
+        variantIdx: number;
     }> = {
         name: 'LEX_COMMON_SELECT_ITEM_VARIANT',
     };
-
-    static isSelectItemVariant(
-        a: Action
-    ): a is typeof Actions.SelectItemVariant {
-        return (
-            a.name === Actions.SelectItemVariant.name &&
-            typeof a.payload['tileId'] === 'number' &&
-            typeof a.payload['variantIdent'] === 'string'
-        );
-    }
 }
