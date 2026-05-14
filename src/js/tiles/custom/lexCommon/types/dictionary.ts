@@ -79,7 +79,7 @@ export function isLexQueryMatch(
         Array.isArray(qm.extraData['variants']) &&
         List.every(
             (d) => 'lemma' in d && 'pos' in d && 'sources' in d,
-            qm.extraData['data']
+            qm.extraData['variants']
         )
     );
 }
@@ -89,7 +89,8 @@ export function getCurrentVariant(
     variantIdx: number
 ): LexItem {
     const currentQueryMatch = findCurrQueryMatch(List.head(queryMatches));
-    return isLexQueryMatch(currentQueryMatch)
+    return isLexQueryMatch(currentQueryMatch) &&
+        !List.empty(currentQueryMatch.extraData.variants)
         ? currentQueryMatch.extraData.variants[variantIdx]
         : null;
 }

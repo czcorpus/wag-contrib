@@ -113,7 +113,9 @@ export class LexCommonModel extends StatelessModel<LexCommonModelState> {
             Actions.TileDataLoaded,
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
-                console.log(action.error);
+                if (action.error) {
+                    console.log(action.error);
+                }
             }
         );
 

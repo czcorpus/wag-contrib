@@ -26,7 +26,7 @@ import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
 import { UjcNeomatArgs, UjcNeomatApi } from './api.js';
 import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
-import { IDataStreaming } from 'src/js/page/streaming.js';
+import { IDataStreaming } from '../../../page/streaming.js';
 import { getCurrentVariant } from '../lexCommon/types/dictionary.js';
 
 export interface UjcNeomatModelState {
@@ -75,11 +75,11 @@ export class UjcNeomatModel extends StatelessModel<UjcNeomatModelState> {
                     queryMatches,
                     state.selectedVariantIdx
                 );
-                if (variant === null) {
+                if (variant) {
+                    state.ident = variant.lemma;
+                } else {
                     const match = findCurrQueryMatch(List.head(queryMatches));
                     state.ident = match.lemma || match.word;
-                } else {
-                    state.ident = variant.lemma;
                 }
                 state.isBusy = true;
                 state.error = null;
@@ -167,11 +167,11 @@ export class UjcNeomatModel extends StatelessModel<UjcNeomatModelState> {
                     queryMatches,
                     state.selectedVariantIdx
                 );
-                if (variant === null) {
+                if (variant) {
+                    state.ident = variant.lemma;
+                } else {
                     const match = findCurrQueryMatch(List.head(queryMatches));
                     state.ident = match.lemma || match.word;
-                } else {
-                    state.ident = variant.lemma;
                 }
                 state.isBusy = true;
                 state.data = {

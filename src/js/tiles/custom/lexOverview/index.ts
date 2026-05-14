@@ -82,8 +82,6 @@ export class LexOverviewTile implements ITileProvider {
         var variants: Array<LexItem> = [];
         var mainSource: Source = undefined;
         var usedCorpus: string = undefined;
-        console.log(currQueryMatch.extraData.data);
-
         if (isLexQueryMatch(currQueryMatch)) {
             variants = currQueryMatch.extraData.variants;
             mainSource = currQueryMatch.extraData.mainSource;
@@ -102,15 +100,14 @@ export class LexOverviewTile implements ITileProvider {
                 ];
                 mainSource = Source.Corpus;
             }
-        } else if (!currQueryMatch.lemma) {
+        } else {
             // empty data
             variants = [
                 {
-                    lemma: currQueryMatch.word,
+                    lemma: currQueryMatch.lemma || currQueryMatch.word,
                 } as LexItem,
             ];
         }
-        console.log(variants);
 
         this.model = new LexOverviewModel({
             dispatcher,

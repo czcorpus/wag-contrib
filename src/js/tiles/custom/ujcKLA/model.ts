@@ -27,7 +27,7 @@ import { List } from 'cnc-tskit';
 import { UjcKLAArgs, UjcKLAApi } from './api.js';
 import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
 import { getCurrentVariant } from '../lexCommon/types/dictionary.js';
-import { IDataStreaming } from 'src/js/page/streaming.js';
+import { IDataStreaming } from '../../../page/streaming.js';
 
 export interface UjcKLAModelState {
     isBusy: boolean;
@@ -75,11 +75,11 @@ export class UjcKLAModel extends StatelessModel<UjcKLAModelState> {
                     queryMatches,
                     state.selectedVariantIdx
                 );
-                if (variant === null) {
+                if (variant) {
+                    state.queries = [variant.lemma];
+                } else {
                     const match = findCurrQueryMatch(List.head(queryMatches));
                     state.queries = [match.lemma || match.word];
-                } else {
-                    state.queries = [variant.lemma];
                 }
 
                 state.isBusy = true;
@@ -167,11 +167,11 @@ export class UjcKLAModel extends StatelessModel<UjcKLAModelState> {
                     queryMatches,
                     state.selectedVariantIdx
                 );
-                if (variant === null) {
+                if (variant) {
+                    state.queries = [variant.lemma];
+                } else {
                     const match = findCurrQueryMatch(List.head(queryMatches));
                     state.queries = [match.lemma || match.word];
-                } else {
-                    state.queries = [variant.lemma];
                 }
                 state.isBusy = true;
                 state.error = null;

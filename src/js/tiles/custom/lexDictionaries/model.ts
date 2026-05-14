@@ -30,9 +30,9 @@ import {
     SSJCDataStructure,
     UjcBasicArgs,
 } from './api/basicApi.js';
-import { forkJoin, map, merge } from 'rxjs';
+import { forkJoin, map } from 'rxjs';
 import { getCurrentVariant } from '../lexCommon/types/dictionary.js';
-import { IDataStreaming } from 'src/js/page/streaming.js';
+import { IDataStreaming } from '../../../page/streaming.js';
 
 export interface LexDictionariesModelState {
     isBusy: boolean;
@@ -99,11 +99,11 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
                     this.queryMatches,
                     state.selectedVariantIdx
                 );
-                if (variant === null) {
+                if (variant) {
+                    searchTerm = variant.lemma;
+                } else {
                     const match = findCurrQueryMatch(List.head(queryMatches));
                     searchTerm = match.lemma || match.word;
-                } else {
-                    searchTerm = variant.lemma;
                 }
                 this.loadData(
                     this.appServices.dataStreaming(),
@@ -192,11 +192,11 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
                     this.queryMatches,
                     state.selectedVariantIdx
                 );
-                if (variant === null) {
+                if (variant) {
+                    searchTerm = variant.lemma;
+                } else {
                     const match = findCurrQueryMatch(List.head(queryMatches));
                     searchTerm = match.lemma || match.word;
-                } else {
-                    searchTerm = variant.lemma;
                 }
                 const url =
                     this.apis[action.payload.backlink.queryId].getBacklinkURL(
@@ -228,11 +228,11 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
                     this.queryMatches,
                     state.selectedVariantIdx
                 );
-                if (variant === null) {
+                if (variant) {
+                    searchTerm = variant.lemma;
+                } else {
                     const match = findCurrQueryMatch(List.head(queryMatches));
                     searchTerm = match.lemma || match.word;
-                } else {
-                    searchTerm = variant.lemma;
                 }
                 this.loadData(
                     this.appServices

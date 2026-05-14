@@ -19,7 +19,7 @@
 import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
-import { QueryMatch, RecognizedQueries } from '../../../query/index.js';
+import { QueryMatch } from '../../../query/index.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { Actions } from './actions.js';
@@ -36,7 +36,7 @@ import {
     LexResponse,
 } from '../lexCommon/api.js';
 import { IJPData } from '../lexCommon/types/ijp.js';
-import { reduce } from 'rxjs';
+import { scan } from 'rxjs';
 
 interface Data {
     assc: HTMLBlock;
@@ -239,17 +239,14 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                 contentType: 'application/json',
             })
             .pipe(
-                reduce(
+                scan(
                     (data, resp) => {
                         if (data.done.assc && data.done.ijp) {
+                            data.dispatched = true;
                             return data;
-                        } else if (isDoneData(resp)) {
-                            if (resp.source === Source.ASSC) {
-                                data.done.assc = true;
-                            } else if (resp.source === Source.IJP) {
-                                data.done.ijp = true;
-                            }
-                        } else if (isAsscData(resp) && !data.done.assc) {
+                        }
+
+                        if (isAsscData(resp) && !data.done.assc) {
                             dispatch<typeof Actions.TilePartialDataLoaded>({
                                 name: Actions.TilePartialDataLoaded.name,
                                 payload: {
@@ -269,32 +266,36 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                             });
                             data.hasData = true;
                             data.done.ijp = true;
+                        } else if (isDoneData(resp)) {
+                            if (resp.source === Source.ASSC) {
+                                data.done.assc = true;
+                            } else if (resp.source === Source.IJP) {
+                                data.done.ijp = true;
+                            }
+                        } else if (resp === null) {
+                            data.done.assc = true;
+                            data.done.ijp = true;
                         }
-
-                        if (data.done.assc && data.done.ijp) {
-                            dispatch<typeof Actions.TileDataLoaded>({
-                                name: Actions.TileDataLoaded.name,
-                                payload: {
-                                    tileId: this.tileId,
-                                    isEmpty: false, // this tile is never empty
-                                },
-                            });
-                        }
-
                         return data;
                     },
-                    { hasData: false, done: { assc: false, ijp: false } }
+                    {
+                        hasData: false,
+                        done: { assc: false, ijp: false },
+                        dispatched: false,
+                    }
                 )
             )
             .subscribe({
                 next: (data) => {
-                    dispatch<typeof Actions.TileDataLoaded>({
-                        name: Actions.TileDataLoaded.name,
-                        payload: {
-                            tileId: this.tileId,
-                            isEmpty: !data.hasData,
-                        },
-                    });
+                    if (data.done.assc && data.done.ijp && !data.dispatched) {
+                        dispatch<typeof Actions.TileDataLoaded>({
+                            name: Actions.TileDataLoaded.name,
+                            payload: {
+                                tileId: this.tileId,
+                                isEmpty: false, // this tile is never empty
+                            },
+                        });
+                    }
                 },
                 error: (error) => {
                     console.error(error);
