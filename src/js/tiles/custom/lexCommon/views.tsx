@@ -64,15 +64,18 @@ export function initViewSubtile(
                                 </a>
                             ) : Array.isArray(props.source) ? (
                                 List.map(
-                                    (v) => (
-                                        <a onClick={handleSourceInfo(v)}>
-                                            {ut.translate(
-                                                `lex_common__source_${v}`
-                                            )}
-                                        </a>
+                                    (v, i) => (
+                                        <>
+                                            {i > 0 ? ', ' : null}
+                                            <a onClick={handleSourceInfo(v)}>
+                                                {ut.translate(
+                                                    `lex_common__source_${v}`
+                                                )}
+                                            </a>
+                                        </>
                                     ),
                                     props.source
-                                ).join(', ')
+                                )
                             ) : (
                                 <a onClick={handleSourceInfo(props.source)}>
                                     {ut.translate(
