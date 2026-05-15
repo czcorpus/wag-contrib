@@ -51,3 +51,48 @@ export const Header = styled.div<{ theme: Theme }>`
         font-style: italic;
     }
 `;
+
+export const PlayerIcon = styled.a<{
+    theme: Theme;
+    $crStaticUrl: (file: string) => string;
+}>`
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 1em;
+    margin-bottom: 0.1em;
+    cursor: pointer;
+
+    width: 1.5em;
+    height: 1.5em;
+    background-image: url(${(props) => props.$crStaticUrl('audio-3w.svg')});
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+
+    &.animate {
+        animation: playAnimation 1s steps(4) infinite;
+
+        @keyframes playAnimation {
+            0% {
+                background-image: url(${(props) =>
+                    props.$crStaticUrl('audio-0w.svg')});
+            }
+            25% {
+                background-image: url(${(props) =>
+                    props.$crStaticUrl('audio-1w.svg')});
+            }
+            50% {
+                background-image: url(${(props) =>
+                    props.$crStaticUrl('audio-2w.svg')});
+            }
+            75% {
+                background-image: url(${(props) =>
+                    props.$crStaticUrl('audio-3w.svg')});
+            }
+            100% {
+                background-image: url(${(props) =>
+                    props.$crStaticUrl('audio-0w.svg')});
+            }
+        }
+    }
+`;

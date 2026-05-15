@@ -21,39 +21,48 @@ import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
 import { DataStructure } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
+import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
 import { UjcNeomatArgs, UjcNeomatApi } from './api.js';
 import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
-
+import { IDataStreaming } from '../../../page/streaming.js';
+import { getCurrentVariant } from '../lexCommon/types/dictionary.js';
 
 export interface UjcNeomatModelState {
-    isBusy:boolean;
-    ident:string;
-    maxItems:number;
-    data:DataStructure;
-    error:string;
-    backlink:Backlink;
+    isBusy: boolean;
+    selectedVariantIdx: number;
+    ident: string;
+    maxItems: number;
+    data: DataStructure;
+    error: string;
+    backlink: Backlink;
 }
 
 export interface UjcNeomatModelArgs {
-    dispatcher:IActionQueue;
-    initState:UjcNeomatModelState;
-    tileId:number;
-    api:UjcNeomatApi,
-    appServices:IAppServices;
-    queryMatches:RecognizedQueries;
+    dispatcher: IActionQueue;
+    initState: UjcNeomatModelState;
+    tileId: number;
+    api: UjcNeomatApi;
+    appServices: IAppServices;
+    queryMatches: RecognizedQueries;
 }
 
 export class UjcNeomatModel extends StatelessModel<UjcNeomatModelState> {
+    private readonly tileId: number;
 
-    private readonly tileId:number;
+    private readonly api: UjcNeomatApi;
 
-    private readonly api:UjcNeomatApi;
+    private readonly appServices: IAppServices;
 
-    private readonly appServices:IAppServices;
-
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches}:UjcNeomatModelArgs) {
+    constructor({
+        dispatcher,
+        initState,
+        api,
+        tileId,
+        appServices,
+        queryMatches,
+    }: UjcNeomatModelArgs) {
         super(dispatcher, initState);
         this.tileId = tileId;
         this.appServices = appServices;
@@ -62,28 +71,39 @@ export class UjcNeomatModel extends StatelessModel<UjcNeomatModelState> {
         this.addActionHandler(
             GlobalActions.RequestQueryResponse,
             (state, action) => {
-                const match = findCurrQueryMatch(List.head(queryMatches));
-                state.ident = match.lemma || match.word;
+                const variant = getCurrentVariant(
+                    queryMatches,
+                    state.selectedVariantIdx
+                );
+                if (variant) {
+                    state.ident = variant.lemma;
+                } else {
+                    const match = findCurrQueryMatch(List.head(queryMatches));
+                    state.ident = match.lemma || match.word;
+                }
                 state.isBusy = true;
                 state.error = null;
                 state.data = {
                     entries: [],
-                }
+                };
                 state.backlink = null;
             },
             (state, action, dispatch) => {
-                this.loadData(dispatch, state, state.ident);
+                this.loadData(
+                    this.appServices.dataStreaming(),
+                    dispatch,
+                    state
+                );
             }
         );
 
         this.addActionSubtypeHandler(
             Actions.TileDataLoaded,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             (state, action) => {
                 state.isBusy = false;
                 if (action.error) {
                     state.error = action.error.message;
-
                 } else {
                     state.data = action.payload.data;
                     state.backlink = this.api.getBacklink(0);
@@ -93,41 +113,44 @@ export class UjcNeomatModel extends StatelessModel<UjcNeomatModelState> {
 
         this.addActionSubtypeHandler(
             GlobalActions.GetSourceInfo,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
-                this.api.getSourceDescription(
-                    this.appServices.dataStreaming(),
-                    this.tileId,
-                    this.appServices.getISO639UILang(),
-                    ''
-                ).subscribe({
-                    next: (data) => {
-                        dispatch({
-                            name: GlobalActions.GetSourceInfoDone.name,
-                            payload: {
-                                data: data
-                            }
-                        });
-                    },
-                    error: (err) => {
-                        console.error(err);
-                        dispatch({
-                            name: GlobalActions.GetSourceInfoDone.name,
-                            error: err
-
-                        });
-                    }
-                });
+                this.api
+                    .getSourceDescription(
+                        this.appServices.dataStreaming(),
+                        this.tileId,
+                        this.appServices.getISO639UILang(),
+                        ''
+                    )
+                    .subscribe({
+                        next: (data) => {
+                            dispatch({
+                                name: GlobalActions.GetSourceInfoDone.name,
+                                payload: {
+                                    data: data,
+                                },
+                            });
+                        },
+                        error: (err) => {
+                            console.error(err);
+                            dispatch({
+                                name: GlobalActions.GetSourceInfoDone.name,
+                                error: err,
+                            });
+                        },
+                    });
             }
         );
 
         this.addActionSubtypeHandler(
             GlobalActions.FollowBacklink,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
-                const backlinkUrl = new URL('http://www.neologismy.cz/index.php');
+                const backlinkUrl = new URL(
+                    'http://www.neologismy.cz/index.php'
+                );
                 backlinkUrl.searchParams.set('retezec', state.ident);
                 backlinkUrl.searchParams.set('nove_hledani', '1');
                 backlinkUrl.searchParams.set('button', 'Hledat');
@@ -135,25 +158,60 @@ export class UjcNeomatModel extends StatelessModel<UjcNeomatModelState> {
                 window.open(backlinkUrl.toString(), '_blank');
             }
         );
+
+        this.addActionHandler(
+            CommonActions.SelectItemVariant,
+            (state, action) => {
+                state.selectedVariantIdx = action.payload.variantIdx;
+                const variant = getCurrentVariant(
+                    queryMatches,
+                    state.selectedVariantIdx
+                );
+                if (variant) {
+                    state.ident = variant.lemma;
+                } else {
+                    const match = findCurrQueryMatch(List.head(queryMatches));
+                    state.ident = match.lemma || match.word;
+                }
+                state.isBusy = true;
+                state.data = {
+                    entries: [],
+                };
+                state.backlink = null;
+            },
+            (state, action, dispatch) => {
+                this.loadData(
+                    this.appServices
+                        .dataStreaming()
+                        .startNewSubgroup(this.tileId),
+                    dispatch,
+                    state
+                );
+            }
+        );
     }
 
-    private loadData(dispatch:SEDispatcher, state:UjcNeomatModelState, q:string) {
-        const args:UjcNeomatArgs = {
-            q,
+    private loadData(
+        streaming: IDataStreaming,
+        dispatch: SEDispatcher,
+        state: UjcNeomatModelState
+    ) {
+        const args: UjcNeomatArgs = {
+            q: state.ident,
             maxItems: state.maxItems,
         };
-        this.api.call(this.appServices.dataStreaming(), this.tileId, 0, args).subscribe({
-            next: data => {
+        this.api.call(streaming, this.tileId, 0, args).subscribe({
+            next: (data) => {
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
                     payload: {
                         tileId: this.tileId,
                         isEmpty: false,
-                        data
-                    }
+                        data,
+                    },
                 });
             },
-            error: error => {
+            error: (error) => {
                 console.error(error);
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
@@ -164,10 +222,9 @@ export class UjcNeomatModel extends StatelessModel<UjcNeomatModelState> {
                         data: {
                             entries: [],
                         },
-                    }
+                    },
                 });
-            }
+            },
         });
     }
-
 }

@@ -44,11 +44,11 @@ export interface LexResponse<T = IJPData | Array<HTMLBlock> | 'done'> {
 }
 
 export function isAsscData(v: LexResponse): v is LexResponse<Array<HTMLBlock>> {
-    return v && v.source === Source.ASSC;
+    return v && v.source === Source.ASSC && v.data !== 'done';
 }
 
 export function isIjpData(v: LexResponse): v is LexResponse<IJPData> {
-    return v && v.source === Source.IJP;
+    return v && v.source === Source.IJP && v.data !== 'done';
 }
 
 export function isDoneData(v: LexResponse): v is LexResponse<'done'> {

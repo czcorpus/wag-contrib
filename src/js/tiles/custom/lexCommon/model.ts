@@ -26,7 +26,9 @@ import { LexApi } from './api.js';
 import { List } from 'cnc-tskit';
 import { IDataStreaming } from '../../../page/streaming.js';
 
-export interface LexCommonModelState {}
+export interface LexCommonModelState {
+    selectedVariantIdx: number;
+}
 
 export interface LexCommonModelArgs {
     dispatcher: IActionQueue;
@@ -74,48 +76,36 @@ export class LexCommonModel extends StatelessModel<LexCommonModelState> {
                         isEmpty: true,
                     },
                 });
-                // wait variants for request
-                this.waitForAction({}, (action, data) => {
-                    if (Actions.isSelectItemVariant(action)) {
-                        return null;
-                    }
-                    return data;
-                }).subscribe({
-                    next: (action) => {
-                        if (Actions.isSelectItemVariant(action)) {
-                            this.loadData(
-                                this.appServices.dataStreaming(),
-                                dispatch,
-                                action.payload.variantIdent
-                            );
-                        }
-                    },
-                });
+                this.loadData(
+                    this.appServices.dataStreaming(),
+                    dispatch,
+                    state.selectedVariantIdx
+                );
             }
         );
 
         this.addActionHandler(
             Actions.SelectItemVariant,
-            (state, action) => {},
+            (state, action) => {
+                state.selectedVariantIdx = action.payload.variantIdx;
+            },
             (state, action, dispatch) => {
-                if (!action.payload.initial) {
-                    dispatch<typeof Actions.TileDataLoaded>({
-                        name: Actions.TileDataLoaded.name,
-                        payload: {
-                            tileId: this.tileId,
-                            isEmpty: true,
-                        },
-                    });
+                dispatch<typeof Actions.TileDataLoaded>({
+                    name: Actions.TileDataLoaded.name,
+                    payload: {
+                        tileId: this.tileId,
+                        isEmpty: true,
+                    },
+                });
 
-                    const subg = appServices
-                        .dataStreaming()
-                        .startNewSubgroup(this.tileId, ...dependentTiles);
-                    dispatch(GlobalActions.TileSubgroupReady, {
-                        mainTileId: this.tileId,
-                        subgroupId: subg.getId(),
-                    });
-                    this.loadData(subg, dispatch, action.payload.variantIdent);
-                }
+                const subg = appServices
+                    .dataStreaming()
+                    .startNewSubgroup(this.tileId, ...dependentTiles);
+                dispatch(GlobalActions.TileSubgroupReady, {
+                    mainTileId: this.tileId,
+                    subgroupId: subg.getId(),
+                });
+                this.loadData(subg, dispatch, state.selectedVariantIdx);
             }
         );
 
@@ -123,7 +113,9 @@ export class LexCommonModel extends StatelessModel<LexCommonModelState> {
             Actions.TileDataLoaded,
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
-                console.log(action.error);
+                if (action.error) {
+                    console.log(action.error);
+                }
             }
         );
 
@@ -170,9 +162,9 @@ export class LexCommonModel extends StatelessModel<LexCommonModelState> {
     private loadData(
         streaming: IDataStreaming,
         dispatch: SEDispatcher,
-        variantIdent: string
+        variantIdx: number
     ) {
-        const variant = getCurrentVariant(this.queryMatches, variantIdent);
+        const variant = getCurrentVariant(this.queryMatches, variantIdx);
         const args = {
             asscIds:
                 variant && variant.sources['assc']

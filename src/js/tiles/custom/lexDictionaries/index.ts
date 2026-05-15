@@ -18,7 +18,11 @@
 import { IActionDispatcher } from 'kombo';
 
 import { IAppServices } from '../../../appServices.js';
-import { LemmatizationLevel, QueryType } from '../../../query/index.js';
+import {
+    findCurrQueryMatch,
+    LemmatizationLevel,
+    QueryType,
+} from '../../../query/index.js';
 import { init as viewInit } from './views.js';
 import {
     TileConf,
@@ -35,6 +39,7 @@ import { LexDictionariesModel } from './model.js';
 import { createApiInstance } from './api/factory.js';
 import { List } from 'cnc-tskit';
 import { ApiType } from './api/types.js';
+import { isLexQueryMatch } from '../lexCommon/types/dictionary.js';
 
 interface ServiceConf {
     type: ApiType;
@@ -87,6 +92,7 @@ export class LexDictionariesTile implements ITileProvider {
                 ),
             conf.services
         );
+        const currQueryMatch = findCurrQueryMatch(queryMatches[0]);
         this.model = new LexDictionariesModel({
             dispatcher,
             appServices,
@@ -95,7 +101,6 @@ export class LexDictionariesTile implements ITileProvider {
             tileId,
             initState: {
                 isBusy: isBusy,
-                queries: [],
                 data: List.map(
                     (serviceConf) => ({
                         type: serviceConf.type,
@@ -105,7 +110,8 @@ export class LexDictionariesTile implements ITileProvider {
                     }),
                     conf.services
                 ),
-                selectedDataIndex: 0,
+                activeDictTab: -1,
+                selectedVariantIdx: 0,
                 error: null,
             },
         });

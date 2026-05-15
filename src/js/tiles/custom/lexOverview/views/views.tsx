@@ -34,9 +34,12 @@ import { initViewSubtile } from '../../lexCommon/views.js';
 import { LexItem } from '../../lexCommon/types/dictionary.js';
 import { SubtileRow } from '../../lexCommon/style.js';
 import { Source } from '../../lexCommon/types/enums.js';
+import { VariantData } from '../../lexCommon/types/assc.js';
+import { Actions } from '../actions.js';
 
 interface BasicOverviewData {
     pronunciation?: string;
+    audioLink?: string;
 }
 
 export function init(
@@ -64,14 +67,14 @@ export function init(
 
     const LexOverviewHeader: React.FC<{
         tileId: number;
-        selectedVariantIdent: string;
+        selectedVariantIdx: number;
         selectedVariant: LexItem;
         variants: Array<LexItem>;
     }> = (props) => {
-        const handleVariantClick = (variantIdent: string) => {
+        const handleVariantClick = (variantIdx: number) => {
             dispatcher.dispatch(CommonActions.SelectItemVariant, {
                 tileId: props.tileId,
-                variantIdent,
+                variantIdx,
             });
         };
 
@@ -109,7 +112,10 @@ export function init(
             return (
                 List.findIndex(
                     (v, i) =>
-                        v.lemma === variant.lemma && v.ident !== variant.ident,
+                        v.lemma === variant.lemma &&
+                        (v.pos !== variant.pos ||
+                            v.gender !== variant.gender ||
+                            v.aspect !== variant.aspect),
                     props.variants
                 ) !== -1
             );
@@ -131,12 +137,8 @@ export function init(
                                   {renderVariant(
                                       variant,
                                       hasSameLemmaVariant(variant),
-                                      variant.ident !==
-                                          props.selectedVariantIdent
-                                          ? () =>
-                                                handleVariantClick(
-                                                    variant.ident
-                                                )
+                                      i !== props.selectedVariantIdx
+                                          ? () => handleVariantClick(i)
                                           : undefined
                                   )}
                               </h4>
@@ -148,6 +150,29 @@ export function init(
         );
     };
 
+    // ------------------------- <PlayerIcon /> -------------------------------
+
+    const PlayerIcon: React.FC<{
+        tileId: number;
+        audioLink: string;
+        isPlaying: boolean;
+    }> = (props) => {
+        const handleClick = () => {
+            dispatcher.dispatch(Actions.PlayAudio, {
+                tileId: props.tileId,
+                link: props.audioLink,
+            });
+        };
+
+        return (
+            <S.PlayerIcon
+                $crStaticUrl={ut.createStaticUrl}
+                onClick={handleClick}
+                className={props.isPlaying ? 'animate' : ''}
+            />
+        );
+    };
+
     // -------------------- <LexOverviewBasics /> -----------------------------------------------
 
     const LexOverviewBasics: React.FC<{
@@ -155,6 +180,7 @@ export function init(
         source: Source;
         selectedVariant: LexItem;
         basicOverview: BasicOverviewData;
+        playingAudio: boolean;
     }> = (props) => {
         return (
             <Subtile tileId={props.tileId} source={props.source}>
@@ -168,6 +194,13 @@ export function init(
                         </span>
                         <span className="value">
                             {props.basicOverview.pronunciation}
+                            {props.basicOverview.audioLink ? (
+                                <PlayerIcon
+                                    tileId={props.tileId}
+                                    audioLink={props.basicOverview.audioLink}
+                                    isPlaying={props.playingAudio}
+                                />
+                            ) : null}
                         </span>
                     </SubtileRow>
                 ) : null}
@@ -183,35 +216,52 @@ export function init(
         );
     };
 
+    // -------------------- <LexOverviewOrigin /> -----------------------------------------------
+
+    const LexOverviewOrigin: React.FC<{
+        tileId: number;
+        source: Source;
+        origin: string;
+    }> = (props) => {
+        return (
+            <Subtile tileId={props.tileId} source={props.source}>
+                <SubtileRow>
+                    <span className="key">
+                        {ut.translate('lex_overview__origin')}:
+                    </span>
+                    <span className="value">{props.origin}</span>
+                </SubtileRow>
+            </Subtile>
+        );
+    };
+
     // -------------------- <LexOverviewTileView /> -----------------------------------------------
 
     const LexOverviewTileView: React.FC<CoreTileComponentProps> = (props) => {
         const state = useModel(model);
 
         const basicOverview = {} as BasicOverviewData;
-        const selectedVariant =
-            state.selectedVariantIdent !== undefined
-                ? List.find(
-                      (item) => item.ident === state.selectedVariantIdent,
-                      state.variants
-                  )
-                : ({
-                      lemma: state.queryMatch.lemma,
-                      pos: state.queryMatch.pos[0].value,
-                      corpusEntry: {
-                          count: state.queryMatch.abs,
-                          ipm: state.queryMatch.ipm,
-                      },
-                  } as LexItem);
+        const selectedVariant = state.variants[state.selectedVariantIdx]
+            ? state.variants[state.selectedVariantIdx]
+            : ({
+                  lemma: state.queryMatch.lemma,
+                  pos: state.queryMatch.pos[0].value,
+                  corpusEntry: {
+                      count: state.queryMatch.abs,
+                      ipm: state.queryMatch.ipm,
+                  },
+              } as LexItem);
+        let asscVariant: VariantData;
 
         switch (state.mainSource) {
             case Source.ASSC:
                 if (state.data.assc) {
-                    const asscVariant = List.find(
+                    asscVariant = List.find(
                         (v) => v.key.startsWith(selectedVariant.lemma),
                         state.data.assc.variants
                     );
                     basicOverview.pronunciation = asscVariant.pronunciation;
+                    basicOverview.audioLink = asscVariant.audioFile;
                 }
                 break;
 
@@ -234,7 +284,7 @@ export function init(
                 <S.LexOverviewTileView>
                     <LexOverviewHeader
                         tileId={props.tileId}
-                        selectedVariantIdent={state.selectedVariantIdent}
+                        selectedVariantIdx={state.selectedVariantIdx}
                         selectedVariant={selectedVariant}
                         variants={state.variants}
                     />
@@ -244,6 +294,7 @@ export function init(
                             source={state.mainSource}
                             selectedVariant={selectedVariant}
                             basicOverview={basicOverview}
+                            playingAudio={state.playingAudio}
                         />
                     ) : null}
 
@@ -269,6 +320,14 @@ export function init(
                             corpname={state.referenceCorpus}
                         />
                     )}
+
+                    {asscVariant && asscVariant.origin ? (
+                        <LexOverviewOrigin
+                            tileId={props.tileId}
+                            source={Source.ASSC}
+                            origin={asscVariant.origin}
+                        />
+                    ) : null}
                 </S.LexOverviewTileView>
             </globalComponents.TileWrapper>
         );

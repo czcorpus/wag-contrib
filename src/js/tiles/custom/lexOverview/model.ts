@@ -19,7 +19,7 @@
 import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
-import { QueryMatch, RecognizedQueries } from '../../../query/index.js';
+import { QueryMatch } from '../../../query/index.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { Actions } from './actions.js';
@@ -36,7 +36,7 @@ import {
     LexResponse,
 } from '../lexCommon/api.js';
 import { IJPData } from '../lexCommon/types/ijp.js';
-import { reduce } from 'rxjs';
+import { scan } from 'rxjs';
 
 interface Data {
     assc: HTMLBlock;
@@ -49,10 +49,11 @@ export interface LexOverviewModelState {
     referenceCorpus: string;
     mainSource: Source;
     variants: Array<LexItem>;
-    selectedVariantIdent: string;
+    selectedVariantIdx: number;
     data: Data;
     error: string;
     backlink: Backlink;
+    playingAudio: boolean;
 }
 
 export interface LexOverviewModelArgs {
@@ -90,14 +91,6 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                 state.isBusy = true;
             },
             (state, action, dispatch) => {
-                dispatch<typeof CommonActions.SelectItemVariant>({
-                    name: CommonActions.SelectItemVariant.name,
-                    payload: {
-                        tileId: this.tileId,
-                        variantIdent: state.selectedVariantIdent,
-                        initial: true,
-                    },
-                });
                 this.loadData(this.appServices.dataStreaming(), dispatch);
             }
         );
@@ -162,38 +155,76 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
             CommonActions.SelectItemVariant,
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
-                state.selectedVariantIdent = action.payload.variantIdent;
-                if (!action.payload.initial) {
-                    state.data = {
-                        assc: null,
-                        ijp: null,
-                    };
-                    state.isBusy = true;
-                }
+                state.selectedVariantIdx = action.payload.variantIdx;
+                state.data = {
+                    assc: null,
+                    ijp: null,
+                };
+                state.isBusy = true;
             },
             (state, action, dispatch) => {
-                if (!action.payload.initial) {
-                    this.waitForAction({}, (action, data) => {
-                        if (
-                            GlobalActions.isTileSubgroupReady(action) &&
-                            action.payload.mainTileId === this.readDataFromTile
-                        ) {
-                            return null;
+                this.waitForAction({}, (action, data) => {
+                    if (
+                        GlobalActions.isTileSubgroupReady(action) &&
+                        action.payload.mainTileId === this.readDataFromTile
+                    ) {
+                        return null;
+                    }
+                    return data;
+                }).subscribe({
+                    next: (action) => {
+                        if (GlobalActions.isTileSubgroupReady(action)) {
+                            this.loadData(
+                                this.appServices
+                                    .dataStreaming()
+                                    .getSubgroup(action.payload.subgroupId),
+                                dispatch
+                            );
                         }
-                        return data;
-                    }).subscribe({
-                        next: (action) => {
-                            if (GlobalActions.isTileSubgroupReady(action)) {
-                                this.loadData(
-                                    this.appServices
-                                        .dataStreaming()
-                                        .getSubgroup(action.payload.subgroupId),
-                                    dispatch
-                                );
-                            }
+                    },
+                });
+            }
+        );
+
+        this.addActionSubtypeHandler(
+            Actions.PlayAudio,
+            (action) => action.payload.tileId === this.tileId,
+            (state, action) => {
+                state.playingAudio = true;
+            },
+            (state, action, dispatch) => {
+                const player = this.appServices.getAudioPlayer();
+                player
+                    .play(
+                        [
+                            {
+                                url: action.payload.link,
+                                format: action.payload.link.split('.').pop(),
+                            },
+                        ],
+                        true
+                    )
+                    .subscribe({
+                        complete: () => {
+                            dispatch(Actions.AudioStopped, {
+                                tileId: this.tileId,
+                            });
+                        },
+                        error: (err) => {
+                            console.error(err);
+                            dispatch(Actions.AudioStopped, {
+                                tileId: this.tileId,
+                            });
                         },
                     });
-                }
+            }
+        );
+
+        this.addActionSubtypeHandler(
+            Actions.AudioStopped,
+            (action) => action.payload.tileId === this.tileId,
+            (state, action) => {
+                state.playingAudio = false;
             }
         );
     }
@@ -208,17 +239,14 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                 contentType: 'application/json',
             })
             .pipe(
-                reduce(
+                scan(
                     (data, resp) => {
                         if (data.done.assc && data.done.ijp) {
+                            data.dispatched = true;
                             return data;
-                        } else if (isDoneData(resp)) {
-                            if (resp.source === Source.ASSC) {
-                                data.done.assc = true;
-                            } else if (resp.source === Source.IJP) {
-                                data.done.ijp = true;
-                            }
-                        } else if (isAsscData(resp) && !data.done.assc) {
+                        }
+
+                        if (isAsscData(resp) && !data.done.assc) {
                             dispatch<typeof Actions.TilePartialDataLoaded>({
                                 name: Actions.TilePartialDataLoaded.name,
                                 payload: {
@@ -238,32 +266,36 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                             });
                             data.hasData = true;
                             data.done.ijp = true;
+                        } else if (isDoneData(resp)) {
+                            if (resp.source === Source.ASSC) {
+                                data.done.assc = true;
+                            } else if (resp.source === Source.IJP) {
+                                data.done.ijp = true;
+                            }
+                        } else if (resp === null) {
+                            data.done.assc = true;
+                            data.done.ijp = true;
                         }
-
-                        if (data.done.assc && data.done.ijp) {
-                            dispatch<typeof Actions.TileDataLoaded>({
-                                name: Actions.TileDataLoaded.name,
-                                payload: {
-                                    tileId: this.tileId,
-                                    isEmpty: false, // this tile is never empty
-                                },
-                            });
-                        }
-
                         return data;
                     },
-                    { hasData: false, done: { assc: false, ijp: false } }
+                    {
+                        hasData: false,
+                        done: { assc: false, ijp: false },
+                        dispatched: false,
+                    }
                 )
             )
             .subscribe({
                 next: (data) => {
-                    dispatch<typeof Actions.TileDataLoaded>({
-                        name: Actions.TileDataLoaded.name,
-                        payload: {
-                            tileId: this.tileId,
-                            isEmpty: !data.hasData,
-                        },
-                    });
+                    if (data.done.assc && data.done.ijp && !data.dispatched) {
+                        dispatch<typeof Actions.TileDataLoaded>({
+                            name: Actions.TileDataLoaded.name,
+                            payload: {
+                                tileId: this.tileId,
+                                isEmpty: false, // this tile is never empty
+                            },
+                        });
+                    }
                 },
                 error: (error) => {
                     console.error(error);

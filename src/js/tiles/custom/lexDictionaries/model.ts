@@ -20,6 +20,7 @@ import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
+import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
 import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
@@ -29,18 +30,20 @@ import {
     SSJCDataStructure,
     UjcBasicArgs,
 } from './api/basicApi.js';
-import { map, merge } from 'rxjs';
+import { forkJoin, map } from 'rxjs';
+import { getCurrentVariant } from '../lexCommon/types/dictionary.js';
+import { IDataStreaming } from '../../../page/streaming.js';
 
 export interface LexDictionariesModelState {
     isBusy: boolean;
-    queries: Array<string>;
     data: Array<{
         type: ApiType;
         loaded: boolean;
         data: SSJCDataStructure | PSJCDataStructure;
         backlink: Backlink;
     }>;
-    selectedDataIndex: number;
+    selectedVariantIdx: number;
+    activeDictTab: number;
     error: string;
 }
 
@@ -60,6 +63,8 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
 
     private readonly appServices: IAppServices;
 
+    private readonly queryMatches: RecognizedQueries;
+
     constructor({
         dispatcher,
         initState,
@@ -72,19 +77,12 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
         this.tileId = tileId;
         this.appServices = appServices;
         this.apis = apis;
+        this.queryMatches = queryMatches;
 
         this.addActionHandler(
             GlobalActions.RequestQueryResponse,
             (state, action) => {
-                const match = findCurrQueryMatch(List.head(queryMatches));
-                state.queries = [match.word];
-                /* TODO
-                if (!match.isNonDict) {
-                    state.queries.push(match.lemma)
-                };
-                */
                 state.isBusy = true;
-                state.error = null;
                 state.data = List.map(
                     (d) => ({
                         type: d.type,
@@ -96,7 +94,22 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
                 );
             },
             (state, action, dispatch) => {
-                this.loadData(dispatch, state);
+                var searchTerm: string;
+                const variant = getCurrentVariant(
+                    this.queryMatches,
+                    state.selectedVariantIdx
+                );
+                if (variant) {
+                    searchTerm = variant.lemma;
+                } else {
+                    const match = findCurrQueryMatch(List.head(queryMatches));
+                    searchTerm = match.lemma || match.word;
+                }
+                this.loadData(
+                    this.appServices.dataStreaming(),
+                    dispatch,
+                    searchTerm
+                );
             }
         );
 
@@ -105,6 +118,12 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
                 state.isBusy = false;
+                if (state.activeDictTab === -1) {
+                    state.activeDictTab = List.findIndex(
+                        (source) => source.data !== null,
+                        state.data
+                    );
+                }
                 if (action.error) {
                     state.error = action.error.message;
                 }
@@ -127,7 +146,7 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
             Actions.SelectTab,
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
-                state.selectedDataIndex = action.payload.dataIdx;
+                state.activeDictTab = action.payload.dataIdx;
             }
         );
 
@@ -136,7 +155,7 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
             (action) => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
-                this.apis[state.selectedDataIndex]
+                this.apis[state.activeDictTab]
                     .getSourceDescription(
                         this.appServices.dataStreaming(),
                         this.tileId,
@@ -168,45 +187,94 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
             (action) => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
-                const url = this.apis[
-                    action.payload.backlink.queryId
-                ].getBacklinkURL(state.queries[0]);
+                var searchTerm: string;
+                const variant = getCurrentVariant(
+                    this.queryMatches,
+                    state.selectedVariantIdx
+                );
+                if (variant) {
+                    searchTerm = variant.lemma;
+                } else {
+                    const match = findCurrQueryMatch(List.head(queryMatches));
+                    searchTerm = match.lemma || match.word;
+                }
+                const url =
+                    this.apis[action.payload.backlink.queryId].getBacklinkURL(
+                        searchTerm
+                    );
                 window.open(url.toString(), '_blank');
+            }
+        );
+
+        this.addActionHandler(
+            CommonActions.SelectItemVariant,
+            (state, action) => {
+                state.selectedVariantIdx = action.payload.variantIdx;
+                state.data = List.map(
+                    (d) => ({
+                        type: d.type,
+                        data: null,
+                        loaded: false,
+                        backlink: null,
+                    }),
+                    state.data
+                );
+                state.isBusy = true;
+                state.activeDictTab = -1;
+            },
+            (state, action, dispatch) => {
+                var searchTerm: string;
+                const variant = getCurrentVariant(
+                    this.queryMatches,
+                    state.selectedVariantIdx
+                );
+                if (variant) {
+                    searchTerm = variant.lemma;
+                } else {
+                    const match = findCurrQueryMatch(List.head(queryMatches));
+                    searchTerm = match.lemma || match.word;
+                }
+                this.loadData(
+                    this.appServices
+                        .dataStreaming()
+                        .startNewSubgroup(this.tileId),
+                    dispatch,
+                    searchTerm
+                );
             }
         );
     }
 
-    private loadData(dispatch: SEDispatcher, state: LexDictionariesModelState) {
+    private loadData(
+        streaming: IDataStreaming,
+        dispatch: SEDispatcher,
+        query: string
+    ) {
         const args: UjcBasicArgs = {
-            q: state.queries,
+            q: query,
         };
-        merge(
-            ...List.map(
+        forkJoin(
+            List.map(
                 (api, i) =>
-                    api
-                        .call(
-                            this.appServices.dataStreaming(),
-                            this.tileId,
-                            i,
-                            args
-                        )
-                        .pipe(
-                            map((data) => ({
-                                queryId: i,
-                                data: data,
-                            }))
-                        ),
+                    api.call(streaming, this.tileId, i, args).pipe(
+                        map((data) => ({
+                            queryId: i,
+                            data: data,
+                        }))
+                    ),
                 this.apis
             )
         ).subscribe({
             next: (response) => {
-                dispatch<typeof Actions.PartialTileDataLoaded>({
-                    name: Actions.PartialTileDataLoaded.name,
-                    payload: {
-                        tileId: this.tileId,
-                        queryId: response.queryId,
-                        data: response.data,
-                    },
+                response.forEach((resp) => {
+                    dispatch<typeof Actions.PartialTileDataLoaded>({
+                        name: Actions.PartialTileDataLoaded.name,
+                        payload: {
+                            tileId: this.tileId,
+                            queryId: resp.queryId,
+                            data: resp.data,
+                        },
+                    });
                 });
             },
             complete: () => {

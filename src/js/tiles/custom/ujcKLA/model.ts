@@ -21,39 +21,48 @@ import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
 import { createEmptyData, DataStructure } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
+import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
 import { UjcKLAArgs, UjcKLAApi } from './api.js';
 import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
-
+import { getCurrentVariant } from '../lexCommon/types/dictionary.js';
+import { IDataStreaming } from '../../../page/streaming.js';
 
 export interface UjcKLAModelState {
-    isBusy:boolean;
-    queries:Array<string>;
-    maxImages:number;
-    data:DataStructure;
-    error:string;
-    backlink:Backlink;
+    isBusy: boolean;
+    selectedVariantIdx: number;
+    queries: Array<string>;
+    maxImages: number;
+    data: DataStructure;
+    error: string;
+    backlink: Backlink;
 }
 
 export interface UjcKLAModelArgs {
-    dispatcher:IActionQueue;
-    initState:UjcKLAModelState;
-    tileId:number;
-    api:UjcKLAApi,
-    appServices:IAppServices;
-    queryMatches:RecognizedQueries;
+    dispatcher: IActionQueue;
+    initState: UjcKLAModelState;
+    tileId: number;
+    api: UjcKLAApi;
+    appServices: IAppServices;
+    queryMatches: RecognizedQueries;
 }
 
 export class UjcKLAModel extends StatelessModel<UjcKLAModelState> {
+    private readonly tileId: number;
 
-    private readonly tileId:number;
+    private readonly api: UjcKLAApi;
 
-    private readonly api:UjcKLAApi;
+    private readonly appServices: IAppServices;
 
-    private readonly appServices:IAppServices;
-
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches}:UjcKLAModelArgs) {
+    constructor({
+        dispatcher,
+        initState,
+        api,
+        tileId,
+        appServices,
+        queryMatches,
+    }: UjcKLAModelArgs) {
         super(dispatcher, initState);
         this.tileId = tileId;
         this.appServices = appServices;
@@ -62,31 +71,38 @@ export class UjcKLAModel extends StatelessModel<UjcKLAModelState> {
         this.addActionHandler(
             GlobalActions.RequestQueryResponse,
             (state, action) => {
-                const match = findCurrQueryMatch(List.head(queryMatches));
-                state.queries = [match.word];
-                /* TODO
-                if (!match.isNonDict) {
-                    state.queries.push(match.lemma)
-                };
-                */
+                const variant = getCurrentVariant(
+                    queryMatches,
+                    state.selectedVariantIdx
+                );
+                if (variant) {
+                    state.queries = [variant.lemma];
+                } else {
+                    const match = findCurrQueryMatch(List.head(queryMatches));
+                    state.queries = [match.lemma || match.word];
+                }
+
                 state.isBusy = true;
                 state.error = null;
                 state.data = createEmptyData();
                 state.backlink = null;
             },
             (state, action, dispatch) => {
-                this.loadData(dispatch, state);
+                this.loadData(
+                    this.appServices.dataStreaming(),
+                    dispatch,
+                    state
+                );
             }
         );
 
         this.addActionSubtypeHandler(
             Actions.TileDataLoaded,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             (state, action) => {
                 state.isBusy = false;
                 if (action.error) {
                     state.error = action.error.message;
-
                 } else {
                     state.data = action.payload.data;
                     state.backlink = this.api.getBacklink(0);
@@ -96,41 +112,44 @@ export class UjcKLAModel extends StatelessModel<UjcKLAModelState> {
 
         this.addActionSubtypeHandler(
             GlobalActions.GetSourceInfo,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
-                this.api.getSourceDescription(
-                    this.appServices.dataStreaming(),
-                    this.tileId,
-                    this.appServices.getISO639UILang(),
-                    ''
-                ).subscribe({
-                    next: (data) => {
-                        dispatch({
-                            name: GlobalActions.GetSourceInfoDone.name,
-                            payload: {
-                                data: data
-                            }
-                        });
-                    },
-                    error: (err) => {
-                        console.error(err);
-                        dispatch({
-                            name: GlobalActions.GetSourceInfoDone.name,
-                            error: err
-
-                        });
-                    }
-                });
+                this.api
+                    .getSourceDescription(
+                        this.appServices.dataStreaming(),
+                        this.tileId,
+                        this.appServices.getISO639UILang(),
+                        ''
+                    )
+                    .subscribe({
+                        next: (data) => {
+                            dispatch({
+                                name: GlobalActions.GetSourceInfoDone.name,
+                                payload: {
+                                    data: data,
+                                },
+                            });
+                        },
+                        error: (err) => {
+                            console.error(err);
+                            dispatch({
+                                name: GlobalActions.GetSourceInfoDone.name,
+                                error: err,
+                            });
+                        },
+                    });
             }
         );
 
         this.addActionSubtypeHandler(
             GlobalActions.FollowBacklink,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
-                const backlinkUrl = new URL('https://psjc.ujc.cas.cz/search.php');
+                const backlinkUrl = new URL(
+                    'https://psjc.ujc.cas.cz/search.php'
+                );
                 backlinkUrl.searchParams.set('hledej', 'Hledej');
                 backlinkUrl.searchParams.set('heslo', state.data.query);
                 backlinkUrl.searchParams.set('where', 'hesla');
@@ -139,25 +158,59 @@ export class UjcKLAModel extends StatelessModel<UjcKLAModelState> {
                 window.open(backlinkUrl.toString(), '_blank');
             }
         );
+
+        this.addActionHandler(
+            CommonActions.SelectItemVariant,
+            (state, action) => {
+                state.selectedVariantIdx = action.payload.variantIdx;
+                const variant = getCurrentVariant(
+                    queryMatches,
+                    state.selectedVariantIdx
+                );
+                if (variant) {
+                    state.queries = [variant.lemma];
+                } else {
+                    const match = findCurrQueryMatch(List.head(queryMatches));
+                    state.queries = [match.lemma || match.word];
+                }
+                state.isBusy = true;
+                state.error = null;
+                state.data = createEmptyData();
+                state.backlink = null;
+            },
+            (state, action, dispatch) => {
+                this.loadData(
+                    this.appServices
+                        .dataStreaming()
+                        .startNewSubgroup(this.tileId),
+                    dispatch,
+                    state
+                );
+            }
+        );
     }
 
-    private loadData(dispatch:SEDispatcher, state:UjcKLAModelState) {
-        const args:UjcKLAArgs = {
+    private loadData(
+        streaming: IDataStreaming,
+        dispatch: SEDispatcher,
+        state: UjcKLAModelState
+    ) {
+        const args: UjcKLAArgs = {
             q: state.queries,
             maxImages: state.maxImages,
         };
-        this.api.call(this.appServices.dataStreaming(), this.tileId, 0, args).subscribe({
-            next: data => {
+        this.api.call(streaming, this.tileId, 0, args).subscribe({
+            next: (data) => {
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
                     payload: {
                         tileId: this.tileId,
                         isEmpty: false,
-                        data
-                    }
+                        data,
+                    },
                 });
             },
-            error: error => {
+            error: (error) => {
                 console.error(error);
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
@@ -166,9 +219,9 @@ export class UjcKLAModel extends StatelessModel<UjcKLAModelState> {
                         tileId: this.tileId,
                         isEmpty: true,
                         data: createEmptyData(),
-                    }
+                    },
                 });
-            }
+            },
         });
     }
 }

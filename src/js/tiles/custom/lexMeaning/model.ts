@@ -27,12 +27,12 @@ import { RecognizedQueries } from '../../../query/index.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
 import { isAsscData, isDoneData, LexResponse } from '../lexCommon/api.js';
-import { reduce } from 'rxjs';
+import { scan } from 'rxjs';
 import { Source } from '../lexCommon/types/enums.js';
 
 export interface LexMeaningModelState {
     isBusy: boolean;
-    selectedVariantIdent: string;
+    selectedVariantIdx: number;
     data: Array<{
         blocks: HTMLBlock[];
     }>;
@@ -119,35 +119,31 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
         this.addActionHandler(
             CommonActions.SelectItemVariant,
             (state, action) => {
-                state.selectedVariantIdent = action.payload.variantIdent;
-                if (!action.payload.initial) {
-                    state.isBusy = true;
-                    state.data = [];
-                }
+                state.selectedVariantIdx = action.payload.variantIdx;
+                state.isBusy = true;
+                state.data = [];
             },
             (state, action, dispatch) => {
-                if (!action.payload.initial) {
-                    this.waitForAction({}, (action, data) => {
-                        if (
-                            GlobalActions.isTileSubgroupReady(action) &&
-                            action.payload.mainTileId === this.readDataFromTile
-                        ) {
-                            return null;
+                this.waitForAction({}, (action, data) => {
+                    if (
+                        GlobalActions.isTileSubgroupReady(action) &&
+                        action.payload.mainTileId === this.readDataFromTile
+                    ) {
+                        return null;
+                    }
+                    return data;
+                }).subscribe({
+                    next: (action) => {
+                        if (GlobalActions.isTileSubgroupReady(action)) {
+                            this.loadData(
+                                this.appServices
+                                    .dataStreaming()
+                                    .getSubgroup(action.payload.subgroupId),
+                                dispatch
+                            );
                         }
-                        return data;
-                    }).subscribe({
-                        next: (action) => {
-                            if (GlobalActions.isTileSubgroupReady(action)) {
-                                this.loadData(
-                                    this.appServices
-                                        .dataStreaming()
-                                        .getSubgroup(action.payload.subgroupId),
-                                    dispatch
-                                );
-                            }
-                        },
-                    });
-                }
+                    },
+                });
             }
         );
     }
@@ -162,23 +158,14 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                 contentType: 'application/json',
             })
             .pipe(
-                reduce(
+                scan(
                     (data, resp) => {
                         if (data.done) {
+                            data.dispatched = true;
                             return data;
-                        } else if (
-                            isDoneData(resp) &&
-                            resp.source === Source.ASSC
-                        ) {
-                            data.done === true;
-                            dispatch<typeof Actions.TileDataLoaded>({
-                                name: Actions.TileDataLoaded.name,
-                                payload: {
-                                    tileId: this.tileId,
-                                    isEmpty: !data.hasData,
-                                },
-                            });
-                        } else if (isAsscData(resp)) {
+                        }
+
+                        if (isAsscData(resp)) {
                             const filteredData = this.filterASSCResultsByIDs(
                                 resp.id,
                                 resp.data
@@ -194,21 +181,29 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                                 });
                                 data.hasData = true;
                             }
+                        } else if (isDoneData(resp)) {
+                            if (resp.source === Source.ASSC) {
+                                data.done = true;
+                            }
+                        } else if (resp === null) {
+                            data.done = true;
                         }
                         return data;
                     },
-                    { hasData: false, done: false }
+                    { hasData: false, done: false, dispatched: false }
                 )
             )
             .subscribe({
                 next: (data) => {
-                    dispatch<typeof Actions.TileDataLoaded>({
-                        name: Actions.TileDataLoaded.name,
-                        payload: {
-                            tileId: this.tileId,
-                            isEmpty: !data.hasData,
-                        },
-                    });
+                    if (data.done && !data.dispatched) {
+                        dispatch<typeof Actions.TileDataLoaded>({
+                            name: Actions.TileDataLoaded.name,
+                            payload: {
+                                tileId: this.tileId,
+                                isEmpty: !data.hasData,
+                            },
+                        });
+                    }
                 },
                 error: (error) => {
                     console.error(error);

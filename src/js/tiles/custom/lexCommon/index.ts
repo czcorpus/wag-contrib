@@ -83,7 +83,9 @@ export class LexCommonTile implements ITileProvider {
             tileId,
             dependentTiles,
             lexApi: this.lexApi,
-            initState: {},
+            initState: {
+                selectedVariantIdx: 0,
+            },
         });
         this.view = () => null;
     }

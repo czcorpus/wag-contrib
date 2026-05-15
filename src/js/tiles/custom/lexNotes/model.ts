@@ -31,12 +31,12 @@ import {
     isIjpData,
     LexResponse,
 } from '../lexCommon/api.js';
-import { reduce } from 'rxjs';
+import { scan } from 'rxjs';
 import { Source } from '../lexCommon/types/enums.js';
 
 export interface LexNotesModelState {
     isBusy: boolean;
-    selectedVariantIdent: string;
+    selectedVariantIdx: number;
     notes: {
         ijp: Array<string>;
         assc: Array<string>;
@@ -129,38 +129,34 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
         this.addActionHandler(
             CommonActions.SelectItemVariant,
             (state, action) => {
-                state.selectedVariantIdent = action.payload.variantIdent;
-                if (!action.payload.initial) {
-                    state.isBusy = true;
-                    state.notes = {
-                        ijp: [],
-                        assc: [],
-                    };
-                }
+                state.selectedVariantIdx = action.payload.variantIdx;
+                state.isBusy = true;
+                state.notes = {
+                    ijp: [],
+                    assc: [],
+                };
             },
             (state, action, dispatch) => {
-                if (!action.payload.initial) {
-                    this.waitForAction({}, (action, data) => {
-                        if (
-                            GlobalActions.isTileSubgroupReady(action) &&
-                            action.payload.mainTileId === this.readDataFromTile
-                        ) {
-                            return null;
+                this.waitForAction({}, (action, data) => {
+                    if (
+                        GlobalActions.isTileSubgroupReady(action) &&
+                        action.payload.mainTileId === this.readDataFromTile
+                    ) {
+                        return null;
+                    }
+                    return data;
+                }).subscribe({
+                    next: (action) => {
+                        if (GlobalActions.isTileSubgroupReady(action)) {
+                            this.loadData(
+                                this.appServices
+                                    .dataStreaming()
+                                    .getSubgroup(action.payload.subgroupId),
+                                dispatch
+                            );
                         }
-                        return data;
-                    }).subscribe({
-                        next: (action) => {
-                            if (GlobalActions.isTileSubgroupReady(action)) {
-                                this.loadData(
-                                    this.appServices
-                                        .dataStreaming()
-                                        .getSubgroup(action.payload.subgroupId),
-                                    dispatch
-                                );
-                            }
-                        },
-                    });
-                }
+                    },
+                });
             }
         );
     }
@@ -175,27 +171,14 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
                 contentType: 'application/json',
             })
             .pipe(
-                reduce(
+                scan(
                     (data, resp) => {
                         if (data.done.assc && data.done.ijp) {
+                            data.dispatched = true;
                             return data;
-                        } else if (isDoneData(resp)) {
-                            if (resp.source === Source.ASSC) {
-                                data.done.assc = true;
-                            } else if (resp.source === Source.IJP) {
-                                data.done.ijp = true;
-                            }
+                        }
 
-                            if (data.done.assc && data.done.ijp) {
-                                dispatch<typeof Actions.TileDataLoaded>({
-                                    name: Actions.TileDataLoaded.name,
-                                    payload: {
-                                        tileId: this.tileId,
-                                        isEmpty: !data.hasData,
-                                    },
-                                });
-                            }
-                        } else if (isAsscData(resp)) {
+                        if (isAsscData(resp)) {
                             const filteredData = this.filterASSCResultsByIDs(
                                 resp.id,
                                 resp.data
@@ -226,21 +209,36 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
                                 },
                             });
                             data.hasData = true;
+                        } else if (isDoneData(resp)) {
+                            if (resp.source === Source.ASSC) {
+                                data.done.assc = true;
+                            } else if (resp.source === Source.IJP) {
+                                data.done.ijp = true;
+                            }
+                        } else if (resp === null) {
+                            data.done.assc = true;
+                            data.done.ijp = true;
                         }
                         return data;
                     },
-                    { hasData: false, done: { assc: false, ijp: false } }
+                    {
+                        hasData: false,
+                        done: { assc: false, ijp: false },
+                        dispatched: false,
+                    }
                 )
             )
             .subscribe({
                 next: (data) => {
-                    dispatch<typeof Actions.TileDataLoaded>({
-                        name: Actions.TileDataLoaded.name,
-                        payload: {
-                            tileId: this.tileId,
-                            isEmpty: !data.hasData,
-                        },
-                    });
+                    if (data.done && !data.dispatched) {
+                        dispatch<typeof Actions.TileDataLoaded>({
+                            name: Actions.TileDataLoaded.name,
+                            payload: {
+                                tileId: this.tileId,
+                                isEmpty: !data.hasData,
+                            },
+                        });
+                    }
                 },
                 error: (error) => {
                     console.error(error);

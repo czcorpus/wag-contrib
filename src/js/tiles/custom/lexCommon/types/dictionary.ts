@@ -22,7 +22,7 @@ import {
     QueryMatch,
     RecognizedQueries,
 } from '../../../../query/index.js';
-import { Aspect, Gender, PoS } from './enums.js';
+import { Aspect, Gender, PoS, Source } from './enums.js';
 
 export interface CorpusEntry {
     _id: string;
@@ -54,8 +54,6 @@ interface LexID {
 }
 
 export interface LexItem {
-    ident: string;
-
     lemma: string;
     pos: PoS;
     gender?: Gender;
@@ -65,28 +63,34 @@ export interface LexItem {
     corpusEntry?: CorpusEntry;
 }
 
+export interface LexExtraData {
+    corpusId: string;
+    mainSource: Source;
+    variants: Array<LexItem>;
+}
+
 export function isLexQueryMatch(
     qm: QueryMatch<any>
-): qm is QueryMatch<Array<LexItem>> {
+): qm is QueryMatch<LexExtraData> {
     return (
         qm.extraData !== undefined &&
-        Array.isArray(qm.extraData) &&
+        typeof qm.extraData['corpusId'] === 'string' &&
+        typeof qm.extraData['mainSource'] === 'string' &&
+        Array.isArray(qm.extraData['variants']) &&
         List.every(
             (d) => 'lemma' in d && 'pos' in d && 'sources' in d,
-            qm.extraData
+            qm.extraData['variants']
         )
     );
 }
 
 export function getCurrentVariant(
     queryMatches: RecognizedQueries,
-    variantIdent: string
+    variantIdx: number
 ): LexItem {
     const currentQueryMatch = findCurrQueryMatch(List.head(queryMatches));
-    return isLexQueryMatch(currentQueryMatch)
-        ? List.find(
-              (item) => item.ident === variantIdent,
-              currentQueryMatch.extraData
-          )
-        : undefined;
+    return isLexQueryMatch(currentQueryMatch) &&
+        !List.empty(currentQueryMatch.extraData.variants)
+        ? currentQueryMatch.extraData.variants[variantIdx]
+        : null;
 }

@@ -49,7 +49,15 @@ export function init(
         return (
             <S.TabButton>
                 <span className={classes.join(' ')}>
-                    {<a onClick={(_) => props.onClick()}>{props.label}</a>}
+                    {
+                        <a
+                            onClick={
+                                props.disabled ? null : (_) => props.onClick()
+                            }
+                        >
+                            {props.label}
+                        </a>
+                    }
                 </span>
             </S.TabButton>
         );
@@ -108,18 +116,27 @@ export function init(
             });
         };
 
-        const current = state.data[state.selectedDataIndex];
-        const source = ut.translate(`lex_dictionaries__label_${current.type}`);
+        let tabIdx = state.activeDictTab;
+        if (tabIdx === -1) {
+            tabIdx = List.findIndex(
+                (source) => source.data !== null,
+                state.data
+            );
+        }
+        const current = state.data[tabIdx];
+        const source = current
+            ? { corp: ut.translate(`lex_dictionaries__label_${current.type}`) }
+            : null;
         return (
             <globalComponents.TileWrapper
                 tileId={props.tileId}
                 isBusy={state.isBusy}
                 error={state.error}
-                hasData={true}
-                backlink={current.backlink}
+                hasData={List.some((d) => !!d.data, state.data)}
+                backlink={current ? current.backlink : null}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
-                sourceIdent={{ corp: source }}
+                sourceIdent={source}
             >
                 <S.LexDictionariesTileView>
                     <S.Tabs>
@@ -134,7 +151,7 @@ export function init(
                                             `lex_dictionaries__short_label_${item.type}`
                                         )}
                                         onClick={() => tabOnClick(i)}
-                                        selected={i === state.selectedDataIndex}
+                                        selected={i === tabIdx}
                                         disabled={!item.loaded}
                                     />
                                 </>
@@ -143,7 +160,7 @@ export function init(
                         )}
                     </S.Tabs>
 
-                    {current.data ? (
+                    {current && current.data ? (
                         isPSJCDataStructure(current.type, current.data) ? (
                             <PSJCDataView data={current.data} />
                         ) : isSSJCDataStructure(current.type, current.data) ? (
