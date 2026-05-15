@@ -24,20 +24,25 @@ import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
 import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
-import { ApiType, LexDictApi } from './api/types.js';
+import {
+    isSSJCDataStructure,
+    isPSJCDataStructure,
+    LexDictApi,
+} from './api/types.js';
 import {
     PSJCDataStructure,
     SSJCDataStructure,
     UjcBasicArgs,
 } from './api/basicApi.js';
-import { forkJoin, map } from 'rxjs';
+import { forkJoin, map, tap } from 'rxjs';
 import { getCurrentVariant } from '../lexCommon/types/dictionary.js';
 import { IDataStreaming } from '../../../page/streaming.js';
+import { Source } from '../lexCommon/types/enums.js';
 
 export interface LexDictionariesModelState {
     isBusy: boolean;
-    data: Array<{
-        type: ApiType;
+    sources: Array<{
+        type: Source;
         loaded: boolean;
         data: SSJCDataStructure | PSJCDataStructure;
         backlink: Backlink;
@@ -83,14 +88,15 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
             GlobalActions.RequestQueryResponse,
             (state, action) => {
                 state.isBusy = true;
-                state.data = List.map(
+                state.sources = List.map(
                     (d) => ({
                         type: d.type,
                         data: null,
                         loaded: false,
+                        empty: true,
                         backlink: null,
                     }),
-                    state.data
+                    state.sources
                 );
             },
             (state, action, dispatch) => {
@@ -121,7 +127,7 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
                 if (state.activeDictTab === -1) {
                     state.activeDictTab = List.findIndex(
                         (source) => source.data !== null,
-                        state.data
+                        state.sources
                     );
                 }
                 if (action.error) {
@@ -134,11 +140,36 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
             Actions.PartialTileDataLoaded,
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
-                state.data[action.payload.queryId].loaded = true;
-                state.data[action.payload.queryId].data = action.payload.data;
-                state.data[action.payload.queryId].backlink = this.apis[
-                    action.payload.queryId
-                ].getBacklink(action.payload.queryId);
+                state.sources[action.payload.queryId].loaded = true;
+                if (
+                    isSSJCDataStructure(
+                        state.sources[action.payload.queryId].type,
+                        action.payload.data
+                    ) &&
+                    !List.empty(action.payload.data.entries)
+                ) {
+                    state.sources[action.payload.queryId].data =
+                        action.payload.data;
+                    state.sources[action.payload.queryId].backlink = this.apis[
+                        action.payload.queryId
+                    ].getBacklink(action.payload.queryId);
+                } else if (
+                    isPSJCDataStructure(
+                        state.sources[action.payload.queryId].type,
+                        action.payload.data
+                    ) &&
+                    !List.empty(action.payload.data.entries)
+                ) {
+                    state.sources[action.payload.queryId].data =
+                        action.payload.data;
+                    state.sources[action.payload.queryId].backlink = this.apis[
+                        action.payload.queryId
+                    ].getBacklink(action.payload.queryId);
+                }
+
+                if (List.every((d) => d.loaded, state.sources)) {
+                    state.isBusy = false;
+                }
             }
         );
 
@@ -210,14 +241,15 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
             CommonActions.SelectItemVariant,
             (state, action) => {
                 state.selectedVariantIdx = action.payload.variantIdx;
-                state.data = List.map(
+                state.sources = List.map(
                     (d) => ({
                         type: d.type,
                         data: null,
                         loaded: false,
+                        empty: true,
                         backlink: null,
                     }),
-                    state.data
+                    state.sources
                 );
                 state.isBusy = true;
                 state.activeDictTab = -1;
@@ -257,32 +289,26 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
             List.map(
                 (api, i) =>
                     api.call(streaming, this.tileId, i, args).pipe(
-                        map((data) => ({
-                            queryId: i,
-                            data: data,
-                        }))
+                        tap((data) => {
+                            dispatch<typeof Actions.PartialTileDataLoaded>({
+                                name: Actions.PartialTileDataLoaded.name,
+                                payload: {
+                                    tileId: this.tileId,
+                                    queryId: i,
+                                    data: data,
+                                },
+                            });
+                        })
                     ),
                 this.apis
             )
         ).subscribe({
-            next: (response) => {
-                response.forEach((resp) => {
-                    dispatch<typeof Actions.PartialTileDataLoaded>({
-                        name: Actions.PartialTileDataLoaded.name,
-                        payload: {
-                            tileId: this.tileId,
-                            queryId: resp.queryId,
-                            data: resp.data,
-                        },
-                    });
-                });
-            },
-            complete: () => {
+            next: (resp) => {
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
                     payload: {
                         tileId: this.tileId,
-                        isEmpty: false,
+                        isEmpty: List.every((d) => List.empty(d), resp),
                     },
                 });
             },

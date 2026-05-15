@@ -38,11 +38,10 @@ import {
 import { LexDictionariesModel } from './model.js';
 import { createApiInstance } from './api/factory.js';
 import { List } from 'cnc-tskit';
-import { ApiType } from './api/types.js';
-import { isLexQueryMatch } from '../lexCommon/types/dictionary.js';
+import { Source } from '../lexCommon/types/enums.js';
 
 interface ServiceConf {
-    type: ApiType;
+    type: Source;
     apiURL: string;
 }
 
@@ -101,7 +100,7 @@ export class LexDictionariesTile implements ITileProvider {
             tileId,
             initState: {
                 isBusy: isBusy,
-                data: List.map(
+                sources: List.map(
                     (serviceConf) => ({
                         type: serviceConf.type,
                         data: null,

@@ -20,6 +20,7 @@ export enum Source {
     ASSC = 'assc',
     IJP = 'ijp',
     SSJC = 'ssjc',
+    PSJC = 'psjc',
     SJC = 'sjc',
     DJD = 'djd',
     Corpus = 'corpus',
