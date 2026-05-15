@@ -120,10 +120,10 @@ export function init(
         if (tabIdx === -1) {
             tabIdx = List.findIndex(
                 (source) => source.data !== null,
-                state.data
+                state.sources
             );
         }
-        const current = state.data[tabIdx];
+        const current = state.sources[tabIdx];
         const source = current
             ? { corp: ut.translate(`lex_dictionaries__label_${current.type}`) }
             : null;
@@ -132,7 +132,7 @@ export function init(
                 tileId={props.tileId}
                 isBusy={state.isBusy}
                 error={state.error}
-                hasData={List.some((d) => !!d.data, state.data)}
+                hasData={List.some((d) => d.data !== null, state.sources)}
                 backlink={current ? current.backlink : null}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
@@ -152,15 +152,17 @@ export function init(
                                         )}
                                         onClick={() => tabOnClick(i)}
                                         selected={i === tabIdx}
-                                        disabled={!item.loaded}
+                                        disabled={
+                                            !item.loaded || item.data === null
+                                        }
                                     />
                                 </>
                             ),
-                            state.data
+                            state.sources
                         )}
                     </S.Tabs>
 
-                    {current && current.data ? (
+                    {current && current.data !== null ? (
                         isPSJCDataStructure(current.type, current.data) ? (
                             <PSJCDataView data={current.data} />
                         ) : isSSJCDataStructure(current.type, current.data) ? (

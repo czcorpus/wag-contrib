@@ -17,18 +17,23 @@
  */
 
 import { ResourceApi } from '../../../../types.js';
+import { Source } from '../../lexCommon/types/enums.js';
 import { SSJCDataStructure, PSJCDataStructure } from './basicApi.js';
 
-export type ApiType = 'ssjc'|'psjc';
-
 export interface LexDictApi<U = any, V = any> extends ResourceApi<U, V> {
-    getBacklinkURL(term:string):URL;
+    getBacklinkURL(term: string): URL;
 }
 
-export function isSSJCDataStructure(type: ApiType, data: any): data is SSJCDataStructure {
-    return type === 'ssjc';
+export function isSSJCDataStructure(
+    type: Source,
+    data: any
+): data is SSJCDataStructure {
+    return type === Source.SSJC;
 }
 
-export function isPSJCDataStructure(type: ApiType, data: any): data is PSJCDataStructure {
-    return type === 'psjc';
+export function isPSJCDataStructure(
+    type: Source,
+    data: any
+): data is PSJCDataStructure {
+    return type === Source.PSJC;
 }
