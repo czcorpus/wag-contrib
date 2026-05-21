@@ -50,6 +50,12 @@ export const MeaningItem = styled.div`
         border-left: 2px solid white;
         padding-left: 1em;
     }
+
+    // ASSC selective styles
+
+    .tooltip-web {
+        display: none;
+    }
 `;
 
 export const MeaningHeading = styled.div`
