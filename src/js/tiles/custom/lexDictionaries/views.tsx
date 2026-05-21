@@ -152,9 +152,7 @@ export function init(
                                         )}
                                         onClick={() => tabOnClick(i)}
                                         selected={i === tabIdx}
-                                        disabled={
-                                            !item.loaded || item.data === null
-                                        }
+                                        disabled={item.data === null}
                                     />
                                 </>
                             ),
