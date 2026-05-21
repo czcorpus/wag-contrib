@@ -260,8 +260,15 @@ export function init(
                         (v) => v.key.startsWith(selectedVariant.lemma),
                         state.data.assc.variants
                     );
-                    basicOverview.pronunciation = asscVariant.pronunciation;
-                    basicOverview.audioLink = asscVariant.audioFile;
+                    // selected variant may not be in detailed data, for example "hranolky" is only mentioned in hranolka/hranolek
+                    if (asscVariant) {
+                        basicOverview.pronunciation = asscVariant.pronunciation;
+                        basicOverview.audioLink = asscVariant.audioFile;
+                    } else {
+                        console.warn(
+                            `Selected variant ${selectedVariant.lemma} ${selectedVariant.pos} not found in ASSC data`
+                        );
+                    }
                 }
                 break;
 
