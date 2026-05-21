@@ -98,11 +98,8 @@ export function init(
                 )
             ) : (
                 <SubtileRow>
-                    <span className="key">
-                        {ut.translate('wordfreq__note')}:
-                    </span>
                     <span className="value">
-                        {ut.translate('wordfreq__not_in_dict')}
+                        {ut.translate('lex_overview__no_freq')}
                     </span>
                 </SubtileRow>
             )}
