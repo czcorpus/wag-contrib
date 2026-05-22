@@ -25,35 +25,44 @@ import { UjcNeomatModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
 
-
 export function init(
-    dispatcher:IActionDispatcher,
-    ut:ViewUtils<GlobalComponents>,
-    theme:Theme,
-    model:UjcNeomatModel
-):TileComponent {
-
+    dispatcher: IActionDispatcher,
+    ut: ViewUtils<GlobalComponents>,
+    theme: Theme,
+    model: UjcNeomatModel
+): TileComponent {
     const globalComponents = ut.getComponents();
 
     // -------------------- <UjcNeomatTileView /> -----------------------------------------------
 
     const UjcNeomatTileView: React.FC<CoreTileComponentProps> = (props) => {
-
         const state = useModel(model);
 
         return (
-            <globalComponents.TileWrapper tileId={props.tileId} isBusy={state.isBusy} error={state.error}
+            <globalComponents.TileWrapper
+                tileId={props.tileId}
+                isBusy={state.isBusy}
+                error={state.error}
                 hasData={state.data.entries.length > 0}
                 backlink={state.backlink}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
-                sourceIdent={{corp: 'UJC'}}>
+                sourceIdent={{ corp: 'UJC' }}
+            >
                 <S.UjcNeomatTileView>
-                    {List.map((entry, i) => <S.Entry key={i} dangerouslySetInnerHTML={{__html: entry}} />, state.data.entries)}
+                    {List.map(
+                        (entry, i) => (
+                            <S.Entry
+                                key={i}
+                                dangerouslySetInnerHTML={{ __html: entry }}
+                            />
+                        ),
+                        state.data.entries
+                    )}
                 </S.UjcNeomatTileView>
             </globalComponents.TileWrapper>
         );
-    }
+    };
 
     return UjcNeomatTileView;
 }

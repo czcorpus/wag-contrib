@@ -51,16 +51,17 @@ export const MeaningItem = styled.div`
         padding-left: 1em;
     }
 
-    // ASSC selective styles
+    // ASSC adjusted styles
 
     .tooltip-web {
         display: none;
     }
 `;
 
-export const MeaningHeading = styled.div`
+export const MeaningHead = styled.div`
     margin-top: 0;
 
+    //------
     .key {
         color: ${(props) => props.theme.colorLightText};
         font-family: ${(props) => props.theme.condensedFontFamily};
@@ -75,11 +76,44 @@ export const MeaningHeading = styled.div`
         margin-left: 0.5em;
         font-size: 0.8em;
     }
+
+    //--------
+
+    .lineNoSpace,
+    .druhyRadek,
+    .sl_druh {
+        display: inline !important;
+    }
+
+    .vyz_count {
+        display: none;
+    }
+
+    .vyslovnost,
+    .druhyRadek .tvCh {
+        display: inline !important;
+        cursor: pointer;
+    }
+
+    .expand {
+        display: none !important;
+        cursor: pointer;
+    }
+
+    .collapsed {
+        .vyslovnost,
+        .druhyRadek .tvCh {
+            display: none !important;
+        }
+        .expand {
+            display: inline !important;
+        }
+    }
 `;
 
 // ---------------- <MeaningBlock /> --------------------------------------
 
-export const MeaningBlock = styled.div`
+export const MeaningBody = styled.div`
     .attachement {
         margin-left: 0.5em;
         font-size: 0.8em;
@@ -94,9 +128,9 @@ export const MeaningBlock = styled.div`
             font-style: italic;
         }
     }
+`;
 
-    // ASSC styles
-
+export const ASSCStyle = styled.div`
     .normal {
         font-weight: 400 !important;
     }
