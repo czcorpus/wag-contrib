@@ -26,7 +26,8 @@
         "lex_overview__conjugation_transgressive_present_m": "přechodník přítomný, m.",
         "lex_overview__conjugation_transgressive_present_zs": "přechodník přítomný, zs.",
         "lex_overview__conjugation_verbal_noun": "verbální substantivum",
-        "lex_overview__origin": "původ"
+        "lex_overview__origin": "původ",
+        "lex_overview__no_freq": "K frekvenci slova nejsou v korpusu k dispozici žádné informace."
     },
     "en-US": {
         "lex_overview__overview_word": "word",
@@ -55,6 +56,7 @@
         "lex_overview__conjugation_transgressive_present_m": "transgressive present, m.",
         "lex_overview__conjugation_transgressive_present_zs": "transgressive present, zs.",
         "lex_overview__conjugation_verbal_noun": "verbal noun",
-        "lex_overview__origin": "origin"
+        "lex_overview__origin": "origin",
+        "lex_overview__no_freq": "No information about word frequency is available in the corpus."
     }
 }

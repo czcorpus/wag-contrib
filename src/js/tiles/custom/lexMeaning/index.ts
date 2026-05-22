@@ -171,7 +171,7 @@ export class LexMeaningTile implements ITileProvider {
     }
 
     hideOnNoData(): boolean {
-        return true;
+        return false;
     }
 
     supportsLemmatizationLevel(ll: LemmatizationLevel): boolean {

@@ -38,6 +38,33 @@ export function init(
     const globalComponents = ut.getComponents();
     const Subtile = initViewSubtile(dispatcher, ut);
 
+    // -------------------- <Header /> -----------------------------------------------
+
+    const Header: React.FC<{ i: number; line: string }> = (props) => {
+        const [collapsed, setCollapsed] = React.useState(true);
+
+        const onClick = (ev: React.MouseEvent<HTMLDivElement>) => {
+            const target = ev.target;
+            if (
+                target instanceof HTMLElement &&
+                (target.closest('.vyslovnost') ||
+                    target.closest('.tvCh') ||
+                    target.closest('.expand'))
+            ) {
+                setCollapsed((prev) => !prev);
+            }
+        };
+
+        return (
+            <S.ASSCStyle
+                key={props.i}
+                className={'assc-style' + (collapsed ? ' collapsed' : '')}
+                onClick={onClick}
+                dangerouslySetInnerHTML={{ __html: props.line }}
+            />
+        );
+    };
+
     // -------------------- <LexMeaningTileView /> -----------------------------------------------
 
     const LexMeaningTileView: React.FC<CoreTileComponentProps> = (props) => {
@@ -50,30 +77,26 @@ export function init(
         ) => {
             return (
                 <S.MeaningItem key={key} className={isParent ? 'parent' : ''}>
-                    <S.MeaningHeading>
-                        <span className="key">pro slovo:</span>
-                        {pipe(
-                            data.variants,
-                            List.map((variant, i) => (
-                                <>
-                                    {i > 0 ? <span> /</span> : null}
-                                    <span className="word">
-                                        {variant.key} {variant.homonym}
-                                    </span>
-                                    <span className="pos">{variant.pos}</span>
-                                </>
-                            ))
+                    <S.MeaningHead>
+                        {List.map(
+                            (line, i) => (
+                                <Header i={i} line={line} />
+                            ),
+                            data.formattedVariants
                         )}
-                    </S.MeaningHeading>
-                    {List.map(
-                        (v, i) => (
-                            <S.MeaningBlock
-                                key={i}
-                                dangerouslySetInnerHTML={{ __html: v }}
-                            />
-                        ),
-                        data.meanings
-                    )}
+                    </S.MeaningHead>
+                    <S.MeaningBody>
+                        {List.map(
+                            (block, i) => (
+                                <S.ASSCStyle
+                                    key={i}
+                                    className="assc-style"
+                                    dangerouslySetInnerHTML={{ __html: block }}
+                                />
+                            ),
+                            data.meanings
+                        )}
+                    </S.MeaningBody>
                 </S.MeaningItem>
             );
         };
