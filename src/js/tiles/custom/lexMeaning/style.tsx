@@ -81,7 +81,9 @@ export const MeaningHead = styled.div`
 
     .lineNoSpace,
     .druhyRadek,
-    .sl_druh {
+    .sl_druh,
+    .puvod,
+    .konec_zahlavi {
         display: inline !important;
     }
 
