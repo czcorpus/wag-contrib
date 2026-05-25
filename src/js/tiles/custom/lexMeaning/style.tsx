@@ -107,7 +107,16 @@ export const MeaningHead = styled.div`
 
 // ---------------- <MeaningBlock /> --------------------------------------
 
-export const MeaningBody = styled.div``;
+export const MeaningBody = styled.div`
+    .hide_souslovi_data {
+        .vyznam_wrapper_link,
+        .vyznam_wrapper,
+        .exeplifikace,
+        .vskipExtraSmall {
+            display: none !important;
+        }
+    }
+`;
 
 // ---------------- <ASSCStyle /> --------------------------------------
 
