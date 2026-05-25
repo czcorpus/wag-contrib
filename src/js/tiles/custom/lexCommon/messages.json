@@ -29,7 +29,8 @@
         "lex_common__gender_N": "rodu středního",
         "lex_common__aspect_P": "dokonavé",
         "lex_common__aspect_I": "nedokonavé",
-        "lex_common__aspect_B": "obouvidné"
+        "lex_common__aspect_B": "obouvidné",
+        "lex_common__not_found": "Litujeme, v tomto zdroji se hledaný výraz nevyskytuje"
     },
     "en-US": {
         "lex_common__source": "Source",
@@ -61,6 +62,7 @@
         "lex_common__gender_N": "neuter",
         "lex_common__aspect_P": "perfective",
         "lex_common__aspect_I": "imperfective",
-        "lex_common__aspect_B": "biaspectual"
+        "lex_common__aspect_B": "biaspectual",
+        "lex_common__not_found": "Our apologies, the searched term does not occur in this source"
     }
 }

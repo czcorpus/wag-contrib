@@ -20,13 +20,25 @@ import { IActionDispatcher, ViewUtils } from 'kombo';
 import * as React from 'react';
 import { GlobalComponents } from '../../../views/common/index.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
-import { SubtileWrapper, SubtileRow } from './style.js';
+import * as S from './style.js';
 import { List } from 'cnc-tskit';
+import { SystemMessageType } from '../../../types.js';
 
-export function initViewSubtile(
+export function initLexComponents(
     dispatcher: IActionDispatcher,
     ut: ViewUtils<GlobalComponents>
-) {
+): {
+    Subtile: React.FC<
+        React.PropsWithChildren<{
+            tileId: number;
+            source: string | Array<string>;
+            corpname?: string;
+            className?: string;
+        }>
+    >;
+} {
+    const components = ut.getComponents();
+
     // -------------------- <Subtile /> ---------------------------------------------------
 
     const Subtile: React.FC<
@@ -45,7 +57,7 @@ export function initViewSubtile(
         };
 
         return (
-            <SubtileWrapper
+            <S.SubtileWrapper
                 className={props.className}
                 $source={
                     Array.isArray(props.source) ? props.source[0] : props.source
@@ -53,7 +65,7 @@ export function initViewSubtile(
             >
                 {props.children}
                 {props.source || props.corpname ? (
-                    <SubtileRow className="footer">
+                    <S.SubtileRow className="footer">
                         <span className="key">
                             {ut.translate('lex_common__source')}:
                         </span>
@@ -84,11 +96,11 @@ export function initViewSubtile(
                                 </a>
                             )}
                         </span>
-                    </SubtileRow>
+                    </S.SubtileRow>
                 ) : null}
-            </SubtileWrapper>
+            </S.SubtileWrapper>
         );
     };
 
-    return Subtile;
+    return { Subtile };
 }

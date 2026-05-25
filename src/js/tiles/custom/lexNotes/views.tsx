@@ -26,7 +26,7 @@ import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
 import { SubtileRow } from '../lexCommon/style.js';
 import { Source } from '../lexCommon/types/enums.js';
-import { initViewSubtile } from '../lexCommon/views.js';
+import { initLexComponents } from '../lexCommon/views.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -35,7 +35,7 @@ export function init(
     model: LexNotesModel
 ): TileComponent {
     const globalComponents = ut.getComponents();
-    const Subtile = initViewSubtile(dispatcher, ut);
+    const lexComponents = initLexComponents(dispatcher, ut);
 
     // -------------------- <LexNotesTileView /> -----------------------------------------------
 
@@ -56,7 +56,7 @@ export function init(
             >
                 <S.NotesTileView>
                     {!List.empty(state.notes.ijp) ? (
-                        <Subtile
+                        <lexComponents.Subtile
                             tileId={props.tileId}
                             source={
                                 List.some(
@@ -77,11 +77,14 @@ export function init(
                                 ),
                                 state.notes.ijp
                             )}
-                        </Subtile>
+                        </lexComponents.Subtile>
                     ) : null}
 
                     {!List.empty(state.notes.assc) ? (
-                        <Subtile tileId={props.tileId} source={Source.ASSC}>
+                        <lexComponents.Subtile
+                            tileId={props.tileId}
+                            source={Source.ASSC}
+                        >
                             {List.map(
                                 (note, i) => (
                                     <SubtileRow
@@ -92,7 +95,7 @@ export function init(
                                 ),
                                 state.notes.assc
                             )}
-                        </Subtile>
+                        </lexComponents.Subtile>
                     ) : null}
                 </S.NotesTileView>
             </globalComponents.TileWrapper>

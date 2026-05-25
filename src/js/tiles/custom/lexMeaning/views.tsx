@@ -27,7 +27,7 @@ import { GlobalComponents } from '../../../views/common/index.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
 import { SubtileRow } from '../lexCommon/style.js';
 import { Source } from '../lexCommon/types/enums.js';
-import { initViewSubtile } from '../lexCommon/views.js';
+import { initLexComponents } from '../lexCommon/views.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -36,7 +36,7 @@ export function init(
     model: LexMeaningModel
 ): TileComponent {
     const globalComponents = ut.getComponents();
-    const Subtile = initViewSubtile(dispatcher, ut);
+    const lexComponents = initLexComponents(dispatcher, ut);
 
     // -------------------- <Header /> -----------------------------------------------
 
@@ -110,12 +110,12 @@ export function init(
                 tileId={props.tileId}
                 isBusy={state.isBusy}
                 error={state.error}
-                hasData={state.data.length > 0}
+                hasData={!List.empty(state.data)}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.MeaningTileView>
-                    <Subtile
+                    <lexComponents.Subtile
                         tileId={props.tileId}
                         source={Source.ASSC}
                         className="stretch"
@@ -141,7 +141,7 @@ export function init(
                                 state.data
                             )}
                         </SubtileRow>
-                    </Subtile>
+                    </lexComponents.Subtile>
                 </S.MeaningTileView>
             </globalComponents.TileWrapper>
         );

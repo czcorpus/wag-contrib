@@ -30,7 +30,7 @@ import { init as initIjpViews } from './ijp/views.js';
 import { init as initCorpusViews } from './corpus/views.js';
 import * as S from './style.js';
 import { List } from 'cnc-tskit';
-import { initViewSubtile } from '../../lexCommon/views.js';
+import { initLexComponents } from '../../lexCommon/views.js';
 import { LexItem } from '../../lexCommon/types/dictionary.js';
 import { SubtileRow } from '../../lexCommon/style.js';
 import { Source } from '../../lexCommon/types/enums.js';
@@ -49,9 +49,9 @@ export function init(
     model: LexOverviewModel
 ): TileComponent {
     const globalComponents = ut.getComponents();
+    const lexComponents = initLexComponents(dispatcher, ut);
     const ijpViews = initIjpViews(dispatcher, ut);
     const corpusViews = initCorpusViews(dispatcher, ut);
-    const Subtile = initViewSubtile(dispatcher, ut);
 
     const translateMorfology = (variant: LexItem) => {
         const parts = [ut.translate(`lex_common__pos_${variant.pos}`)];
@@ -183,7 +183,7 @@ export function init(
         playingAudio: boolean;
     }> = (props) => {
         return (
-            <Subtile tileId={props.tileId} source={props.source}>
+            <lexComponents.Subtile tileId={props.tileId} source={props.source}>
                 {props.basicOverview.pronunciation ? (
                     <SubtileRow>
                         <span className="key">
@@ -212,7 +212,7 @@ export function init(
                         {translateMorfology(props.selectedVariant)}
                     </span>
                 </SubtileRow>
-            </Subtile>
+            </lexComponents.Subtile>
         );
     };
 
@@ -224,14 +224,14 @@ export function init(
         origin: string;
     }> = (props) => {
         return (
-            <Subtile tileId={props.tileId} source={props.source}>
+            <lexComponents.Subtile tileId={props.tileId} source={props.source}>
                 <SubtileRow>
                     <span className="key">
                         {ut.translate('lex_overview__origin')}:
                     </span>
                     <span className="value">{props.origin}</span>
                 </SubtileRow>
-            </Subtile>
+            </lexComponents.Subtile>
         );
     };
 

@@ -21,7 +21,7 @@ import * as React from 'react';
 import { GlobalComponents } from '../../../../../views/common/index.js';
 import { init as starsViewInit } from './stars.js';
 import { calcFreqBand } from '../../../../../query/index.js';
-import { initViewSubtile } from '../../../lexCommon/views.js';
+import { initLexComponents } from '../../../lexCommon/views.js';
 import { Source } from '../../../lexCommon/types/enums.js';
 import { SubtileRow } from '../../../lexCommon/style.js';
 
@@ -38,8 +38,8 @@ export function init(
         };
     }>;
 } {
+    const lexComponents = initLexComponents(dispatcher, ut);
     const Stars = starsViewInit(dispatcher, ut);
-    const Subtile = initViewSubtile(dispatcher, ut);
 
     // -------------------- <SrchWordInfo /> ---------------------------------------------------
 
@@ -51,7 +51,7 @@ export function init(
             ipm: number;
         };
     }> = (props) => (
-        <Subtile
+        <lexComponents.Subtile
             tileId={props.tileId}
             source={Source.Corpus}
             corpname={props.corpname}
@@ -103,7 +103,7 @@ export function init(
                     </span>
                 </SubtileRow>
             )}
-        </Subtile>
+        </lexComponents.Subtile>
     );
 
     return {

@@ -24,6 +24,7 @@ import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
 import { UjcNeomatModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
+import { initLexComponents } from '../lexCommon/views.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -32,6 +33,7 @@ export function init(
     model: UjcNeomatModel
 ): TileComponent {
     const globalComponents = ut.getComponents();
+    const lexComponents = initLexComponents(dispatcher, ut);
 
     // -------------------- <UjcNeomatTileView /> -----------------------------------------------
 
@@ -43,7 +45,8 @@ export function init(
                 tileId={props.tileId}
                 isBusy={state.isBusy}
                 error={state.error}
-                hasData={state.data.entries.length > 0}
+                hasData={!List.empty(state.data.entries)}
+                noDataMessage={ut.translate('lex_common__not_found')}
                 backlink={state.backlink}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}

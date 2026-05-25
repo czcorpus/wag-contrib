@@ -27,7 +27,7 @@ import {
 } from '../../../lexCommon/types/ijp.js';
 import * as LS from './style.js';
 import { IJPData } from '../../../lexCommon/types/ijp.js';
-import { initViewSubtile } from '../../../lexCommon/views.js';
+import { initLexComponents } from '../../../lexCommon/views.js';
 import { SubtileRow } from '../../../lexCommon/style.js';
 import { Source } from '../../../lexCommon/types/enums.js';
 
@@ -40,7 +40,7 @@ export function init(
         data: IJPData;
     }>;
 } {
-    const Subtile = initViewSubtile(dispatcher, ut);
+    const lexComponents = initLexComponents(dispatcher, ut);
 
     // -------------------- <ComparisonTable /> -----------------------------------------------
 
@@ -288,7 +288,7 @@ export function init(
         data: IJPData;
     }> = (props) => {
         return (
-            <Subtile tileId={props.tileId} source={Source.IJP}>
+            <lexComponents.Subtile tileId={props.tileId} source={Source.IJP}>
                 <SubtileRow>
                     <span className="key">
                         {ut.translate('lex_overview__overview_syllabification')}
@@ -343,7 +343,7 @@ export function init(
                         />
                     </SubtileRow>
                 ) : null}
-            </Subtile>
+            </lexComponents.Subtile>
         );
     };
 
