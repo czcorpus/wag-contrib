@@ -45,13 +45,15 @@ export const MeaningItem = styled.div`
     margin-top: 1em;
     margin-bottom: 1em;
 
+    // -------- parent meaning indentation --------
+
     &.parent {
         margin-left: 1em;
         border-left: 2px solid white;
         padding-left: 1em;
     }
 
-    // ASSC adjusted styles
+    // -------- ASSC adjusted styles -------
 
     .tooltip-web {
         display: none;
@@ -61,23 +63,11 @@ export const MeaningItem = styled.div`
 export const MeaningHead = styled.div`
     margin-top: 0;
 
-    //------
-    .key {
-        color: ${(props) => props.theme.colorLightText};
-        font-family: ${(props) => props.theme.condensedFontFamily};
-    }
+    // -------- ASSC adjusted styles -------
 
-    .word {
-        margin-left: 0.5em;
-        font-weight: 700;
+    .mainVar {
+        font-size: 15px !important;
     }
-
-    .pos {
-        margin-left: 0.5em;
-        font-size: 0.8em;
-    }
-
-    //--------
 
     .lineNoSpace,
     .druhyRadek,
@@ -90,6 +80,8 @@ export const MeaningHead = styled.div`
     .vyz_count {
         display: none;
     }
+
+    // ---- [+] toggle for vyslovnost and druhyRadek.tvCh ----
 
     .vyslovnost,
     .druhyRadek .tvCh {
@@ -115,22 +107,9 @@ export const MeaningHead = styled.div`
 
 // ---------------- <MeaningBlock /> --------------------------------------
 
-export const MeaningBody = styled.div`
-    .attachement {
-        margin-left: 0.5em;
-        font-size: 0.8em;
-    }
+export const MeaningBody = styled.div``;
 
-    .explanation {
-        font-weight: 700;
-    }
-
-    .examples {
-        .example {
-            font-style: italic;
-        }
-    }
-`;
+// ---------------- <ASSCStyle /> --------------------------------------
 
 export const ASSCStyle = styled.div`
     .normal {
