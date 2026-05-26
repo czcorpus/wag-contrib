@@ -30,7 +30,7 @@ import { init as initIjpViews } from './ijp/views.js';
 import { init as initCorpusViews } from './corpus/views.js';
 import * as S from './style.js';
 import { List } from 'cnc-tskit';
-import { initViewSubtile } from '../../lexCommon/views.js';
+import { initLexComponents } from '../../lexCommon/views.js';
 import { LexItem } from '../../lexCommon/types/dictionary.js';
 import { SubtileRow } from '../../lexCommon/style.js';
 import { Source } from '../../lexCommon/types/enums.js';
@@ -49,16 +49,28 @@ export function init(
     model: LexOverviewModel
 ): TileComponent {
     const globalComponents = ut.getComponents();
+    const lexComponents = initLexComponents(dispatcher, ut);
     const ijpViews = initIjpViews(dispatcher, ut);
     const corpusViews = initCorpusViews(dispatcher, ut);
-    const Subtile = initViewSubtile(dispatcher, ut);
 
-    const translateMorfology = (variant: LexItem) => {
-        const parts = [ut.translate(`lex_common__pos_${variant.pos}`)];
+    const translateMorfology = (variant: LexItem, short: boolean) => {
+        const parts = [
+            short
+                ? ut.translate(`lex_common__pos_short_${variant.pos}`)
+                : ut.translate(`lex_common__pos_${variant.pos}`),
+        ];
         if (variant.gender) {
-            parts.push(ut.translate(`lex_common__gender_${variant.gender}`));
+            parts.push(
+                short
+                    ? ut.translate(`lex_common__gender_short_${variant.gender}`)
+                    : ut.translate(`lex_common__gender_${variant.gender}`)
+            );
         } else if (variant.aspect) {
-            parts.push(ut.translate(`lex_common__aspect_${variant.aspect}`));
+            parts.push(
+                short
+                    ? ut.translate(`lex_common__aspect_short_${variant.aspect}`)
+                    : ut.translate(`lex_common__aspect_${variant.aspect}`)
+            );
         }
         return parts.join(' ');
     };
@@ -90,7 +102,7 @@ export function init(
                             {variant.lemma}{' '}
                             {withInfo && variant.pos ? (
                                 <span className="small">
-                                    ({translateMorfology(variant)})
+                                    ({translateMorfology(variant, true)})
                                 </span>
                             ) : null}
                         </a>
@@ -99,7 +111,7 @@ export function init(
                             {variant.lemma}{' '}
                             {withInfo && variant.pos ? (
                                 <span className="small">
-                                    ({translateMorfology(variant)})
+                                    ({translateMorfology(variant, true)})
                                 </span>
                             ) : null}
                         </span>
@@ -183,7 +195,7 @@ export function init(
         playingAudio: boolean;
     }> = (props) => {
         return (
-            <Subtile tileId={props.tileId} source={props.source}>
+            <lexComponents.Subtile tileId={props.tileId} source={props.source}>
                 {props.basicOverview.pronunciation ? (
                     <SubtileRow>
                         <span className="key">
@@ -209,10 +221,10 @@ export function init(
                         {ut.translate('lex_overview__overview_part_of_speech')}:
                     </span>
                     <span className="value">
-                        {translateMorfology(props.selectedVariant)}
+                        {translateMorfology(props.selectedVariant, false)}
                     </span>
                 </SubtileRow>
-            </Subtile>
+            </lexComponents.Subtile>
         );
     };
 
@@ -224,14 +236,14 @@ export function init(
         origin: string;
     }> = (props) => {
         return (
-            <Subtile tileId={props.tileId} source={props.source}>
+            <lexComponents.Subtile tileId={props.tileId} source={props.source}>
                 <SubtileRow>
                     <span className="key">
                         {ut.translate('lex_overview__origin')}:
                     </span>
                     <span className="value">{props.origin}</span>
                 </SubtileRow>
-            </Subtile>
+            </lexComponents.Subtile>
         );
     };
 

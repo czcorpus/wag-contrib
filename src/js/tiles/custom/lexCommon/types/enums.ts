@@ -47,6 +47,7 @@ export enum PoS {
 export enum Gender {
     MASCULINE_ANIM = 'M',
     MASCULINE_INAN = 'I',
+    MASCULINE_ANIM_INAN = 'MI',
     FEMININE = 'F',
     NEUTER = 'N',
 }

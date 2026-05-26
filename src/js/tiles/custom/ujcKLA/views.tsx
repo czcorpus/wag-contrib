@@ -24,36 +24,45 @@ import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
 import { UjcKLAModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
-
+import { initLexComponents } from '../lexCommon/views.js';
 
 export function init(
-    dispatcher:IActionDispatcher,
-    ut:ViewUtils<GlobalComponents>,
-    theme:Theme,
-    model:UjcKLAModel
-):TileComponent {
-
+    dispatcher: IActionDispatcher,
+    ut: ViewUtils<GlobalComponents>,
+    theme: Theme,
+    model: UjcKLAModel
+): TileComponent {
     const globalComponents = ut.getComponents();
+    const lexComponents = initLexComponents(dispatcher, ut);
 
     // -------------------- <UjcKLATileView /> -----------------------------------------------
 
     const UjcKLATileView: React.FC<CoreTileComponentProps> = (props) => {
-
         const state = useModel(model);
 
         return (
-            <globalComponents.TileWrapper tileId={props.tileId} isBusy={state.isBusy} error={state.error}
-                hasData={state.data.images.length > 0}
+            <globalComponents.TileWrapper
+                tileId={props.tileId}
+                isBusy={state.isBusy}
+                error={state.error}
+                hasData={!List.empty(state.data.images)}
+                noDataMessage={ut.translate('lex_common__not_found')}
                 backlink={state.backlink}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
-                sourceIdent={{corp: 'UJC'}}>
+                sourceIdent={{ corp: 'UJC' }}
+            >
                 <S.UjcKLATileView>
-                    {List.map((image, i) => <S.Ticket key={i} src={image}/>, state.data.images)}
+                    {List.map(
+                        (image, i) => (
+                            <S.Ticket key={i} src={image} />
+                        ),
+                        state.data.images
+                    )}
                 </S.UjcKLATileView>
             </globalComponents.TileWrapper>
         );
-    }
+    };
 
     return UjcKLATileView;
 }

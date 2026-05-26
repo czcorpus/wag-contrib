@@ -27,6 +27,7 @@ import { GlobalComponents } from '../../../views/common/index.js';
 import { PSJCDataStructure, SSJCDataStructure } from './api/basicApi.js';
 import { isPSJCDataStructure, isSSJCDataStructure } from './api/types.js';
 import { Actions } from './actions.js';
+import { initLexComponents } from '../lexCommon/views.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -35,6 +36,7 @@ export function init(
     model: LexDictionariesModel
 ): TileComponent {
     const globalComponents = ut.getComponents();
+    const lexComponents = initLexComponents(dispatcher, ut);
 
     const TabButton: React.FC<{
         label: string;
@@ -133,6 +135,7 @@ export function init(
                 isBusy={state.isBusy}
                 error={state.error}
                 hasData={List.some((d) => d.data !== null, state.sources)}
+                noDataMessage={ut.translate('lex_common__not_found')}
                 backlink={current ? current.backlink : null}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
