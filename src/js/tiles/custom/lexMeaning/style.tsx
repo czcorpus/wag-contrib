@@ -65,33 +65,40 @@ export const MeaningHead = styled.div`
 
     // -------- ASSC adjusted styles -------
 
-    .mainVar {
-        font-size: 15px !important;
-    }
+    .header-line {
+        .mainVar {
+            font-size: 15px !important;
+        }
 
-    .lineNoSpace,
-    .druhyRadek,
-    .sl_druh,
-    .puvod,
-    .konec_zahlavi {
-        display: inline !important;
-    }
+        .mainVarSign,
+        .vyz_count {
+            display: none;
+        }
 
-    .vyz_count {
-        display: none;
-    }
+        > span {
+            display: inline-block !important;
+            margin: 0 !important;
+        }
 
-    // ---- [+] toggle for vyslovnost and druhyRadek.tvCh ----
+        > span:first-child {
+            margin: 0 3px 0 0 !important;
+        }
 
-    .vyslovnost,
-    .druhyRadek .tvCh {
-        display: inline !important;
-        cursor: pointer;
-    }
+        > span:not(:first-child):not(.semicolon) {
+            margin: 0 0 0 3px !important;
+        }
 
-    .expand {
-        display: none !important;
-        cursor: pointer;
+        // ---- [+] toggle for vyslovnost and druhyRadek.tvCh ----
+
+        .vyslovnost,
+        .druhyRadek .tvCh {
+            cursor: pointer;
+        }
+
+        .expand {
+            display: none !important;
+            cursor: pointer;
+        }
     }
 
     .collapsed {
@@ -100,7 +107,7 @@ export const MeaningHead = styled.div`
             display: none !important;
         }
         .expand {
-            display: inline !important;
+            display: inline-block !important;
         }
     }
 `;

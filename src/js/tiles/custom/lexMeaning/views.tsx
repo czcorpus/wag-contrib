@@ -58,7 +58,7 @@ export function init(
         return (
             <S.ASSCStyle
                 key={props.i}
-                className={collapsed ? 'collapsed' : ''}
+                className={'header-line' + (collapsed ? ' collapsed' : '')}
                 onClick={onClick}
                 dangerouslySetInnerHTML={{ __html: props.line }}
             />
