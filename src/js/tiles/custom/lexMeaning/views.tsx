@@ -58,7 +58,7 @@ export function init(
         return (
             <S.ASSCStyle
                 key={props.i}
-                className={collapsed ? 'collapsed' : ''}
+                className={'header-line' + (collapsed ? ' collapsed' : '')}
                 onClick={onClick}
                 dangerouslySetInnerHTML={{ __html: props.line }}
             />
@@ -92,7 +92,7 @@ export function init(
                                     key={i}
                                     className={
                                         block.includes('□')
-                                            ? 'hide_souslovi_data'
+                                            ? 'style_souslovi'
                                             : ''
                                     }
                                     dangerouslySetInnerHTML={{ __html: block }}
