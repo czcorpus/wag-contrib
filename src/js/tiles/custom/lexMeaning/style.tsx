@@ -108,7 +108,11 @@ export const MeaningHead = styled.div`
 // ---------------- <MeaningBlock /> --------------------------------------
 
 export const MeaningBody = styled.div`
-    .hide_souslovi_data {
+    .style_souslovi {
+        .varianta_h2_rel {
+            font-weight: 400 !important;
+        }
+
         .vyznam_wrapper_link,
         .vyznam_wrapper,
         .exeplifikace,

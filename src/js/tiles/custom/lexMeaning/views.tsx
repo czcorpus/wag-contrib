@@ -92,7 +92,7 @@ export function init(
                                     key={i}
                                     className={
                                         block.includes('□')
-                                            ? 'hide_souslovi_data'
+                                            ? 'style_souslovi'
                                             : ''
                                     }
                                     dangerouslySetInnerHTML={{ __html: block }}
