@@ -91,9 +91,10 @@ export function init(
                                 <S.ASSCStyle
                                     key={i}
                                     className={
-                                        block.includes('□')
-                                            ? 'style_souslovi'
-                                            : ''
+                                        'meaning-block' +
+                                        (block.includes('□')
+                                            ? ' style_souslovi'
+                                            : '')
                                     }
                                     dangerouslySetInnerHTML={{ __html: block }}
                                 />
@@ -129,6 +130,11 @@ export function init(
                                             <>
                                                 {i > 0 && j === 0 ? (
                                                     <hr />
+                                                ) : null}
+                                                {isParent ? (
+                                                    <span className="ke-slovu">
+                                                        ke slovu
+                                                    </span>
                                                 ) : null}
                                                 {renderDataItem(
                                                     `item-${i}-${j}`,

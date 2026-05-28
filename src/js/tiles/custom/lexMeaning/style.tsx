@@ -39,10 +39,14 @@ export const MeaningTileView = styled(LexTileBase)`
             overflow-y: auto;
         }
     }
+
+    .ke-slovu {
+        font-weight: 800;
+        font-size: 11px;
+    }
 `;
 
 export const MeaningItem = styled.div`
-    margin-top: 1em;
     margin-bottom: 1em;
 
     // -------- parent meaning indentation --------
@@ -61,7 +65,11 @@ export const MeaningItem = styled.div`
 `;
 
 export const MeaningHead = styled.div`
-    margin-top: 0;
+    margin-bottom: 25px;
+
+    .semicolon {
+        font-size: 11px;
+    }
 
     // -------- ASSC adjusted styles -------
 
@@ -77,7 +85,6 @@ export const MeaningHead = styled.div`
 
         > span {
             display: inline-block !important;
-            margin: 0 !important;
         }
 
         > span:first-child {
@@ -91,7 +98,8 @@ export const MeaningHead = styled.div`
         // ---- [+] toggle for vyslovnost and druhyRadek.tvCh ----
 
         .vyslovnost,
-        .druhyRadek .tvCh {
+        .druhyRadek .tvCh,
+        .puvod {
             cursor: pointer;
         }
 
@@ -103,7 +111,8 @@ export const MeaningHead = styled.div`
 
     .collapsed {
         .vyslovnost,
-        .druhyRadek .tvCh {
+        .druhyRadek .tvCh,
+        .puvod {
             display: none !important;
         }
         .expand {
@@ -112,9 +121,16 @@ export const MeaningHead = styled.div`
     }
 `;
 
-// ---------------- <MeaningBlock /> --------------------------------------
+// ---------------- <MeaningBody /> --------------------------------------
 
 export const MeaningBody = styled.div`
+    .meaning-block {
+        margin-bottom: 16px;
+    }
+
+    // -------- ASSC adjusted styles -------
+
+    // hide souslovi meanings and examples
     .style_souslovi {
         .varianta_h2_rel {
             font-weight: 400 !important;
@@ -126,6 +142,15 @@ export const MeaningBody = styled.div`
         .vskipExtraSmall {
             display: none !important;
         }
+    }
+
+    .korpus_odkaz {
+        display: none;
+    }
+
+    .vskipBig,
+    .vskipMedium {
+        display: none;
     }
 `;
 

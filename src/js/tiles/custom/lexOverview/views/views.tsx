@@ -135,12 +135,7 @@ export function init(
 
         return (
             <S.Header>
-                <h2>
-                    {renderVariant(
-                        props.selectedVariant,
-                        hasSameLemmaVariant(props.selectedVariant)
-                    )}
-                </h2>
+                <h2>{props.selectedVariant.lemma}</h2>
 
                 {List.size(props.variants) > 1
                     ? List.map(

@@ -23,14 +23,14 @@
         "lex_common__pos_V": "sloveso",
         "lex_common__pos_X": "neznámý slovní druh",
         "lex_common__pos_Z": "interpunkce",
-        "lex_common__pos_short_A": "adj.",
+        "lex_common__pos_short_A": "příd. jm.",
         "lex_common__pos_short_B": "zkrat.",
         "lex_common__pos_short_C": "čísl.",
         "lex_common__pos_short_D": "přísl.",
         "lex_common__pos_short_F": "ciz.",
         "lex_common__pos_short_I": "cit.",
         "lex_common__pos_short_J": "spoj.",
-        "lex_common__pos_short_N": "subst.",
+        "lex_common__pos_short_N": "podst. jm.",
         "lex_common__pos_short_P": "záj.",
         "lex_common__pos_short_R": "předl.",
         "lex_common__pos_short_S": "seg.",
@@ -45,7 +45,7 @@
         "lex_common__gender_N": "rodu středního",
         "lex_common__gender_short_M": "m. živ.",
         "lex_common__gender_short_I": "m. neživ.",
-        "lex_common__gender_short_MI": "m. živ./neživ.",
+        "lex_common__gender_short_MI": "m. živ. i neživ.",
         "lex_common__gender_short_F": "ž.",
         "lex_common__gender_short_N": "s.",
         "lex_common__aspect_P": "dokonavé",
@@ -53,7 +53,7 @@
         "lex_common__aspect_B": "obouvidné",
         "lex_common__aspect_short_P": "dok.",
         "lex_common__aspect_short_I": "nedok.",
-        "lex_common__aspect_short_B": "dok./nedok.",
+        "lex_common__aspect_short_B": "dok. i nedok.",
         "lex_common__not_found": "Litujeme, v tomto zdroji se hledaný výraz nevyskytuje"
     },
     "en-US": {
@@ -102,7 +102,7 @@
         "lex_common__gender_N": "neuter",
         "lex_common__gender_short_M": "masc. anim.",
         "lex_common__gender_short_I": "masc. inanim.",
-        "lex_common__gender_short_MI": "masc. anim./inanim.",
+        "lex_common__gender_short_MI": "masc. anim. & inanim.",
         "lex_common__gender_short_F": "fem.",
         "lex_common__gender_short_N": "neut.",
         "lex_common__aspect_P": "perfective",
@@ -110,7 +110,7 @@
         "lex_common__aspect_B": "biaspectual",
         "lex_common__aspect_short_P": "perf.",
         "lex_common__aspect_short_I": "imperf.",
-        "lex_common__aspect_short_B": "per./imperf.",
+        "lex_common__aspect_short_B": "per. & imperf.",
         "lex_common__not_found": "Our apologies, the searched term does not occur in this source"
     }
 }
