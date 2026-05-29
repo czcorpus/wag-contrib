@@ -86,6 +86,7 @@ export function init(
 
     const LexOverviewHeader: React.FC<{
         tileId: number;
+        source: string;
         selectedVariantIdx: number;
         selectedVariant: LexItem;
         variants: Array<LexItem>;
@@ -109,7 +110,7 @@ export function init(
                         <a onClick={clickHandler}>
                             {variant.lemma}{' '}
                             {withInfo && variant.pos ? (
-                                <span className="small">
+                                <span className="morphology">
                                     (
                                     {translateMorfology(
                                         variant,
@@ -124,7 +125,7 @@ export function init(
                         <span>
                             {variant.lemma}{' '}
                             {withInfo && variant.pos ? (
-                                <span className="small">
+                                <span className="morphology">
                                     (
                                     {translateMorfology(
                                         variant,
@@ -167,13 +168,21 @@ export function init(
         };
 
         return (
-            <S.Header>
+            <S.Header source={props.source}>
                 <h2>{props.selectedVariant.lemma}</h2>
 
                 {List.size(props.variants) > 1
                     ? List.map(
                           (variant, i) => (
-                              <h4 key={i} className="variant">
+                              <h4
+                                  key={i}
+                                  className={
+                                      'variant' +
+                                      (i === props.selectedVariantIdx
+                                          ? ' selected'
+                                          : '')
+                                  }
+                              >
                                   {renderVariant(
                                       variant,
                                       hasSameLemmaVariant(variant),
@@ -334,6 +343,7 @@ export function init(
                         tileId={props.tileId}
                         selectedVariantIdx={state.selectedVariantIdx}
                         selectedVariant={selectedVariant}
+                        source={state.mainSource}
                         variants={state.variants}
                     />
                     {state.mainSource !== undefined ? (

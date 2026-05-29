@@ -20,7 +20,7 @@ import { Theme } from '../../../page/theme.js';
 import { styled } from 'styled-components';
 import { Source } from './types/enums.js';
 
-function getSourceColor(source: string): string {
+export function getSourceColor(source: string): string {
     switch (source) {
         case Source.ASSC:
             return '#d4e2f4';

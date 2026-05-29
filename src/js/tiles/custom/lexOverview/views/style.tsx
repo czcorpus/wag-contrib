@@ -18,7 +18,7 @@
 
 import { Theme } from '../../../../page/theme.js';
 import { styled } from 'styled-components';
-import { LexTileBase } from '../../lexCommon/style.js';
+import { LexTileBase, getSourceColor } from '../../lexCommon/style.js';
 
 export const LexOverviewTileView = styled(LexTileBase)`
     display: flex;
@@ -26,7 +26,7 @@ export const LexOverviewTileView = styled(LexTileBase)`
     justify-content: space-between;
 `;
 
-export const Header = styled.div<{ theme: Theme }>`
+export const Header = styled.div<{ theme: Theme; source?: string }>`
     padding: 0.5em;
     display: flex;
     flex-direction: row;
@@ -38,7 +38,13 @@ export const Header = styled.div<{ theme: Theme }>`
     }
 
     .variant {
-        margin: 0.1em 1em;
+        margin: 0.1em 0.5em;
+        padding: 0 0.5em;
+
+        .morphology {
+            font-size: 0.8em;
+            font-style: italic;
+        }
 
         a {
             text-decoration: none;
@@ -46,9 +52,9 @@ export const Header = styled.div<{ theme: Theme }>`
         }
     }
 
-    .small {
-        font-size: 0.8em;
-        font-style: italic;
+    .selected {
+        background: ${(props) => getSourceColor(props.source)};
+        box-shadow: 0px 0px 6px 3px ${(props) => getSourceColor(props.source)};
     }
 `;
 
