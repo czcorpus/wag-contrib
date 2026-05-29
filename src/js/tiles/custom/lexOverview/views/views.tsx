@@ -265,7 +265,7 @@ export function init(
                 if (state.data.assc) {
                     asscVariant = List.find(
                         (v) => v.key.startsWith(selectedVariant.lemma),
-                        state.data.assc.variants
+                        state.data.assc.parsedVariants
                     );
                     // selected variant may not be in detailed data, for example "hranolky" is only mentioned in hranolka/hranolek
                     if (asscVariant) {

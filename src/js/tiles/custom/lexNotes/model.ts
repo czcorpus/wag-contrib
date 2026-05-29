@@ -256,7 +256,7 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
 
     private filterASSCResultsByIDs(id: string, data: HTMLBlock[]): HTMLBlock[] {
         const blockIdx = List.findIndex(
-            (d) => List.some((x) => x.id === 'hid-' + id, d.variants),
+            (d) => List.some((x) => x.id === 'hid-' + id, d.parsedVariants),
             data
         );
         if (blockIdx > -1) {

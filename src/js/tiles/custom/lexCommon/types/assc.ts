@@ -57,8 +57,10 @@ export interface DataItem {
 }
 
 export interface HTMLBlock {
-    variants: Array<VariantData>;
+    parsedVariants: Array<VariantData>;
     formattedVariants: Array<string>;
+    nestedVariants: Array<string>;
     meanings: Array<string>;
+    links: Array<string>;
     notes: Array<string>;
 }

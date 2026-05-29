@@ -107,7 +107,7 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                             List.some(
                                 (variant) =>
                                     'hid-' + action.payload.id === variant.id,
-                                block.variants
+                                block.parsedVariants
                             ),
                         action.payload.data
                     );

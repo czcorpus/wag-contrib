@@ -128,6 +128,17 @@ export const MeaningBody = styled.div`
         margin-bottom: 16px;
     }
 
+    .nest-line {
+        .mainVar {
+            font-size: 15px !important;
+        }
+
+        > span:not(:first-child),
+        .mainVarSign {
+            display: none !important;
+        }
+    }
+
     // -------- ASSC adjusted styles -------
 
     // hide souslovi meanings and examples
