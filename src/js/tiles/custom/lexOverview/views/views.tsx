@@ -53,12 +53,19 @@ export function init(
     const ijpViews = initIjpViews(dispatcher, ut);
     const corpusViews = initCorpusViews(dispatcher, ut);
 
-    const translateMorfology = (variant: LexItem, short: boolean) => {
-        const parts = [
-            short
-                ? ut.translate(`lex_common__pos_short_${variant.pos}`)
-                : ut.translate(`lex_common__pos_${variant.pos}`),
-        ];
+    const translateMorfology = (
+        variant: LexItem,
+        withPosInfo: boolean,
+        short: boolean
+    ) => {
+        const parts = [];
+        if (withPosInfo) {
+            parts.push(
+                short
+                    ? ut.translate(`lex_common__pos_short_${variant.pos}`)
+                    : ut.translate(`lex_common__pos_${variant.pos}`)
+            );
+        }
         if (variant.gender) {
             parts.push(
                 short
@@ -93,6 +100,7 @@ export function init(
         const renderVariant = (
             variant: LexItem,
             withInfo: boolean,
+            withPosInfo: boolean,
             clickHandler?: () => void
         ) => {
             return (
@@ -102,7 +110,13 @@ export function init(
                             {variant.lemma}{' '}
                             {withInfo && variant.pos ? (
                                 <span className="small">
-                                    ({translateMorfology(variant, true)})
+                                    (
+                                    {translateMorfology(
+                                        variant,
+                                        withPosInfo,
+                                        true
+                                    )}
+                                    )
                                 </span>
                             ) : null}
                         </a>
@@ -111,7 +125,13 @@ export function init(
                             {variant.lemma}{' '}
                             {withInfo && variant.pos ? (
                                 <span className="small">
-                                    ({translateMorfology(variant, true)})
+                                    (
+                                    {translateMorfology(
+                                        variant,
+                                        withPosInfo,
+                                        true
+                                    )}
+                                    )
                                 </span>
                             ) : null}
                         </span>
@@ -133,6 +153,19 @@ export function init(
             );
         };
 
+        const hasSamePosVariant = (variant: LexItem) => {
+            return (
+                List.findIndex(
+                    (v, i) =>
+                        v.lemma === variant.lemma &&
+                        v.pos === variant.pos &&
+                        (v.gender !== variant.gender ||
+                            v.aspect !== variant.aspect),
+                    props.variants
+                ) !== -1
+            );
+        };
+
         return (
             <S.Header>
                 <h2>{props.selectedVariant.lemma}</h2>
@@ -144,6 +177,7 @@ export function init(
                                   {renderVariant(
                                       variant,
                                       hasSameLemmaVariant(variant),
+                                      !hasSamePosVariant(variant),
                                       i !== props.selectedVariantIdx
                                           ? () => handleVariantClick(i)
                                           : undefined
@@ -216,7 +250,7 @@ export function init(
                         {ut.translate('lex_overview__overview_part_of_speech')}:
                     </span>
                     <span className="value">
-                        {translateMorfology(props.selectedVariant, false)}
+                        {translateMorfology(props.selectedVariant, true, false)}
                     </span>
                 </SubtileRow>
             </lexComponents.Subtile>
