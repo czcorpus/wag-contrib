@@ -122,7 +122,7 @@ export function init(
                             ) : null}
                         </a>
                     ) : (
-                        <span>
+                        <span className="selected">
                             {variant.lemma}{' '}
                             {withInfo && variant.pos ? (
                                 <span className="morphology">
@@ -170,32 +170,25 @@ export function init(
         return (
             <S.Header source={props.source}>
                 <h2>{props.selectedVariant.lemma}</h2>
-
-                {List.size(props.variants) > 1
-                    ? List.map(
-                          (variant, i) => (
-                              <h4
-                                  key={i}
-                                  className={
-                                      'variant' +
-                                      (i === props.selectedVariantIdx
-                                          ? ' selected'
-                                          : '')
-                                  }
-                              >
-                                  {renderVariant(
-                                      variant,
-                                      hasSameLemmaVariant(variant),
-                                      !hasSamePosVariant(variant),
-                                      i !== props.selectedVariantIdx
-                                          ? () => handleVariantClick(i)
-                                          : undefined
-                                  )}
-                              </h4>
-                          ),
-                          props.variants
-                      )
-                    : null}
+                {List.size(props.variants) > 1 ? (
+                    <div className="variant-grid">
+                        {List.map(
+                            (variant, i) => (
+                                <h4 key={i} className="variant">
+                                    {renderVariant(
+                                        variant,
+                                        hasSameLemmaVariant(variant),
+                                        !hasSamePosVariant(variant),
+                                        i !== props.selectedVariantIdx
+                                            ? () => handleVariantClick(i)
+                                            : undefined
+                                    )}
+                                </h4>
+                            ),
+                            props.variants
+                        )}
+                    </div>
+                ) : null}
             </S.Header>
         );
     };

@@ -27,34 +27,42 @@ export const LexOverviewTileView = styled(LexTileBase)`
 `;
 
 export const Header = styled.div<{ theme: Theme; source?: string }>`
-    padding: 0.5em;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-
     h2 {
         width: 100%;
         margin: 0.1em 0;
     }
 
-    .variant {
-        margin: 0.1em 0.5em;
-        padding: 0 0.5em;
+    .variant-grid {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
 
-        .morphology {
-            font-size: 0.8em;
-            font-style: italic;
+        .variant {
+            flex: 1;
+            margin: 0.1em 0.5em;
+            white-space: nowrap;
+
+            .morphology {
+                font-size: 0.8em;
+                font-style: italic;
+            }
+
+            a {
+                padding: 0 0.5em;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+            span {
+                padding: 0 0.5em;
+            }
         }
 
-        a {
-            text-decoration: none;
-            cursor: pointer;
+        .selected {
+            background: ${(props) => getSourceColor(props.source)};
+            box-shadow: 0px 0px 6px 3px
+                ${(props) => getSourceColor(props.source)};
         }
-    }
-
-    .selected {
-        background: ${(props) => getSourceColor(props.source)};
-        box-shadow: 0px 0px 6px 3px ${(props) => getSourceColor(props.source)};
     }
 `;
 
