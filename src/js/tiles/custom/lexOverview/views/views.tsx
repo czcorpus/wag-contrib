@@ -53,12 +53,19 @@ export function init(
     const ijpViews = initIjpViews(dispatcher, ut);
     const corpusViews = initCorpusViews(dispatcher, ut);
 
-    const translateMorfology = (variant: LexItem, short: boolean) => {
-        const parts = [
-            short
-                ? ut.translate(`lex_common__pos_short_${variant.pos}`)
-                : ut.translate(`lex_common__pos_${variant.pos}`),
-        ];
+    const translateMorfology = (
+        variant: LexItem,
+        withPosInfo: boolean,
+        short: boolean
+    ) => {
+        const parts = [];
+        if (withPosInfo) {
+            parts.push(
+                short
+                    ? ut.translate(`lex_common__pos_short_${variant.pos}`)
+                    : ut.translate(`lex_common__pos_${variant.pos}`)
+            );
+        }
         if (variant.gender) {
             parts.push(
                 short
@@ -79,6 +86,7 @@ export function init(
 
     const LexOverviewHeader: React.FC<{
         tileId: number;
+        source: string;
         selectedVariantIdx: number;
         selectedVariant: LexItem;
         variants: Array<LexItem>;
@@ -93,6 +101,7 @@ export function init(
         const renderVariant = (
             variant: LexItem,
             withInfo: boolean,
+            withPosInfo: boolean,
             clickHandler?: () => void
         ) => {
             return (
@@ -101,17 +110,29 @@ export function init(
                         <a onClick={clickHandler}>
                             {variant.lemma}{' '}
                             {withInfo && variant.pos ? (
-                                <span className="small">
-                                    ({translateMorfology(variant, true)})
+                                <span className="morphology">
+                                    (
+                                    {translateMorfology(
+                                        variant,
+                                        withPosInfo,
+                                        true
+                                    )}
+                                    )
                                 </span>
                             ) : null}
                         </a>
                     ) : (
-                        <span>
+                        <span className="selected">
                             {variant.lemma}{' '}
                             {withInfo && variant.pos ? (
-                                <span className="small">
-                                    ({translateMorfology(variant, true)})
+                                <span className="morphology">
+                                    (
+                                    {translateMorfology(
+                                        variant,
+                                        withPosInfo,
+                                        true
+                                    )}
+                                    )
                                 </span>
                             ) : null}
                         </span>
@@ -133,31 +154,41 @@ export function init(
             );
         };
 
-        return (
-            <S.Header>
-                <h2>
-                    {renderVariant(
-                        props.selectedVariant,
-                        hasSameLemmaVariant(props.selectedVariant)
-                    )}
-                </h2>
+        const hasSamePosVariant = (variant: LexItem) => {
+            return (
+                List.findIndex(
+                    (v, i) =>
+                        v.lemma === variant.lemma &&
+                        v.pos === variant.pos &&
+                        (v.gender !== variant.gender ||
+                            v.aspect !== variant.aspect),
+                    props.variants
+                ) !== -1
+            );
+        };
 
-                {List.size(props.variants) > 1
-                    ? List.map(
-                          (variant, i) => (
-                              <h4 key={i} className="variant">
-                                  {renderVariant(
-                                      variant,
-                                      hasSameLemmaVariant(variant),
-                                      i !== props.selectedVariantIdx
-                                          ? () => handleVariantClick(i)
-                                          : undefined
-                                  )}
-                              </h4>
-                          ),
-                          props.variants
-                      )
-                    : null}
+        return (
+            <S.Header source={props.source}>
+                <h2>{props.selectedVariant.lemma}</h2>
+                {List.size(props.variants) > 1 ? (
+                    <div className="variant-grid">
+                        {List.map(
+                            (variant, i) => (
+                                <h4 key={i} className="variant">
+                                    {renderVariant(
+                                        variant,
+                                        hasSameLemmaVariant(variant),
+                                        !hasSamePosVariant(variant),
+                                        i !== props.selectedVariantIdx
+                                            ? () => handleVariantClick(i)
+                                            : undefined
+                                    )}
+                                </h4>
+                            ),
+                            props.variants
+                        )}
+                    </div>
+                ) : null}
             </S.Header>
         );
     };
@@ -221,7 +252,7 @@ export function init(
                         {ut.translate('lex_overview__overview_part_of_speech')}:
                     </span>
                     <span className="value">
-                        {translateMorfology(props.selectedVariant, false)}
+                        {translateMorfology(props.selectedVariant, true, false)}
                     </span>
                 </SubtileRow>
             </lexComponents.Subtile>
@@ -270,7 +301,7 @@ export function init(
                 if (state.data.assc) {
                     asscVariant = List.find(
                         (v) => v.key.startsWith(selectedVariant.lemma),
-                        state.data.assc.variants
+                        state.data.assc.parsedVariants
                     );
                     // selected variant may not be in detailed data, for example "hranolky" is only mentioned in hranolka/hranolek
                     if (asscVariant) {
@@ -305,6 +336,7 @@ export function init(
                         tileId={props.tileId}
                         selectedVariantIdx={state.selectedVariantIdx}
                         selectedVariant={selectedVariant}
+                        source={state.mainSource}
                         variants={state.variants}
                     />
                     {state.mainSource !== undefined ? (

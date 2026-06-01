@@ -18,7 +18,7 @@
 
 import { Theme } from '../../../../page/theme.js';
 import { styled } from 'styled-components';
-import { LexTileBase } from '../../lexCommon/style.js';
+import { LexTileBase, getSourceColor } from '../../lexCommon/style.js';
 
 export const LexOverviewTileView = styled(LexTileBase)`
     display: flex;
@@ -26,29 +26,43 @@ export const LexOverviewTileView = styled(LexTileBase)`
     justify-content: space-between;
 `;
 
-export const Header = styled.div<{ theme: Theme }>`
-    padding: 0.5em;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-
+export const Header = styled.div<{ theme: Theme; source?: string }>`
     h2 {
         width: 100%;
         margin: 0.1em 0;
     }
 
-    .variant {
-        margin: 0.1em 1em;
+    .variant-grid {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
 
-        a {
-            text-decoration: none;
-            cursor: pointer;
+        .variant {
+            flex: 1;
+            margin: 0.1em 0.5em;
+            white-space: nowrap;
+
+            .morphology {
+                font-size: 0.8em;
+                font-style: italic;
+            }
+
+            a {
+                padding: 0 0.5em;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+            span {
+                padding: 0 0.5em;
+            }
         }
-    }
 
-    .small {
-        font-size: 0.8em;
-        font-style: italic;
+        .selected {
+            background: ${(props) => getSourceColor(props.source)};
+            box-shadow: 0px 0px 6px 3px
+                ${(props) => getSourceColor(props.source)};
+        }
     }
 `;
 

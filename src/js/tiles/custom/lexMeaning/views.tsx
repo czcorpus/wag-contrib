@@ -89,16 +89,36 @@ export function init(
                         {List.map(
                             (block, i) => (
                                 <S.ASSCStyle
-                                    key={i}
+                                    key={`block${i}`}
                                     className={
-                                        block.includes('□')
-                                            ? 'style_souslovi'
-                                            : ''
+                                        'meaning-block' +
+                                        (block.includes('□')
+                                            ? ' style_souslovi'
+                                            : '')
                                     }
                                     dangerouslySetInnerHTML={{ __html: block }}
                                 />
                             ),
                             data.meanings
+                        )}
+                        {List.map(
+                            (nest, i) => (
+                                <S.ASSCStyle
+                                    key={`nest${i}`}
+                                    className="nest-line"
+                                    dangerouslySetInnerHTML={{ __html: nest }}
+                                ></S.ASSCStyle>
+                            ),
+                            data.nestedVariants
+                        )}
+                        {List.map(
+                            (links, i) => (
+                                <S.ASSCStyle
+                                    key={`links${i}`}
+                                    dangerouslySetInnerHTML={{ __html: links }}
+                                ></S.ASSCStyle>
+                            ),
+                            data.links
                         )}
                     </S.MeaningBody>
                 </S.MeaningItem>
@@ -129,6 +149,11 @@ export function init(
                                             <>
                                                 {i > 0 && j === 0 ? (
                                                     <hr />
+                                                ) : null}
+                                                {isParent ? (
+                                                    <span className="ke-slovu">
+                                                        ke slovu
+                                                    </span>
                                                 ) : null}
                                                 {renderDataItem(
                                                     `item-${i}-${j}`,
