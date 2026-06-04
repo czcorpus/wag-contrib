@@ -176,15 +176,17 @@ export class LexCommonModel extends StatelessModel<LexCommonModelState> {
                     : [],
         };
         this.lexApi.call(streaming, this.tileId, 0, args).subscribe({
-            error: (error) => {
+            complete: () => {
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
-                    error,
                     payload: {
                         tileId: this.tileId,
                         isEmpty: true,
                     },
                 });
+            },
+            error: (err) => {
+                console.error('lex api error:', err);
             },
         });
     }

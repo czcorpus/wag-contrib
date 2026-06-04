@@ -17,7 +17,7 @@
  */
 
 import { Dict, HTTP, List, pipe } from 'cnc-tskit';
-import { EMPTY, from, mergeMap, Observable, of as rxOf } from 'rxjs';
+import { EMPTY, Observable, of as rxOf } from 'rxjs';
 import { IApiServices } from '../../../appServices.js';
 import { ajax$ } from '../../../page/ajax.js';
 import { ResourceApi, SourceDetails, HTTPHeaders } from '../../../types.js';
@@ -41,6 +41,8 @@ export interface LexResponse<T = IJPData | Array<HTMLBlock> | 'done'> {
     source: Source;
     id: string;
     data: T;
+    statusCode?: number;
+    error?: string;
 }
 
 export function isAsscData(v: LexResponse): v is LexResponse<Array<HTMLBlock>> {
@@ -110,34 +112,6 @@ export class LexApi implements ResourceApi<LexArgs, LexResponse> {
                     this.apiURL + '/stream?' + params.join('&'),
                     {}
                 );
-    }
-
-    bulk(
-        streaming: IDataStreaming | null,
-        tileId: number,
-        queryIdx: number,
-        queryArgs: LexArgs
-    ): Observable<LexResponse> {
-        const params = [
-            ...this.prepareArgs('assc_id', queryArgs.asscIds),
-            ...this.prepareArgs('ijp_id', queryArgs.ijpIds),
-        ];
-        return (
-            streaming
-                ? streaming.registerTileRequest<Array<LexResponse>>({
-                      tileId,
-                      queryIdx,
-                      method: HTTP.Method.GET,
-                      url: this.apiURL + '/bulk?' + params.join('&'),
-                      body: {},
-                      contentType: 'application/json',
-                  })
-                : ajax$<Array<LexResponse>>(
-                      HTTP.Method.GET,
-                      this.apiURL + '/bulk?' + params.join('&'),
-                      {}
-                  )
-        ).pipe(mergeMap((v) => from(v)));
     }
 
     getSourceDescription(

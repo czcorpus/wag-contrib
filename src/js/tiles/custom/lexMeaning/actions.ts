@@ -21,7 +21,6 @@ import { Actions as GlobalActions } from '../../../models/actions.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
 
 export interface PartialDataPayload {
-    id: string;
     data: HTMLBlock[];
 }
 

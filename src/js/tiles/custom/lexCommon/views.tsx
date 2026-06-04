@@ -36,6 +36,14 @@ export function initLexComponents(
             className?: string;
         }>
     >;
+    SourceUnavailableSubtile: React.FC<
+        React.PropsWithChildren<{
+            tileId: number;
+            source: string | Array<string>;
+            corpname?: string;
+            className?: string;
+        }>
+    >;
 } {
     const components = ut.getComponents();
 
@@ -102,5 +110,25 @@ export function initLexComponents(
         );
     };
 
-    return { Subtile };
+    // -------------------- <SourceUnavailableSubtile /> ---------------------------------------------------
+
+    const SourceUnavailableSubtile: React.FC<
+        React.PropsWithChildren<{
+            tileId: number;
+            source: string | Array<string>;
+            corpname?: string;
+            className?: string;
+        }>
+    > = (props) => {
+        return (
+            <Subtile {...props}>
+                <components.MessageStatusIcon
+                    statusType={SystemMessageType.WARNING}
+                />
+                <p>{ut.translate('lex_common__source_unavailable')}</p>
+            </Subtile>
+        );
+    };
+
+    return { Subtile, SourceUnavailableSubtile };
 }

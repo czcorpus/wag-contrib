@@ -142,7 +142,7 @@ export function init(
                     >
                         <SubtileRow className="scroller">
                             {List.flatMap(
-                                (d, i) =>
+                                (blocks, i) =>
                                     List.map((block, j) => {
                                         const isParent = j > 0;
                                         return (
@@ -162,7 +162,7 @@ export function init(
                                                 )}
                                             </>
                                         );
-                                    }, d.blocks),
+                                    }, blocks),
                                 state.data
                             )}
                         </SubtileRow>

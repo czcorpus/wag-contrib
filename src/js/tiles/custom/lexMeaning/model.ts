@@ -33,9 +33,7 @@ import { Source } from '../lexCommon/types/enums.js';
 export interface LexMeaningModelState {
     isBusy: boolean;
     selectedVariantIdx: number;
-    data: Array<{
-        blocks: HTMLBlock[];
-    }>;
+    data: Array<HTMLBlock[]>;
     error: string;
     backlink: Backlink;
 }
@@ -100,7 +98,7 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
             Actions.TilePartialDataLoaded,
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
-                state.data.push({ blocks: action.payload.data });
+                state.data.push(action.payload.data);
             }
         );
 
@@ -166,17 +164,16 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                         }
 
                         if (isAsscData(resp)) {
-                            const filteredData = this.filterASSCResultsByIDs(
+                            resp.data = this.filterASSCResultsByIDs(
                                 resp.id,
                                 resp.data
                             );
-                            if (List.size(filteredData) > 0) {
+                            if (List.size(resp.data) > 0) {
                                 dispatch<typeof Actions.TilePartialDataLoaded>({
                                     name: Actions.TilePartialDataLoaded.name,
                                     payload: {
                                         tileId: this.tileId,
-                                        id: resp.id,
-                                        data: filteredData,
+                                        data: resp.data,
                                     },
                                 });
                                 data.hasData = true;

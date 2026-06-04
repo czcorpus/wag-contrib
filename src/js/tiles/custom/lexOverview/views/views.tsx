@@ -298,10 +298,10 @@ export function init(
 
         switch (state.mainSource) {
             case Source.ASSC:
-                if (state.data.assc) {
+                if (state.source.assc && !List.empty(state.source.assc.data)) {
                     asscVariant = List.find(
                         (v) => v.key.startsWith(selectedVariant.lemma),
-                        state.data.assc.parsedVariants
+                        state.source.assc.data[0].parsedVariants
                     );
                     // selected variant may not be in detailed data, for example "hranolky" is only mentioned in hranolka/hranolek
                     if (asscVariant) {
@@ -316,8 +316,9 @@ export function init(
                 break;
 
             case Source.IJP:
-                if (state.data.ijp) {
-                    basicOverview.pronunciation = state.data.ijp.pronunciation;
+                if (state.source.ijp) {
+                    basicOverview.pronunciation =
+                        state.source.ijp.data.pronunciation;
                 }
                 break;
         }
@@ -349,10 +350,10 @@ export function init(
                         />
                     ) : null}
 
-                    {state.data.ijp ? (
+                    {state.source.ijp ? (
                         <ijpViews.Subtile
                             tileId={props.tileId}
-                            data={state.data.ijp}
+                            data={state.source.ijp.data}
                         />
                     ) : null}
 
