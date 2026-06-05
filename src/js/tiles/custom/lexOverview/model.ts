@@ -30,17 +30,20 @@ import { HTMLBlock } from '../lexCommon/types/assc.js';
 import { Source } from '../lexCommon/types/enums.js';
 import { LexItem } from '../lexCommon/types/dictionary.js';
 import {
-    isAsscData,
-    isDoneData,
-    isIjpData,
     LexResponse,
+    isAsscData,
+    isAsscError,
+    isAsscDone,
+    isIjpData,
+    isIjpError,
+    isIjpDone,
 } from '../lexCommon/api.js';
 import { IJPData } from '../lexCommon/types/ijp.js';
 import { scan } from 'rxjs';
 
 interface SourceData {
-    assc: LexResponse<HTMLBlock[]> | null;
-    ijp: LexResponse<IJPData> | null;
+    assc: LexResponse<HTMLBlock[] | string> | null;
+    ijp: LexResponse<IJPData | string> | null;
 }
 
 export interface LexOverviewModelState {
@@ -116,10 +119,12 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                         action.payload.resp.data = [block];
                         state.source.assc = action.payload.resp;
                     }
-                }
-
-                // get only first ijp data
-                if (isIjpData(action.payload.resp)) {
+                } else if (isAsscError(action.payload.resp)) {
+                    state.source.assc = action.payload.resp;
+                } else if (
+                    isIjpData(action.payload.resp) ||
+                    isIjpError(action.payload.resp)
+                ) {
                     state.source.ijp = action.payload.resp;
                 }
             }
@@ -243,13 +248,16 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
             .pipe(
                 scan(
                     (data, resp) => {
-                        console.log('Received data:', resp);
                         if (data.done.assc && data.done.ijp) {
                             data.dispatched = true;
                             return data;
                         }
 
-                        if (isAsscData(resp) && !data.done.assc) {
+                        if (
+                            isAsscData(resp) ||
+                            (isAsscError(resp) && !data.done.assc)
+                        ) {
+                            // dispatch only first assc data
                             dispatch<typeof Actions.TilePartialDataLoaded>({
                                 name: Actions.TilePartialDataLoaded.name,
                                 payload: {
@@ -259,7 +267,11 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                             });
                             data.hasData = true;
                             data.done.assc = true;
-                        } else if (isIjpData(resp) && !data.done.ijp) {
+                        } else if (
+                            (isIjpData(resp) || isIjpError(resp)) &&
+                            !data.done.ijp
+                        ) {
+                            // dispatch only first ijp data
                             dispatch<typeof Actions.TilePartialDataLoaded>({
                                 name: Actions.TilePartialDataLoaded.name,
                                 payload: {
@@ -269,12 +281,10 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                             });
                             data.hasData = true;
                             data.done.ijp = true;
-                        } else if (isDoneData(resp)) {
-                            if (resp.source === Source.ASSC) {
-                                data.done.assc = true;
-                            } else if (resp.source === Source.IJP) {
-                                data.done.ijp = true;
-                            }
+                        } else if (isAsscDone(resp)) {
+                            data.done.assc = true;
+                        } else if (isIjpDone(resp)) {
+                            data.done.ijp = true;
                         } else if (resp === null) {
                             data.done.assc = true;
                             data.done.ijp = true;

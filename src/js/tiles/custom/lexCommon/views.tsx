@@ -36,12 +36,9 @@ export function initLexComponents(
             className?: string;
         }>
     >;
-    SourceUnavailableSubtile: React.FC<
+    MessageSubtile: React.FC<
         React.PropsWithChildren<{
-            tileId: number;
-            source: string | Array<string>;
-            corpname?: string;
-            className?: string;
+            systemMessageType: SystemMessageType;
         }>
     >;
 } {
@@ -110,25 +107,25 @@ export function initLexComponents(
         );
     };
 
-    // -------------------- <SourceUnavailableSubtile /> ---------------------------------------------------
+    // -------------------- <MessageSubtile /> ---------------------------------------------------
 
-    const SourceUnavailableSubtile: React.FC<
+    const MessageSubtile: React.FC<
         React.PropsWithChildren<{
-            tileId: number;
-            source: string | Array<string>;
-            corpname?: string;
-            className?: string;
+            systemMessageType: SystemMessageType;
+            message?: string;
         }>
     > = (props) => {
         return (
-            <Subtile {...props}>
-                <components.MessageStatusIcon
-                    statusType={SystemMessageType.WARNING}
-                />
-                <p>{ut.translate('lex_common__source_unavailable')}</p>
-            </Subtile>
+            <S.SubtileWrapper $systemMessageType={props.systemMessageType}>
+                <S.SubtileRow style={{ display: 'flex', alignItems: 'center' }}>
+                    <components.MessageStatusIcon
+                        statusType={props.systemMessageType}
+                    />
+                    {props.children}
+                </S.SubtileRow>
+            </S.SubtileWrapper>
         );
     };
 
-    return { Subtile, SourceUnavailableSubtile };
+    return { Subtile, MessageSubtile };
 }

@@ -18,11 +18,12 @@
 
 import { Action } from 'kombo';
 import { Actions as GlobalActions } from '../../../models/actions.js';
-import { Source } from '../lexCommon/types/enums.js';
+import { HTMLBlock } from '../lexCommon/types/assc.js';
+import { IJPData } from '../lexCommon/types/ijp.js';
+import { LexResponse } from '../lexCommon/api.js';
 
 export interface PartialDataPayload {
-    source: Source;
-    notes: Array<string>;
+    response: LexResponse<HTMLBlock[] | IJPData | string>;
 }
 
 export class Actions {

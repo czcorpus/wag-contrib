@@ -54,7 +54,11 @@
         "lex_common__aspect_short_P": "dok.",
         "lex_common__aspect_short_I": "nedok.",
         "lex_common__aspect_short_B": "dok. i nedok.",
-        "lex_common__not_found": "Litujeme, v tomto zdroji se hledaný výraz nevyskytuje"
+        "lex_common__not_found": "Litujeme, v tomto zdroji se hledaný výraz nevyskytuje",
+        "lex_common__assc_unavailable": "Litujeme, Akademický slovník současné češtiny není dostupný",
+        "lex_common__ijp_unavailable": "Litujeme, Internetová jazyková příručka není dostupná",
+        "lex_common__assc_failed": "Litujeme, nepodařilo se načíst data z Akademického slovníku současné češtiny",
+        "lex_common__ijp_failed": "Litujeme, nepodařilo se načíst data z Internetové jazykové příručky"
     },
     "en-US": {
         "lex_common__source": "Source",
@@ -111,6 +115,10 @@
         "lex_common__aspect_short_P": "perf.",
         "lex_common__aspect_short_I": "imperf.",
         "lex_common__aspect_short_B": "per. & imperf.",
-        "lex_common__not_found": "Our apologies, the searched term does not occur in this source"
+        "lex_common__not_found": "Our apologies, the searched term does not occur in this source",
+        "lex_common__assc_unavailable": "Our apologies, the Akademický slovník současné češtiny is unavailable",
+        "lex_common__ijp_unavailable": "Our apologies, the Internetová jazyková příručka is unavailable",
+        "lex_common__assc_failed": "Our apologies, loading data from the Akademický slovník současné češtiny failed",
+        "lex_common__ijp_failed": "Our apologies, loading data from the Internetová jazyková příručka failed"
     }
 }

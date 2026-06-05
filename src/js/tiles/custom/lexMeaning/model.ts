@@ -26,14 +26,18 @@ import { List } from 'cnc-tskit';
 import { RecognizedQueries } from '../../../query/index.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
-import { isAsscData, isDoneData, LexResponse } from '../lexCommon/api.js';
+import {
+    isAsscData,
+    isAsscDone,
+    isAsscError,
+    LexResponse,
+} from '../lexCommon/api.js';
 import { scan } from 'rxjs';
-import { Source } from '../lexCommon/types/enums.js';
 
 export interface LexMeaningModelState {
     isBusy: boolean;
     selectedVariantIdx: number;
-    data: Array<HTMLBlock[]>;
+    data: Array<LexResponse<HTMLBlock[] | string>>;
     error: string;
     backlink: Backlink;
 }
@@ -98,7 +102,7 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
             Actions.TilePartialDataLoaded,
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
-                state.data.push(action.payload.data);
+                state.data.push(action.payload.response);
             }
         );
 
@@ -157,32 +161,37 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
             })
             .pipe(
                 scan(
-                    (data, resp) => {
+                    (data, response) => {
                         if (data.done) {
                             data.dispatched = true;
                             return data;
                         }
 
-                        if (isAsscData(resp)) {
-                            resp.data = this.filterASSCResultsByIDs(
-                                resp.id,
-                                resp.data
+                        if (isAsscData(response)) {
+                            response.data = this.filterASSCResultsByIDs(
+                                response.id,
+                                response.data
                             );
-                            if (List.size(resp.data) > 0) {
+                            if (List.size(response.data) > 0) {
                                 dispatch<typeof Actions.TilePartialDataLoaded>({
                                     name: Actions.TilePartialDataLoaded.name,
                                     payload: {
                                         tileId: this.tileId,
-                                        data: resp.data,
+                                        response,
                                     },
                                 });
                                 data.hasData = true;
                             }
-                        } else if (isDoneData(resp)) {
-                            if (resp.source === Source.ASSC) {
-                                data.done = true;
-                            }
-                        } else if (resp === null) {
+                        } else if (isAsscError(response)) {
+                            dispatch<typeof Actions.TilePartialDataLoaded>({
+                                name: Actions.TilePartialDataLoaded.name,
+                                payload: {
+                                    tileId: this.tileId,
+                                    response,
+                                },
+                            });
+                            data.hasData = true;
+                        } else if (isAsscDone(response) || response === null) {
                             data.done = true;
                         }
                         return data;

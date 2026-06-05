@@ -37,24 +37,72 @@ export function isEmptyArgs(args: LexArgs): boolean {
     return Dict.every((v) => List.empty(v), args);
 }
 
-export interface LexResponse<T = IJPData | Array<HTMLBlock> | 'done'> {
+export interface LexResponse<T = IJPData | Array<HTMLBlock> | 'done' | string> {
     source: Source;
     id: string;
     data: T;
-    statusCode?: number;
-    error?: string;
+    statusCode: number;
 }
 
 export function isAsscData(v: LexResponse): v is LexResponse<Array<HTMLBlock>> {
-    return v && v.source === Source.ASSC && v.data !== 'done';
+    return (
+        v &&
+        v.source === Source.ASSC &&
+        !!v.data &&
+        v.data !== 'done' &&
+        typeof v.data !== 'string'
+    );
+}
+
+export function isAsscDone(v: LexResponse): v is LexResponse<'done'> {
+    return (
+        v && v.source === Source.ASSC && v.statusCode < 400 && v.data === 'done'
+    );
+}
+
+export function isAsscError(v: LexResponse): v is LexResponse<string> {
+    return (
+        v &&
+        v.source === Source.ASSC &&
+        v.statusCode >= 400 &&
+        typeof v.data === 'string' &&
+        v.data !== 'done'
+    );
 }
 
 export function isIjpData(v: LexResponse): v is LexResponse<IJPData> {
-    return v && v.source === Source.IJP && v.data !== 'done';
+    return (
+        v &&
+        v.source === Source.IJP &&
+        !!v.data &&
+        v.data !== 'done' &&
+        typeof v.data !== 'string'
+    );
 }
 
-export function isDoneData(v: LexResponse): v is LexResponse<'done'> {
-    return v && v.data === 'done';
+export function isIjpDone(v: LexResponse): v is LexResponse<'done'> {
+    return (
+        v && v.source === Source.IJP && v.statusCode < 400 && v.data === 'done'
+    );
+}
+
+export function isIjpError(v: LexResponse): v is LexResponse<string> {
+    return (
+        v &&
+        v.source === Source.IJP &&
+        v.statusCode >= 400 &&
+        typeof v.data === 'string' &&
+        v.data !== 'done'
+    );
+}
+
+export function getErrorMessage(lexResponse: LexResponse): string {
+    switch (lexResponse.statusCode) {
+        case 503:
+            return `lex_common__${lexResponse.source}_unavailable`;
+        default:
+            return `lex_common__${lexResponse.source}_failed`;
+    }
 }
 
 export class LexApi implements ResourceApi<LexArgs, LexResponse> {

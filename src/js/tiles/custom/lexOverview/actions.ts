@@ -24,7 +24,7 @@ import { HTMLBlock } from '../lexCommon/types/assc.js';
 import { LexResponse } from '../lexCommon/api.js';
 
 export interface PartialDataPayload {
-    resp: LexResponse<IJPData | Array<HTMLBlock>>;
+    resp: LexResponse<IJPData | Array<HTMLBlock> | string>;
 }
 
 export class Actions {

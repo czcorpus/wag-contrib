@@ -27,19 +27,22 @@ import { IDataStreaming } from '../../../page/streaming.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
 import {
     isAsscData,
-    isDoneData,
+    isAsscDone,
+    isAsscError,
     isIjpData,
+    isIjpDone,
+    isIjpError,
     LexResponse,
 } from '../lexCommon/api.js';
 import { scan } from 'rxjs';
-import { Source } from '../lexCommon/types/enums.js';
+import { IJPData } from '../lexCommon/types/ijp.js';
 
 export interface LexNotesModelState {
     isBusy: boolean;
     selectedVariantIdx: number;
-    notes: {
-        ijp: Array<string>;
-        assc: Array<string>;
+    data: {
+        ijp: Array<LexResponse<IJPData | string>>;
+        assc: Array<LexResponse<Array<HTMLBlock> | string>>;
     };
     error: string;
     backlink: Backlink;
@@ -77,7 +80,7 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
             (state, action) => {
                 state.error = null;
                 state.backlink = null;
-                state.notes = {
+                state.data = {
                     ijp: [],
                     assc: [],
                 };
@@ -103,13 +106,16 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
             Actions.TilePartialDataLoaded,
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
-                switch (action.payload.source) {
-                    case Source.IJP:
-                        state.notes.ijp.push(...action.payload.notes);
-                        break;
-                    case Source.ASSC:
-                        state.notes.assc.push(...action.payload.notes);
-                        break;
+                if (
+                    isAsscData(action.payload.response) ||
+                    isAsscError(action.payload.response)
+                ) {
+                    state.data.assc.push(action.payload.response);
+                } else if (
+                    isIjpData(action.payload.response) ||
+                    isIjpError(action.payload.response)
+                ) {
+                    state.data.ijp.push(action.payload.response);
                 }
             }
         );
@@ -131,7 +137,7 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
             (state, action) => {
                 state.selectedVariantIdx = action.payload.variantIdx;
                 state.isBusy = true;
-                state.notes = {
+                state.data = {
                     ijp: [],
                     assc: [],
                 };
@@ -179,42 +185,48 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
                         }
 
                         if (isAsscData(resp)) {
-                            const filteredData = this.filterASSCResultsByIDs(
-                                resp.id,
-                                resp.data
+                            const filteredData = pipe(
+                                this.filterASSCResultsByIDs(resp.id, resp.data),
+                                List.filter(
+                                    (v) => v.notes && v.notes.length > 0
+                                )
                             );
-                            const notes = pipe(
-                                filteredData,
-                                List.flatMap((v) => v.notes),
-                                List.filter((v) => !!v)
-                            );
-                            if (List.size(notes) > 0) {
+                            if (filteredData.length > 0) {
+                                resp.data = filteredData;
                                 dispatch<typeof Actions.TilePartialDataLoaded>({
                                     name: Actions.TilePartialDataLoaded.name,
                                     payload: {
                                         tileId: this.tileId,
-                                        source: Source.ASSC,
-                                        notes,
+                                        response: resp,
                                     },
                                 });
                                 data.hasData = true;
                             }
-                        } else if (isIjpData(resp) && resp.data.notes) {
+                        } else if (
+                            isIjpData(resp) &&
+                            List.size(resp.data.notes) > 0
+                        ) {
                             dispatch<typeof Actions.TilePartialDataLoaded>({
                                 name: Actions.TilePartialDataLoaded.name,
                                 payload: {
                                     tileId: this.tileId,
-                                    source: Source.IJP,
-                                    notes: resp.data.notes,
+                                    response: resp,
                                 },
                             });
                             data.hasData = true;
-                        } else if (isDoneData(resp)) {
-                            if (resp.source === Source.ASSC) {
-                                data.done.assc = true;
-                            } else if (resp.source === Source.IJP) {
-                                data.done.ijp = true;
-                            }
+                        } else if (isAsscError(resp) || isIjpError(resp)) {
+                            dispatch<typeof Actions.TilePartialDataLoaded>({
+                                name: Actions.TilePartialDataLoaded.name,
+                                payload: {
+                                    tileId: this.tileId,
+                                    response: resp,
+                                },
+                            });
+                            data.hasData = true;
+                        } else if (isAsscDone(resp)) {
+                            data.done.assc = true;
+                        } else if (isIjpDone(resp)) {
+                            data.done.ijp = true;
                         } else if (resp === null) {
                             data.done.assc = true;
                             data.done.ijp = true;

@@ -28,6 +28,8 @@ import { HTMLBlock } from '../lexCommon/types/assc.js';
 import { SubtileRow } from '../lexCommon/style.js';
 import { Source } from '../lexCommon/types/enums.js';
 import { initLexComponents } from '../lexCommon/views.js';
+import { getErrorMessage, isAsscData, isAsscError } from '../lexCommon/api.js';
+import { SystemMessageType } from '../../../types.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -125,6 +127,12 @@ export function init(
             );
         };
 
+        const validAsscData = pipe(
+            state.data,
+            List.filter((d) => isAsscData(d)),
+            List.map((d) => d.data)
+        );
+
         return (
             <globalComponents.TileWrapper
                 tileId={props.tileId}
@@ -135,6 +143,19 @@ export function init(
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.MeaningTileView>
+                    {pipe(
+                        state.data,
+                        List.filter((v) => isAsscError(v)),
+                        List.map((v, i) => (
+                            <lexComponents.MessageSubtile
+                                key={i}
+                                systemMessageType={SystemMessageType.ERROR}
+                            >
+                                {ut.translate(getErrorMessage(v))}
+                            </lexComponents.MessageSubtile>
+                        ))
+                    )}
+
                     <lexComponents.Subtile
                         tileId={props.tileId}
                         source={Source.ASSC}
@@ -163,7 +184,7 @@ export function init(
                                             </>
                                         );
                                     }, blocks),
-                                state.data
+                                validAsscData
                             )}
                         </SubtileRow>
                     </lexComponents.Subtile>
