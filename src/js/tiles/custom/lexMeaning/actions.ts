@@ -19,10 +19,10 @@
 import { Action } from 'kombo';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
+import { LexResponse } from '../lexCommon/api.js';
 
 export interface PartialDataPayload {
-    id: string;
-    data: HTMLBlock[];
+    response: LexResponse<HTMLBlock[] | string>;
 }
 
 export class Actions {

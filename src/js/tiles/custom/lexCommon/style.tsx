@@ -19,6 +19,7 @@
 import { Theme } from '../../../page/theme.js';
 import { styled } from 'styled-components';
 import { Source } from './types/enums.js';
+import { SystemMessageType } from '../../../types.js';
 
 export function getSourceColor(source: string): string {
     switch (source) {
@@ -33,11 +34,23 @@ export function getSourceColor(source: string): string {
     }
 }
 
+export function getMessageColor(systemMessageType: string): string {
+    switch (systemMessageType) {
+        case SystemMessageType.WARNING:
+            return '#009ee0';
+        case SystemMessageType.ERROR:
+            return '#ea670c';
+        default:
+            return null;
+    }
+}
+
 export const LexTileBase = styled.div<{ theme: Theme }>``;
 
 export const SubtileWrapper = styled.div<{
     theme: Theme;
     $source?: string;
+    $systemMessageType?: SystemMessageType;
 }>`
     margin-top: 1em;
     &:first-child {
@@ -45,29 +58,13 @@ export const SubtileWrapper = styled.div<{
     }
     padding: 0.5em;
     background-color: ${(props) => getSourceColor(props.$source)};
+    border: ${(props) =>
+        props.$systemMessageType
+            ? `2px solid ${getMessageColor(props.$systemMessageType)}`
+            : 'none'};
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-
-    .content {
-        margin: 0;
-        padding: 0;
-        line-height: 2em;
-
-        .key {
-            color: ${(props) => props.theme.colorLightText};
-            font-family: ${(props) => props.theme.condensedFontFamily};
-        }
-
-        .value {
-            margin-left: 0.5em;
-        }
-    }
-
-    .footer {
-        font-size: 0.9em;
-        text-align: right;
-    }
 
     a:hover {
         text-decoration: none;
@@ -76,7 +73,9 @@ export const SubtileWrapper = styled.div<{
 `;
 
 export const SubtileRow = styled.div<{ theme: Theme }>`
-    margin-bottom: 0.5em;
+    &:not(:first-child) {
+        margin-top: 0.5em;
+    }
 
     .key {
         color: ${(props) => props.theme.colorLightText};
@@ -87,8 +86,11 @@ export const SubtileRow = styled.div<{ theme: Theme }>`
         margin-left: 0.5em;
     }
 
+    .MessageStatusIcon {
+        margin: 0 0.5em;
+    }
+
     &.footer {
-        margin-top: 0em;
         font-size: 0.9em;
         text-align: right;
     }

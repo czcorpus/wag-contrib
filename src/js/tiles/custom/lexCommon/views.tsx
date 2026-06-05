@@ -36,6 +36,11 @@ export function initLexComponents(
             className?: string;
         }>
     >;
+    MessageSubtile: React.FC<
+        React.PropsWithChildren<{
+            systemMessageType: SystemMessageType;
+        }>
+    >;
 } {
     const components = ut.getComponents();
 
@@ -102,5 +107,25 @@ export function initLexComponents(
         );
     };
 
-    return { Subtile };
+    // -------------------- <MessageSubtile /> ---------------------------------------------------
+
+    const MessageSubtile: React.FC<
+        React.PropsWithChildren<{
+            systemMessageType: SystemMessageType;
+            message?: string;
+        }>
+    > = (props) => {
+        return (
+            <S.SubtileWrapper $systemMessageType={props.systemMessageType}>
+                <S.SubtileRow style={{ display: 'flex', alignItems: 'center' }}>
+                    <components.MessageStatusIcon
+                        statusType={props.systemMessageType}
+                    />
+                    {props.children}
+                </S.SubtileRow>
+            </S.SubtileWrapper>
+        );
+    };
+
+    return { Subtile, MessageSubtile };
 }

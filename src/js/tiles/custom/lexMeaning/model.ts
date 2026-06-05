@@ -26,16 +26,18 @@ import { List } from 'cnc-tskit';
 import { RecognizedQueries } from '../../../query/index.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
-import { isAsscData, isDoneData, LexResponse } from '../lexCommon/api.js';
+import {
+    isAsscData,
+    isAsscDone,
+    isAsscError,
+    LexResponse,
+} from '../lexCommon/api.js';
 import { scan } from 'rxjs';
-import { Source } from '../lexCommon/types/enums.js';
 
 export interface LexMeaningModelState {
     isBusy: boolean;
     selectedVariantIdx: number;
-    data: Array<{
-        blocks: HTMLBlock[];
-    }>;
+    data: Array<LexResponse<HTMLBlock[] | string>>;
     error: string;
     backlink: Backlink;
 }
@@ -100,7 +102,7 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
             Actions.TilePartialDataLoaded,
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
-                state.data.push({ blocks: action.payload.data });
+                state.data.push(action.payload.response);
             }
         );
 
@@ -159,33 +161,37 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
             })
             .pipe(
                 scan(
-                    (data, resp) => {
+                    (data, response) => {
                         if (data.done) {
                             data.dispatched = true;
                             return data;
                         }
 
-                        if (isAsscData(resp)) {
-                            const filteredData = this.filterASSCResultsByIDs(
-                                resp.id,
-                                resp.data
+                        if (isAsscData(response)) {
+                            response.data = this.filterASSCResultsByIDs(
+                                response.id,
+                                response.data
                             );
-                            if (List.size(filteredData) > 0) {
+                            if (List.size(response.data) > 0) {
                                 dispatch<typeof Actions.TilePartialDataLoaded>({
                                     name: Actions.TilePartialDataLoaded.name,
                                     payload: {
                                         tileId: this.tileId,
-                                        id: resp.id,
-                                        data: filteredData,
+                                        response,
                                     },
                                 });
                                 data.hasData = true;
                             }
-                        } else if (isDoneData(resp)) {
-                            if (resp.source === Source.ASSC) {
-                                data.done = true;
-                            }
-                        } else if (resp === null) {
+                        } else if (isAsscError(response)) {
+                            dispatch<typeof Actions.TilePartialDataLoaded>({
+                                name: Actions.TilePartialDataLoaded.name,
+                                payload: {
+                                    tileId: this.tileId,
+                                    response,
+                                },
+                            });
+                            data.hasData = true;
+                        } else if (isAsscDone(response) || response === null) {
                             data.done = true;
                         }
                         return data;
@@ -228,6 +234,14 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
             const mainItem = data[blockIdx];
             if (blockIdx > 0) {
                 const parentItem = data[0];
+                parentItem.nestedVariants = List.filter(
+                    (v) =>
+                        List.findIndex(
+                            (x) => x === v,
+                            mainItem.formattedVariants
+                        ) === -1,
+                    parentItem.nestedVariants
+                );
                 return [mainItem, parentItem];
             }
             return [mainItem];

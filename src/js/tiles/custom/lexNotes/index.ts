@@ -80,7 +80,7 @@ export class LexNotesTile implements ITileProvider {
             initState: {
                 isBusy: isBusy,
                 selectedVariantIdx: null,
-                notes: {
+                data: {
                     ijp: [],
                     assc: [],
                 },

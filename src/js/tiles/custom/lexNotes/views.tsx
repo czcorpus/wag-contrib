@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { List } from 'cnc-tskit';
+import { List, pipe } from 'cnc-tskit';
 import { IActionDispatcher, ViewUtils, useModel } from 'kombo';
 import * as React from 'react';
 import { Theme } from '../../../page/theme.js';
@@ -27,6 +27,14 @@ import { GlobalComponents } from '../../../views/common/index.js';
 import { SubtileRow } from '../lexCommon/style.js';
 import { Source } from '../lexCommon/types/enums.js';
 import { initLexComponents } from '../lexCommon/views.js';
+import {
+    getErrorMessage,
+    isAsscData,
+    isAsscError,
+    isIjpData,
+    isIjpError,
+} from '../lexCommon/api.js';
+import { SystemMessageType } from '../../../types.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -42,26 +50,49 @@ export function init(
     const LexNotesTileView: React.FC<CoreTileComponentProps> = (props) => {
         const state = useModel(model);
 
+        const ijpNotes = pipe(
+            state.data.ijp,
+            List.filter((v) => isIjpData(v)),
+            List.flatMap((v) => v.data.notes)
+        );
+
+        const asscNotes = pipe(
+            state.data.assc,
+            List.filter((v) => isAsscData(v)),
+            List.flatMap((v) => List.map((d) => d.notes, v.data))
+        );
+
         return (
             <globalComponents.TileWrapper
                 tileId={props.tileId}
                 isBusy={state.isBusy}
                 error={state.error}
                 hasData={
-                    !List.empty(state.notes.assc) ||
-                    !List.empty(state.notes.ijp)
+                    !List.empty(state.data.assc) || !List.empty(state.data.ijp)
                 }
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.NotesTileView>
-                    {!List.empty(state.notes.ijp) ? (
+                    {pipe(
+                        [...state.data.ijp, ...state.data.assc],
+                        List.filter((v) => isIjpError(v) || isAsscError(v)),
+                        List.map((v) => (
+                            <lexComponents.MessageSubtile
+                                systemMessageType={SystemMessageType.ERROR}
+                            >
+                                {ut.translate(getErrorMessage(v))}
+                            </lexComponents.MessageSubtile>
+                        ))
+                    )}
+
+                    {!List.empty(ijpNotes) ? (
                         <lexComponents.Subtile
                             tileId={props.tileId}
                             source={
                                 List.some(
-                                    (note) => note.includes('</a>'),
-                                    state.notes.ijp
+                                    (data) => data.includes('</a>'),
+                                    ijpNotes
                                 )
                                     ? [Source.IJP, Source.DJD]
                                     : Source.IJP
@@ -75,12 +106,12 @@ export function init(
                                         }}
                                     />
                                 ),
-                                state.notes.ijp
+                                ijpNotes
                             )}
                         </lexComponents.Subtile>
                     ) : null}
 
-                    {!List.empty(state.notes.assc) ? (
+                    {!List.empty(asscNotes) ? (
                         <lexComponents.Subtile
                             tileId={props.tileId}
                             source={Source.ASSC}
@@ -93,7 +124,7 @@ export function init(
                                         }}
                                     />
                                 ),
-                                state.notes.assc
+                                asscNotes
                             )}
                         </lexComponents.Subtile>
                     ) : null}

@@ -29,13 +29,21 @@ import { LexOverviewModel } from '../model.js';
 import { init as initIjpViews } from './ijp/views.js';
 import { init as initCorpusViews } from './corpus/views.js';
 import * as S from './style.js';
-import { List } from 'cnc-tskit';
+import { List, pipe } from 'cnc-tskit';
 import { initLexComponents } from '../../lexCommon/views.js';
 import { LexItem } from '../../lexCommon/types/dictionary.js';
 import { SubtileRow } from '../../lexCommon/style.js';
 import { Source } from '../../lexCommon/types/enums.js';
 import { VariantData } from '../../lexCommon/types/assc.js';
 import { Actions } from '../actions.js';
+import { SystemMessageType } from '../../../../types.js';
+import {
+    getErrorMessage,
+    isAsscData,
+    isAsscError,
+    isIjpData,
+    isIjpError,
+} from '../../lexCommon/api.js';
 
 interface BasicOverviewData {
     pronunciation?: string;
@@ -298,10 +306,13 @@ export function init(
 
         switch (state.mainSource) {
             case Source.ASSC:
-                if (state.data.assc) {
+                if (
+                    isAsscData(state.source.assc) &&
+                    !List.empty(state.source.assc.data)
+                ) {
                     asscVariant = List.find(
                         (v) => v.key.startsWith(selectedVariant.lemma),
-                        state.data.assc.parsedVariants
+                        state.source.assc.data[0].parsedVariants
                     );
                     // selected variant may not be in detailed data, for example "hranolky" is only mentioned in hranolka/hranolek
                     if (asscVariant) {
@@ -316,8 +327,9 @@ export function init(
                 break;
 
             case Source.IJP:
-                if (state.data.ijp) {
-                    basicOverview.pronunciation = state.data.ijp.pronunciation;
+                if (isIjpData(state.source.ijp) && state.source.ijp.data) {
+                    basicOverview.pronunciation =
+                        state.source.ijp.data.pronunciation;
                 }
                 break;
         }
@@ -339,6 +351,18 @@ export function init(
                         source={state.mainSource}
                         variants={state.variants}
                     />
+                    {pipe(
+                        [state.source.assc, state.source.ijp],
+                        List.filter((v) => isAsscError(v) || isIjpError(v)),
+                        List.map((v, i) => (
+                            <lexComponents.MessageSubtile
+                                key={i}
+                                systemMessageType={SystemMessageType.ERROR}
+                            >
+                                {ut.translate(getErrorMessage(v))}
+                            </lexComponents.MessageSubtile>
+                        ))
+                    )}
                     {state.mainSource !== undefined ? (
                         <LexOverviewBasics
                             tileId={props.tileId}
@@ -348,14 +372,12 @@ export function init(
                             playingAudio={state.playingAudio}
                         />
                     ) : null}
-
-                    {state.data.ijp ? (
+                    {isIjpData(state.source.ijp) && state.source.ijp.data ? (
                         <ijpViews.Subtile
                             tileId={props.tileId}
-                            data={state.data.ijp}
+                            data={state.source.ijp.data}
                         />
                     ) : null}
-
                     {selectedVariant.corpusEntry ? (
                         <corpusViews.Subtile
                             tileId={props.tileId}
@@ -371,7 +393,6 @@ export function init(
                             corpname={state.referenceCorpus}
                         />
                     )}
-
                     {asscVariant && asscVariant.origin ? (
                         <LexOverviewOrigin
                             tileId={props.tileId}

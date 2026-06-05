@@ -139,6 +139,12 @@ export const MeaningBody = styled.div`
         }
     }
 
+    .links {
+        .heslo {
+            font-weight: 800 !important;
+        }
+    }
+
     // -------- ASSC adjusted styles -------
 
     // hide souslovi meanings and examples
