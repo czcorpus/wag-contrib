@@ -234,6 +234,14 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
             const mainItem = data[blockIdx];
             if (blockIdx > 0) {
                 const parentItem = data[0];
+                parentItem.nestedVariants = List.filter(
+                    (v) =>
+                        List.findIndex(
+                            (x) => x === v,
+                            mainItem.formattedVariants
+                        ) === -1,
+                    parentItem.nestedVariants
+                );
                 return [mainItem, parentItem];
             }
             return [mainItem];

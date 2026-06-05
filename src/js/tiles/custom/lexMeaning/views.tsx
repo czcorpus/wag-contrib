@@ -109,7 +109,7 @@ export function init(
                                     key={`nest${i}`}
                                     className="nest-line"
                                     dangerouslySetInnerHTML={{ __html: nest }}
-                                ></S.ASSCStyle>
+                                />
                             ),
                             data.nestedVariants
                         )}
@@ -117,8 +117,11 @@ export function init(
                             (links, i) => (
                                 <S.ASSCStyle
                                     key={`links${i}`}
-                                    dangerouslySetInnerHTML={{ __html: links }}
-                                ></S.ASSCStyle>
+                                    className="links"
+                                    dangerouslySetInnerHTML={{
+                                        __html: links,
+                                    }}
+                                />
                             ),
                             data.links
                         )}

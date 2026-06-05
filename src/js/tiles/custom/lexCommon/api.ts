@@ -56,7 +56,10 @@ export function isAsscData(v: LexResponse): v is LexResponse<Array<HTMLBlock>> {
 
 export function isAsscDone(v: LexResponse): v is LexResponse<'done'> {
     return (
-        v && v.source === Source.ASSC && v.statusCode < 400 && v.data === 'done'
+        v &&
+        v.source === Source.ASSC &&
+        v.statusCode === 200 &&
+        v.data === 'done'
     );
 }
 
@@ -82,7 +85,10 @@ export function isIjpData(v: LexResponse): v is LexResponse<IJPData> {
 
 export function isIjpDone(v: LexResponse): v is LexResponse<'done'> {
     return (
-        v && v.source === Source.IJP && v.statusCode < 400 && v.data === 'done'
+        v &&
+        v.source === Source.IJP &&
+        v.statusCode === 200 &&
+        v.data === 'done'
     );
 }
 
