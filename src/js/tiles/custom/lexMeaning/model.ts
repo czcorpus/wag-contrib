@@ -168,7 +168,9 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                         }
 
                         if (isAsscData(response)) {
-                            response.data = this.filterASSCResultsByIDs(
+                            // response contains whole ASSČ page, we need to filter only
+                            // requested id, and its parent if it has one
+                            const filteredData = this.filterASSCResultsByIDs(
                                 response.id,
                                 response.data
                             );
@@ -177,7 +179,10 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                                     name: Actions.TilePartialDataLoaded.name,
                                     payload: {
                                         tileId: this.tileId,
-                                        response,
+                                        response: {
+                                            ...response,
+                                            data: filteredData,
+                                        },
                                     },
                                 });
                                 data.hasData = true;
@@ -230,7 +235,8 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
             (d) => List.some((x) => x.id === 'hid-' + id, d.parsedVariants),
             data
         );
-        if (blockIdx > -1) {
+
+        if (blockIdx !== -1) {
             const mainItem = data[blockIdx];
             if (blockIdx > 0) {
                 const parentItem = data[0];
