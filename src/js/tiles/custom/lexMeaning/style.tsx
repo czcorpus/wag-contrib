@@ -110,6 +110,7 @@ export const MeaningHead = styled.div`
 
         .vyslovnost,
         .druhyRadek .tvCh,
+        .druhyRadek .tvChSl,
         .puvod {
             cursor: pointer;
         }
@@ -123,6 +124,7 @@ export const MeaningHead = styled.div`
     .collapsed {
         .vyslovnost,
         .druhyRadek .tvCh,
+        .druhyRadek .tvChSl,
         .puvod {
             display: none !important;
         }
