@@ -107,13 +107,17 @@ export function init(
         };
 
         const renderVariant = (
+            i: number,
             variant: LexItem,
             withInfo: boolean,
             withPosInfo: boolean,
             clickHandler?: () => void
         ) => {
             return (
-                <>
+                <h4
+                    key={i}
+                    className={'variant' + (clickHandler ? '' : ' selected')}
+                >
                     {clickHandler ? (
                         <a onClick={clickHandler}>
                             {variant.lemma}{' '}
@@ -130,7 +134,7 @@ export function init(
                             ) : null}
                         </a>
                     ) : (
-                        <span className="selected">
+                        <span>
                             {variant.lemma}{' '}
                             {withInfo && variant.pos ? (
                                 <span className="morphology">
@@ -145,7 +149,7 @@ export function init(
                             ) : null}
                         </span>
                     )}
-                </>
+                </h4>
             );
         };
 
@@ -181,18 +185,16 @@ export function init(
                 {List.size(props.variants) > 1 ? (
                     <div className="variant-grid">
                         {List.map(
-                            (variant, i) => (
-                                <h4 key={i} className="variant">
-                                    {renderVariant(
-                                        variant,
-                                        hasSameLemmaVariant(variant),
-                                        !hasSamePosVariant(variant),
-                                        i !== props.selectedVariantIdx
-                                            ? () => handleVariantClick(i)
-                                            : undefined
-                                    )}
-                                </h4>
-                            ),
+                            (variant, i) =>
+                                renderVariant(
+                                    i,
+                                    variant,
+                                    hasSameLemmaVariant(variant),
+                                    !hasSamePosVariant(variant),
+                                    i !== props.selectedVariantIdx
+                                        ? () => handleVariantClick(i)
+                                        : undefined
+                                ),
                             props.variants
                         )}
                     </div>

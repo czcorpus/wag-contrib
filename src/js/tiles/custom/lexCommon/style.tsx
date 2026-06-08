@@ -62,6 +62,7 @@ export const SubtileWrapper = styled.div<{
         props.$systemMessageType
             ? `2px solid ${getMessageColor(props.$systemMessageType)}`
             : 'none'};
+    border-radius: 3px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
