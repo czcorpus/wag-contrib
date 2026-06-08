@@ -35,8 +35,19 @@ export const MeaningTileView = styled(LexTileBase)`
         right: 0;
         bottom: 0;
 
-        .scroller {
-            overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+
+        .error-box {
+        }
+
+        .data-box {
+            flex-grow: 1;
+            overflow-y: hidden;
+
+            .scroller {
+                overflow-y: auto;
+            }
         }
     }
 
