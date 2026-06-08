@@ -146,51 +146,56 @@ export function init(
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.MeaningTileView>
-                    {pipe(
-                        state.data,
-                        List.filter((v) => isAsscError(v)),
-                        List.map((v, i) => (
-                            <lexComponents.MessageSubtile
-                                key={i}
-                                systemMessageType={SystemMessageType.ERROR}
-                            >
-                                {ut.translate(getErrorMessage(v))}
-                            </lexComponents.MessageSubtile>
-                        ))
-                    )}
+                    <div className="stretch">
+                        {pipe(
+                            state.data,
+                            List.filter((v) => isAsscError(v)),
+                            List.map((v, i) => (
+                                <lexComponents.MessageSubtile
+                                    key={i}
+                                    systemMessageType={SystemMessageType.ERROR}
+                                    className="error-box"
+                                >
+                                    {ut.translate(getErrorMessage(v))}
+                                </lexComponents.MessageSubtile>
+                            ))
+                        )}
 
-                    <lexComponents.Subtile
-                        tileId={props.tileId}
-                        source={Source.ASSC}
-                        className="stretch"
-                    >
-                        <SubtileRow className="scroller">
-                            {List.flatMap(
-                                (blocks, i) =>
-                                    List.map((block, j) => {
-                                        const isParent = j > 0;
-                                        return (
-                                            <>
-                                                {i > 0 && j === 0 ? (
-                                                    <hr />
-                                                ) : null}
-                                                {isParent ? (
-                                                    <span className="ke-slovu">
-                                                        ke slovu
-                                                    </span>
-                                                ) : null}
-                                                {renderDataItem(
-                                                    `item-${i}-${j}`,
-                                                    block,
-                                                    isParent
-                                                )}
-                                            </>
-                                        );
-                                    }, blocks),
-                                validAsscData
-                            )}
-                        </SubtileRow>
-                    </lexComponents.Subtile>
+                        {!List.empty(validAsscData) ? (
+                            <lexComponents.Subtile
+                                tileId={props.tileId}
+                                source={Source.ASSC}
+                                className="data-box"
+                            >
+                                <SubtileRow className="scroller">
+                                    {List.flatMap(
+                                        (blocks, i) =>
+                                            List.map((block, j) => {
+                                                const isParent = j > 0;
+                                                return (
+                                                    <>
+                                                        {i > 0 && j === 0 ? (
+                                                            <hr />
+                                                        ) : null}
+                                                        {isParent ? (
+                                                            <span className="ke-slovu">
+                                                                ke slovu
+                                                            </span>
+                                                        ) : null}
+                                                        {renderDataItem(
+                                                            `item-${i}-${j}`,
+                                                            block,
+                                                            isParent
+                                                        )}
+                                                    </>
+                                                );
+                                            }, blocks),
+                                        validAsscData
+                                    )}
+                                </SubtileRow>
+                            </lexComponents.Subtile>
+                        ) : null}
+                    </div>
                 </S.MeaningTileView>
             </globalComponents.TileWrapper>
         );

@@ -39,6 +39,7 @@ export function initLexComponents(
     MessageSubtile: React.FC<
         React.PropsWithChildren<{
             systemMessageType: SystemMessageType;
+            className?: string;
         }>
     >;
 } {
@@ -112,11 +113,14 @@ export function initLexComponents(
     const MessageSubtile: React.FC<
         React.PropsWithChildren<{
             systemMessageType: SystemMessageType;
-            message?: string;
+            className?: string;
         }>
     > = (props) => {
         return (
-            <S.SubtileWrapper $systemMessageType={props.systemMessageType}>
+            <S.SubtileWrapper
+                $systemMessageType={props.systemMessageType}
+                className={props.className}
+            >
                 <S.SubtileRow style={{ display: 'flex', alignItems: 'center' }}>
                     <components.MessageStatusIcon
                         statusType={props.systemMessageType}

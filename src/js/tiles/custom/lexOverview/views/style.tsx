@@ -29,18 +29,21 @@ export const LexOverviewTileView = styled(LexTileBase)`
 export const Header = styled.div<{ theme: Theme; source?: string }>`
     h2 {
         width: 100%;
-        margin: 0.1em 0;
+        margin: 0;
     }
 
     .variant-grid {
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
+        margin-top: 1em;
 
         .variant {
             flex: 1;
-            margin: 0.1em 0.5em;
+            margin: 0;
+            padding: 0.2em 1em;
             white-space: nowrap;
+            text-align: center;
 
             .morphology {
                 font-size: 0.8em;
@@ -48,20 +51,17 @@ export const Header = styled.div<{ theme: Theme; source?: string }>`
             }
 
             a {
-                padding: 0 0.5em;
                 text-decoration: none;
                 cursor: pointer;
             }
 
             span {
-                padding: 0 0.5em;
             }
         }
 
         .selected {
-            background: ${(props) => getSourceColor(props.source)};
-            box-shadow: 0px 0px 6px 3px
-                ${(props) => getSourceColor(props.source)};
+            border-radius: 3px;
+            background-color: ${(props) => getSourceColor(props.source)};
         }
     }
 `;
