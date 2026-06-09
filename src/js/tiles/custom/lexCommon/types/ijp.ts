@@ -78,9 +78,9 @@ export interface IJPData {
     meaning: string;
     syllabification: string;
     gender: string;
-    grammarCase: CaseData;
-    comparison: ComparisonData;
-    conjugation: ConjugationData;
+    grammarCase?: CaseData;
+    comparison?: ComparisonData;
+    conjugation?: ConjugationData;
     examples: Array<string>;
     notes: Array<string>;
     alternatives: Array<Alternative>;

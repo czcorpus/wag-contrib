@@ -53,7 +53,7 @@ export interface LexOverviewModelState {
     mainSource: Source;
     variants: Array<LexItem>;
     selectedVariantIdx: number;
-    source: SourceData;
+    sourceData: SourceData;
     error: string;
     backlink: Backlink;
     playingAudio: boolean;
@@ -94,7 +94,11 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                 state.isBusy = true;
             },
             (state, action, dispatch) => {
-                this.loadData(this.appServices.dataStreaming(), dispatch);
+                this.loadData(
+                    this.appServices.dataStreaming(),
+                    dispatch,
+                    state
+                );
             }
         );
 
@@ -102,30 +106,16 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
             Actions.TilePartialDataLoaded,
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
-                // get only first assc data
-                if (isAsscData(action.payload.resp)) {
-                    // get only block containig word with the correct id
-                    const block = List.find(
-                        (block) =>
-                            List.some(
-                                (variant) =>
-                                    'hid-' + action.payload.resp.id ===
-                                    variant.id,
-                                block.parsedVariants
-                            ),
-                        action.payload.resp.data
-                    );
-                    if (block) {
-                        action.payload.resp.data = [block];
-                        state.source.assc = action.payload.resp;
-                    }
-                } else if (isAsscError(action.payload.resp)) {
-                    state.source.assc = action.payload.resp;
+                if (
+                    isAsscData(action.payload.resp) ||
+                    isAsscError(action.payload.resp)
+                ) {
+                    state.sourceData.assc = action.payload.resp;
                 } else if (
                     isIjpData(action.payload.resp) ||
                     isIjpError(action.payload.resp)
                 ) {
-                    state.source.ijp = action.payload.resp;
+                    state.sourceData.ijp = action.payload.resp;
                 }
             }
         );
@@ -163,7 +153,7 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
                 state.selectedVariantIdx = action.payload.variantIdx;
-                state.source = {
+                state.sourceData = {
                     assc: null,
                     ijp: null,
                 };
@@ -185,7 +175,8 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                                 this.appServices
                                     .dataStreaming()
                                     .getSubgroup(action.payload.subgroupId),
-                                dispatch
+                                dispatch,
+                                state
                             );
                         }
                     },
@@ -236,7 +227,11 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
         );
     }
 
-    private loadData(streaming: IDataStreaming, dispatch: SEDispatcher) {
+    private loadData(
+        streaming: IDataStreaming,
+        dispatch: SEDispatcher,
+        state: LexOverviewModelState
+    ) {
         streaming
             .registerTileRequest<LexResponse>({
                 tileId: this.tileId,
@@ -254,10 +249,35 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                         }
 
                         if (
-                            isAsscData(resp) ||
-                            (isAsscError(resp) && !data.done.assc)
+                            (isAsscData(resp) || isAsscError(resp)) &&
+                            !data.done.assc
                         ) {
-                            // dispatch only first assc data
+                            if (isAsscData(resp)) {
+                                const asscBlock = this.filterASSCResultsByID(
+                                    resp.id,
+                                    state.variants[state.selectedVariantIdx]
+                                        .lemma,
+                                    resp.data
+                                );
+                                if (asscBlock) {
+                                    dispatch<
+                                        typeof Actions.TilePartialDataLoaded
+                                    >({
+                                        name: Actions.TilePartialDataLoaded
+                                            .name,
+                                        payload: {
+                                            tileId: this.tileId,
+                                            resp: {
+                                                ...resp,
+                                                data: [asscBlock],
+                                            },
+                                        },
+                                    });
+                                    data.hasData = true;
+                                    data.done.assc = true;
+                                }
+                                return data;
+                            }
                             dispatch<typeof Actions.TilePartialDataLoaded>({
                                 name: Actions.TilePartialDataLoaded.name,
                                 payload: {
@@ -322,5 +342,33 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                     });
                 },
             });
+    }
+
+    private filterASSCResultsByID(
+        id: string,
+        value: string,
+        data: HTMLBlock[]
+    ): HTMLBlock {
+        const asscData = List.find(
+            (d) => List.some((x) => x.id === 'hid-' + id, d.parsedVariants),
+            data
+        );
+        if (!asscData) {
+            return asscData;
+        }
+
+        // need to create new object here, changing old object can affect other tiles
+        const newData = { ...asscData };
+        const variantIndex = List.findIndex(
+            (v) => v.key === value,
+            newData.parsedVariants
+        );
+        if (variantIndex !== -1) {
+            newData.parsedVariants = [newData.parsedVariants[variantIndex]];
+            newData.formattedVariants = [
+                newData.formattedVariants[variantIndex],
+            ];
+        }
+        return newData;
     }
 }

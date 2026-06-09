@@ -24,11 +24,20 @@ export const DataTable = styled.table<{ theme: Theme }>`
     border-collapse: collapse;
     border-spacing: 0em;
 
+    .tableKey {
+        white-space: nowrap;
+        text-align: left;
+    }
+
+    .tableValue {
+        text-align: center;
+        width: 100%;
+    }
+
     td,
     th {
         padding: 0.2em 0.5em;
-        border: 1px solid #dddddd;
-        text-align: center;
+        border: 1px solid #cccccc;
         vertical-align: middle;
     }
 `;

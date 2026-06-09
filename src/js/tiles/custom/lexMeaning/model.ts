@@ -174,6 +174,7 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
                                 response.id,
                                 response.data
                             );
+
                             if (List.size(response.data) > 0) {
                                 dispatch<typeof Actions.TilePartialDataLoaded>({
                                     name: Actions.TilePartialDataLoaded.name,
