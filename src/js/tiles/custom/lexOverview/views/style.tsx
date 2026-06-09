@@ -37,6 +37,7 @@ export const Header = styled.div<{ theme: Theme; source?: string }>`
         flex-direction: row;
         flex-wrap: wrap;
         margin-top: 1em;
+        gap: 2px;
 
         .variant {
             flex: 1;
@@ -44,6 +45,9 @@ export const Header = styled.div<{ theme: Theme; source?: string }>`
             padding: 0.2em 1em;
             white-space: nowrap;
             text-align: center;
+            border-radius: 3px;
+            border: 1px solid ${(props) => getSourceColor(props.source)};
+            cursor: pointer;
 
             .morphology {
                 font-size: 0.8em;
@@ -51,6 +55,7 @@ export const Header = styled.div<{ theme: Theme; source?: string }>`
             }
 
             a {
+                width: 100%;
                 text-decoration: none;
                 cursor: pointer;
             }
@@ -60,8 +65,12 @@ export const Header = styled.div<{ theme: Theme; source?: string }>`
         }
 
         .selected {
-            border-radius: 3px;
             background-color: ${(props) => getSourceColor(props.source)};
+            cursor: default;
+        }
+
+        .variant:not(.selected):hover {
+            background-color: ${(props) => getSourceColor(props.source)}44;
         }
     }
 `;

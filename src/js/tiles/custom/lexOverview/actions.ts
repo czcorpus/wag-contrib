@@ -18,7 +18,6 @@
 
 import { Action } from 'kombo';
 import { Actions as GlobalActions } from '../../../models/actions.js';
-import { Source } from '../lexCommon/types/enums.js';
 import { IJPData } from '../lexCommon/types/ijp.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
 import { LexResponse } from '../lexCommon/api.js';

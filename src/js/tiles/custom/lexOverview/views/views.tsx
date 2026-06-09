@@ -26,10 +26,11 @@ import {
 import { GlobalComponents } from '../../../../views/common/index.js';
 import { Actions as CommonActions } from '../../lexCommon/actions.js';
 import { LexOverviewModel } from '../model.js';
+import { init as initAsscViews } from './assc/views.js';
 import { init as initIjpViews } from './ijp/views.js';
 import { init as initCorpusViews } from './corpus/views.js';
 import * as S from './style.js';
-import { List, pipe } from 'cnc-tskit';
+import { Dict, List, pipe } from 'cnc-tskit';
 import { initLexComponents } from '../../lexCommon/views.js';
 import { LexItem } from '../../lexCommon/types/dictionary.js';
 import { SubtileRow } from '../../lexCommon/style.js';
@@ -58,6 +59,7 @@ export function init(
 ): TileComponent {
     const globalComponents = ut.getComponents();
     const lexComponents = initLexComponents(dispatcher, ut);
+    const asscViews = initAsscViews(dispatcher, ut);
     const ijpViews = initIjpViews(dispatcher, ut);
     const corpusViews = initCorpusViews(dispatcher, ut);
 
@@ -117,9 +119,10 @@ export function init(
                 <h4
                     key={i}
                     className={'variant' + (clickHandler ? '' : ' selected')}
+                    onClick={clickHandler ? clickHandler : null}
                 >
                     {clickHandler ? (
-                        <a onClick={clickHandler}>
+                        <a>
                             {variant.lemma}{' '}
                             {withInfo && variant.pos ? (
                                 <span className="morphology">
@@ -293,6 +296,17 @@ export function init(
     const LexOverviewTileView: React.FC<CoreTileComponentProps> = (props) => {
         const state = useModel(model);
 
+        const ijpHasForms = () => {
+            if (isIjpData(state.sourceData.ijp)) {
+                return (
+                    !!state.sourceData.ijp.data.grammarCase ||
+                    !!state.sourceData.ijp.data.conjugation ||
+                    !!state.sourceData.ijp.data.comparison
+                );
+            }
+            return false;
+        };
+
         const basicOverview = {} as BasicOverviewData;
         const selectedVariant = state.variants[state.selectedVariantIdx]
             ? state.variants[state.selectedVariantIdx]
@@ -309,12 +323,12 @@ export function init(
         switch (state.mainSource) {
             case Source.ASSC:
                 if (
-                    isAsscData(state.source.assc) &&
-                    !List.empty(state.source.assc.data)
+                    isAsscData(state.sourceData.assc) &&
+                    !List.empty(state.sourceData.assc.data)
                 ) {
                     asscVariant = List.find(
                         (v) => v.key.startsWith(selectedVariant.lemma),
-                        state.source.assc.data[0].parsedVariants
+                        state.sourceData.assc.data[0].parsedVariants
                     );
                     // selected variant may not be in detailed data, for example "hranolky" is only mentioned in hranolka/hranolek
                     if (asscVariant) {
@@ -329,9 +343,12 @@ export function init(
                 break;
 
             case Source.IJP:
-                if (isIjpData(state.source.ijp) && state.source.ijp.data) {
+                if (
+                    isIjpData(state.sourceData.ijp) &&
+                    state.sourceData.ijp.data
+                ) {
                     basicOverview.pronunciation =
-                        state.source.ijp.data.pronunciation;
+                        state.sourceData.ijp.data.pronunciation;
                 }
                 break;
         }
@@ -354,7 +371,7 @@ export function init(
                         variants={state.variants}
                     />
                     {pipe(
-                        [state.source.assc, state.source.ijp],
+                        [state.sourceData.assc, state.sourceData.ijp],
                         List.filter((v) => isAsscError(v) || isIjpError(v)),
                         List.map((v, i) => (
                             <lexComponents.MessageSubtile
@@ -374,10 +391,20 @@ export function init(
                             playingAudio={state.playingAudio}
                         />
                     ) : null}
-                    {isIjpData(state.source.ijp) && state.source.ijp.data ? (
+                    {isIjpData(state.sourceData.ijp) ? (
                         <ijpViews.Subtile
                             tileId={props.tileId}
-                            data={state.source.ijp.data}
+                            data={state.sourceData.ijp.data}
+                        />
+                    ) : null}
+                    {isAsscData(state.sourceData.assc) &&
+                    !Dict.empty(
+                        state.sourceData.assc.data[0].parsedVariants[0].forms
+                    ) &&
+                    !ijpHasForms() ? (
+                        <asscViews.Subtile
+                            tileId={props.tileId}
+                            block={state.sourceData.assc.data[0]}
                         />
                     ) : null}
                     {selectedVariant.corpusEntry ? (

@@ -305,8 +305,7 @@ export function init(
                     </SubtileRow>
                 ) : null}
 
-                {!!props.data.comparison.comparative ||
-                !!props.data.comparison.superlative ? (
+                {props.data.comparison ? (
                     <SubtileRow>
                         <span className="key">
                             {ut.translate('lex_overview__comparison')}
@@ -318,22 +317,16 @@ export function init(
                     </SubtileRow>
                 ) : null}
 
-                {Dict.some(
-                    (item) => !!item.singular || !!item.plural,
-                    props.data.grammarCase
-                ) ? (
+                {props.data.grammarCase ? (
                     <SubtileRow>
                         <span className="key">
-                            {ut.translate('lex_overview__case')}:
+                            {ut.translate('lex_overview__forms')}:
                         </span>
                         <CaseTable caseData={props.data.grammarCase} />
                     </SubtileRow>
                 ) : null}
 
-                {Dict.some(
-                    (item) => !!item.singular || !!item.plural,
-                    props.data.conjugation.person
-                ) ? (
+                {props.data.conjugation ? (
                     <SubtileRow>
                         <span className="key">
                             {ut.translate('lex_overview__conjugation')}

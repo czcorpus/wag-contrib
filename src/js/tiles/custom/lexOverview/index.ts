@@ -122,7 +122,7 @@ export class LexOverviewTile implements ITileProvider {
                 mainSource,
                 variants,
                 selectedVariantIdx: 0,
-                source: {
+                sourceData: {
                     assc: null,
                     ijp: null,
                 },

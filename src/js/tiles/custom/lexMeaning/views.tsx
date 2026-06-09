@@ -51,6 +51,7 @@ export function init(
                 target instanceof HTMLElement &&
                 (target.closest('.vyslovnost') ||
                     target.closest('.tvCh') ||
+                    target.closest('.tvChSl') ||
                     target.closest('.expand'))
             ) {
                 setCollapsed((prev) => !prev);
