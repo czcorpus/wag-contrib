@@ -49,6 +49,8 @@ export class LexCommonModel extends StatelessModel<LexCommonModelState> {
 
     private readonly lexApi: LexApi;
 
+    private dataStreaming: IDataStreaming | null;
+
     constructor({
         dispatcher,
         initState,
@@ -63,6 +65,7 @@ export class LexCommonModel extends StatelessModel<LexCommonModelState> {
         this.appServices = appServices;
         this.queryMatches = queryMatches;
         this.lexApi = lexApi;
+        this.dataStreaming = null;
 
         this.addActionHandler(
             GlobalActions.RequestQueryResponse,
@@ -76,8 +79,12 @@ export class LexCommonModel extends StatelessModel<LexCommonModelState> {
                         isEmpty: true,
                     },
                 });
+                if (this.dataStreaming !== null) {
+                    this.dataStreaming.cancel();
+                }
+                this.dataStreaming = this.appServices.dataStreaming();
                 this.loadData(
-                    this.appServices.dataStreaming(),
+                    this.dataStreaming,
                     dispatch,
                     state.selectedVariantIdx
                 );
@@ -98,14 +105,21 @@ export class LexCommonModel extends StatelessModel<LexCommonModelState> {
                     },
                 });
 
-                const subg = appServices
+                if (this.dataStreaming !== null) {
+                    this.dataStreaming.cancel();
+                }
+                this.dataStreaming = appServices
                     .dataStreaming()
                     .startNewSubgroup(this.tileId, ...dependentTiles);
                 dispatch(GlobalActions.TileSubgroupReady, {
                     mainTileId: this.tileId,
-                    subgroupId: subg.getId(),
+                    subgroupId: this.dataStreaming.getId(),
                 });
-                this.loadData(subg, dispatch, state.selectedVariantIdx);
+                this.loadData(
+                    this.dataStreaming,
+                    dispatch,
+                    state.selectedVariantIdx
+                );
             }
         );
 
@@ -184,6 +198,7 @@ export class LexCommonModel extends StatelessModel<LexCommonModelState> {
                         isEmpty: true,
                     },
                 });
+                this.dataStreaming = null;
             },
             error: (err) => {
                 console.error('lex api error:', err);
