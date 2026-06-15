@@ -38,7 +38,7 @@ export const GunstickTileView = styled.div`
 
 // ----------- <DataListTable /> -------------------------
 
-export const DataListTable = styled.table`
+export const DataListTable = styled.table<{theme: Theme}>`
     th.word {
         text-align: left;
         color: ${(props) => props.theme.colorLogoPink};
@@ -62,7 +62,7 @@ export const Controls = styled.form`
 
 export const Examples = styled.div<{ theme: Theme }>`
     background-color: ${(props) => props.theme.tileBackgroundColor};
-    border: ${(props) => props.theme.defaultBorderStyle};
+    border: ${(props) => props.theme.tileBorderStyle};
     border-radius: ${(props) => props.theme.tileBorderRadius};
     box-shadow: 0.05em 0.05em 0.15em 0.05em rgba(0, 0, 0, 0.2);
     padding: 0.5em;

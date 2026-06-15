@@ -170,7 +170,7 @@ export const PSJCEntry = styled.li`
 
 // ---------------- <Tabs /> --------------------------------------
 
-export const Tabs = styled.div`
+export const Tabs = styled.div<{ theme: Theme} >`
     .separator {
         margin: 0 5px;
         font-size: 1.5em;
