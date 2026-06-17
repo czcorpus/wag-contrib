@@ -182,8 +182,9 @@ export function init(
             );
         };
 
+        const itemWidth = List.size(props.variants) === 4 ? '35%' : undefined;
         return (
-            <S.Header source={props.source}>
+            <S.Header source={props.source} width={itemWidth}>
                 <h2>{props.selectedVariant.lemma}</h2>
                 {List.size(props.variants) > 1 ? (
                     <div className="variant-grid">
