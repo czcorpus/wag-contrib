@@ -82,6 +82,7 @@ export class LexCommonTile implements ITileProvider {
             queryMatches,
             tileId,
             dependentTiles,
+            lemLevelSupport: this.configuredLemLevels,
             lexApi: this.lexApi,
             initState: {
                 selectedVariantIdx: 0,

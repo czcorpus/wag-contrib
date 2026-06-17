@@ -64,6 +64,7 @@ export class LexNotesTile implements ITileProvider {
         conf,
         isBusy,
         readDataFromTile,
+        dependentTiles,
     }: TileFactoryArgs<LexNotesTileConf>) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
@@ -77,6 +78,8 @@ export class LexNotesTile implements ITileProvider {
             tileId,
             readDataFromTile:
                 typeof readDataFromTile === 'number' ? readDataFromTile : null,
+            dependentTiles,
+            lemLevelSupport: this.configuredLemLevels,
             initState: {
                 isBusy: isBusy,
                 selectedVariantIdx: null,

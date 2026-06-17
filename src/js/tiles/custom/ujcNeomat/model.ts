@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
+import { IActionQueue, SEDispatcher } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
 import { DataStructure } from './common.js';
@@ -25,9 +25,10 @@ import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
 import { UjcNeomatArgs, UjcNeomatApi } from './api.js';
-import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
+import { findCurrQueryMatch, LemmatizationLevel, RecognizedQueries } from '../../../query/index.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { getCurrentVariant } from '../lexCommon/types/dictionary.js';
+import { TileStatelessModel } from '../../../models/tiles/base.js';
 
 export interface UjcNeomatModelState {
     isBusy: boolean;
@@ -46,14 +47,13 @@ export interface UjcNeomatModelArgs {
     api: UjcNeomatApi;
     appServices: IAppServices;
     queryMatches: RecognizedQueries;
+    lemLevelSupport: Array<LemmatizationLevel>;
+    dependentTiles: Array<number>;
 }
 
-export class UjcNeomatModel extends StatelessModel<UjcNeomatModelState> {
-    private readonly tileId: number;
+export class UjcNeomatModel extends TileStatelessModel<UjcNeomatModelState> {
 
     private readonly api: UjcNeomatApi;
-
-    private readonly appServices: IAppServices;
 
     constructor({
         dispatcher,
@@ -62,14 +62,13 @@ export class UjcNeomatModel extends StatelessModel<UjcNeomatModelState> {
         tileId,
         appServices,
         queryMatches,
+        dependentTiles,
+        lemLevelSupport,
     }: UjcNeomatModelArgs) {
-        super(dispatcher, initState);
-        this.tileId = tileId;
-        this.appServices = appServices;
+        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
         this.api = api;
 
-        this.addActionHandler(
-            GlobalActions.RequestQueryResponse,
+        this.addSearchActionHandler(
             (state, action) => {
                 const variant = getCurrentVariant(
                     queryMatches,
@@ -88,9 +87,9 @@ export class UjcNeomatModel extends StatelessModel<UjcNeomatModelState> {
                 };
                 state.backlink = null;
             },
-            (state, action, dispatch) => {
+            (state, action, dispatch, ds) => {
                 this.loadData(
-                    this.appServices.dataStreaming(),
+                    ds,
                     dispatch,
                     state
                 );
@@ -118,9 +117,9 @@ export class UjcNeomatModel extends StatelessModel<UjcNeomatModelState> {
             (state, action, dispatch) => {
                 this.api
                     .getSourceDescription(
-                        this.appServices.dataStreaming(),
+                        appServices.dataStreaming(),
                         this.tileId,
-                        this.appServices.getISO639UILang(),
+                        appServices.getISO639UILang(),
                         ''
                     )
                     .subscribe({
@@ -181,7 +180,7 @@ export class UjcNeomatModel extends StatelessModel<UjcNeomatModelState> {
             },
             (state, action, dispatch) => {
                 this.loadData(
-                    this.appServices
+                    appServices
                         .dataStreaming()
                         .startNewSubgroup(this.tileId),
                     dispatch,

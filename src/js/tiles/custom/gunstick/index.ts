@@ -79,6 +79,7 @@ export class GunstickTile implements ITileProvider {
         conf,
         isBusy,
         queryMatches,
+        dependentTiles,
     }: TileFactoryArgs<GunstickTileConf>) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
@@ -92,6 +93,8 @@ export class GunstickTile implements ITileProvider {
             api: this.api,
             queryMatches,
             tileId,
+            dependentTiles,
+            lemLevelSupport: this.configuredLemLevels,
             initState: {
                 isBusy: isBusy,
                 currMatch: findCurrQueryMatch(List.head(queryMatches)),

@@ -16,10 +16,11 @@
  * limitations under the License.
  */
 
-import { IActionQueue, StatelessModel } from 'kombo';
+import { IActionQueue } from 'kombo';
 
 import { IAppServices } from '../../../appServices.js';
 import {
+    LemmatizationLevel,
     QueryMatch,
     RecognizedQueries,
     testIsDictMatch,
@@ -29,6 +30,7 @@ import { Data, mkEmptyData } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { DataApi } from '../../../types.js';
+import { TileStatelessModel } from '../../../models/tiles/base.js';
 
 export interface GunstickModelState {
     isBusy: boolean;
@@ -56,10 +58,11 @@ export interface GunstickModelArgs {
     api: DataApi<KSPRequestArgs, Data>;
     appServices: IAppServices;
     queryMatches: RecognizedQueries;
+    lemLevelSupport: Array<LemmatizationLevel>;
+    dependentTiles: Array<number>;
 }
 
-export class GunstickModel extends StatelessModel<GunstickModelState> {
-    private readonly tileId: number;
+export class GunstickModel extends TileStatelessModel<GunstickModelState> {
 
     private readonly api: DataApi<KSPRequestArgs, Data>;
 
@@ -70,22 +73,22 @@ export class GunstickModel extends StatelessModel<GunstickModelState> {
         tileId,
         appServices,
         queryMatches,
+        dependentTiles,
+        lemLevelSupport,
     }: GunstickModelArgs) {
-        super(dispatcher, initState);
-        this.tileId = tileId;
+        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
         this.api = api;
 
-        this.addActionHandler(
-            GlobalActions.RequestQueryResponse,
+        this.addSearchActionHandler(
             (state, action) => {
                 state.isBusy = true;
                 state.error = null;
                 state.data = mkEmptyData();
             },
-            (state, action, dispatch) => {
+            (state, action, dispatch, ds) => {
                 this.api
                     .call(
-                        appServices.dataStreaming(),
+                        ds,
                         this.tileId,
                         0,
                         testIsDictMatch(state.currMatch)

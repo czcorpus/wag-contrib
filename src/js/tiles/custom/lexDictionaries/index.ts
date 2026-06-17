@@ -76,6 +76,7 @@ export class LexDictionariesTile implements ITileProvider {
         conf,
         isBusy,
         queryMatches,
+        dependentTiles,
     }: TileFactoryArgs<LexDictionariesTileConf>) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
@@ -98,6 +99,8 @@ export class LexDictionariesTile implements ITileProvider {
             apis,
             queryMatches,
             tileId,
+            dependentTiles,
+            lemLevelSupport: this.configuredLemLevels,
             initState: {
                 isBusy: isBusy,
                 sources: List.map(

@@ -71,6 +71,7 @@ export class LexMeaningTile implements ITileProvider {
         isBusy,
         queryMatches,
         readDataFromTile,
+        dependentTiles,
     }: TileFactoryArgs<LexMeaningTileConf>) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
@@ -87,6 +88,8 @@ export class LexMeaningTile implements ITileProvider {
             tileId,
             readDataFromTile:
                 typeof readDataFromTile === 'number' ? readDataFromTile : null,
+            dependentTiles,
+            lemLevelSupport: this.configuredLemLevels,
             initState: {
                 isBusy: isBusy,
                 selectedVariantIdx: 0,

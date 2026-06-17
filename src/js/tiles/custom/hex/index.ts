@@ -63,7 +63,7 @@ export class HexTile implements ITileProvider {
 
     constructor({
         tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
-        queryMatches}:TileFactoryArgs<HexTileConf>
+        queryMatches, dependentTiles}:TileFactoryArgs<HexTileConf>
     ) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
@@ -77,6 +77,8 @@ export class HexTile implements ITileProvider {
             api: this.api,
             queryMatches,
             tileId,
+            dependentTiles,
+            lemLevelSupport: this.configuredLemLevels,
             initState: {
                 isBusy: isBusy,
                 data: mkEmptyData(),

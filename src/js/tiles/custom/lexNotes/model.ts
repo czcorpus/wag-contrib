@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
+import { IActionQueue, SEDispatcher } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
@@ -36,6 +36,8 @@ import {
 } from '../lexCommon/api.js';
 import { scan } from 'rxjs';
 import { IJPData } from '../lexCommon/types/ijp.js';
+import { TileStatelessModel } from '../../../models/tiles/base.js';
+import { LemmatizationLevel } from '../../../query/index.js';
 
 export interface LexNotesModelState {
     isBusy: boolean;
@@ -54,13 +56,11 @@ export interface LexNotesModelArgs {
     tileId: number;
     appServices: IAppServices;
     readDataFromTile: number | null;
+    lemLevelSupport: Array<LemmatizationLevel>;
+    dependentTiles: Array<number>;
 }
 
-export class LexNotesModel extends StatelessModel<LexNotesModelState> {
-    private readonly tileId: number;
-
-    private readonly appServices: IAppServices;
-
+export class LexNotesModel extends TileStatelessModel<LexNotesModelState> {
     private readonly readDataFromTile: number | null;
 
     constructor({
@@ -69,14 +69,13 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
         tileId,
         appServices,
         readDataFromTile,
+        dependentTiles,
+        lemLevelSupport,
     }: LexNotesModelArgs) {
-        super(dispatcher, initState);
-        this.tileId = tileId;
-        this.appServices = appServices;
+        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
         this.readDataFromTile = readDataFromTile;
 
-        this.addActionHandler(
-            GlobalActions.RequestQueryResponse,
+        this.addSearchActionHandler(
             (state, action) => {
                 state.error = null;
                 state.backlink = null;
@@ -86,8 +85,8 @@ export class LexNotesModel extends StatelessModel<LexNotesModelState> {
                 };
                 state.isBusy = true;
             },
-            (state, action, dispatch) => {
-                this.loadData(this.appServices.dataStreaming(), dispatch);
+            (state, action, dispatch, ds) => {
+                this.loadData(ds, dispatch);
             }
         );
 

@@ -16,15 +16,17 @@
  * limitations under the License.
  */
 
-import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
+import { IActionQueue, SEDispatcher } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
-import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
+import { findCurrQueryMatch, LemmatizationLevel, RecognizedQueries } from '../../../query/index.js';
 import { DataStructure, mkEmptyData } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
 import { UjcLGuideApi, UjcLGuideRequestArgs } from './api.js';
+import { TileStatelessModel } from '../../../models/tiles/base.js';
+import { IDataStreaming } from '../../../page/streaming.js';
 
 
 export interface UjcLGuideModelState {
@@ -41,24 +43,19 @@ export interface UjcLGuideModelArgs {
     api:UjcLGuideApi,
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
+    lemLevelSupport:Array<LemmatizationLevel>;
+    dependentTiles:Array<number>;
 }
 
-export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
-
-    private readonly tileId:number;
+export class UjcLGuideModel extends TileStatelessModel<UjcLGuideModelState> {
 
     private readonly api:UjcLGuideApi;
 
-    private readonly appServices:IAppServices;
-
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches}:UjcLGuideModelArgs) {
-        super(dispatcher, initState);
-        this.tileId = tileId;
-        this.appServices = appServices;
+    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, dependentTiles, lemLevelSupport}:UjcLGuideModelArgs) {
+        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
         this.api = api;
 
-        this.addActionHandler(
-            GlobalActions.RequestQueryResponse,
+        this.addSearchActionHandler(
             (state, action) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
                 state.isBusy = true;
@@ -66,9 +63,9 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
                 state.data = {...mkEmptyData(), rawQuery: match.lemma || match.word};
                 state.backlink = null;
             },
-            (state, action, dispatch) => {
+            (state, action, dispatch, ds) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
-                this.loadData(dispatch, state, match.lemma || match.word, false);
+                this.loadData(dispatch, state, match.lemma || match.word, false, ds);
             }
         );
 
@@ -84,7 +81,7 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
                 };
             },
             (state, action, dispatch) => {
-                this.loadData(dispatch, state, action.payload.id, true);
+                this.loadData(dispatch, state, action.payload.id, true, this.appServices.dataStreaming());
             }
         );
 
@@ -150,12 +147,12 @@ export class UjcLGuideModel extends StatelessModel<UjcLGuideModelState> {
         );
     }
 
-    private loadData(dispatch:SEDispatcher, state:UjcLGuideModelState, q:string, direct:boolean) {
+    private loadData(dispatch:SEDispatcher, state:UjcLGuideModelState, q:string, direct:boolean, ds:IDataStreaming) {
         const args:UjcLGuideRequestArgs = {
             q,
             direct: direct ? 1 : 0
         };
-        this.api.call(this.appServices.dataStreaming(), this.tileId, 0, args).subscribe({
+        this.api.call(ds, this.tileId, 0, args).subscribe({
             next: data => {
                 if (direct) {
                     data.alternatives = state.data.alternatives;

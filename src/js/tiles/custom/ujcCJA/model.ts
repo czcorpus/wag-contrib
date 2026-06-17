@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
+import { IActionQueue, SEDispatcher } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { Backlink, BacklinkConf } from '../../../page/tile.js';
 import { createEmptyData, DataStructure } from './common.js';
@@ -24,7 +24,9 @@ import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
 import { UjcCJAArgs, UjcCJAApi } from './api.js';
-import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
+import { findCurrQueryMatch, LemmatizationLevel, RecognizedQueries } from '../../../query/index.js';
+import { TileStatelessModel } from '../../../models/tiles/base.js';
+import { IDataStreaming } from '../../../page/streaming.js';
 
 
 export interface UjcCJAModelState {
@@ -42,24 +44,19 @@ export interface UjcCJAModelArgs {
     api:UjcCJAApi,
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
+    lemLevelSupport: Array<LemmatizationLevel>;
+    dependentTiles: Array<number>;
 }
 
-export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
-
-    private readonly tileId:number;
+export class UjcCJAModel extends TileStatelessModel<UjcCJAModelState> {
 
     private readonly api:UjcCJAApi;
 
-    private readonly appServices:IAppServices;
-
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches}:UjcCJAModelArgs) {
-        super(dispatcher, initState);
-        this.tileId = tileId;
-        this.appServices = appServices;
+    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, dependentTiles, lemLevelSupport}:UjcCJAModelArgs) {
+        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
         this.api = api;
 
-        this.addActionHandler(
-            GlobalActions.RequestQueryResponse,
+        this.addSearchActionHandler(
             (state, action) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
                 state.ident = match.lemma || match.word;
@@ -68,8 +65,8 @@ export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
                 state.data = createEmptyData();
                 state.backlink = null;
             },
-            (state, action, dispatch) => {
-                this.loadData(dispatch, state);
+            (state, action, dispatch, ds) => {
+                this.loadData(dispatch, state, ds);
             }
         );
 
@@ -135,11 +132,11 @@ export class UjcCJAModel extends StatelessModel<UjcCJAModelState> {
         );
     }
 
-    private loadData(dispatch:SEDispatcher, state:UjcCJAModelState) {
+    private loadData(dispatch:SEDispatcher, state:UjcCJAModelState, ds:IDataStreaming) {
         const args:UjcCJAArgs = {
             q: state.ident,
         };
-        this.api.call(this.appServices.dataStreaming(), this.tileId, 0, args).subscribe({
+        this.api.call(ds, this.tileId, 0, args).subscribe({
             next: data => {
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,

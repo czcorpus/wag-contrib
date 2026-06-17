@@ -16,14 +16,15 @@
  * limitations under the License.
  */
 
-import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
+import { IActionQueue, SEDispatcher } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
-import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
+import { findCurrQueryMatch, LemmatizationLevel, RecognizedQueries } from '../../../query/index.js';
+import { TileStatelessModel } from '../../../models/tiles/base.js';
 import {
     isSSJCDataStructure,
     isPSJCDataStructure,
@@ -59,14 +60,12 @@ export interface LexDictionariesModelArgs {
     apis: Array<LexDictApi>;
     appServices: IAppServices;
     queryMatches: RecognizedQueries;
+    lemLevelSupport: Array<LemmatizationLevel>;
+    dependentTiles: Array<number>;
 }
 
-export class LexDictionariesModel extends StatelessModel<LexDictionariesModelState> {
-    private readonly tileId: number;
-
+export class LexDictionariesModel extends TileStatelessModel<LexDictionariesModelState> {
     private readonly apis: Array<LexDictApi>;
-
-    private readonly appServices: IAppServices;
 
     private readonly queryMatches: RecognizedQueries;
 
@@ -77,15 +76,14 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
         tileId,
         appServices,
         queryMatches,
+        dependentTiles,
+        lemLevelSupport,
     }: LexDictionariesModelArgs) {
-        super(dispatcher, initState);
-        this.tileId = tileId;
-        this.appServices = appServices;
+        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
         this.apis = apis;
         this.queryMatches = queryMatches;
 
-        this.addActionHandler(
-            GlobalActions.RequestQueryResponse,
+        this.addSearchActionHandler(
             (state, action) => {
                 state.isBusy = true;
                 state.sources = List.map(
@@ -99,7 +97,7 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
                     state.sources
                 );
             },
-            (state, action, dispatch) => {
+            (state, action, dispatch, ds) => {
                 var searchTerm: string;
                 const variant = getCurrentVariant(
                     this.queryMatches,
@@ -108,11 +106,11 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
                 if (variant) {
                     searchTerm = variant.lemma;
                 } else {
-                    const match = findCurrQueryMatch(List.head(queryMatches));
+                    const match = findCurrQueryMatch(List.head(this.queryMatches));
                     searchTerm = match.lemma || match.word;
                 }
                 this.loadData(
-                    this.appServices.dataStreaming(),
+                    ds,
                     dispatch,
                     searchTerm
                 );
@@ -263,13 +261,11 @@ export class LexDictionariesModel extends StatelessModel<LexDictionariesModelSta
                 if (variant) {
                     searchTerm = variant.lemma;
                 } else {
-                    const match = findCurrQueryMatch(List.head(queryMatches));
+                    const match = findCurrQueryMatch(List.head(this.queryMatches));
                     searchTerm = match.lemma || match.word;
                 }
                 this.loadData(
-                    this.appServices
-                        .dataStreaming()
-                        .startNewSubgroup(this.tileId),
+                    this.appServices.dataStreaming().startNewSubgroup(this.tileId),
                     dispatch,
                     searchTerm
                 );

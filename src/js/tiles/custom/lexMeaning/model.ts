@@ -16,14 +16,14 @@
  * limitations under the License.
  */
 
-import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
+import { IActionQueue, SEDispatcher } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { List } from 'cnc-tskit';
-import { RecognizedQueries } from '../../../query/index.js';
+import { LemmatizationLevel, RecognizedQueries } from '../../../query/index.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
 import {
@@ -33,6 +33,7 @@ import {
     LexResponse,
 } from '../lexCommon/api.js';
 import { scan } from 'rxjs';
+import { TileStatelessModel } from '../../../models/tiles/base.js';
 
 export interface LexMeaningModelState {
     isBusy: boolean;
@@ -49,13 +50,11 @@ export interface LexMeaningModelArgs {
     appServices: IAppServices;
     queryMatches: RecognizedQueries;
     readDataFromTile: number | null;
+    lemLevelSupport: Array<LemmatizationLevel>;
+    dependentTiles: Array<number>;
 }
 
-export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
-    private readonly tileId: number;
-
-    private readonly appServices: IAppServices;
-
+export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
     private readonly queryMatches: RecognizedQueries;
 
     private readonly readDataFromTile: number | null;
@@ -67,23 +66,22 @@ export class LexMeaningModel extends StatelessModel<LexMeaningModelState> {
         appServices,
         queryMatches,
         readDataFromTile,
+        dependentTiles,
+        lemLevelSupport,
     }: LexMeaningModelArgs) {
-        super(dispatcher, initState);
-        this.tileId = tileId;
-        this.appServices = appServices;
+        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
         this.queryMatches = queryMatches;
         this.readDataFromTile = readDataFromTile;
 
-        this.addActionHandler(
-            GlobalActions.RequestQueryResponse,
+        this.addSearchActionHandler(
             (state, action) => {
                 state.error = null;
                 state.backlink = null;
                 state.data = [];
                 state.isBusy = true;
             },
-            (state, action, dispatch) => {
-                this.loadData(this.appServices.dataStreaming(), dispatch);
+            (state, action, dispatch, ds) => {
+                this.loadData(ds, dispatch);
             }
         );
 

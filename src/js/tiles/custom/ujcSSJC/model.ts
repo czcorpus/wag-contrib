@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
+import { IActionQueue, SEDispatcher } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
 import { createEmptyData, DataStructure } from './common.js';
@@ -24,7 +24,9 @@ import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
 import { UjcSSJCArgs, UjcSSJCApi } from './api.js';
-import { findCurrQueryMatch, RecognizedQueries } from '../../../query/index.js';
+import { findCurrQueryMatch, LemmatizationLevel, RecognizedQueries } from '../../../query/index.js';
+import { TileStatelessModel } from '../../../models/tiles/base.js';
+import { IDataStreaming } from '../../../page/streaming.js';
 
 
 export interface UjcSSJCModelState {
@@ -42,25 +44,20 @@ export interface UjcSSJCModelArgs {
     api:UjcSSJCApi,
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
+    lemLevelSupport:Array<LemmatizationLevel>;
+    dependentTiles:Array<number>;
 }
 
-export class UjcSSJCModel extends StatelessModel<UjcSSJCModelState> {
-
-    private readonly tileId:number;
+export class UjcSSJCModel extends TileStatelessModel<UjcSSJCModelState> {
 
     private readonly api:UjcSSJCApi;
 
-    private readonly appServices:IAppServices;
 
-
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches}:UjcSSJCModelArgs) {
-        super(dispatcher, initState);
-        this.tileId = tileId;
-        this.appServices = appServices;
+    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, dependentTiles, lemLevelSupport}:UjcSSJCModelArgs) {
+        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
         this.api = api;
 
-        this.addActionHandler(
-            GlobalActions.RequestQueryResponse,
+        this.addSearchActionHandler(
             (state, action) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
                 state.queries = [match.word];
@@ -74,8 +71,8 @@ export class UjcSSJCModel extends StatelessModel<UjcSSJCModelState> {
                 state.data = createEmptyData();
                 state.backlink = null;
             },
-            (state, action, dispatch) => {
-                this.loadData(dispatch, state);
+            (state, action, dispatch, ds) => {
+                this.loadData(dispatch, state, ds);
             }
         );
 
@@ -140,11 +137,11 @@ export class UjcSSJCModel extends StatelessModel<UjcSSJCModelState> {
         );
     }
 
-    private loadData(dispatch:SEDispatcher, state:UjcSSJCModelState) {
+    private loadData(dispatch:SEDispatcher, state:UjcSSJCModelState, ds:IDataStreaming) {
         const args:UjcSSJCArgs = {
             q: state.queries
         };
-        this.api.call(this.appServices.dataStreaming(), this.tileId, 0, args).subscribe({
+        this.api.call(ds, this.tileId, 0, args).subscribe({
             next: data => {
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
