@@ -16,16 +16,17 @@
  * limitations under the License.
  */
 
-import { IActionQueue, StatelessModel } from 'kombo';
+import { IActionQueue } from 'kombo';
 import { Dict, List } from 'cnc-tskit';
 
 import { IAppServices } from '../../../appServices.js';
-import { RecognizedQueries, QueryMatch, findCurrQueryMatch, testIsDictMatch } from '../../../query/index.js';
+import { RecognizedQueries, QueryMatch, findCurrQueryMatch, testIsDictMatch, LemmatizationLevel } from '../../../query/index.js';
 import { Data, mkEmptyData } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { PoSValues } from '../../../postag.js';
 import { HexKspApi, KSPRequestArgs } from './api.js';
+import { TileStatelessModel } from '../../../models/tiles/base.js';
 
 
 export interface HexModelState {
@@ -45,6 +46,8 @@ export interface HexModelArgs {
     api:HexKspApi,
     appServices:IAppServices;
     queryMatches:RecognizedQueries;
+    lemLevelSupport: Array<LemmatizationLevel>;
+    dependentTiles: Array<number>;
 }
 
 const posArgMapping = {
@@ -75,27 +78,22 @@ function exportPosArgs(args:KSPRequestArgs, match:QueryMatch):void {
     }
 }
 
-export class HexModel extends StatelessModel<HexModelState> {
-
-    private readonly tileId:number;
+export class HexModel extends TileStatelessModel<HexModelState> {
 
     private readonly api:HexKspApi;
 
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches}:HexModelArgs) {
-        super(dispatcher, initState);
-        this.tileId = tileId;
+    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, lemLevelSupport, dependentTiles}:HexModelArgs) {
+        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
         this.api = api;
 
-
-        this.addActionHandler<typeof GlobalActions.RequestQueryResponse>(
-            GlobalActions.RequestQueryResponse.name,
+        this.addSearchActionHandler(
             (state, action) => {
                 state.isBusy = true;
                 state.error = null;
                 state.word = '';
                 state.data = mkEmptyData();
             },
-            (state, action, dispatch) => {
+            (state, action, dispatch, ds) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
                 const args:KSPRequestArgs = {
                     q: match.lemma,
@@ -109,8 +107,8 @@ export class HexModel extends StatelessModel<HexModelState> {
                 exportPosArgs(args, match);
                 const currMatch = findCurrQueryMatch(List.head(queryMatches));
                 this.api.call(
-                    appServices.dataStreaming(),
-                    tileId,
+                    ds,
+                    this.tileId,
                     0,
                     testIsDictMatch(currMatch) ? args : null
 

@@ -16,15 +16,16 @@
  * limitations under the License.
  */
 
-import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
+import { IActionQueue, SEDispatcher } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
-import { RecognizedQueries } from '../../../query/index.js';
+import { LemmatizationLevel, RecognizedQueries } from '../../../query/index.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { getCurrentVariant } from './types/dictionary.js';
 import { LexApi } from './api.js';
 import { List } from 'cnc-tskit';
 import { IDataStreaming } from '../../../page/streaming.js';
+import { TileStatelessModel } from '../../../models/tiles/base.js';
 
 export interface LexCommonModelState {
     selectedVariantIdx: number;
@@ -36,14 +37,12 @@ export interface LexCommonModelArgs {
     tileId: number;
     appServices: IAppServices;
     queryMatches: RecognizedQueries;
+    lemLevelSupport: Array<LemmatizationLevel>;
     dependentTiles: Array<number>;
     lexApi: LexApi;
 }
 
-export class LexCommonModel extends StatelessModel<LexCommonModelState> {
-    private readonly tileId: number;
-
-    private readonly appServices: IAppServices;
+export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
 
     private readonly queryMatches: RecognizedQueries;
 
@@ -59,18 +58,16 @@ export class LexCommonModel extends StatelessModel<LexCommonModelState> {
         lexApi,
         queryMatches,
         dependentTiles,
+        lemLevelSupport,
     }: LexCommonModelArgs) {
-        super(dispatcher, initState);
-        this.tileId = tileId;
-        this.appServices = appServices;
+        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
         this.queryMatches = queryMatches;
         this.lexApi = lexApi;
         this.dataStreaming = null;
 
-        this.addActionHandler(
-            GlobalActions.RequestQueryResponse,
+        this.addSearchActionHandler(
             (state, action) => {},
-            (state, action, dispatch) => {
+            (state, action, dispatch, ds) => {
                 // this instantly hides tile from layout
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
@@ -82,7 +79,7 @@ export class LexCommonModel extends StatelessModel<LexCommonModelState> {
                 if (this.dataStreaming !== null) {
                     this.dataStreaming.cancel();
                 }
-                this.dataStreaming = this.appServices.dataStreaming();
+                this.dataStreaming = ds;
                 this.loadData(
                     this.dataStreaming,
                     dispatch,
@@ -108,9 +105,9 @@ export class LexCommonModel extends StatelessModel<LexCommonModelState> {
                 if (this.dataStreaming !== null) {
                     this.dataStreaming.cancel();
                 }
-                this.dataStreaming = appServices
+                this.dataStreaming = this.appServices
                     .dataStreaming()
-                    .startNewSubgroup(this.tileId, ...dependentTiles);
+                    .startNewSubgroup(this.tileId, ...this.dependentTiles);
                 dispatch(GlobalActions.TileSubgroupReady, {
                     mainTileId: this.tileId,
                     subgroupId: this.dataStreaming.getId(),
@@ -138,7 +135,7 @@ export class LexCommonModel extends StatelessModel<LexCommonModelState> {
             (action) =>
                 List.some(
                     (tileId) => tileId === action.payload.tileId,
-                    dependentTiles
+                    this.dependentTiles
                 ),
             null,
             (state, action, dispatch) => {

@@ -60,6 +60,7 @@ export class UjcSSJCTile implements ITileProvider {
         conf,
         isBusy,
         queryMatches,
+        dependentTiles,
     }: TileFactoryArgs<UjcSSJCTileConf>) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
@@ -73,6 +74,8 @@ export class UjcSSJCTile implements ITileProvider {
             api: this.api,
             queryMatches,
             tileId,
+            dependentTiles,
+            lemLevelSupport: this.configuredLemLevels,
             initState: {
                 isBusy: isBusy,
                 queries: [],

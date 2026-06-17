@@ -70,6 +70,7 @@ export class LexOverviewTile implements ITileProvider {
         isBusy,
         queryMatches,
         readDataFromTile,
+        dependentTiles,
     }: TileFactoryArgs<LexOverviewTileConf>) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
@@ -115,6 +116,8 @@ export class LexOverviewTile implements ITileProvider {
             tileId,
             readDataFromTile:
                 typeof readDataFromTile === 'number' ? readDataFromTile : null,
+            dependentTiles,
+            lemLevelSupport: this.configuredLemLevels,
             initState: {
                 isBusy: isBusy,
                 queryMatch: currQueryMatch,

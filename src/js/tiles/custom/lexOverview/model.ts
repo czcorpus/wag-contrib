@@ -16,13 +16,14 @@
  * limitations under the License.
  */
 
-import { IActionQueue, SEDispatcher, StatelessModel } from 'kombo';
+import { IActionQueue, SEDispatcher } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
-import { QueryMatch } from '../../../query/index.js';
+import { QueryMatch, LemmatizationLevel } from '../../../query/index.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { Actions } from './actions.js';
+import { TileStatelessModel } from '../../../models/tiles/base.js';
 
 import { IDataStreaming } from '../../../page/streaming.js';
 import { List } from 'cnc-tskit';
@@ -65,13 +66,11 @@ export interface LexOverviewModelArgs {
     tileId: number;
     appServices: IAppServices;
     readDataFromTile: number | null;
+    lemLevelSupport: Array<LemmatizationLevel>;
+    dependentTiles: Array<number>;
 }
 
-export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
-    private readonly tileId: number;
-
-    private readonly appServices: IAppServices;
-
+export class LexOverviewModel extends TileStatelessModel<LexOverviewModelState> {
     private readonly readDataFromTile: number | null;
 
     constructor({
@@ -80,22 +79,21 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
         tileId,
         appServices,
         readDataFromTile,
+        dependentTiles,
+        lemLevelSupport,
     }: LexOverviewModelArgs) {
-        super(dispatcher, initState);
-        this.tileId = tileId;
-        this.appServices = appServices;
+        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
         this.readDataFromTile = readDataFromTile;
 
-        this.addActionHandler(
-            GlobalActions.RequestQueryResponse,
+        this.addSearchActionHandler(
             (state, action) => {
                 state.error = undefined;
                 state.backlink = undefined;
                 state.isBusy = true;
             },
-            (state, action, dispatch) => {
+            (state, action, dispatch, ds) => {
                 this.loadData(
-                    this.appServices.dataStreaming(),
+                    ds,
                     dispatch,
                     state
                 );
@@ -171,10 +169,8 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
                 }).subscribe({
                     next: (action) => {
                         if (GlobalActions.isTileSubgroupReady(action)) {
-                            this.loadData(
-                                this.appServices
-                                    .dataStreaming()
-                                    .getSubgroup(action.payload.subgroupId),
+                            this.loadDataFromSubgroup(
+                                action.payload.subgroupId,
                                 dispatch,
                                 state
                             );
@@ -224,6 +220,18 @@ export class LexOverviewModel extends StatelessModel<LexOverviewModelState> {
             (state, action) => {
                 state.playingAudio = false;
             }
+        );
+    }
+
+    private loadDataFromSubgroup(
+        subgroupId: string,
+        dispatch: SEDispatcher,
+        state: LexOverviewModelState
+    ) {
+        this.loadData(
+            this.appServices.dataStreaming().getSubgroup(subgroupId),
+            dispatch,
+            state
         );
     }
 

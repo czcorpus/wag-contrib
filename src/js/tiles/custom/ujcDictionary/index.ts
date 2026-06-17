@@ -61,6 +61,7 @@ export class UjcDictionaryTile implements ITileProvider {
         conf,
         isBusy,
         queryMatches,
+        dependentTiles,
     }: TileFactoryArgs<UjcDictionaryTileConf>) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
@@ -74,6 +75,8 @@ export class UjcDictionaryTile implements ITileProvider {
             api: this.api,
             queryMatches,
             tileId,
+            dependentTiles,
+            lemLevelSupport: this.configuredLemLevels,
             initState: {
                 isBusy: isBusy,
                 queries: [],

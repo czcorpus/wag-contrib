@@ -68,6 +68,7 @@ export class UjcNeomatTile implements ITileProvider {
         conf,
         isBusy,
         queryMatches,
+        dependentTiles,
     }: TileFactoryArgs<UjcNeomatTileConf>) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
@@ -81,6 +82,8 @@ export class UjcNeomatTile implements ITileProvider {
             api: this.api,
             queryMatches,
             tileId,
+            dependentTiles,
+            lemLevelSupport: this.configuredLemLevels,
             initState: {
                 isBusy: isBusy,
                 selectedVariantIdx: 0,
