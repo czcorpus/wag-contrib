@@ -35,7 +35,7 @@ import {
     SSJCDataStructure,
     UjcBasicArgs,
 } from './api/basicApi.js';
-import { forkJoin, map, tap } from 'rxjs';
+import { forkJoin, tap } from 'rxjs';
 import { getCurrentVariant } from '../lexCommon/types/dictionary.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { Source } from '../lexCommon/types/enums.js';

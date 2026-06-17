@@ -49,7 +49,7 @@ interface SourceData {
 
 export interface LexOverviewModelState {
     isBusy: boolean;
-    queryMatch: QueryMatch;
+    queryMatches: Array<QueryMatch>;
     referenceCorpus: string;
     mainSource: Source;
     variants: Array<LexItem>;

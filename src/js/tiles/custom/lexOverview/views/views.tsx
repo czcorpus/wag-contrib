@@ -45,6 +45,7 @@ import {
     isIjpData,
     isIjpError,
 } from '../../lexCommon/api.js';
+import { QueryMatch } from '../../../../query/index.js';
 
 interface BasicOverviewData {
     pronunciation?: string;
@@ -100,6 +101,7 @@ export function init(
         selectedVariantIdx: number;
         selectedVariant: LexItem;
         variants: Array<LexItem>;
+        queryMatches: Array<QueryMatch>;
     }> = (props) => {
         const handleVariantClick = (variantIdx: number) => {
             dispatcher.dispatch(CommonActions.SelectItemVariant, {
@@ -309,15 +311,12 @@ export function init(
         };
 
         const basicOverview = {} as BasicOverviewData;
+        const selectedQueryMatch = state.queryMatches[state.selectedVariantIdx];
         const selectedVariant = state.variants[state.selectedVariantIdx]
             ? state.variants[state.selectedVariantIdx]
             : ({
-                  lemma: state.queryMatch.lemma,
-                  pos: state.queryMatch.pos[0].value,
-                  corpusEntry: {
-                      count: state.queryMatch.abs,
-                      ipm: state.queryMatch.ipm,
-                  },
+                  lemma: selectedQueryMatch.lemma,
+                  pos: selectedQueryMatch.pos[0].value,
               } as LexItem);
         let asscVariant: VariantData;
 
@@ -371,6 +370,7 @@ export function init(
                         selectedVariant={selectedVariant}
                         source={state.mainSource}
                         variants={state.variants}
+                        queryMatches={state.queryMatches}
                     />
                     {pipe(
                         [state.sourceData.assc, state.sourceData.ijp],
@@ -409,13 +409,13 @@ export function init(
                             block={state.sourceData.assc.data[0]}
                         />
                     ) : null}
-                    {selectedVariant.corpusEntry ? (
+                    {selectedQueryMatch ? (
                         <corpusViews.Subtile
                             tileId={props.tileId}
                             corpname={state.referenceCorpus}
                             data={{
-                                abs: selectedVariant.corpusEntry.count,
-                                ipm: selectedVariant.corpusEntry.ipm,
+                                abs: selectedQueryMatch.abs,
+                                ipm: selectedQueryMatch.ipm,
                             }}
                         />
                     ) : (
