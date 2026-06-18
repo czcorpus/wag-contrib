@@ -57,6 +57,8 @@ export const MeaningTileView = styled(LexTileBase)`
     }
 `;
 
+export const UsageNotesTileView = styled(LexTileBase)``;
+
 export const MeaningItem = styled.div`
     margin-bottom: 1em;
 

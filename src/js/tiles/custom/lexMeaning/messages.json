@@ -1,8 +1,10 @@
 {
     "cs-CZ": {
-        "lex_meaning__main_label": "Významy a příklady užití"
+        "lex_meaning__main_label": "Významy a příklady užití",
+        "lex_meaning__usage_notes": "Poznámky k užití"
     },
     "en-US": {
-        "lex_meaning__main_label": "Meaning and usage examples"
+        "lex_meaning__main_label": "Meaning and usage examples",
+        "lex_meaning__usage_notes": "Usage notes"
     }
 }

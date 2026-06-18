@@ -30,15 +30,22 @@ import {
     isAsscData,
     isAsscDone,
     isAsscError,
+    isIjpData,
+    isIjpDone,
+    isIjpError,
     LexResponse,
 } from '../lexCommon/api.js';
 import { scan } from 'rxjs';
 import { TileStatelessModel } from '../../../models/tiles/base.js';
+import { IJPData } from '../lexCommon/types/ijp.js';
 
 export interface LexMeaningModelState {
     isBusy: boolean;
     selectedVariantIdx: number;
-    data: Array<LexResponse<HTMLBlock[] | string>>;
+    data: {
+        ijp: Array<LexResponse<IJPData | string>>;
+        assc: Array<LexResponse<HTMLBlock[] | string>>;
+    };
     error: string;
     backlink: Backlink;
 }
@@ -69,7 +76,14 @@ export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
         dependentTiles,
         lemLevelSupport,
     }: LexMeaningModelArgs) {
-        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
+        super({
+            dispatcher,
+            initState,
+            tileId,
+            appServices,
+            dependentTiles,
+            lemLevelSupport,
+        });
         this.queryMatches = queryMatches;
         this.readDataFromTile = readDataFromTile;
 
@@ -77,7 +91,10 @@ export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
             (state, action) => {
                 state.error = null;
                 state.backlink = null;
-                state.data = [];
+                state.data = {
+                    ijp: [],
+                    assc: [],
+                };
                 state.isBusy = true;
             },
             (state, action, dispatch, ds) => {
@@ -100,7 +117,17 @@ export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
             Actions.TilePartialDataLoaded,
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
-                state.data.push(action.payload.response);
+                if (
+                    isAsscData(action.payload.response) ||
+                    isAsscError(action.payload.response)
+                ) {
+                    state.data.assc.push(action.payload.response);
+                } else if (
+                    isIjpData(action.payload.response) ||
+                    isIjpError(action.payload.response)
+                ) {
+                    state.data.ijp.push(action.payload.response);
+                }
             }
         );
 
@@ -121,7 +148,10 @@ export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
             (state, action) => {
                 state.selectedVariantIdx = action.payload.variantIdx;
                 state.isBusy = true;
-                state.data = [];
+                state.data = {
+                    ijp: [],
+                    assc: [],
+                };
             },
             (state, action, dispatch) => {
                 this.waitForAction({}, (action, data) => {
@@ -159,53 +189,74 @@ export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
             })
             .pipe(
                 scan(
-                    (data, response) => {
-                        if (data.done) {
+                    (data, resp) => {
+                        if (data.done.assc && data.done.ijp) {
                             data.dispatched = true;
                             return data;
                         }
 
-                        if (isAsscData(response)) {
+                        if (isAsscData(resp)) {
                             // response contains whole ASSČ page, we need to filter only
                             // requested id, and its parent if it has one
                             const filteredData = this.filterASSCResultsByIDs(
-                                response.id,
-                                response.data
+                                resp.id,
+                                resp.data
                             );
 
-                            if (List.size(response.data) > 0) {
+                            if (List.size(resp.data) > 0) {
                                 dispatch<typeof Actions.TilePartialDataLoaded>({
                                     name: Actions.TilePartialDataLoaded.name,
                                     payload: {
                                         tileId: this.tileId,
                                         response: {
-                                            ...response,
+                                            ...resp,
                                             data: filteredData,
                                         },
                                     },
                                 });
                                 data.hasData = true;
                             }
-                        } else if (isAsscError(response)) {
+                        } else if (
+                            isIjpData(resp) &&
+                            List.size(resp.data.notes) > 0
+                        ) {
                             dispatch<typeof Actions.TilePartialDataLoaded>({
                                 name: Actions.TilePartialDataLoaded.name,
                                 payload: {
                                     tileId: this.tileId,
-                                    response,
+                                    response: resp,
                                 },
                             });
                             data.hasData = true;
-                        } else if (isAsscDone(response) || response === null) {
-                            data.done = true;
+                        } else if (isAsscError(resp) || isIjpError(resp)) {
+                            dispatch<typeof Actions.TilePartialDataLoaded>({
+                                name: Actions.TilePartialDataLoaded.name,
+                                payload: {
+                                    tileId: this.tileId,
+                                    response: resp,
+                                },
+                            });
+                            data.hasData = true;
+                        } else if (isAsscDone(resp)) {
+                            data.done.assc = true;
+                        } else if (isIjpDone(resp)) {
+                            data.done.ijp = true;
+                        } else if (resp === null) {
+                            data.done.assc = true;
+                            data.done.ijp = true;
                         }
                         return data;
                     },
-                    { hasData: false, done: false, dispatched: false }
+                    {
+                        hasData: false,
+                        done: { assc: false, ijp: false },
+                        dispatched: false,
+                    }
                 )
             )
             .subscribe({
                 next: (data) => {
-                    if (data.done && !data.dispatched) {
+                    if (data.done.assc && data.done.ijp && !data.dispatched) {
                         dispatch<typeof Actions.TileDataLoaded>({
                             name: Actions.TileDataLoaded.name,
                             payload: {
