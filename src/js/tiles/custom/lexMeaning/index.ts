@@ -91,7 +91,10 @@ export class LexMeaningTile implements ITileProvider {
             initState: {
                 isBusy: isBusy,
                 selectedVariantIdx: 0,
-                data: [],
+                data: {
+                    assc: [],
+                    ijp: [],
+                },
                 error: null,
                 backlink: null,
             },
@@ -180,7 +183,7 @@ export class LexMeaningTile implements ITileProvider {
     }
 
     isSubtileContainer(): boolean {
-        return false;
+        return true;
     }
 }
 

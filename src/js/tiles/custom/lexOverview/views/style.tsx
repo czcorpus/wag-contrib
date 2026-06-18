@@ -26,7 +26,11 @@ export const LexOverviewTileView = styled(LexTileBase)`
     justify-content: space-between;
 `;
 
-export const Header = styled.div<{ theme: Theme; source?: string }>`
+export const Header = styled.div<{
+    theme: Theme;
+    source?: string;
+    width?: string;
+}>`
     h2 {
         width: 100%;
         margin: 0;
@@ -41,6 +45,7 @@ export const Header = styled.div<{ theme: Theme; source?: string }>`
 
         .variant {
             flex: 1;
+            flex-basis: ${(props) => props.width || 'auto'};
             margin: 0;
             padding: 0.2em 1em;
             white-space: nowrap;
