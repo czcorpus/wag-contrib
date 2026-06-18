@@ -158,16 +158,18 @@ export function init(
         return (
             <globalComponents.TileWrapper
                 tileId={props.tileId}
-                isBusy={state.isBusy}
+                isBusy={false}
                 error={state.error}
-                hasData={
-                    !List.empty(state.data.assc) || !List.empty(state.data.ijp)
-                }
+                hasData={true}
                 supportsTileReload={props.supportsReloadOnError}
                 isSubtileContainer={props.isSubtileContainer}
                 issueReportingUrl={props.issueReportingUrl}
             >
-                <globalComponents.Subtile tileId={props.tileId}>
+                <globalComponents.Subtile
+                    tileId={props.tileId}
+                    isBusy={state.isBusy}
+                    hasData={!List.empty(validAsscData)}
+                >
                     {props.tileHeader}
 
                     <S.MeaningTileView>
@@ -232,6 +234,8 @@ export function init(
                     <globalComponents.Subtile
                         tileId={props.tileId}
                         heading={ut.translate('lex_meaning__usage_notes')}
+                        isBusy={state.isBusy}
+                        hasData={true}
                     >
                         <S.UsageNotesTileView>
                             {!List.empty(ijpNotes) ? (
