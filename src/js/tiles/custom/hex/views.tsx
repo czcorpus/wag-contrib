@@ -187,6 +187,7 @@ export function init(
                 error={state.error}
                 hasData={state.data.count > 0}
                 supportsTileReload={props.supportsReloadOnError}
+                isSubtileContainer={props.isSubtileContainer}
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{ corp: 'HEX', url: state.serviceInfoUrl }}
             >

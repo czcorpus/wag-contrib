@@ -36,8 +36,6 @@ import {
     lemLevelSupport,
 } from '../../../page/tile.js';
 import { LexMeaningModel } from './model.js';
-import { isLexQueryMatch } from '../lexCommon/types/dictionary.js';
-import { List } from 'cnc-tskit';
 
 export interface LexMeaningTileConf extends TileConf {}
 
@@ -179,6 +177,10 @@ export class LexMeaningTile implements ITileProvider {
 
     supportsLemmatizationLevel(ll: LemmatizationLevel): boolean {
         return lemLevelSupport(this.configuredLemLevels, ll);
+    }
+
+    isSubtileContainer(): boolean {
+        return false;
     }
 }
 

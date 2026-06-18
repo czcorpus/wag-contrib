@@ -360,6 +360,7 @@ export function init(
                 error={state.error}
                 hasData={true} // this tile will always have some data
                 supportsTileReload={props.supportsReloadOnError}
+                isSubtileContainer={props.isSubtileContainer}
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.LexOverviewTileView>

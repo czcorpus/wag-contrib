@@ -49,6 +49,7 @@ export function init(
                 noDataMessage={ut.translate('lex_common__not_found')}
                 backlink={state.backlink}
                 supportsTileReload={props.supportsReloadOnError}
+                isSubtileContainer={props.isSubtileContainer}
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{ corp: 'UJC' }}
             >

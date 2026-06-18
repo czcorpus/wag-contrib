@@ -71,6 +71,7 @@ export function init(
                     !List.empty(state.data.assc) || !List.empty(state.data.ijp)
                 }
                 supportsTileReload={props.supportsReloadOnError}
+                isSubtileContainer={props.isSubtileContainer}
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.NotesTileView>

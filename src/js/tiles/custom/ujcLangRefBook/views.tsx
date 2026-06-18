@@ -192,6 +192,7 @@ export function init(
                 hasData={state.data !== null && !!state.data.heading}
                 backlink={state.backlink}
                 supportsTileReload={props.supportsReloadOnError}
+                isSubtileContainer={props.isSubtileContainer}
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'UJC'}}>
                 <S.UjcLangRefBookTileView>
