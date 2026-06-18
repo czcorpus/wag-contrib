@@ -95,6 +95,7 @@ export function init(
                 backlink={state.backlink}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
+                isSubtileContainer={props.isSubtileContainer}
                 sourceIdent={{corp: 'UJC'}}>
                 <S.UjcDictionaryTileView>
                     {List.map(item => renderDataItem(item), state.data.items.slice(0, state.maxItems))}

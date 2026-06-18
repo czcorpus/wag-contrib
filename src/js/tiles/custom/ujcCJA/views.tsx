@@ -46,6 +46,7 @@ export function init(
                 backlink={state.backlink}
                 supportsTileReload={props.supportsReloadOnError}
                 issueReportingUrl={props.issueReportingUrl}
+                isSubtileContainer={props.isSubtileContainer}
                 sourceIdent={{corp: 'UJC'}}>
                 <S.UjcCJATileView>
                     <S.Preview maxHeight={MAX_HEIGHT}>

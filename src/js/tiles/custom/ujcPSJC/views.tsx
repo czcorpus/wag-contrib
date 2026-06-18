@@ -46,6 +46,7 @@ export function init(
                 hasData={state.data.entries.length > 0}
                 backlink={state.backlink}
                 supportsTileReload={props.supportsReloadOnError}
+                isSubtileContainer={props.isSubtileContainer}
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{corp: 'UJC'}}>
                 <S.UjcPSJCTileView>

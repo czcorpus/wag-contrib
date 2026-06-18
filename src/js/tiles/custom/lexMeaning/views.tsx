@@ -144,6 +144,7 @@ export function init(
                 error={state.error}
                 hasData={!List.empty(state.data)}
                 supportsTileReload={props.supportsReloadOnError}
+                isSubtileContainer={props.isSubtileContainer}
                 issueReportingUrl={props.issueReportingUrl}
             >
                 <S.MeaningTileView>

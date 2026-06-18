@@ -138,6 +138,7 @@ export function init(
                 noDataMessage={ut.translate('lex_common__not_found')}
                 backlink={current ? current.backlink : null}
                 supportsTileReload={props.supportsReloadOnError}
+                isSubtileContainer={props.isSubtileContainer}
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={source}
             >
