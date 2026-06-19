@@ -169,6 +169,7 @@ export function init(
                     tileId={props.tileId}
                     isBusy={state.isBusy}
                     hasData={!List.empty(validAsscData)}
+                    setMaxHeight={true}
                 >
                     {props.tileHeader}
 

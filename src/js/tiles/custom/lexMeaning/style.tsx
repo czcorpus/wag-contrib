@@ -24,7 +24,6 @@ import { LexTileBase } from '../lexCommon/style.js';
 
 export const MeaningTileView = styled(LexTileBase)`
     position: relative;
-    min-height: 30em;
     height: 100%;
     width: 100%;
 
