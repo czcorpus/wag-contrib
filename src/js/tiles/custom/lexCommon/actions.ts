@@ -24,11 +24,4 @@ export class Actions {
         {
             name: GlobalActions.TileDataLoaded.name,
         };
-
-    static SelectItemVariant: Action<{
-        tileId: number;
-        variantIdx: number;
-    }> = {
-        name: 'LEX_COMMON_SELECT_ITEM_VARIANT',
-    };
 }

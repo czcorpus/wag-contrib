@@ -18,7 +18,12 @@
 
 import { IActionQueue, SEDispatcher } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
-import { LemmatizationLevel, RecognizedQueries } from '../../../query/index.js';
+import {
+    findCurrQueryMatch,
+    LemmatizationLevel,
+    QueryMatch,
+    RecognizedQueries,
+} from '../../../query/index.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { getCurrentVariant } from './types/dictionary.js';
@@ -27,9 +32,7 @@ import { List } from 'cnc-tskit';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { TileStatelessModel } from '../../../models/tiles/base.js';
 
-export interface LexCommonModelState {
-    selectedVariantIdx: number;
-}
+export interface LexCommonModelState {}
 
 export interface LexCommonModelArgs {
     dispatcher: IActionQueue;
@@ -43,8 +46,7 @@ export interface LexCommonModelArgs {
 }
 
 export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
-
-    private readonly queryMatches: RecognizedQueries;
+    private currQueryMatch: QueryMatch;
 
     private readonly lexApi: LexApi;
 
@@ -60,13 +62,24 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
         dependentTiles,
         lemLevelSupport,
     }: LexCommonModelArgs) {
-        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
-        this.queryMatches = queryMatches;
+        super({
+            dispatcher,
+            initState,
+            tileId,
+            appServices,
+            dependentTiles,
+            lemLevelSupport,
+        });
+        this.currQueryMatch = findCurrQueryMatch(queryMatches[0]);
         this.lexApi = lexApi;
         this.dataStreaming = null;
 
         this.addSearchActionHandler(
-            (state, action) => {},
+            (state, action) => {
+                if (!!action.payload?.queryMatches) {
+                    this.currQueryMatch = action.payload.queryMatches[0];
+                }
+            },
             (state, action, dispatch, ds) => {
                 // this instantly hides tile from layout
                 dispatch<typeof Actions.TileDataLoaded>({
@@ -79,44 +92,18 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
                 if (this.dataStreaming !== null) {
                     this.dataStreaming.cancel();
                 }
-                this.dataStreaming = ds;
-                this.loadData(
-                    this.dataStreaming,
-                    dispatch,
-                    state.selectedVariantIdx
-                );
-            }
-        );
-
-        this.addActionHandler(
-            Actions.SelectItemVariant,
-            (state, action) => {
-                state.selectedVariantIdx = action.payload.variantIdx;
-            },
-            (state, action, dispatch) => {
-                dispatch<typeof Actions.TileDataLoaded>({
-                    name: Actions.TileDataLoaded.name,
-                    payload: {
-                        tileId: this.tileId,
-                        isEmpty: true,
-                    },
-                });
-
-                if (this.dataStreaming !== null) {
-                    this.dataStreaming.cancel();
+                if (!!action.payload?.queryMatches) {
+                    this.dataStreaming = appServices
+                        .dataStreaming()
+                        .startNewSubgroup(this.tileId, ...this.dependentTiles);
+                    dispatch(GlobalActions.TileSubgroupReady, {
+                        mainTileId: this.tileId,
+                        subgroupId: this.dataStreaming.getId(),
+                    });
+                } else {
+                    this.dataStreaming = ds;
                 }
-                this.dataStreaming = this.appServices
-                    .dataStreaming()
-                    .startNewSubgroup(this.tileId, ...this.dependentTiles);
-                dispatch(GlobalActions.TileSubgroupReady, {
-                    mainTileId: this.tileId,
-                    subgroupId: this.dataStreaming.getId(),
-                });
-                this.loadData(
-                    this.dataStreaming,
-                    dispatch,
-                    state.selectedVariantIdx
-                );
+                this.loadData(this.dataStreaming, dispatch);
             }
         );
 
@@ -170,12 +157,8 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
         );
     }
 
-    private loadData(
-        streaming: IDataStreaming,
-        dispatch: SEDispatcher,
-        variantIdx: number
-    ) {
-        const variant = getCurrentVariant(this.queryMatches, variantIdx);
+    private loadData(streaming: IDataStreaming, dispatch: SEDispatcher) {
+        const variant = getCurrentVariant(this.currQueryMatch);
         const args = {
             asscIds:
                 variant && variant.sources['assc']

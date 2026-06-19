@@ -91,7 +91,6 @@ export class LexOverviewTile implements ITileProvider {
                 lemma: match.lemma || match.word,
             } as LexItem;
         }, queryMatches[0]);
-        console.log(queryMatches[0], variants);
 
         this.model = new LexOverviewModel({
             dispatcher,

@@ -82,21 +82,61 @@ export class LexOverviewModel extends TileStatelessModel<LexOverviewModelState> 
         dependentTiles,
         lemLevelSupport,
     }: LexOverviewModelArgs) {
-        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
+        super({
+            dispatcher,
+            initState,
+            tileId,
+            appServices,
+            dependentTiles,
+            lemLevelSupport,
+        });
         this.readDataFromTile = readDataFromTile;
 
         this.addSearchActionHandler(
             (state, action) => {
+                if (!!action.payload?.queryMatches) {
+                    state.queryMatches = List.map(
+                        (match) => ({
+                            ...match,
+                            isCurrent:
+                                match.localId ===
+                                action.payload.queryMatches[0].localId,
+                        }),
+                        state.queryMatches
+                    );
+                }
+                state.selectedVariantIdx = List.findIndex(
+                    (match) => match.isCurrent,
+                    state.queryMatches
+                );
                 state.error = undefined;
                 state.backlink = undefined;
                 state.isBusy = true;
             },
             (state, action, dispatch, ds) => {
-                this.loadData(
-                    ds,
-                    dispatch,
-                    state
-                );
+                if (!!action.payload?.queryMatches) {
+                    this.waitForAction({}, (action, data) => {
+                        if (
+                            GlobalActions.isTileSubgroupReady(action) &&
+                            action.payload.mainTileId === this.readDataFromTile
+                        ) {
+                            return null;
+                        }
+                        return data;
+                    }).subscribe({
+                        next: (action) => {
+                            if (GlobalActions.isTileSubgroupReady(action)) {
+                                this.loadDataFromSubgroup(
+                                    ds.getSubgroup(action.payload.subgroupId),
+                                    dispatch,
+                                    state
+                                );
+                            }
+                        },
+                    });
+                } else {
+                    this.loadData(ds, dispatch, state);
+                }
             }
         );
 
@@ -147,40 +187,6 @@ export class LexOverviewModel extends TileStatelessModel<LexOverviewModelState> 
         );
 
         this.addActionSubtypeHandler(
-            CommonActions.SelectItemVariant,
-            (action) => action.payload.tileId === this.tileId,
-            (state, action) => {
-                state.selectedVariantIdx = action.payload.variantIdx;
-                state.sourceData = {
-                    assc: null,
-                    ijp: null,
-                };
-                state.isBusy = true;
-            },
-            (state, action, dispatch) => {
-                this.waitForAction({}, (action, data) => {
-                    if (
-                        GlobalActions.isTileSubgroupReady(action) &&
-                        action.payload.mainTileId === this.readDataFromTile
-                    ) {
-                        return null;
-                    }
-                    return data;
-                }).subscribe({
-                    next: (action) => {
-                        if (GlobalActions.isTileSubgroupReady(action)) {
-                            this.loadDataFromSubgroup(
-                                action.payload.subgroupId,
-                                dispatch,
-                                state
-                            );
-                        }
-                    },
-                });
-            }
-        );
-
-        this.addActionSubtypeHandler(
             Actions.PlayAudio,
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
@@ -224,15 +230,11 @@ export class LexOverviewModel extends TileStatelessModel<LexOverviewModelState> 
     }
 
     private loadDataFromSubgroup(
-        subgroupId: string,
+        ds: IDataStreaming,
         dispatch: SEDispatcher,
         state: LexOverviewModelState
     ) {
-        this.loadData(
-            this.appServices.dataStreaming().getSubgroup(subgroupId),
-            dispatch,
-            state
-        );
+        this.loadData(ds, dispatch, state);
     }
 
     private loadData(

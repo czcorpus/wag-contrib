@@ -25,14 +25,18 @@ import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
 import { UjcNeomatArgs, UjcNeomatApi } from './api.js';
-import { findCurrQueryMatch, LemmatizationLevel, RecognizedQueries } from '../../../query/index.js';
+import {
+    findCurrQueryMatch,
+    LemmatizationLevel,
+    QueryMatch,
+    RecognizedQueries,
+} from '../../../query/index.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { getCurrentVariant } from '../lexCommon/types/dictionary.js';
 import { TileStatelessModel } from '../../../models/tiles/base.js';
 
 export interface UjcNeomatModelState {
     isBusy: boolean;
-    selectedVariantIdx: number;
     ident: string;
     maxItems: number;
     data: DataStructure;
@@ -52,7 +56,6 @@ export interface UjcNeomatModelArgs {
 }
 
 export class UjcNeomatModel extends TileStatelessModel<UjcNeomatModelState> {
-
     private readonly api: UjcNeomatApi;
 
     constructor({
@@ -65,20 +68,29 @@ export class UjcNeomatModel extends TileStatelessModel<UjcNeomatModelState> {
         dependentTiles,
         lemLevelSupport,
     }: UjcNeomatModelArgs) {
-        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
+        super({
+            dispatcher,
+            initState,
+            tileId,
+            appServices,
+            dependentTiles,
+            lemLevelSupport,
+        });
         this.api = api;
 
         this.addSearchActionHandler(
             (state, action) => {
-                const variant = getCurrentVariant(
-                    queryMatches,
-                    state.selectedVariantIdx
-                );
+                let queryMatch: QueryMatch;
+                if (!!action.payload?.queryMatches) {
+                    queryMatch = action.payload.queryMatches[0];
+                } else {
+                    queryMatch = findCurrQueryMatch(List.head(queryMatches));
+                }
+                const variant = getCurrentVariant(queryMatch);
                 if (variant) {
                     state.ident = variant.lemma;
                 } else {
-                    const match = findCurrQueryMatch(List.head(queryMatches));
-                    state.ident = match.lemma || match.word;
+                    state.ident = queryMatch.lemma || queryMatch.word;
                 }
                 state.isBusy = true;
                 state.error = null;
@@ -88,11 +100,7 @@ export class UjcNeomatModel extends TileStatelessModel<UjcNeomatModelState> {
                 state.backlink = null;
             },
             (state, action, dispatch, ds) => {
-                this.loadData(
-                    ds,
-                    dispatch,
-                    state
-                );
+                this.loadData(ds, dispatch, state);
             }
         );
 
@@ -155,37 +163,6 @@ export class UjcNeomatModel extends TileStatelessModel<UjcNeomatModelState> {
                 backlinkUrl.searchParams.set('button', 'Hledat');
                 backlinkUrl.searchParams.set('prijimam', '1');
                 window.open(backlinkUrl.toString(), '_blank');
-            }
-        );
-
-        this.addActionHandler(
-            CommonActions.SelectItemVariant,
-            (state, action) => {
-                state.selectedVariantIdx = action.payload.variantIdx;
-                const variant = getCurrentVariant(
-                    queryMatches,
-                    state.selectedVariantIdx
-                );
-                if (variant) {
-                    state.ident = variant.lemma;
-                } else {
-                    const match = findCurrQueryMatch(List.head(queryMatches));
-                    state.ident = match.lemma || match.word;
-                }
-                state.isBusy = true;
-                state.data = {
-                    entries: [],
-                };
-                state.backlink = null;
-            },
-            (state, action, dispatch) => {
-                this.loadData(
-                    appServices
-                        .dataStreaming()
-                        .startNewSubgroup(this.tileId),
-                    dispatch,
-                    state
-                );
             }
         );
     }

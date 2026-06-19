@@ -113,7 +113,6 @@ export class LexDictionariesTile implements ITileProvider {
                     conf.services
                 ),
                 activeDictTab: -1,
-                selectedVariantIdx: 0,
                 error: null,
             },
         });

@@ -55,12 +55,8 @@ export function isLexQueryMatch(
     );
 }
 
-export function getCurrentVariant(
-    queryMatches: RecognizedQueries,
-    variantIdx: number
-): LexItem {
-    const currentQueryMatch = List.head(queryMatches)[variantIdx];
-    return isLexQueryMatch(currentQueryMatch) && currentQueryMatch.extraData
-        ? currentQueryMatch.extraData.variant
+export function getCurrentVariant(currQueryMatch: QueryMatch): LexItem {
+    return isLexQueryMatch(currQueryMatch) && currQueryMatch.extraData
+        ? currQueryMatch.extraData.variant
         : null;
 }

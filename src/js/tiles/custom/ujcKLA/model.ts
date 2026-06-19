@@ -25,14 +25,18 @@ import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
 import { UjcKLAArgs, UjcKLAApi } from './api.js';
-import { findCurrQueryMatch, LemmatizationLevel, RecognizedQueries } from '../../../query/index.js';
+import {
+    findCurrQueryMatch,
+    LemmatizationLevel,
+    QueryMatch,
+    RecognizedQueries,
+} from '../../../query/index.js';
 import { getCurrentVariant } from '../lexCommon/types/dictionary.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { TileStatelessModel } from '../../../models/tiles/base.js';
 
 export interface UjcKLAModelState {
     isBusy: boolean;
-    selectedVariantIdx: number;
     queries: Array<string>;
     maxImages: number;
     data: DataStructure;
@@ -64,20 +68,29 @@ export class UjcKLAModel extends TileStatelessModel<UjcKLAModelState> {
         dependentTiles,
         lemLevelSupport,
     }: UjcKLAModelArgs) {
-        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
+        super({
+            dispatcher,
+            initState,
+            tileId,
+            appServices,
+            dependentTiles,
+            lemLevelSupport,
+        });
         this.api = api;
 
         this.addSearchActionHandler(
             (state, action) => {
-                const variant = getCurrentVariant(
-                    queryMatches,
-                    state.selectedVariantIdx
-                );
+                let queryMatch: QueryMatch;
+                if (!!action.payload?.queryMatches) {
+                    queryMatch = action.payload.queryMatches[0];
+                } else {
+                    queryMatch = findCurrQueryMatch(List.head(queryMatches));
+                }
+                const variant = getCurrentVariant(queryMatch);
                 if (variant) {
                     state.queries = [variant.lemma];
                 } else {
-                    const match = findCurrQueryMatch(List.head(queryMatches));
-                    state.queries = [match.lemma || match.word];
+                    state.queries = [queryMatch.lemma || queryMatch.word];
                 }
 
                 state.isBusy = true;
@@ -86,11 +99,7 @@ export class UjcKLAModel extends TileStatelessModel<UjcKLAModelState> {
                 state.backlink = null;
             },
             (state, action, dispatch, ds) => {
-                this.loadData(
-                    ds,
-                    dispatch,
-                    state
-                );
+                this.loadData(ds, dispatch, state);
             }
         );
 
@@ -154,36 +163,6 @@ export class UjcKLAModel extends TileStatelessModel<UjcKLAModelState> {
                 backlinkUrl.searchParams.set('zobraz_cards', 'cards');
                 backlinkUrl.searchParams.set('not_initial', '1');
                 window.open(backlinkUrl.toString(), '_blank');
-            }
-        );
-
-        this.addActionHandler(
-            CommonActions.SelectItemVariant,
-            (state, action) => {
-                state.selectedVariantIdx = action.payload.variantIdx;
-                const variant = getCurrentVariant(
-                    queryMatches,
-                    state.selectedVariantIdx
-                );
-                if (variant) {
-                    state.queries = [variant.lemma];
-                } else {
-                    const match = findCurrQueryMatch(List.head(queryMatches));
-                    state.queries = [match.lemma || match.word];
-                }
-                state.isBusy = true;
-                state.error = null;
-                state.data = createEmptyData();
-                state.backlink = null;
-            },
-            (state, action, dispatch) => {
-                this.loadData(
-                    appServices
-                        .dataStreaming()
-                        .startNewSubgroup(this.tileId),
-                    dispatch,
-                    state
-                );
             }
         );
     }

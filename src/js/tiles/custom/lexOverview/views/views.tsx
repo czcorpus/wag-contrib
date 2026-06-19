@@ -25,6 +25,7 @@ import {
 } from '../../../../page/tile.js';
 import { GlobalComponents } from '../../../../views/common/index.js';
 import { Actions as CommonActions } from '../../lexCommon/actions.js';
+import { Actions as GlobalActions } from '../../../../models/actions.js';
 import { LexOverviewModel } from '../model.js';
 import { init as initAsscViews } from './assc/views.js';
 import { init as initIjpViews } from './ijp/views.js';
@@ -104,9 +105,24 @@ export function init(
         queryMatches: Array<QueryMatch>;
     }> = (props) => {
         const handleVariantClick = (variantIdx: number) => {
-            dispatcher.dispatch(CommonActions.SelectItemVariant, {
-                tileId: props.tileId,
-                variantIdx,
+            dispatcher.dispatch<typeof GlobalActions.ChangeCurrQueryMatch>({
+                name: GlobalActions.ChangeCurrQueryMatch.name,
+                payload: {
+                    queryIdx: 0,
+                    matchId: props.queryMatches[variantIdx].localId,
+                    softReload: true,
+                },
+            });
+            dispatcher.dispatch<typeof GlobalActions.RequestQueryResponse>({
+                name: GlobalActions.RequestQueryResponse.name,
+                payload: {
+                    queryMatches: [
+                        {
+                            ...props.queryMatches[variantIdx],
+                            isCurrent: true,
+                        },
+                    ],
+                },
             });
         };
 

@@ -90,7 +90,6 @@ export class LexMeaningTile implements ITileProvider {
             lemLevelSupport: this.configuredLemLevels,
             initState: {
                 isBusy: isBusy,
-                selectedVariantIdx: 0,
                 data: {
                     assc: [],
                     ijp: [],

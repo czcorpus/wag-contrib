@@ -41,7 +41,6 @@ import { IJPData } from '../lexCommon/types/ijp.js';
 
 export interface LexMeaningModelState {
     isBusy: boolean;
-    selectedVariantIdx: number;
     data: {
         ijp: Array<LexResponse<IJPData | string>>;
         assc: Array<LexResponse<HTMLBlock[] | string>>;
@@ -98,7 +97,30 @@ export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
                 state.isBusy = true;
             },
             (state, action, dispatch, ds) => {
-                this.loadData(ds, dispatch);
+                if (!!action.payload?.queryMatches) {
+                    this.waitForAction({}, (action, data) => {
+                        if (
+                            GlobalActions.isTileSubgroupReady(action) &&
+                            action.payload.mainTileId === this.readDataFromTile
+                        ) {
+                            return null;
+                        }
+                        return data;
+                    }).subscribe({
+                        next: (action) => {
+                            if (GlobalActions.isTileSubgroupReady(action)) {
+                                this.loadData(
+                                    appServices
+                                        .dataStreaming()
+                                        .getSubgroup(action.payload.subgroupId),
+                                    dispatch
+                                );
+                            }
+                        },
+                    });
+                } else {
+                    this.loadData(ds, dispatch);
+                }
             }
         );
 
@@ -140,40 +162,6 @@ export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
                     `https://slovnikcestiny.cz/heslo/state.data.query/`,
                     '_blank'
                 );
-            }
-        );
-
-        this.addActionHandler(
-            CommonActions.SelectItemVariant,
-            (state, action) => {
-                state.selectedVariantIdx = action.payload.variantIdx;
-                state.isBusy = true;
-                state.data = {
-                    ijp: [],
-                    assc: [],
-                };
-            },
-            (state, action, dispatch) => {
-                this.waitForAction({}, (action, data) => {
-                    if (
-                        GlobalActions.isTileSubgroupReady(action) &&
-                        action.payload.mainTileId === this.readDataFromTile
-                    ) {
-                        return null;
-                    }
-                    return data;
-                }).subscribe({
-                    next: (action) => {
-                        if (GlobalActions.isTileSubgroupReady(action)) {
-                            this.loadData(
-                                this.appServices
-                                    .dataStreaming()
-                                    .getSubgroup(action.payload.subgroupId),
-                                dispatch
-                            );
-                        }
-                    },
-                });
             }
         );
     }
