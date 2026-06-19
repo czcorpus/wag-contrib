@@ -116,7 +116,7 @@ export function init(
             dispatcher.dispatch<typeof GlobalActions.RequestQueryResponse>({
                 name: GlobalActions.RequestQueryResponse.name,
                 payload: {
-                    queryMatches: [
+                    newQueryMatches: [
                         {
                             ...props.queryMatches[variantIdx],
                             isCurrent: true,
@@ -327,7 +327,8 @@ export function init(
         };
 
         const basicOverview = {} as BasicOverviewData;
-        const selectedQueryMatch = state.queryMatches[state.selectedVariantIdx];
+        const selectedQueryMatch =
+            state.availQueryMatches[state.selectedVariantIdx];
         const selectedVariant = state.variants[state.selectedVariantIdx]
             ? state.variants[state.selectedVariantIdx]
             : ({
@@ -386,7 +387,7 @@ export function init(
                         selectedVariant={selectedVariant}
                         source={state.mainSource}
                         variants={state.variants}
-                        queryMatches={state.queryMatches}
+                        queryMatches={state.availQueryMatches}
                     />
                     {pipe(
                         [state.sourceData.assc, state.sourceData.ijp],

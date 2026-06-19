@@ -71,7 +71,7 @@ export interface LexDictionariesModelArgs {
 export class LexDictionariesModel extends TileStatelessModel<LexDictionariesModelState> {
     private readonly apis: Array<LexDictApi>;
 
-    private queryMatch: QueryMatch;
+    private currQueryMatch: QueryMatch;
 
     constructor({
         dispatcher,
@@ -92,12 +92,12 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
             lemLevelSupport,
         });
         this.apis = apis;
-        this.queryMatch = findCurrQueryMatch(List.head(queryMatches));
+        this.currQueryMatch = findCurrQueryMatch(List.head(queryMatches));
 
         this.addSearchActionHandler(
             (state, action) => {
-                if (!!action.payload?.queryMatches) {
-                    this.queryMatch = action.payload.queryMatches[0];
+                if (!!action.payload?.newQueryMatches) {
+                    this.currQueryMatch = action.payload.newQueryMatches[0];
                 }
                 state.isBusy = true;
                 state.sources = List.map(
@@ -113,13 +113,14 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
             },
             (state, action, dispatch, ds) => {
                 var searchTerm: string;
-                const variant = getCurrentVariant(this.queryMatch);
+                const variant = getCurrentVariant(this.currQueryMatch);
                 if (variant) {
                     searchTerm = variant.lemma;
                 } else {
-                    searchTerm = this.queryMatch.lemma || this.queryMatch.word;
+                    searchTerm =
+                        this.currQueryMatch.lemma || this.currQueryMatch.word;
                 }
-                if (!!action.payload?.queryMatches) {
+                if (!!action.payload?.newQueryMatches) {
                     this.loadData(
                         ds.startNewSubgroup(this.tileId),
                         dispatch,
@@ -231,11 +232,12 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
             null,
             (state, action, dispatch) => {
                 var searchTerm: string;
-                const variant = getCurrentVariant(this.queryMatch);
+                const variant = getCurrentVariant(this.currQueryMatch);
                 if (variant) {
                     searchTerm = variant.lemma;
                 } else {
-                    searchTerm = this.queryMatch.lemma || this.queryMatch.word;
+                    searchTerm =
+                        this.currQueryMatch.lemma || this.currQueryMatch.word;
                 }
                 const url =
                     this.apis[action.payload.backlink.queryId].getBacklinkURL(

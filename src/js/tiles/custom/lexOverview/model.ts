@@ -49,7 +49,7 @@ interface SourceData {
 
 export interface LexOverviewModelState {
     isBusy: boolean;
-    queryMatches: Array<QueryMatch>;
+    availQueryMatches: Array<QueryMatch>;
     referenceCorpus: string;
     mainSource: Source;
     variants: Array<LexItem>;
@@ -71,8 +71,6 @@ export interface LexOverviewModelArgs {
 }
 
 export class LexOverviewModel extends TileStatelessModel<LexOverviewModelState> {
-    private readonly readDataFromTile: number | null;
-
     constructor({
         dispatcher,
         initState,
@@ -89,32 +87,32 @@ export class LexOverviewModel extends TileStatelessModel<LexOverviewModelState> 
             appServices,
             dependentTiles,
             lemLevelSupport,
+            readDataFromTile,
         });
-        this.readDataFromTile = readDataFromTile;
 
         this.addSearchActionHandler(
             (state, action) => {
-                if (!!action.payload?.queryMatches) {
-                    state.queryMatches = List.map(
+                if (!!action.payload?.newQueryMatches) {
+                    state.availQueryMatches = List.map(
                         (match) => ({
                             ...match,
                             isCurrent:
                                 match.localId ===
-                                action.payload.queryMatches[0].localId,
+                                action.payload.newQueryMatches[0].localId,
                         }),
-                        state.queryMatches
+                        state.availQueryMatches
                     );
                 }
                 state.selectedVariantIdx = List.findIndex(
                     (match) => match.isCurrent,
-                    state.queryMatches
+                    state.availQueryMatches
                 );
                 state.error = undefined;
                 state.backlink = undefined;
                 state.isBusy = true;
             },
             (state, action, dispatch, ds) => {
-                if (!!action.payload?.queryMatches) {
+                if (!!action.payload?.newQueryMatches) {
                     this.waitForAction({}, (action, data) => {
                         if (
                             GlobalActions.isTileSubgroupReady(action) &&
@@ -126,7 +124,7 @@ export class LexOverviewModel extends TileStatelessModel<LexOverviewModelState> 
                     }).subscribe({
                         next: (action) => {
                             if (GlobalActions.isTileSubgroupReady(action)) {
-                                this.loadDataFromSubgroup(
+                                this.loadData(
                                     ds.getSubgroup(action.payload.subgroupId),
                                     dispatch,
                                     state
@@ -227,14 +225,6 @@ export class LexOverviewModel extends TileStatelessModel<LexOverviewModelState> 
                 state.playingAudio = false;
             }
         );
-    }
-
-    private loadDataFromSubgroup(
-        ds: IDataStreaming,
-        dispatch: SEDispatcher,
-        state: LexOverviewModelState
-    ) {
-        this.loadData(ds, dispatch, state);
     }
 
     private loadData(

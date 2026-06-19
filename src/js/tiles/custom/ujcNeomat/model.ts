@@ -81,8 +81,8 @@ export class UjcNeomatModel extends TileStatelessModel<UjcNeomatModelState> {
         this.addSearchActionHandler(
             (state, action) => {
                 let queryMatch: QueryMatch;
-                if (!!action.payload?.queryMatches) {
-                    queryMatch = action.payload.queryMatches[0];
+                if (!!action.payload?.newQueryMatches) {
+                    queryMatch = action.payload.newQueryMatches[0];
                 } else {
                     queryMatch = findCurrQueryMatch(List.head(queryMatches));
                 }

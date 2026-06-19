@@ -76,8 +76,8 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
 
         this.addSearchActionHandler(
             (state, action) => {
-                if (!!action.payload?.queryMatches) {
-                    this.currQueryMatch = action.payload.queryMatches[0];
+                if (!!action.payload?.newQueryMatches) {
+                    this.currQueryMatch = action.payload.newQueryMatches[0];
                 }
             },
             (state, action, dispatch, ds) => {
@@ -92,16 +92,12 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
                 if (this.dataStreaming !== null) {
                     this.dataStreaming.cancel();
                 }
-                if (!!action.payload?.queryMatches) {
-                    this.dataStreaming = appServices
-                        .dataStreaming()
-                        .startNewSubgroup(this.tileId, ...this.dependentTiles);
+                this.dataStreaming = ds;
+                if (!!action.payload?.newQueryMatches) {
                     dispatch(GlobalActions.TileSubgroupReady, {
                         mainTileId: this.tileId,
                         subgroupId: this.dataStreaming.getId(),
                     });
-                } else {
-                    this.dataStreaming = ds;
                 }
                 this.loadData(this.dataStreaming, dispatch);
             }

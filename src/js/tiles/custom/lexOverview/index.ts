@@ -102,7 +102,7 @@ export class LexOverviewTile implements ITileProvider {
             lemLevelSupport: this.configuredLemLevels,
             initState: {
                 isBusy: isBusy,
-                queryMatches: queryMatches[0],
+                availQueryMatches: queryMatches[0],
                 referenceCorpus: usedCorpus,
                 mainSource,
                 variants,

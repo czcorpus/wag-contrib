@@ -61,16 +61,11 @@ export interface LexMeaningModelArgs {
 }
 
 export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
-    private readonly queryMatches: RecognizedQueries;
-
-    private readonly readDataFromTile: number | null;
-
     constructor({
         dispatcher,
         initState,
         tileId,
         appServices,
-        queryMatches,
         readDataFromTile,
         dependentTiles,
         lemLevelSupport,
@@ -82,9 +77,8 @@ export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
             appServices,
             dependentTiles,
             lemLevelSupport,
+            readDataFromTile,
         });
-        this.queryMatches = queryMatches;
-        this.readDataFromTile = readDataFromTile;
 
         this.addSearchActionHandler(
             (state, action) => {
@@ -97,7 +91,7 @@ export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
                 state.isBusy = true;
             },
             (state, action, dispatch, ds) => {
-                if (!!action.payload?.queryMatches) {
+                if (!!action.payload?.newQueryMatches) {
                     this.waitForAction({}, (action, data) => {
                         if (
                             GlobalActions.isTileSubgroupReady(action) &&
@@ -110,9 +104,7 @@ export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
                         next: (action) => {
                             if (GlobalActions.isTileSubgroupReady(action)) {
                                 this.loadData(
-                                    appServices
-                                        .dataStreaming()
-                                        .getSubgroup(action.payload.subgroupId),
+                                    ds.getSubgroup(action.payload.subgroupId),
                                     dispatch
                                 );
                             }
