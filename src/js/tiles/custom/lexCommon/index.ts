@@ -16,9 +16,10 @@
  * limitations under the License.
  */
 import { IActionDispatcher } from 'kombo';
+import { List } from 'cnc-tskit';
 
 import { IAppServices } from '../../../appServices.js';
-import { LemmatizationLevel, QueryType } from '../../../query/index.js';
+import { findCurrQueryMatch, LemmatizationLevel, QueryType } from '../../../query/index.js';
 import {
     TileConf,
     ITileProvider,
@@ -79,13 +80,12 @@ export class LexCommonTile implements ITileProvider {
         this.model = new LexCommonModel({
             dispatcher,
             appServices,
-            queryMatches,
             tileId,
             dependentTiles,
             lemLevelSupport: this.configuredLemLevels,
             lexApi: this.lexApi,
             initState: {
-                selectedVariantIdx: 0,
+                currQueryMatch: List.map(findCurrQueryMatch, queryMatches)[0],
             },
         });
         this.view = () => null;

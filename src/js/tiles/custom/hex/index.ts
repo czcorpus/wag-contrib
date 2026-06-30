@@ -16,9 +16,10 @@
  * limitations under the License.
  */
 import { IActionDispatcher } from 'kombo';
+import { List } from 'cnc-tskit';
 
 import { IAppServices } from '../../../appServices.js';
-import { LemmatizationLevel, QueryType } from '../../../query/index.js';
+import { findCurrQueryMatch, LemmatizationLevel, QueryType } from '../../../query/index.js';
 import { init as viewInit } from './views.js';
 import {
     TileConf, ITileProvider, TileComponent, TileFactory,
@@ -75,7 +76,6 @@ export class HexTile implements ITileProvider {
             dispatcher,
             appServices,
             api: this.api,
-            queryMatches,
             tileId,
             dependentTiles,
             lemLevelSupport: this.configuredLemLevels,
@@ -87,6 +87,7 @@ export class HexTile implements ITileProvider {
                 isAltViewMode: false,
                 isTweakMode: false,
                 serviceInfoUrl: appServices.importExternalMessage(conf.serviceInfoUrl),
+                currQueryMatches: List.map(findCurrQueryMatch, queryMatches),
             }
         });
         this.label = appServices.importExternalMessage(conf.label || 'html__main_label');

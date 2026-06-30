@@ -86,7 +86,6 @@ export class UjcNeomatTile implements ITileProvider {
             lemLevelSupport: this.configuredLemLevels,
             initState: {
                 isBusy: isBusy,
-                selectedVariantIdx: 0,
                 ident: '',
                 maxItems: conf.maxItems || 3,
                 data: {

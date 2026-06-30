@@ -18,7 +18,7 @@
 
 import { IActionQueue, SEDispatcher } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
-import { Backlink, BacklinkConf } from '../../../page/tile.js';
+import { Backlink } from '../../../page/tile.js';
 import { createEmptyData, DataStructure } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';

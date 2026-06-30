@@ -21,9 +21,8 @@ import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
-import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { List } from 'cnc-tskit';
-import { LemmatizationLevel, RecognizedQueries } from '../../../query/index.js';
+import { LemmatizationLevel, QueryMatch } from '../../../query/index.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
 import {
@@ -41,13 +40,13 @@ import { IJPData } from '../lexCommon/types/ijp.js';
 
 export interface LexMeaningModelState {
     isBusy: boolean;
-    selectedVariantIdx: number;
     data: {
         ijp: Array<LexResponse<IJPData | string>>;
         assc: Array<LexResponse<HTMLBlock[] | string>>;
     };
     error: string;
     backlink: Backlink;
+    queryMatches: Array<QueryMatch>;
 }
 
 export interface LexMeaningModelArgs {
@@ -55,23 +54,17 @@ export interface LexMeaningModelArgs {
     initState: LexMeaningModelState;
     tileId: number;
     appServices: IAppServices;
-    queryMatches: RecognizedQueries;
     readDataFromTile: number | null;
     lemLevelSupport: Array<LemmatizationLevel>;
     dependentTiles: Array<number>;
 }
 
 export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
-    private readonly queryMatches: RecognizedQueries;
-
-    private readonly readDataFromTile: number | null;
-
     constructor({
         dispatcher,
         initState,
         tileId,
         appServices,
-        queryMatches,
         readDataFromTile,
         dependentTiles,
         lemLevelSupport,
@@ -83,9 +76,8 @@ export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
             appServices,
             dependentTiles,
             lemLevelSupport,
+            readDataFromTile,
         });
-        this.queryMatches = queryMatches;
-        this.readDataFromTile = readDataFromTile;
 
         this.addSearchActionHandler(
             (state, action) => {
@@ -98,7 +90,28 @@ export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
                 state.isBusy = true;
             },
             (state, action, dispatch, ds) => {
-                this.loadData(ds, dispatch);
+                if (!!action.payload?.newQueryMatches) {
+                    this.waitForAction({}, (action, data) => {
+                        if (
+                            GlobalActions.isTileSubgroupReady(action) &&
+                            action.payload.mainTileId === this.readDataFromTile
+                        ) {
+                            return null;
+                        }
+                        return data;
+                    }).subscribe({
+                        next: (action) => {
+                            if (GlobalActions.isTileSubgroupReady(action)) {
+                                this.loadData(
+                                    ds.getSubgroup(action.payload.subgroupId),
+                                    dispatch
+                                );
+                            }
+                        },
+                    });
+                } else {
+                    this.loadData(ds, dispatch);
+                }
             }
         );
 
@@ -140,40 +153,6 @@ export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
                     `https://slovnikcestiny.cz/heslo/state.data.query/`,
                     '_blank'
                 );
-            }
-        );
-
-        this.addActionHandler(
-            CommonActions.SelectItemVariant,
-            (state, action) => {
-                state.selectedVariantIdx = action.payload.variantIdx;
-                state.isBusy = true;
-                state.data = {
-                    ijp: [],
-                    assc: [],
-                };
-            },
-            (state, action, dispatch) => {
-                this.waitForAction({}, (action, data) => {
-                    if (
-                        GlobalActions.isTileSubgroupReady(action) &&
-                        action.payload.mainTileId === this.readDataFromTile
-                    ) {
-                        return null;
-                    }
-                    return data;
-                }).subscribe({
-                    next: (action) => {
-                        if (GlobalActions.isTileSubgroupReady(action)) {
-                            this.loadData(
-                                this.appServices
-                                    .dataStreaming()
-                                    .getSubgroup(action.payload.subgroupId),
-                                dispatch
-                            );
-                        }
-                    },
-                });
             }
         );
     }

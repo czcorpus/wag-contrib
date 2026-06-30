@@ -19,7 +19,6 @@ import { IActionDispatcher } from 'kombo';
 
 import { IAppServices } from '../../../appServices.js';
 import {
-    findCurrQueryMatch,
     LemmatizationLevel,
     QueryType,
 } from '../../../query/index.js';
@@ -36,9 +35,9 @@ import {
     lemLevelSupport,
 } from '../../../page/tile.js';
 import { LexOverviewModel } from './model.js';
-import { List } from 'cnc-tskit';
 import { Source } from '../lexCommon/types/enums.js';
 import { isLexQueryMatch, LexItem } from '../lexCommon/types/dictionary.js';
+import { List } from 'cnc-tskit';
 
 export interface LexOverviewTileConf extends TileConf {}
 
@@ -79,36 +78,18 @@ export class LexOverviewTile implements ITileProvider {
         this.configuredLemLevels = conf.lemmatizationLevels || [];
         this.readDataFromTile = readDataFromTile;
 
-        const currQueryMatch = findCurrQueryMatch(queryMatches[0]);
-        var variants: Array<LexItem> = [];
         var mainSource: Source = undefined;
         var usedCorpus: string = undefined;
-        if (isLexQueryMatch(currQueryMatch)) {
-            variants = currQueryMatch.extraData.variants;
-            mainSource = currQueryMatch.extraData.mainSource;
-            usedCorpus = currQueryMatch.extraData.corpusId;
-            // in case no variants available, use corpus data
-            if (List.empty(variants)) {
-                variants = [
-                    {
-                        lemma: currQueryMatch.lemma,
-                        pos: currQueryMatch.pos[0].value,
-                        corpusEntry: {
-                            count: currQueryMatch.abs,
-                            ipm: currQueryMatch.ipm,
-                        },
-                    } as LexItem,
-                ];
-                mainSource = Source.Corpus;
+        const variants = List.map((match) => {
+            if (isLexQueryMatch(match)) {
+                mainSource = match.extraData.mainSource;
+                usedCorpus = match.extraData.corpusId;
+                return match.extraData.variant;
             }
-        } else {
-            // empty data
-            variants = [
-                {
-                    lemma: currQueryMatch.lemma || currQueryMatch.word,
-                } as LexItem,
-            ];
-        }
+            return {
+                lemma: match.lemma || match.word,
+            } as LexItem;
+        }, queryMatches[0]);
 
         this.model = new LexOverviewModel({
             dispatcher,
@@ -120,11 +101,14 @@ export class LexOverviewTile implements ITileProvider {
             lemLevelSupport: this.configuredLemLevels,
             initState: {
                 isBusy: isBusy,
-                queryMatch: currQueryMatch,
+                availQueryMatches: queryMatches[0],
                 referenceCorpus: usedCorpus,
                 mainSource,
                 variants,
-                selectedVariantIdx: 0,
+                selectedVariantIdx: List.findIndex(
+                    (v) => v.isCurrent,
+                    queryMatches[0]
+                ),
                 sourceData: {
                     assc: null,
                     ijp: null,

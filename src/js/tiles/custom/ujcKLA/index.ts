@@ -87,7 +87,6 @@ export class UjcKLATile implements ITileProvider {
             lemLevelSupport: this.configuredLemLevels,
             initState: {
                 isBusy: isBusy,
-                selectedVariantIdx: 0,
                 queries: [],
                 maxImages: conf.maxItems || 2,
                 data: createEmptyData(),

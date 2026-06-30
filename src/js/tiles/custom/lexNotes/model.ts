@@ -21,7 +21,6 @@ import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
-import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { List, pipe } from 'cnc-tskit';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
@@ -41,7 +40,6 @@ import { LemmatizationLevel } from '../../../query/index.js';
 
 export interface LexNotesModelState {
     isBusy: boolean;
-    selectedVariantIdx: number;
     data: {
         ijp: Array<LexResponse<IJPData | string>>;
         assc: Array<LexResponse<Array<HTMLBlock> | string>>;
@@ -61,8 +59,6 @@ export interface LexNotesModelArgs {
 }
 
 export class LexNotesModel extends TileStatelessModel<LexNotesModelState> {
-    private readonly readDataFromTile: number | null;
-
     constructor({
         dispatcher,
         initState,
@@ -72,8 +68,15 @@ export class LexNotesModel extends TileStatelessModel<LexNotesModelState> {
         dependentTiles,
         lemLevelSupport,
     }: LexNotesModelArgs) {
-        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
-        this.readDataFromTile = readDataFromTile;
+        super({
+            dispatcher,
+            initState,
+            tileId,
+            appServices,
+            dependentTiles,
+            lemLevelSupport,
+            readDataFromTile,
+        });
 
         this.addSearchActionHandler(
             (state, action) => {
@@ -86,7 +89,28 @@ export class LexNotesModel extends TileStatelessModel<LexNotesModelState> {
                 state.isBusy = true;
             },
             (state, action, dispatch, ds) => {
-                this.loadData(ds, dispatch);
+                if (!!action.payload?.newQueryMatches) {
+                    this.waitForAction({}, (action, data) => {
+                        if (
+                            GlobalActions.isTileSubgroupReady(action) &&
+                            action.payload.mainTileId === this.readDataFromTile
+                        ) {
+                            return null;
+                        }
+                        return data;
+                    }).subscribe({
+                        next: (action) => {
+                            if (GlobalActions.isTileSubgroupReady(action)) {
+                                this.loadData(
+                                    ds.getSubgroup(action.payload.subgroupId),
+                                    dispatch
+                                );
+                            }
+                        },
+                    });
+                } else {
+                    this.loadData(ds, dispatch);
+                }
             }
         );
 
@@ -128,40 +152,6 @@ export class LexNotesModel extends TileStatelessModel<LexNotesModelState> {
                     `https://slovnikcestiny.cz/heslo/state.data.query/`,
                     '_blank'
                 );
-            }
-        );
-
-        this.addActionHandler(
-            CommonActions.SelectItemVariant,
-            (state, action) => {
-                state.selectedVariantIdx = action.payload.variantIdx;
-                state.isBusy = true;
-                state.data = {
-                    ijp: [],
-                    assc: [],
-                };
-            },
-            (state, action, dispatch) => {
-                this.waitForAction({}, (action, data) => {
-                    if (
-                        GlobalActions.isTileSubgroupReady(action) &&
-                        action.payload.mainTileId === this.readDataFromTile
-                    ) {
-                        return null;
-                    }
-                    return data;
-                }).subscribe({
-                    next: (action) => {
-                        if (GlobalActions.isTileSubgroupReady(action)) {
-                            this.loadData(
-                                this.appServices
-                                    .dataStreaming()
-                                    .getSubgroup(action.payload.subgroupId),
-                                dispatch
-                            );
-                        }
-                    },
-                });
             }
         );
     }

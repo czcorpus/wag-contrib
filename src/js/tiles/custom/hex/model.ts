@@ -37,6 +37,7 @@ export interface HexModelState {
     isTweakMode:boolean;
     word:string;
     serviceInfoUrl:string;
+    currQueryMatches: Array<QueryMatch>;
 }
 
 export interface HexModelArgs {
@@ -45,7 +46,6 @@ export interface HexModelArgs {
     tileId:number;
     api:HexKspApi,
     appServices:IAppServices;
-    queryMatches:RecognizedQueries;
     lemLevelSupport: Array<LemmatizationLevel>;
     dependentTiles: Array<number>;
 }
@@ -82,7 +82,15 @@ export class HexModel extends TileStatelessModel<HexModelState> {
 
     private readonly api:HexKspApi;
 
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, lemLevelSupport, dependentTiles}:HexModelArgs) {
+    constructor({
+        dispatcher,
+        initState,
+        api,
+        tileId,
+        appServices,
+        lemLevelSupport,
+        dependentTiles,
+    }:HexModelArgs) {
         super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
         this.api = api;
 
@@ -94,7 +102,7 @@ export class HexModel extends TileStatelessModel<HexModelState> {
                 state.data = mkEmptyData();
             },
             (state, action, dispatch, ds) => {
-                const match = findCurrQueryMatch(List.head(queryMatches));
+                const match = state.currQueryMatches[0];
                 const args:KSPRequestArgs = {
                     q: match.lemma,
                     sort: 'a',
@@ -105,7 +113,7 @@ export class HexModel extends TileStatelessModel<HexModelState> {
                     lang: 'cz'
                 };
                 exportPosArgs(args, match);
-                const currMatch = findCurrQueryMatch(List.head(queryMatches));
+                const currMatch = state.currQueryMatches[0];
                 this.api.call(
                     ds,
                     this.tileId,
@@ -143,7 +151,7 @@ export class HexModel extends TileStatelessModel<HexModelState> {
             action => action.payload.tileId === this.tileId,
             (state, action) => {
                 state.isBusy = false;
-                state.word = findCurrQueryMatch(List.head(queryMatches)).word;
+                state.word = state.currQueryMatches[0].word;
                 if (action.error) {
                     state.error = action.error.message;
 

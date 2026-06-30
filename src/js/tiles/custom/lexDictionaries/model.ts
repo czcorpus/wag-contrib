@@ -20,10 +20,14 @@ import { IActionQueue, SEDispatcher } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
-import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
-import { findCurrQueryMatch, LemmatizationLevel, RecognizedQueries } from '../../../query/index.js';
+import {
+    findCurrQueryMatch,
+    LemmatizationLevel,
+    QueryMatch,
+    RecognizedQueries,
+} from '../../../query/index.js';
 import { TileStatelessModel } from '../../../models/tiles/base.js';
 import {
     isSSJCDataStructure,
@@ -35,7 +39,7 @@ import {
     SSJCDataStructure,
     UjcBasicArgs,
 } from './api/basicApi.js';
-import { forkJoin, map, tap } from 'rxjs';
+import { forkJoin, tap } from 'rxjs';
 import { getCurrentVariant } from '../lexCommon/types/dictionary.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { Source } from '../lexCommon/types/enums.js';
@@ -48,8 +52,8 @@ export interface LexDictionariesModelState {
         data: SSJCDataStructure | PSJCDataStructure;
         backlink: Backlink;
     }>;
-    selectedVariantIdx: number;
     activeDictTab: number;
+    currQueryMatch: QueryMatch;
     error: string;
 }
 
@@ -59,7 +63,6 @@ export interface LexDictionariesModelArgs {
     tileId: number;
     apis: Array<LexDictApi>;
     appServices: IAppServices;
-    queryMatches: RecognizedQueries;
     lemLevelSupport: Array<LemmatizationLevel>;
     dependentTiles: Array<number>;
 }
@@ -67,24 +70,30 @@ export interface LexDictionariesModelArgs {
 export class LexDictionariesModel extends TileStatelessModel<LexDictionariesModelState> {
     private readonly apis: Array<LexDictApi>;
 
-    private readonly queryMatches: RecognizedQueries;
-
     constructor({
         dispatcher,
         initState,
         apis,
         tileId,
         appServices,
-        queryMatches,
         dependentTiles,
         lemLevelSupport,
     }: LexDictionariesModelArgs) {
-        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
+        super({
+            dispatcher,
+            initState,
+            tileId,
+            appServices,
+            dependentTiles,
+            lemLevelSupport,
+        });
         this.apis = apis;
-        this.queryMatches = queryMatches;
 
         this.addSearchActionHandler(
             (state, action) => {
+                if (!!action.payload?.newQueryMatches) {
+                    state.currQueryMatch = action.payload.newQueryMatches[0];
+                }
                 state.isBusy = true;
                 state.sources = List.map(
                     (d) => ({
@@ -99,21 +108,22 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
             },
             (state, action, dispatch, ds) => {
                 var searchTerm: string;
-                const variant = getCurrentVariant(
-                    this.queryMatches,
-                    state.selectedVariantIdx
-                );
+                const variant = getCurrentVariant(state.currQueryMatch);
                 if (variant) {
                     searchTerm = variant.lemma;
                 } else {
-                    const match = findCurrQueryMatch(List.head(this.queryMatches));
-                    searchTerm = match.lemma || match.word;
+                    searchTerm =
+                        state.currQueryMatch.lemma || state.currQueryMatch.word;
                 }
-                this.loadData(
-                    ds,
-                    dispatch,
-                    searchTerm
-                );
+                if (!!action.payload?.newQueryMatches) {
+                    this.loadData(
+                        ds.startNewSubgroup(this.tileId),
+                        dispatch,
+                        searchTerm
+                    );
+                } else {
+                    this.loadData(ds, dispatch, searchTerm);
+                }
             }
         );
 
@@ -217,58 +227,18 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
             null,
             (state, action, dispatch) => {
                 var searchTerm: string;
-                const variant = getCurrentVariant(
-                    this.queryMatches,
-                    state.selectedVariantIdx
-                );
+                const variant = getCurrentVariant(state.currQueryMatch);
                 if (variant) {
                     searchTerm = variant.lemma;
                 } else {
-                    const match = findCurrQueryMatch(List.head(queryMatches));
-                    searchTerm = match.lemma || match.word;
+                    searchTerm =
+                        state.currQueryMatch.lemma || state.currQueryMatch.word;
                 }
                 const url =
                     this.apis[action.payload.backlink.queryId].getBacklinkURL(
                         searchTerm
                     );
                 window.open(url.toString(), '_blank');
-            }
-        );
-
-        this.addActionHandler(
-            CommonActions.SelectItemVariant,
-            (state, action) => {
-                state.selectedVariantIdx = action.payload.variantIdx;
-                state.sources = List.map(
-                    (d) => ({
-                        type: d.type,
-                        data: null,
-                        loaded: false,
-                        empty: true,
-                        backlink: null,
-                    }),
-                    state.sources
-                );
-                state.isBusy = true;
-                state.activeDictTab = -1;
-            },
-            (state, action, dispatch) => {
-                var searchTerm: string;
-                const variant = getCurrentVariant(
-                    this.queryMatches,
-                    state.selectedVariantIdx
-                );
-                if (variant) {
-                    searchTerm = variant.lemma;
-                } else {
-                    const match = findCurrQueryMatch(List.head(this.queryMatches));
-                    searchTerm = match.lemma || match.word;
-                }
-                this.loadData(
-                    this.appServices.dataStreaming().startNewSubgroup(this.tileId),
-                    dispatch,
-                    searchTerm
-                );
             }
         );
     }

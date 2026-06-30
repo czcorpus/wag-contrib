@@ -82,7 +82,6 @@ export class LexNotesTile implements ITileProvider {
             lemLevelSupport: this.configuredLemLevels,
             initState: {
                 isBusy: isBusy,
-                selectedVariantIdx: null,
                 data: {
                     ijp: [],
                     assc: [],

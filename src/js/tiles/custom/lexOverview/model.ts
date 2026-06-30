@@ -21,7 +21,6 @@ import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
 import { QueryMatch, LemmatizationLevel } from '../../../query/index.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
-import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { Actions } from './actions.js';
 import { TileStatelessModel } from '../../../models/tiles/base.js';
 
@@ -49,7 +48,7 @@ interface SourceData {
 
 export interface LexOverviewModelState {
     isBusy: boolean;
-    queryMatch: QueryMatch;
+    availQueryMatches: Array<QueryMatch>;
     referenceCorpus: string;
     mainSource: Source;
     variants: Array<LexItem>;
@@ -71,8 +70,6 @@ export interface LexOverviewModelArgs {
 }
 
 export class LexOverviewModel extends TileStatelessModel<LexOverviewModelState> {
-    private readonly readDataFromTile: number | null;
-
     constructor({
         dispatcher,
         initState,
@@ -82,21 +79,61 @@ export class LexOverviewModel extends TileStatelessModel<LexOverviewModelState> 
         dependentTiles,
         lemLevelSupport,
     }: LexOverviewModelArgs) {
-        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
-        this.readDataFromTile = readDataFromTile;
+        super({
+            dispatcher,
+            initState,
+            tileId,
+            appServices,
+            dependentTiles,
+            lemLevelSupport,
+            readDataFromTile,
+        });
 
         this.addSearchActionHandler(
             (state, action) => {
+                if (!!action.payload?.newQueryMatches) {
+                    state.availQueryMatches = List.map(
+                        (match) => ({
+                            ...match,
+                            isCurrent:
+                                match.localId ===
+                                action.payload.newQueryMatches[0].localId,
+                        }),
+                        state.availQueryMatches
+                    );
+                }
+                state.selectedVariantIdx = List.findIndex(
+                    (match) => match.isCurrent,
+                    state.availQueryMatches
+                );
                 state.error = undefined;
                 state.backlink = undefined;
                 state.isBusy = true;
             },
             (state, action, dispatch, ds) => {
-                this.loadData(
-                    ds,
-                    dispatch,
-                    state
-                );
+                if (!!action.payload?.newQueryMatches) {
+                    this.waitForAction({}, (action, data) => {
+                        if (
+                            GlobalActions.isTileSubgroupReady(action) &&
+                            action.payload.mainTileId === this.readDataFromTile
+                        ) {
+                            return null;
+                        }
+                        return data;
+                    }).subscribe({
+                        next: (action) => {
+                            if (GlobalActions.isTileSubgroupReady(action)) {
+                                this.loadData(
+                                    ds.getSubgroup(action.payload.subgroupId),
+                                    dispatch,
+                                    state
+                                );
+                            }
+                        },
+                    });
+                } else {
+                    this.loadData(ds, dispatch, state);
+                }
             }
         );
 
@@ -147,40 +184,6 @@ export class LexOverviewModel extends TileStatelessModel<LexOverviewModelState> 
         );
 
         this.addActionSubtypeHandler(
-            CommonActions.SelectItemVariant,
-            (action) => action.payload.tileId === this.tileId,
-            (state, action) => {
-                state.selectedVariantIdx = action.payload.variantIdx;
-                state.sourceData = {
-                    assc: null,
-                    ijp: null,
-                };
-                state.isBusy = true;
-            },
-            (state, action, dispatch) => {
-                this.waitForAction({}, (action, data) => {
-                    if (
-                        GlobalActions.isTileSubgroupReady(action) &&
-                        action.payload.mainTileId === this.readDataFromTile
-                    ) {
-                        return null;
-                    }
-                    return data;
-                }).subscribe({
-                    next: (action) => {
-                        if (GlobalActions.isTileSubgroupReady(action)) {
-                            this.loadDataFromSubgroup(
-                                action.payload.subgroupId,
-                                dispatch,
-                                state
-                            );
-                        }
-                    },
-                });
-            }
-        );
-
-        this.addActionSubtypeHandler(
             Actions.PlayAudio,
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
@@ -220,18 +223,6 @@ export class LexOverviewModel extends TileStatelessModel<LexOverviewModelState> 
             (state, action) => {
                 state.playingAudio = false;
             }
-        );
-    }
-
-    private loadDataFromSubgroup(
-        subgroupId: string,
-        dispatch: SEDispatcher,
-        state: LexOverviewModelState
-    ) {
-        this.loadData(
-            this.appServices.dataStreaming().getSubgroup(subgroupId),
-            dispatch,
-            state
         );
     }
 

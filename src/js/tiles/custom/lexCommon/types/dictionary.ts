@@ -24,30 +24,6 @@ import {
 } from '../../../../query/index.js';
 import { Aspect, Gender, PoS, Source } from './enums.js';
 
-export interface CorpusEntry {
-    _id: string;
-    _rev: string;
-    lemma: string;
-    sublemmas: Array<{
-        value: string;
-        count: number;
-    }>;
-    pos: string;
-    datasetSize: number;
-    upos: string;
-    count: number;
-    arf: number;
-    ipm: number;
-    is_pname: boolean;
-    forms: Array<{
-        word: string;
-        sublemma?: string;
-        count: number;
-        ipm: number;
-        arf: number;
-    }>;
-}
-
 interface LexID {
     id: string;
     parentId?: string;
@@ -60,13 +36,12 @@ export interface LexItem {
     aspect?: Aspect;
 
     sources: { [source: string]: Array<LexID> };
-    corpusEntry?: CorpusEntry;
 }
 
 export interface LexExtraData {
     corpusId: string;
     mainSource: Source;
-    variants: Array<LexItem>;
+    variant: LexItem;
 }
 
 export function isLexQueryMatch(
@@ -76,21 +51,12 @@ export function isLexQueryMatch(
         qm.extraData !== undefined &&
         typeof qm.extraData['corpusId'] === 'string' &&
         typeof qm.extraData['mainSource'] === 'string' &&
-        Array.isArray(qm.extraData['variants']) &&
-        List.every(
-            (d) => 'lemma' in d && 'pos' in d && 'sources' in d,
-            qm.extraData['variants']
-        )
+        typeof qm.extraData['variant'] === 'object'
     );
 }
 
-export function getCurrentVariant(
-    queryMatches: RecognizedQueries,
-    variantIdx: number
-): LexItem {
-    const currentQueryMatch = findCurrQueryMatch(List.head(queryMatches));
-    return isLexQueryMatch(currentQueryMatch) &&
-        !List.empty(currentQueryMatch.extraData.variants)
-        ? currentQueryMatch.extraData.variants[variantIdx]
+export function getCurrentVariant(currQueryMatch: QueryMatch): LexItem {
+    return isLexQueryMatch(currQueryMatch) && currQueryMatch.extraData
+        ? currQueryMatch.extraData.variant
         : null;
 }

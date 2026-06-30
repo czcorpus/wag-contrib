@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 import { IActionDispatcher } from 'kombo';
+import { List } from 'cnc-tskit';
 
 import { IAppServices } from '../../../appServices.js';
 import {
@@ -78,11 +79,9 @@ export class LexMeaningTile implements ITileProvider {
         this.configuredLemLevels = conf.lemmatizationLevels || [];
         this.readDataFromTile = readDataFromTile;
 
-        const currQueryMatch = findCurrQueryMatch(queryMatches[0]);
         this.model = new LexMeaningModel({
             dispatcher,
             appServices,
-            queryMatches,
             tileId,
             readDataFromTile:
                 typeof readDataFromTile === 'number' ? readDataFromTile : null,
@@ -90,7 +89,7 @@ export class LexMeaningTile implements ITileProvider {
             lemLevelSupport: this.configuredLemLevels,
             initState: {
                 isBusy: isBusy,
-                selectedVariantIdx: 0,
+                queryMatches: List.map(findCurrQueryMatch, queryMatches),
                 data: {
                     assc: [],
                     ijp: [],
