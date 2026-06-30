@@ -20,7 +20,6 @@ import { IActionQueue, SEDispatcher } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
-import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
 import {
@@ -54,6 +53,7 @@ export interface LexDictionariesModelState {
         backlink: Backlink;
     }>;
     activeDictTab: number;
+    currQueryMatch: QueryMatch;
     error: string;
 }
 
@@ -63,7 +63,6 @@ export interface LexDictionariesModelArgs {
     tileId: number;
     apis: Array<LexDictApi>;
     appServices: IAppServices;
-    queryMatches: RecognizedQueries;
     lemLevelSupport: Array<LemmatizationLevel>;
     dependentTiles: Array<number>;
 }
@@ -71,15 +70,12 @@ export interface LexDictionariesModelArgs {
 export class LexDictionariesModel extends TileStatelessModel<LexDictionariesModelState> {
     private readonly apis: Array<LexDictApi>;
 
-    private currQueryMatch: QueryMatch;
-
     constructor({
         dispatcher,
         initState,
         apis,
         tileId,
         appServices,
-        queryMatches,
         dependentTiles,
         lemLevelSupport,
     }: LexDictionariesModelArgs) {
@@ -92,12 +88,11 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
             lemLevelSupport,
         });
         this.apis = apis;
-        this.currQueryMatch = findCurrQueryMatch(List.head(queryMatches));
 
         this.addSearchActionHandler(
             (state, action) => {
                 if (!!action.payload?.newQueryMatches) {
-                    this.currQueryMatch = action.payload.newQueryMatches[0];
+                    state.currQueryMatch = action.payload.newQueryMatches[0];
                 }
                 state.isBusy = true;
                 state.sources = List.map(
@@ -113,12 +108,12 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
             },
             (state, action, dispatch, ds) => {
                 var searchTerm: string;
-                const variant = getCurrentVariant(this.currQueryMatch);
+                const variant = getCurrentVariant(state.currQueryMatch);
                 if (variant) {
                     searchTerm = variant.lemma;
                 } else {
                     searchTerm =
-                        this.currQueryMatch.lemma || this.currQueryMatch.word;
+                        state.currQueryMatch.lemma || state.currQueryMatch.word;
                 }
                 if (!!action.payload?.newQueryMatches) {
                     this.loadData(
@@ -232,12 +227,12 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
             null,
             (state, action, dispatch) => {
                 var searchTerm: string;
-                const variant = getCurrentVariant(this.currQueryMatch);
+                const variant = getCurrentVariant(state.currQueryMatch);
                 if (variant) {
                     searchTerm = variant.lemma;
                 } else {
                     searchTerm =
-                        this.currQueryMatch.lemma || this.currQueryMatch.word;
+                        state.currQueryMatch.lemma || state.currQueryMatch.word;
                 }
                 const url =
                     this.apis[action.payload.backlink.queryId].getBacklinkURL(

@@ -19,10 +19,8 @@
 import { IActionQueue, SEDispatcher } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import {
-    findCurrQueryMatch,
     LemmatizationLevel,
     QueryMatch,
-    RecognizedQueries,
 } from '../../../query/index.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
@@ -32,21 +30,21 @@ import { List } from 'cnc-tskit';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { TileStatelessModel } from '../../../models/tiles/base.js';
 
-export interface LexCommonModelState {}
+export interface LexCommonModelState {
+    currQueryMatch: QueryMatch;
+}
 
 export interface LexCommonModelArgs {
     dispatcher: IActionQueue;
     initState: LexCommonModelState;
     tileId: number;
     appServices: IAppServices;
-    queryMatches: RecognizedQueries;
     lemLevelSupport: Array<LemmatizationLevel>;
     dependentTiles: Array<number>;
     lexApi: LexApi;
 }
 
 export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
-    private currQueryMatch: QueryMatch;
 
     private readonly lexApi: LexApi;
 
@@ -58,7 +56,6 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
         tileId,
         appServices,
         lexApi,
-        queryMatches,
         dependentTiles,
         lemLevelSupport,
     }: LexCommonModelArgs) {
@@ -70,14 +67,13 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
             dependentTiles,
             lemLevelSupport,
         });
-        this.currQueryMatch = findCurrQueryMatch(queryMatches[0]);
         this.lexApi = lexApi;
         this.dataStreaming = null;
 
         this.addSearchActionHandler(
             (state, action) => {
                 if (!!action.payload?.newQueryMatches) {
-                    this.currQueryMatch = action.payload.newQueryMatches[0];
+                    state.currQueryMatch = action.payload.newQueryMatches[0];
                 }
             },
             (state, action, dispatch, ds) => {
@@ -99,7 +95,7 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
                         subgroupId: this.dataStreaming.getId(),
                     });
                 }
-                this.loadData(this.dataStreaming, dispatch);
+                this.loadData(state, this.dataStreaming, dispatch);
             }
         );
 
@@ -153,8 +149,8 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
         );
     }
 
-    private loadData(streaming: IDataStreaming, dispatch: SEDispatcher) {
-        const variant = getCurrentVariant(this.currQueryMatch);
+    private loadData(state: LexCommonModelState, streaming: IDataStreaming, dispatch: SEDispatcher) {
+        const variant = getCurrentVariant(state.currQueryMatch);
         const args = {
             asscIds:
                 variant && variant.sources['assc']

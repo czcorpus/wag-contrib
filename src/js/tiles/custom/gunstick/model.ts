@@ -57,7 +57,6 @@ export interface GunstickModelArgs {
     tileId: number;
     api: DataApi<KSPRequestArgs, Data>;
     appServices: IAppServices;
-    queryMatches: RecognizedQueries;
     lemLevelSupport: Array<LemmatizationLevel>;
     dependentTiles: Array<number>;
 }
@@ -72,7 +71,6 @@ export class GunstickModel extends TileStatelessModel<GunstickModelState> {
         api,
         tileId,
         appServices,
-        queryMatches,
         dependentTiles,
         lemLevelSupport,
     }: GunstickModelArgs) {

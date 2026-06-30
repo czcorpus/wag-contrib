@@ -21,9 +21,8 @@ import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
-import { Actions as CommonActions } from '../lexCommon/actions.js';
 import { List } from 'cnc-tskit';
-import { LemmatizationLevel, RecognizedQueries } from '../../../query/index.js';
+import { LemmatizationLevel, QueryMatch } from '../../../query/index.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
 import {
@@ -47,6 +46,7 @@ export interface LexMeaningModelState {
     };
     error: string;
     backlink: Backlink;
+    queryMatches: Array<QueryMatch>;
 }
 
 export interface LexMeaningModelArgs {
@@ -54,7 +54,6 @@ export interface LexMeaningModelArgs {
     initState: LexMeaningModelState;
     tileId: number;
     appServices: IAppServices;
-    queryMatches: RecognizedQueries;
     readDataFromTile: number | null;
     lemLevelSupport: Array<LemmatizationLevel>;
     dependentTiles: Array<number>;

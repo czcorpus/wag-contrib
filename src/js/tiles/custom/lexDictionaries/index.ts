@@ -92,12 +92,10 @@ export class LexDictionariesTile implements ITileProvider {
                 ),
             conf.services
         );
-        const currQueryMatch = findCurrQueryMatch(queryMatches[0]);
         this.model = new LexDictionariesModel({
             dispatcher,
             appServices,
             apis,
-            queryMatches,
             tileId,
             dependentTiles,
             lemLevelSupport: this.configuredLemLevels,
@@ -114,6 +112,7 @@ export class LexDictionariesTile implements ITileProvider {
                 ),
                 activeDictTab: -1,
                 error: null,
+                currQueryMatch: findCurrQueryMatch(List.head(queryMatches))
             },
         });
         this.label = appServices.importExternalMessage(

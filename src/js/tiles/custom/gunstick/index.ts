@@ -91,7 +91,6 @@ export class GunstickTile implements ITileProvider {
             dispatcher,
             appServices,
             api: this.api,
-            queryMatches,
             tileId,
             dependentTiles,
             lemLevelSupport: this.configuredLemLevels,

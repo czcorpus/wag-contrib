@@ -19,7 +19,6 @@ import { IActionDispatcher } from 'kombo';
 
 import { IAppServices } from '../../../appServices.js';
 import {
-    findCurrQueryMatch,
     LemmatizationLevel,
     QueryType,
 } from '../../../query/index.js';
