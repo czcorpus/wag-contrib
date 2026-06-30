@@ -23,10 +23,8 @@ import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
 import {
-    findCurrQueryMatch,
     LemmatizationLevel,
     QueryMatch,
-    RecognizedQueries,
 } from '../../../query/index.js';
 import { TileStatelessModel } from '../../../models/tiles/base.js';
 import {
