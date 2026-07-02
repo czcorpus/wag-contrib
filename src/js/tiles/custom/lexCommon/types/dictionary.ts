@@ -16,11 +16,8 @@
  * limitations under the License.
  */
 
-import { List } from 'cnc-tskit';
 import {
-    findCurrQueryMatch,
     QueryMatch,
-    RecognizedQueries,
 } from '../../../../query/index.js';
 import { Aspect, Gender, PoS, Source } from './enums.js';
 

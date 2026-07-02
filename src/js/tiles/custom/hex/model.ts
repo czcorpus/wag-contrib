@@ -20,7 +20,7 @@ import { IActionQueue } from 'kombo';
 import { Dict, List } from 'cnc-tskit';
 
 import { IAppServices } from '../../../appServices.js';
-import { RecognizedQueries, QueryMatch, findCurrQueryMatch, testIsDictMatch, LemmatizationLevel } from '../../../query/index.js';
+import { QueryMatch, testIsDictMatch, LemmatizationLevel } from '../../../query/index.js';
 import { Data, mkEmptyData } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
