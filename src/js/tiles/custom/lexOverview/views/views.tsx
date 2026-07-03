@@ -388,7 +388,10 @@ export function init(
                                 key={i}
                                 systemMessageType={SystemMessageType.ERROR}
                             >
-                                {ut.translate(getErrorMessage(v))}
+                                {List.map(
+                                    (msg) => ut.translate(msg),
+                                    getErrorMessage(v)
+                                )}
                             </lexComponents.MessageSubtile>
                         ))
                     )}

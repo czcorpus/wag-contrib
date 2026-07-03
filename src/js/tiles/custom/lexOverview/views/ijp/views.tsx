@@ -287,15 +287,32 @@ export function init(
         tileId: number;
         data: IJPData;
     }> = (props) => {
+        if (
+            !props.data.syllabification &&
+            !props.data.gender &&
+            !props.data.comparison &&
+            !props.data.grammarCase &&
+            !props.data.conjugation
+        ) {
+            return null;
+        }
+
         return (
             <lexComponents.Subtile tileId={props.tileId} source={Source.IJP}>
-                <SubtileRow>
-                    <span className="key">
-                        {ut.translate('lex_overview__overview_syllabification')}
-                        :
-                    </span>
-                    <span className="value">{props.data.syllabification}</span>
-                </SubtileRow>
+                {props.data.syllabification ? (
+                    <SubtileRow>
+                        <span className="key">
+                            {ut.translate(
+                                'lex_overview__overview_syllabification'
+                            )}
+                            :
+                        </span>
+                        <span className="value">
+                            {props.data.syllabification}
+                        </span>
+                    </SubtileRow>
+                ) : null}
+
                 {props.data.gender ? (
                     <SubtileRow>
                         <span className="key">

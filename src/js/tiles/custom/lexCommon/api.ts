@@ -102,12 +102,17 @@ export function isIjpError(v: LexResponse): v is LexResponse<string> {
     );
 }
 
-export function getErrorMessage(lexResponse: LexResponse): string {
+export function getErrorMessage(lexResponse: LexResponse): Array<string> {
     switch (lexResponse.statusCode) {
         case 503:
-            return `lex_common__${lexResponse.source}_unavailable`;
+            return [`lex_common__${lexResponse.source}_unavailable`];
+        case 404:
+            return [
+                `lex_common__${lexResponse.source}_not_found`,
+                `: '${lexResponse.id}'`,
+            ];
         default:
-            return `lex_common__${lexResponse.source}_failed`;
+            return [`lex_common__${lexResponse.source}_failed`];
     }
 }
 
