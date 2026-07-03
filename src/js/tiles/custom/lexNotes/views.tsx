@@ -82,7 +82,10 @@ export function init(
                             <lexComponents.MessageSubtile
                                 systemMessageType={SystemMessageType.ERROR}
                             >
-                                {ut.translate(getErrorMessage(v))}
+                                {List.map(
+                                    (msg) => ut.translate(msg),
+                                    getErrorMessage(v)
+                                )}
                             </lexComponents.MessageSubtile>
                         ))
                     )}

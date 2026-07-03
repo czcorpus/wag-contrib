@@ -187,7 +187,10 @@ export function init(
                                         }
                                         className="error-box"
                                     >
-                                        {ut.translate(getErrorMessage(v))}
+                                        {List.map(
+                                            (msg) => ut.translate(msg),
+                                            getErrorMessage(v)
+                                        )}
                                     </lexComponents.MessageSubtile>
                                 ))
                             )}
