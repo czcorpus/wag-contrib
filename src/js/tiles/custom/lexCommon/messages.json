@@ -58,16 +58,18 @@
         "lex_common__assc_unavailable": "Litujeme, Akademický slovník současné češtiny není dostupný",
         "lex_common__ijp_unavailable": "Litujeme, Internetová jazyková příručka není dostupná",
         "lex_common__assc_failed": "Litujeme, nepodařilo se načíst data z Akademického slovníku současné češtiny",
-        "lex_common__ijp_failed": "Litujeme, nepodařilo se načíst data z Internetové jazykové příručky"
+        "lex_common__ijp_failed": "Litujeme, nepodařilo se načíst data z Internetové jazykové příručky",
+        "lex_common__assc_not_found": "Položka nebyla nalezena v Akademickém slovníku současné češtiny",
+        "lex_common__ijp_not_found": "Položka nebyla nalezena v Internetové jazykové příručce"
     },
     "en-US": {
         "lex_common__source": "Source",
         "lex_common__source_corpus": "Czech National Corpus",
-        "lex_common__source_assc": "Akademický slovník současné češtiny UNTRANSLATED",
-        "lex_common__source_ijp": "Internetová jazyková příručka UNTRANSLATED",
+        "lex_common__source_assc": "Academic Dictionary of Contemporary Czech",
+        "lex_common__source_ijp": "Internet Language Guide",
         "lex_common__source_ssjc": "Slovník spisovného jazyka českého UNTRANSLATED",
         "lex_common__source_ssc": "Slovník spisovné češtiny UNTRANSLATED",
-        "lex_common__source_kla": "Kartotéka lexikálního archivu UNTRANSLATED",
+        "lex_common__source_kla": "Lexical Archive Card Catalog",
         "lex_common__source_djd": "Dotazy z jazykové poradny UNTRANSLATED",
         "lex_common__pos_A": "adjective",
         "lex_common__pos_B": "abbreviation",
@@ -116,9 +118,11 @@
         "lex_common__aspect_short_I": "imperf.",
         "lex_common__aspect_short_B": "per. & imperf.",
         "lex_common__not_found": "Our apologies, the searched term does not occur in this source",
-        "lex_common__assc_unavailable": "Our apologies, the Akademický slovník současné češtiny is unavailable",
-        "lex_common__ijp_unavailable": "Our apologies, the Internetová jazyková příručka is unavailable",
-        "lex_common__assc_failed": "Our apologies, loading data from the Akademický slovník současné češtiny failed",
-        "lex_common__ijp_failed": "Our apologies, loading data from the Internetová jazyková příručka failed"
+        "lex_common__assc_unavailable": "Our apologies, the Academic Dictionary of Contemporary Czech is unavailable",
+        "lex_common__ijp_unavailable": "Our apologies, the Internet Language Guide is unavailable",
+        "lex_common__assc_failed": "Our apologies, loading data from the Academic Dictionary of Contemporary Czech failed",
+        "lex_common__ijp_failed": "Our apologies, loading data from the Internet Language Guide failed",
+        "lex_common__assc_not_found": "Item not found in the Academic Dictionary of Contemporary Czech",
+        "lex_common__ijp_not_found": "Item not found in the Internet Language Guide"
     }
 }
