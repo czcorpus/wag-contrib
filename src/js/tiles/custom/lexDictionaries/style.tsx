@@ -170,7 +170,7 @@ export const PSJCEntry = styled.li`
 
 // ---------------- <Tabs /> --------------------------------------
 
-export const Tabs = styled.div<{ theme: Theme} >`
+export const Tabs = styled.div<{ theme: Theme }>`
     .separator {
         margin: 0 5px;
         font-size: 1.5em;
@@ -186,26 +186,31 @@ export const TabButton = styled.span<{ theme: Theme }>`
     span.item {
         margin: 0 5px;
         padding: 0 3px;
-    }
 
-    span.item.disabled {
-        color: ${(props) => props.theme.colorLightText};
-        opacity: 0.5;
-        cursor: default;
-    }
-
-    span.item a {
-        text-decoration: none;
-        color: ${(props) => props.theme.colorDefaultText};
-    }
-
-    span.item a:hover {
-        cursor: pointer;
-        color: ${(props) => props.theme.colorLogoBlue};
+        a {
+            text-decoration: none;
+            color: ${(props) => props.theme.colorDefaultText};
+        }
     }
 
     span.item.current {
         border-bottom: 2px solid ${(props) => props.theme.colorLogoBlue};
+    }
+
+    span.item.disabled {
+        opacity: 0.5;
+        cursor: default;
+
+        a:hover {
+            text-decoration: none;
+            cursor: default;
+        }
+    }
+
+    span.item:not(.disabled) a:hover {
+        text-decoration: none;
+        color: ${(props) => props.theme.colorLogoBlue};
+        cursor: pointer;
     }
 `;
 

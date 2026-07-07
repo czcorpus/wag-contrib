@@ -100,6 +100,7 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
                     }),
                     state.sources
                 );
+                state.activeDictTab = -1;
             },
             (state, action, dispatch, ds) => {
                 var searchTerm: string;

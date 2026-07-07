@@ -106,6 +106,8 @@ export class LexOverviewModel extends TileStatelessModel<LexOverviewModelState> 
                     (match) => match.isCurrent,
                     state.availQueryMatches
                 );
+                state.sourceData.assc = null;
+                state.sourceData.ijp = null;
                 state.error = undefined;
                 state.backlink = undefined;
                 state.isBusy = true;
