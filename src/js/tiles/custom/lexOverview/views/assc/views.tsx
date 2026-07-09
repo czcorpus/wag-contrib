@@ -40,11 +40,18 @@ export function init(
     // -------------------- <FormsTable /> -----------------------------------------------
 
     const FormsTable: React.FC<{
+        basicForm: string;
         forms: { [key: string]: string };
     }> = (props) => {
         return (
             <LS.DataTable>
                 <tbody>
+                    <tr>
+                        <td className="tableKey">
+                            {ut.translate('lex_overview__basic_form')}
+                        </td>
+                        <td className="tableValue">{props.basicForm}</td>
+                    </tr>
                     {pipe(
                         props.forms,
                         Dict.toEntries(),
@@ -74,6 +81,7 @@ export function init(
                             {ut.translate('lex_overview__forms')}:
                         </span>
                         <FormsTable
+                            basicForm={props.block.parsedVariants[0].key}
                             forms={props.block.parsedVariants[0].forms}
                         />
                     </SubtileRow>
