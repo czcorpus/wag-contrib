@@ -23,7 +23,7 @@ import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { getCurrentVariant } from './types/dictionary.js';
 import { LexApi } from './api.js';
-import { List } from 'cnc-tskit';
+import { List, pipe } from 'cnc-tskit';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { TileStatelessModel } from '../../../models/tiles/base.js';
 
@@ -132,6 +132,11 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
         );
     }
 
+    private isValidIjpId(id: string): boolean {
+        console.warn('Ignoring IJP item', id);
+        return !id.startsWith('__');
+    }
+
     private loadData(
         state: LexCommonModelState,
         streaming: IDataStreaming,
@@ -145,7 +150,11 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
                     : [],
             ijpIds:
                 variant && variant.sources['ijp']
-                    ? List.map((v) => v.id, variant.sources['ijp'])
+                    ? pipe(
+                          variant.sources['ijp'],
+                          List.map((v) => v.id),
+                          List.filter((id) => this.isValidIjpId(id))
+                      )
                     : [],
         };
         this.lexApi.call(streaming, this.tileId, 0, args).subscribe({
