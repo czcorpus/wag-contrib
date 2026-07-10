@@ -133,8 +133,11 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
     }
 
     private isValidIjpId(id: string): boolean {
-        console.warn('Ignoring IJP item', id);
-        return !id.startsWith('__');
+        const valid = !id.startsWith('__');
+        if (!valid) {
+            console.warn('Ignoring IJP item', id);
+        }
+        return valid;
     }
 
     private loadData(
