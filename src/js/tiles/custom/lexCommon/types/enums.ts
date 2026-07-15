@@ -26,6 +26,11 @@ export enum Source {
     Corpus = 'corpus',
 }
 
+export enum Type {
+    ASSCRaw = 'raw',
+    ASSCHTML = 'html',
+}
+
 export enum PoS {
     ADJ = 'A',
     ABB = 'B',

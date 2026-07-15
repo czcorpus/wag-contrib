@@ -24,7 +24,7 @@ import * as LS from './style.js';
 import { initLexComponents } from '../../../lexCommon/views.js';
 import { SubtileRow } from '../../../lexCommon/style.js';
 import { Source } from '../../../lexCommon/types/enums.js';
-import { HTMLBlock } from '../../../lexCommon/types/assc.js';
+import { HTMLBlock, VariantData } from '../../../lexCommon/types/assc.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -32,7 +32,7 @@ export function init(
 ): {
     Subtile: React.FC<{
         tileId: number;
-        block: HTMLBlock;
+        variant: VariantData;
     }>;
 } {
     const lexComponents = initLexComponents(dispatcher, ut);
@@ -71,18 +71,18 @@ export function init(
 
     const AsscSubtileView: React.FC<{
         tileId: number;
-        block: HTMLBlock;
+        variant: VariantData;
     }> = (props) => {
         return (
             <lexComponents.Subtile tileId={props.tileId} source={Source.ASSC}>
-                {!Dict.empty(props.block.parsedVariants[0].forms) ? (
+                {!Dict.empty(props.variant.forms) ? (
                     <SubtileRow>
                         <span className="key">
                             {ut.translate('lex_overview__forms')}:
                         </span>
                         <FormsTable
-                            basicForm={props.block.parsedVariants[0].key}
-                            forms={props.block.parsedVariants[0].forms}
+                            basicForm={props.variant.key}
+                            forms={props.variant.forms}
                         />
                     </SubtileRow>
                 ) : null}

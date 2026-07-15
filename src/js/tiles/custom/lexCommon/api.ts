@@ -23,9 +23,9 @@ import { ajax$ } from '../../../page/ajax.js';
 import { ResourceApi, SourceDetails, HTTPHeaders } from '../../../types.js';
 import { Backlink } from '../../../page/tile.js';
 import { IDataStreaming } from '../../../page/streaming.js';
-import { HTMLBlock } from './types/assc.js';
+import { HTMLBlock, VariantData } from './types/assc.js';
 import { IJPData as IJPData } from './types/ijp.js';
-import { Source } from './types/enums.js';
+import { Source, Type } from './types/enums.js';
 import { CorpusInfoAPI } from '../../../api/vendor/mquery/corpusInfo.js';
 
 export interface LexArgs {
@@ -37,20 +37,33 @@ export function isEmptyArgs(args: LexArgs): boolean {
     return Dict.every((v) => List.empty(v), args);
 }
 
-export interface LexResponse<T = IJPData | Array<HTMLBlock> | 'done' | string> {
+export interface LexResponse<
+    T = IJPData | Array<VariantData> | Array<HTMLBlock> | 'done' | string,
+> {
     source: Source;
+    type: string;
     id: string;
     data: T;
     statusCode: number;
 }
 
-export function isAsscData(v: LexResponse): v is LexResponse<Array<HTMLBlock>> {
+export function isAsscData(
+    v: LexResponse
+): v is LexResponse<Array<VariantData>> {
     return (
         v &&
         v.source === Source.ASSC &&
-        !!v.data &&
-        v.data !== 'done' &&
-        typeof v.data !== 'string'
+        v.type === Type.ASSCRaw &&
+        Array.isArray(v.data)
+    );
+}
+
+export function isAsscHtml(v: LexResponse): v is LexResponse<Array<HTMLBlock>> {
+    return (
+        v &&
+        v.source === Source.ASSC &&
+        v.type === Type.ASSCHTML &&
+        Array.isArray(v.data)
     );
 }
 

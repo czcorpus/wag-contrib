@@ -336,7 +336,7 @@ export function init(
                 ) {
                     asscVariant = List.find(
                         (v) => v.key.startsWith(selectedVariant.lemma),
-                        state.sourceData.assc.data[0].parsedVariants
+                        state.sourceData.assc.data
                     );
                     // selected variant may not be in detailed data, for example "hranolky" is only mentioned in hranolka/hranolek
                     if (asscVariant !== undefined) {
@@ -411,13 +411,11 @@ export function init(
                         />
                     ) : null}
                     {isAsscData(state.sourceData.assc) &&
-                    !Dict.empty(
-                        state.sourceData.assc.data[0].parsedVariants[0].forms
-                    ) &&
+                    !Dict.empty(state.sourceData.assc.data[0].forms) &&
                     !ijpHasForms() ? (
                         <asscViews.Subtile
                             tileId={props.tileId}
-                            block={state.sourceData.assc.data[0]}
+                            variant={state.sourceData.assc.data[0]}
                         />
                     ) : null}
                     {selectedQueryMatch ? (
