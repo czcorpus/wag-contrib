@@ -89,7 +89,6 @@ export class LexOverviewTile implements ITileProvider {
                     lemma: match.lemma || match.word,
                 } as LexItem;
             }),
-            List.sortBy((v) => v.sources[mainSource][0].groupOrder)
         );
 
         this.model = new LexOverviewModel({

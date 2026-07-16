@@ -30,7 +30,7 @@ import { init as initAsscViews } from './assc/views.js';
 import { init as initIjpViews } from './ijp/views.js';
 import { init as initCorpusViews } from './corpus/views.js';
 import * as S from './style.js';
-import { Dict, List, pipe } from 'cnc-tskit';
+import { Dict, List, pipe, tuple } from 'cnc-tskit';
 import { initLexComponents } from '../../lexCommon/views.js';
 import { LexItem } from '../../lexCommon/types/dictionary.js';
 import { SubtileRow } from '../../lexCommon/style.js';
@@ -118,7 +118,7 @@ export function init(
         };
 
         const renderVariant = (
-            i: number,
+            key: number,
             variant: LexItem,
             withInfo: boolean,
             withPosInfo: boolean,
@@ -126,7 +126,7 @@ export function init(
         ) => {
             return (
                 <h4
-                    key={i}
+                    key={key}
                     className={'variant' + (clickHandler ? '' : ' selected')}
                     onClick={clickHandler ? clickHandler : null}
                 >
@@ -197,18 +197,24 @@ export function init(
                 <h2>{props.selectedVariant.lemma}</h2>
                 {List.size(props.variants) > 1 ? (
                     <div className="variant-grid">
-                        {List.map(
-                            (variant, i) =>
+                        {pipe(
+                            props.variants,
+                            List.map((variant, idx) => tuple(variant, idx)),
+                            List.sortBy(
+                                ([v, _]) =>
+                                    v.sources[props.source][0].groupOrder
+                            ),
+                            List.map(([variant, idx]) =>
                                 renderVariant(
-                                    i,
+                                    idx,
                                     variant,
                                     hasSameLemmaVariant(variant),
                                     !hasSamePosVariant(variant),
-                                    i !== props.selectedVariantIdx
-                                        ? () => handleVariantClick(i)
+                                    idx !== props.selectedVariantIdx
+                                        ? () => handleVariantClick(idx)
                                         : undefined
-                                ),
-                            props.variants
+                                )
+                            )
                         )}
                     </div>
                 ) : null}
