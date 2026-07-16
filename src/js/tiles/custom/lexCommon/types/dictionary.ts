@@ -16,14 +16,13 @@
  * limitations under the License.
  */
 
-import {
-    QueryMatch,
-} from '../../../../query/index.js';
+import { QueryMatch } from '../../../../query/index.js';
 import { Aspect, Gender, PoS, Source } from './enums.js';
 
 interface LexID {
     id: string;
     parentId?: string;
+    groupOrder: number;
 }
 
 export interface LexItem {
@@ -31,7 +30,6 @@ export interface LexItem {
     pos: PoS;
     gender?: Gender;
     aspect?: Aspect;
-
     sources: { [source: string]: Array<LexID> };
 }
 

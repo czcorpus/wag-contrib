@@ -26,7 +26,7 @@ import { TileStatelessModel } from '../../../models/tiles/base.js';
 
 import { IDataStreaming } from '../../../page/streaming.js';
 import { List } from 'cnc-tskit';
-import { HTMLBlock, VariantData } from '../lexCommon/types/assc.js';
+import { VariantData } from '../lexCommon/types/assc.js';
 import { Source } from '../lexCommon/types/enums.js';
 import { LexItem } from '../lexCommon/types/dictionary.js';
 import {

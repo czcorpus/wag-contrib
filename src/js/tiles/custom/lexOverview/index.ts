@@ -18,10 +18,7 @@
 import { IActionDispatcher } from 'kombo';
 
 import { IAppServices } from '../../../appServices.js';
-import {
-    LemmatizationLevel,
-    QueryType,
-} from '../../../query/index.js';
+import { LemmatizationLevel, QueryType } from '../../../query/index.js';
 import { init as viewInit } from './views/views.js';
 import {
     TileConf,
@@ -37,7 +34,7 @@ import {
 import { LexOverviewModel } from './model.js';
 import { Source } from '../lexCommon/types/enums.js';
 import { isLexQueryMatch, LexItem } from '../lexCommon/types/dictionary.js';
-import { List } from 'cnc-tskit';
+import { List, pipe } from 'cnc-tskit';
 
 export interface LexOverviewTileConf extends TileConf {}
 
@@ -80,16 +77,20 @@ export class LexOverviewTile implements ITileProvider {
 
         var mainSource: Source = undefined;
         var usedCorpus: string = undefined;
-        const variants = List.map((match) => {
-            if (isLexQueryMatch(match)) {
-                mainSource = match.extraData.mainSource;
-                usedCorpus = match.extraData.corpusId;
-                return match.extraData.variant;
-            }
-            return {
-                lemma: match.lemma || match.word,
-            } as LexItem;
-        }, queryMatches[0]);
+        const variants = pipe(
+            queryMatches[0],
+            List.map((match) => {
+                if (isLexQueryMatch(match)) {
+                    mainSource = match.extraData.mainSource;
+                    usedCorpus = match.extraData.corpusId;
+                    return match.extraData.variant;
+                }
+                return {
+                    lemma: match.lemma || match.word,
+                } as LexItem;
+            }),
+            List.sortBy((v) => v.sources[mainSource][0].groupOrder)
+        );
 
         this.model = new LexOverviewModel({
             dispatcher,

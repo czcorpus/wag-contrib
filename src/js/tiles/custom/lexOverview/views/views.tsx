@@ -326,7 +326,7 @@ export function init(
                   lemma: selectedQueryMatch.lemma,
                   pos: selectedQueryMatch.pos[0].value,
               } as LexItem);
-        let asscVariant: VariantData;
+        let asscVariantData: VariantData;
 
         switch (state.mainSource) {
             case Source.ASSC:
@@ -334,14 +334,15 @@ export function init(
                     isAsscData(state.sourceData.assc) &&
                     !List.empty(state.sourceData.assc.data)
                 ) {
-                    asscVariant = List.find(
-                        (v) => v.key.startsWith(selectedVariant.lemma),
-                        state.sourceData.assc.data
-                    );
+                    asscVariantData =
+                        state.sourceData.assc.data[
+                            selectedVariant.sources['assc'][0].groupOrder
+                        ];
                     // selected variant may not be in detailed data, for example "hranolky" is only mentioned in hranolka/hranolek
-                    if (asscVariant !== undefined) {
-                        basicOverview.pronunciation = asscVariant.pronunciation;
-                        basicOverview.audioLink = asscVariant.audioFile;
+                    if (asscVariantData !== undefined) {
+                        basicOverview.pronunciation =
+                            asscVariantData.pronunciation;
+                        basicOverview.audioLink = asscVariantData.audioFile;
                     } else {
                         console.warn(
                             `Selected variant ${selectedVariant.lemma} ${selectedVariant.pos} not found in ASSC data`
@@ -410,12 +411,12 @@ export function init(
                             data={state.sourceData.ijp.data}
                         />
                     ) : null}
-                    {isAsscData(state.sourceData.assc) &&
-                    !Dict.empty(state.sourceData.assc.data[0].forms) &&
+                    {asscVariantData &&
+                    !Dict.empty(asscVariantData.forms) &&
                     !ijpHasForms() ? (
                         <asscViews.Subtile
                             tileId={props.tileId}
-                            variant={state.sourceData.assc.data[0]}
+                            variant={asscVariantData}
                         />
                     ) : null}
                     {selectedQueryMatch ? (
@@ -433,11 +434,11 @@ export function init(
                             corpname={state.referenceCorpus}
                         />
                     )}
-                    {asscVariant && asscVariant.origin ? (
+                    {asscVariantData && asscVariantData.origin ? (
                         <LexOverviewOrigin
                             tileId={props.tileId}
                             source={Source.ASSC}
-                            origin={asscVariant.origin}
+                            origin={asscVariantData.origin}
                         />
                     ) : null}
                 </S.LexOverviewTileView>
