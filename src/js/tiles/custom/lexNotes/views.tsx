@@ -31,6 +31,7 @@ import {
     getErrorMessage,
     isAsscData,
     isAsscError,
+    isAsscHtml,
     isIjpData,
     isIjpError,
 } from '../lexCommon/api.js';
@@ -58,7 +59,7 @@ export function init(
 
         const asscNotes = pipe(
             state.data.assc,
-            List.filter((v) => isAsscData(v)),
+            List.filter((v) => isAsscHtml(v)),
             List.flatMap((v) => List.map((d) => d.notes, v.data))
         );
 

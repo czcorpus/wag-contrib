@@ -25,9 +25,9 @@ import { List, pipe } from 'cnc-tskit';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { HTMLBlock } from '../lexCommon/types/assc.js';
 import {
-    isAsscData,
     isAsscDone,
     isAsscError,
+    isAsscHtml,
     isIjpData,
     isIjpDone,
     isIjpError,
@@ -109,7 +109,7 @@ export class LexNotesModel extends TileStatelessModel<LexNotesModelState> {
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
                 if (
-                    isAsscData(action.payload.response) ||
+                    isAsscHtml(action.payload.response) ||
                     isAsscError(action.payload.response)
                 ) {
                     state.data.assc.push(action.payload.response);
@@ -152,9 +152,9 @@ export class LexNotesModel extends TileStatelessModel<LexNotesModelState> {
                             return data;
                         }
 
-                        if (isAsscData(resp)) {
+                        if (isAsscHtml(resp)) {
                             const filteredData = pipe(
-                                this.filterASSCResultsByIDs(resp.id, resp.data),
+                                resp.data,
                                 List.filter(
                                     (v) => v.notes && v.notes.length > 0
                                 )
@@ -232,22 +232,5 @@ export class LexNotesModel extends TileStatelessModel<LexNotesModelState> {
                     });
                 },
             });
-    }
-
-    private filterASSCResultsByIDs(id: string, data: HTMLBlock[]): HTMLBlock[] {
-        const blockIdx = List.findIndex(
-            (d) => List.some((x) => x.id === 'hid-' + id, d.parsedVariants),
-            data
-        );
-        if (blockIdx > -1) {
-            const mainItem = data[blockIdx];
-            if (blockIdx > 0) {
-                const parentItem = data[0];
-                return [mainItem, parentItem];
-            }
-            return [mainItem];
-        } else {
-            return [];
-        }
     }
 }
