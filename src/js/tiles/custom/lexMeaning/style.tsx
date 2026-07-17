@@ -22,7 +22,7 @@ import { LexTileBase } from '../lexCommon/style.js';
 
 // ---------------- <MeaningTileView /> --------------------------------------
 
-export const MeaningTileView = styled(LexTileBase)`
+export const MeaningTileView = styled(LexTileBase)<{ theme: Theme }>`
     position: relative;
     height: 100%;
     width: 100%;
@@ -53,6 +53,10 @@ export const MeaningTileView = styled(LexTileBase)`
     .ke-slovu {
         font-weight: 800;
         font-size: 11px;
+    }
+
+    ${(props) => props.theme.cssMobileScreen} {
+        min-height: 25em;
     }
 `;
 

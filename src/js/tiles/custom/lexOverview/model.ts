@@ -26,7 +26,7 @@ import { TileStatelessModel } from '../../../models/tiles/base.js';
 
 import { IDataStreaming } from '../../../page/streaming.js';
 import { List } from 'cnc-tskit';
-import { HTMLBlock } from '../lexCommon/types/assc.js';
+import { VariantData } from '../lexCommon/types/assc.js';
 import { Source } from '../lexCommon/types/enums.js';
 import { LexItem } from '../lexCommon/types/dictionary.js';
 import {
@@ -42,7 +42,7 @@ import { IJPData } from '../lexCommon/types/ijp.js';
 import { scan } from 'rxjs';
 
 interface SourceData {
-    assc: LexResponse<HTMLBlock[] | string> | null;
+    assc: LexResponse<VariantData[] | string> | null;
     ijp: LexResponse<IJPData | string> | null;
 }
 
@@ -232,29 +232,15 @@ export class LexOverviewModel extends TileStatelessModel<LexOverviewModelState> 
                             !data.done.assc
                         ) {
                             if (isAsscData(resp)) {
-                                const asscBlock = this.filterASSCResultsByID(
-                                    resp.id,
-                                    state.variants[state.selectedVariantIdx]
-                                        .lemma,
-                                    resp.data
-                                );
-                                if (asscBlock) {
-                                    dispatch<
-                                        typeof Actions.TilePartialDataLoaded
-                                    >({
-                                        name: Actions.TilePartialDataLoaded
-                                            .name,
-                                        payload: {
-                                            tileId: this.tileId,
-                                            resp: {
-                                                ...resp,
-                                                data: [asscBlock],
-                                            },
-                                        },
-                                    });
-                                    data.hasData = true;
-                                    data.done.assc = true;
-                                }
+                                dispatch<typeof Actions.TilePartialDataLoaded>({
+                                    name: Actions.TilePartialDataLoaded.name,
+                                    payload: {
+                                        tileId: this.tileId,
+                                        resp,
+                                    },
+                                });
+                                data.hasData = true;
+                                data.done.assc = true;
                                 return data;
                             }
                             dispatch<typeof Actions.TilePartialDataLoaded>({
@@ -321,33 +307,5 @@ export class LexOverviewModel extends TileStatelessModel<LexOverviewModelState> 
                     });
                 },
             });
-    }
-
-    private filterASSCResultsByID(
-        id: string,
-        value: string,
-        data: HTMLBlock[]
-    ): HTMLBlock {
-        const asscData = List.find(
-            (d) => List.some((x) => x.id === 'hid-' + id, d.parsedVariants),
-            data
-        );
-        if (!asscData) {
-            return asscData;
-        }
-
-        // need to create new object here, changing old object can affect other tiles
-        const newData = { ...asscData };
-        const variantIndex = List.findIndex(
-            (v) => v.key === value,
-            newData.parsedVariants
-        );
-        if (variantIndex !== -1) {
-            newData.parsedVariants = [newData.parsedVariants[variantIndex]];
-            newData.formattedVariants = [
-                newData.formattedVariants[variantIndex],
-            ];
-        }
-        return newData;
     }
 }

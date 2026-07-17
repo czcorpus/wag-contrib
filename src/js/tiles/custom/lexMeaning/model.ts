@@ -29,6 +29,7 @@ import {
     isAsscData,
     isAsscDone,
     isAsscError,
+    isAsscHtml,
     isIjpData,
     isIjpDone,
     isIjpError,
@@ -110,7 +111,7 @@ export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
             (action) => action.payload.tileId === this.tileId,
             (state, action) => {
                 if (
-                    isAsscData(action.payload.response) ||
+                    isAsscHtml(action.payload.response) ||
                     isAsscError(action.payload.response)
                 ) {
                     state.data.assc.push(action.payload.response);
@@ -153,7 +154,7 @@ export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
                             return data;
                         }
 
-                        if (isAsscData(resp)) {
+                        if (isAsscHtml(resp)) {
                             // response contains whole ASSČ page, we need to filter only
                             // requested id, and its parent if it has one
                             const filteredData = this.filterASSCResultsByIDs(
@@ -240,7 +241,8 @@ export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
 
     private filterASSCResultsByIDs(id: string, data: HTMLBlock[]): HTMLBlock[] {
         const blockIdx = List.findIndex(
-            (d) => List.some((x) => x.id === 'hid-' + id, d.parsedVariants),
+            (d) =>
+                List.some((x) => x.includes('hid-' + id), d.formattedVariants),
             data
         );
 

@@ -30,7 +30,7 @@ import { init as initAsscViews } from './assc/views.js';
 import { init as initIjpViews } from './ijp/views.js';
 import { init as initCorpusViews } from './corpus/views.js';
 import * as S from './style.js';
-import { Dict, List, pipe } from 'cnc-tskit';
+import { Dict, List, pipe, tuple } from 'cnc-tskit';
 import { initLexComponents } from '../../lexCommon/views.js';
 import { LexItem } from '../../lexCommon/types/dictionary.js';
 import { SubtileRow } from '../../lexCommon/style.js';
@@ -118,7 +118,7 @@ export function init(
         };
 
         const renderVariant = (
-            i: number,
+            key: number,
             variant: LexItem,
             withInfo: boolean,
             withPosInfo: boolean,
@@ -126,7 +126,7 @@ export function init(
         ) => {
             return (
                 <h4
-                    key={i}
+                    key={key}
                     className={'variant' + (clickHandler ? '' : ' selected')}
                     onClick={clickHandler ? clickHandler : null}
                 >
@@ -197,18 +197,24 @@ export function init(
                 <h2>{props.selectedVariant.lemma}</h2>
                 {List.size(props.variants) > 1 ? (
                     <div className="variant-grid">
-                        {List.map(
-                            (variant, i) =>
+                        {pipe(
+                            props.variants,
+                            List.map((variant, idx) => tuple(variant, idx)),
+                            List.sortBy(
+                                ([v, _]) =>
+                                    v.sources[props.source][0].groupOrder
+                            ),
+                            List.map(([variant, idx]) =>
                                 renderVariant(
-                                    i,
+                                    idx,
                                     variant,
                                     hasSameLemmaVariant(variant),
                                     !hasSamePosVariant(variant),
-                                    i !== props.selectedVariantIdx
-                                        ? () => handleVariantClick(i)
+                                    idx !== props.selectedVariantIdx
+                                        ? () => handleVariantClick(idx)
                                         : undefined
-                                ),
-                            props.variants
+                                )
+                            )
                         )}
                     </div>
                 ) : null}
@@ -326,7 +332,7 @@ export function init(
                   lemma: selectedQueryMatch.lemma,
                   pos: selectedQueryMatch.pos[0].value,
               } as LexItem);
-        let asscVariant: VariantData;
+        let asscVariantData: VariantData;
 
         switch (state.mainSource) {
             case Source.ASSC:
@@ -334,14 +340,15 @@ export function init(
                     isAsscData(state.sourceData.assc) &&
                     !List.empty(state.sourceData.assc.data)
                 ) {
-                    asscVariant = List.find(
-                        (v) => v.key.startsWith(selectedVariant.lemma),
-                        state.sourceData.assc.data[0].parsedVariants
-                    );
+                    asscVariantData =
+                        state.sourceData.assc.data[
+                            selectedVariant.sources['assc'][0].groupOrder
+                        ];
                     // selected variant may not be in detailed data, for example "hranolky" is only mentioned in hranolka/hranolek
-                    if (asscVariant !== undefined) {
-                        basicOverview.pronunciation = asscVariant.pronunciation;
-                        basicOverview.audioLink = asscVariant.audioFile;
+                    if (asscVariantData !== undefined) {
+                        basicOverview.pronunciation =
+                            asscVariantData.pronunciation;
+                        basicOverview.audioLink = asscVariantData.audioFile;
                     } else {
                         console.warn(
                             `Selected variant ${selectedVariant.lemma} ${selectedVariant.pos} not found in ASSC data`
@@ -410,14 +417,12 @@ export function init(
                             data={state.sourceData.ijp.data}
                         />
                     ) : null}
-                    {isAsscData(state.sourceData.assc) &&
-                    !Dict.empty(
-                        state.sourceData.assc.data[0].parsedVariants[0].forms
-                    ) &&
+                    {asscVariantData &&
+                    !Dict.empty(asscVariantData.forms) &&
                     !ijpHasForms() ? (
                         <asscViews.Subtile
                             tileId={props.tileId}
-                            block={state.sourceData.assc.data[0]}
+                            variant={asscVariantData}
                         />
                     ) : null}
                     {selectedQueryMatch ? (
@@ -435,11 +440,11 @@ export function init(
                             corpname={state.referenceCorpus}
                         />
                     )}
-                    {asscVariant && asscVariant.origin ? (
+                    {asscVariantData && asscVariantData.origin ? (
                         <LexOverviewOrigin
                             tileId={props.tileId}
                             source={Source.ASSC}
-                            origin={asscVariant.origin}
+                            origin={asscVariantData.origin}
                         />
                     ) : null}
                 </S.LexOverviewTileView>

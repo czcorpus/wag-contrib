@@ -28,36 +28,7 @@ export interface VariantData {
     origin: string;
 }
 
-export interface MeaningData {
-    explanation: string;
-    metaExplanation: string;
-    attachement: string;
-    synonyms: Array<string>;
-    examples: Array<{
-        usage: string;
-        data: Array<string>;
-    }>;
-    collocations: Array<{
-        collocation: string;
-        explanation: string;
-        examples: Array<string>;
-    }>;
-}
-
-export interface PhrasemeData {
-    phraseme: string;
-    explanation: string;
-    examples: Array<string>;
-}
-
-export interface DataItem {
-    variants: Array<VariantData>;
-    meanings: Array<MeaningData>;
-    phrasemes: Array<PhrasemeData>;
-}
-
 export interface HTMLBlock {
-    parsedVariants: Array<VariantData>;
     formattedVariants: Array<string>;
     nestedVariants: Array<string>;
     meanings: Array<string>;
