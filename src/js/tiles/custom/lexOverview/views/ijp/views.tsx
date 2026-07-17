@@ -83,6 +83,40 @@ export function init(
     const CaseTable: React.FC<{
         caseData: CaseData;
     }> = (props) => {
+        if (
+            pipe(
+                props.caseData,
+                Dict.toEntries(),
+                List.some((v) => v[1].indetermined !== '')
+            )
+        ) {
+            return (
+                <LS.DataTable>
+                    <thead>
+                        <tr>
+                            <th>{ut.translate('lex_overview__table_case')}</th>
+                            <th>
+                                {ut.translate(
+                                    'lex_overview__number_indetermined'
+                                )}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {pipe(
+                            props.caseData,
+                            Dict.toEntries(),
+                            List.map((data, i) => (
+                                <tr key={`${i}:${data[0]}`}>
+                                    <td>{i + 1}.</td>
+                                    <td>{data[1].indetermined}</td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </LS.DataTable>
+            );
+        }
         return (
             <LS.DataTable>
                 <thead>
