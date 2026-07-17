@@ -19,6 +19,7 @@
 export interface NumberData {
     singular: string;
     plural: string;
+    indetermined: string;
 }
 
 export interface CaseData {
@@ -91,6 +92,7 @@ export function mkEmptyNumber(): NumberData {
     return {
         singular: '',
         plural: '',
+        indetermined: '',
     };
 }
 
