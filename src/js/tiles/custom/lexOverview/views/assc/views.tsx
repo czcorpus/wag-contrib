@@ -57,8 +57,12 @@ export function init(
                         Dict.toEntries(),
                         List.map(([key, value]) => (
                             <tr>
-                                <td className="tableKey">{key}</td>
-                                <td className="tableValue">{value}</td>
+                                <td className="tableKey">
+                                    {!value ? null : key}
+                                </td>
+                                <td className="tableValue">
+                                    {!value ? key : value}
+                                </td>
                             </tr>
                         ))
                     )}

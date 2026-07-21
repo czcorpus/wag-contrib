@@ -140,7 +140,13 @@ export function init(
                                         variant,
                                         withPosInfo,
                                         true
-                                    )}
+                                    ) + ' '}
+                                    {variant.uninflected
+                                        ? ' ' +
+                                          ut.translate(
+                                              'lex_common__uninflected_short'
+                                          )
+                                        : null}
                                     )
                                 </span>
                             ) : null}
@@ -156,6 +162,12 @@ export function init(
                                         withPosInfo,
                                         true
                                     )}
+                                    {variant.uninflected
+                                        ? ' ' +
+                                          ut.translate(
+                                              'lex_common__uninflected_short'
+                                          )
+                                        : null}
                                     )
                                 </span>
                             ) : null}
