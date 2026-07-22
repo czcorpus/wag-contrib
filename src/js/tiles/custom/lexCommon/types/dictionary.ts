@@ -23,6 +23,7 @@ interface LexID {
     id: string;
     parentId?: string;
     groupOrder: number;
+    homonym: number;
 }
 
 export interface LexItem {

@@ -211,19 +211,14 @@ export function init(
                     <div className="variant-grid">
                         {pipe(
                             props.variants,
-                            List.map((variant, idx) => tuple(variant, idx)),
-                            List.sortBy(
-                                ([v, _]) =>
-                                    v.sources[props.source][0].groupOrder
-                            ),
-                            List.map(([variant, idx]) =>
+                            List.map((variant, i) =>
                                 renderVariant(
-                                    idx,
+                                    i,
                                     variant,
                                     hasSameLemmaVariant(variant),
                                     !hasSamePosVariant(variant),
-                                    idx !== props.selectedVariantIdx
-                                        ? () => handleVariantClick(idx)
+                                    i !== props.selectedVariantIdx
+                                        ? () => handleVariantClick(i)
                                         : undefined
                                 )
                             )
