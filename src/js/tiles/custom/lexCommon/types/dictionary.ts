@@ -23,6 +23,7 @@ interface LexID {
     id: string;
     parentId?: string;
     groupOrder: number;
+    homonym: number;
 }
 
 export interface LexItem {
@@ -30,6 +31,8 @@ export interface LexItem {
     pos: PoS;
     gender?: Gender;
     aspect?: Aspect;
+    uninflected: boolean;
+    plurality: string;
     sources: { [source: string]: Array<LexID> };
 }
 
