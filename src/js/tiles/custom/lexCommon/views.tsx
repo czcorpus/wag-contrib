@@ -46,7 +46,6 @@ export function initLexComponents(
     const components = ut.getComponents();
 
     // -------------------- <Subtile /> ---------------------------------------------------
-
     const Subtile: React.FC<
         React.PropsWithChildren<{
             tileId: number;

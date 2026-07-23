@@ -51,7 +51,8 @@ export const Header = styled.div<{
             white-space: nowrap;
             text-align: center;
             border-radius: 3px;
-            border: 1px solid ${(props) => getSourceColor(props.source)};
+            border: 1px solid
+                ${(props) => getSourceColor(props.source, props.theme)};
             cursor: pointer;
 
             .morphology {
@@ -70,12 +71,15 @@ export const Header = styled.div<{
         }
 
         .selected {
-            background-color: ${(props) => getSourceColor(props.source)};
+            background-color: ${(props) =>
+                getSourceColor(props.source, props.theme)};
             cursor: default;
         }
 
         .variant:not(.selected):hover {
-            background-color: ${(props) => getSourceColor(props.source)}44;
+            background-color: ${(props) =>
+                getSourceColor(props.source, props.theme)}44;
+            // the 44 adds transparency to base color in hex format
         }
     }
 `;
