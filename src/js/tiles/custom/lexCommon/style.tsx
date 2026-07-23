@@ -18,27 +18,8 @@
 
 import { Theme } from '../../../page/theme.js';
 import { styled } from 'styled-components';
-import { Source } from './types/enums.js';
 import { SystemMessageType } from '../../../types.js';
-import { isLexTheme, LexTheme } from './theme.js';
-
-export function getSourceColor(source: string, theme: Theme<LexTheme>): string {
-    if (isLexTheme(theme)) {
-        const c = theme.extraTheme.sourceColors[source];
-        if (c) return c;
-    }
-
-    switch (source) {
-        case Source.ASSC:
-            return '#d4e2f4';
-        case Source.IJP:
-            return '#e5eef8';
-        case Source.Corpus:
-            return '#fae9da';
-        default:
-            return null;
-    }
-}
+import { getLexTheme } from './theme.js';
 
 export function getMessageColor(systemMessageType: string): string {
     switch (systemMessageType) {
@@ -63,7 +44,8 @@ export const SubtileWrapper = styled.div<{
         margin-top: 0;
     }
     padding: 0.5em;
-    background-color: ${(props) => getSourceColor(props.$source, props.theme)};
+    background-color: ${(props) =>
+        getLexTheme(props.theme).sourceColors[props.$source]};
     border: ${(props) =>
         props.$systemMessageType
             ? `2px solid ${getMessageColor(props.$systemMessageType)}`
