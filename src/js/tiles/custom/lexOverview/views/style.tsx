@@ -62,13 +62,15 @@ export const Header = styled.div<{
                 font-style: italic;
             }
 
+            .plurality {
+                font-size: 0.6em;
+                font-style: bold;
+            }
+
             a {
                 width: 100%;
                 text-decoration: none;
                 cursor: pointer;
-            }
-
-            span {
             }
         }
 

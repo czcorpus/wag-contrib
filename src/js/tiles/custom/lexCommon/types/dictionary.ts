@@ -17,7 +17,7 @@
  */
 
 import { QueryMatch } from '../../../../query/index.js';
-import { Aspect, Gender, PoS, Source } from './enums.js';
+import { Aspect, Gender, PoS, Plurality, Source } from './enums.js';
 
 interface LexID {
     id: string;
@@ -32,7 +32,7 @@ export interface LexItem {
     gender?: Gender;
     aspect?: Aspect;
     uninflected: boolean;
-    plurality: string;
+    plurality: Plurality;
     sources: { [source: string]: Array<LexID> };
 }
 
