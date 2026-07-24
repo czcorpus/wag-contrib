@@ -19,7 +19,11 @@ import { IActionDispatcher } from 'kombo';
 import { List } from 'cnc-tskit';
 
 import { IAppServices } from '../../../appServices.js';
-import { findCurrQueryMatch, LemmatizationLevel, QueryType } from '../../../query/index.js';
+import {
+    findCurrQueryMatch,
+    LemmatizationLevel,
+    QueryType,
+} from '../../../query/index.js';
 import {
     TileConf,
     ITileProvider,

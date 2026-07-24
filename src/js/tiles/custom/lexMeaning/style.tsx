@@ -55,9 +55,7 @@ export const MeaningTileView = styled(LexTileBase)<{ theme: Theme }>`
         font-size: 11px;
     }
 
-    ${(props) => props.theme.cssMobileScreen} {
-        min-height: 25em;
-    }
+    min-height: 25em;
 `;
 
 export const UsageNotesTileView = styled(LexTileBase)``;

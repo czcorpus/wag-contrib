@@ -34,7 +34,7 @@ import { Dict, List, pipe, tuple } from 'cnc-tskit';
 import { initLexComponents } from '../../lexCommon/views.js';
 import { LexItem } from '../../lexCommon/types/dictionary.js';
 import { SubtileRow } from '../../lexCommon/style.js';
-import { Source } from '../../lexCommon/types/enums.js';
+import { Plurality, Source } from '../../lexCommon/types/enums.js';
 import { VariantData } from '../../lexCommon/types/assc.js';
 import { Actions } from '../actions.js';
 import { SystemMessageType } from '../../../../types.js';
@@ -93,6 +93,29 @@ export function init(
         return parts.join(' ');
     };
 
+    const translatePlurality = (variant: LexItem, short: boolean) => {
+        switch (variant.plurality) {
+            case Plurality.PLURAL:
+                return ut.translate(
+                    `lex_common__plurality${short ? '_short' : ''}_plural`
+                );
+            case Plurality.ALWAYS:
+                return ut.translate(
+                    `lex_common__plurality${short ? '_short' : ''}_always`
+                );
+            case Plurality.USUALLY:
+                return ut.translate(
+                    `lex_common__plurality${short ? '_short' : ''}_usually`
+                );
+            case Plurality.ONLY:
+                return ut.translate(
+                    `lex_common__plurality${short ? '_short' : ''}_only`
+                );
+            default:
+                return '';
+        }
+    };
+
     // -------------------- <LexOverviewHeader /> -----------------------------------------------
 
     const LexOverviewHeader: React.FC<{
@@ -130,17 +153,26 @@ export function init(
                     className={'variant' + (clickHandler ? '' : ' selected')}
                     onClick={clickHandler ? clickHandler : null}
                 >
+                    {variant.plurality !== Plurality.NONE ? (
+                        <span className="plurality">
+                            {translatePlurality(variant, true)}{' '}
+                        </span>
+                    ) : null}
                     {clickHandler ? (
                         <a>
-                            {variant.lemma}{' '}
-                            {withInfo && variant.pos ? (
+                            {variant.lemma}
+                            {(withInfo || variant.uninflected) &&
+                            variant.pos ? (
                                 <span className="morphology">
+                                    {' '}
                                     (
-                                    {translateMorfology(
-                                        variant,
-                                        withPosInfo,
-                                        true
-                                    ) + ' '}
+                                    {withInfo
+                                        ? translateMorfology(
+                                              variant,
+                                              withPosInfo,
+                                              true
+                                          )
+                                        : null}
                                     {variant.uninflected
                                         ? ' ' +
                                           ut.translate(
@@ -153,15 +185,19 @@ export function init(
                         </a>
                     ) : (
                         <span>
-                            {variant.lemma}{' '}
-                            {withInfo && variant.pos ? (
+                            {variant.lemma}
+                            {(withInfo || variant.uninflected) &&
+                            variant.pos ? (
                                 <span className="morphology">
+                                    {' '}
                                     (
-                                    {translateMorfology(
-                                        variant,
-                                        withPosInfo,
-                                        true
-                                    )}
+                                    {withInfo
+                                        ? translateMorfology(
+                                              variant,
+                                              withPosInfo,
+                                              true
+                                          )
+                                        : null}
                                     {variant.uninflected
                                         ? ' ' +
                                           ut.translate(

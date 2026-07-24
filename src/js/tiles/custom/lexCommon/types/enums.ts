@@ -62,3 +62,11 @@ export enum Aspect {
     IMPERF = 'I',
     BOTH = 'B',
 }
+
+export enum Plurality {
+    NONE = 0,
+    PLURAL = 1,
+    ALWAYS = 2,
+    USUALLY = 3,
+    ONLY = 4,
+}

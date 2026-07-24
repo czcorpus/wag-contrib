@@ -18,7 +18,8 @@
 
 import { Theme } from '../../../../page/theme.js';
 import { styled } from 'styled-components';
-import { LexTileBase, getSourceColor } from '../../lexCommon/style.js';
+import { LexTileBase } from '../../lexCommon/style.js';
+import { getLexTheme } from '../../lexCommon/theme.js';
 
 export const LexOverviewTileView = styled(LexTileBase)`
     display: flex;
@@ -51,7 +52,9 @@ export const Header = styled.div<{
             white-space: nowrap;
             text-align: center;
             border-radius: 3px;
-            border: 1px solid ${(props) => getSourceColor(props.source)};
+            border: 1px solid
+                ${(props) =>
+                    getLexTheme(props.theme).sourceColors[props.source]};
             cursor: pointer;
 
             .morphology {
@@ -59,23 +62,28 @@ export const Header = styled.div<{
                 font-style: italic;
             }
 
+            .plurality {
+                font-size: 0.6em;
+                font-style: bold;
+            }
+
             a {
                 width: 100%;
                 text-decoration: none;
                 cursor: pointer;
             }
-
-            span {
-            }
         }
 
         .selected {
-            background-color: ${(props) => getSourceColor(props.source)};
+            background-color: ${(props) =>
+                getLexTheme(props.theme).sourceColors[props.source]};
             cursor: default;
         }
 
         .variant:not(.selected):hover {
-            background-color: ${(props) => getSourceColor(props.source)}44;
+            background-color: ${(props) =>
+                getLexTheme(props.theme).sourceColors[props.source]}44;
+            // the 44 adds transparency to base color in hex format
         }
     }
 `;
