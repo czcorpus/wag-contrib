@@ -36,6 +36,8 @@ export const DataTable = styled.table<{ theme: Theme }>`
         width: 0.1%;
         white-space: nowrap;
         text-align: right;
+        font-weight: 400;
+        font-size: 0.8em;
     }
 
     .tableValue {
@@ -43,8 +45,12 @@ export const DataTable = styled.table<{ theme: Theme }>`
 
         .comment {
             font-size: 0.8em;
-            font-weight: 400;
         }
+    }
+
+    th {
+        font-weight: 400;
+        font-size: 0.8em;
     }
 
     td,
