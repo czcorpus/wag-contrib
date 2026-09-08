@@ -67,9 +67,8 @@ export const SubtileRow = styled.div<{ theme: Theme }>`
     }
 
     .key {
-        color: ${(props) => props.theme.colorSecondaryText};
+        color: ${(props) => props.theme.colorLightText};
         font-family: ${(props) => props.theme.condensedFontFamily};
-        font-weight: 800;
     }
 
     .value {
@@ -84,10 +83,5 @@ export const SubtileRow = styled.div<{ theme: Theme }>`
         margin-top: 0.5em;
         font-size: 0.9em;
         text-align: right;
-
-        .key {
-            color: ${(props) => props.theme.colorLightText};
-            font-weight: 100;
-        }
     }
 `;
