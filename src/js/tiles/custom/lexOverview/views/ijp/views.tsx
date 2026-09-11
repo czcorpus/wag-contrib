@@ -167,7 +167,7 @@ export function init(
                         Dict.toEntries(),
                         List.map((data) => (
                             <tr>
-                                <td className="tableKey">
+                                <td className="tableKey wrap">
                                     {ut.translate(
                                         `lex_overview__conjugation_person_${data[0]}`
                                     )}
@@ -180,7 +180,7 @@ export function init(
                     {!!props.conjugationData.imperative.singular ||
                     !!props.conjugationData.imperative.singular ? (
                         <tr>
-                            <td className="tableKey">
+                            <td className="tableKey wrap">
                                 {ut.translate(
                                     'lex_overview__conjugation_imperative'
                                 )}
@@ -191,7 +191,7 @@ export function init(
                     ) : null}
                     {!!props.conjugationData.participle.active ? (
                         <tr>
-                            <td className="tableKey">
+                            <td className="tableKey wrap">
                                 {ut.translate(
                                     'lex_overview__conjugation_participle_active'
                                 )}
@@ -203,7 +203,7 @@ export function init(
                     ) : null}
                     {!!props.conjugationData.participle.passive ? (
                         <tr>
-                            <td className="tableKey">
+                            <td className="tableKey wrap">
                                 {ut.translate(
                                     'lex_overview__conjugation_participle_passive'
                                 )}
@@ -216,7 +216,7 @@ export function init(
                     {!!props.conjugationData.transgressive.past.m.singular ||
                     !!props.conjugationData.transgressive.past.m.plural ? (
                         <tr>
-                            <td className="tableKey">
+                            <td className="tableKey wrap">
                                 {ut.translate(
                                     'lex_overview__conjugation_transgressive_past_m'
                                 )}
@@ -238,7 +238,7 @@ export function init(
                     {!!props.conjugationData.transgressive.past.zs.singular ||
                     !!props.conjugationData.transgressive.past.zs.plural ? (
                         <tr>
-                            <td className="tableKey">
+                            <td className="tableKey wrap">
                                 {ut.translate(
                                     'lex_overview__conjugation_transgressive_past_zs'
                                 )}
@@ -260,7 +260,7 @@ export function init(
                     {!!props.conjugationData.transgressive.present.m.singular ||
                     !!props.conjugationData.transgressive.present.m.plural ? (
                         <tr>
-                            <td className="tableKey">
+                            <td className="tableKey wrap">
                                 {ut.translate(
                                     'lex_overview__conjugation_transgressive_present_m'
                                 )}
@@ -283,7 +283,7 @@ export function init(
                         .singular ||
                     !!props.conjugationData.transgressive.present.zs.plural ? (
                         <tr>
-                            <td className="tableKey">
+                            <td className="tableKey wrap">
                                 {ut.translate(
                                     'lex_overview__conjugation_transgressive_present_zs'
                                 )}
@@ -304,7 +304,7 @@ export function init(
                     ) : null}
                     {!!props.conjugationData.verbalNoun ? (
                         <tr>
-                            <td className="tableKey">
+                            <td className="tableKey wrap">
                                 {ut.translate(
                                     'lex_overview__conjugation_verbal_noun'
                                 )}

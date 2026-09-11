@@ -38,6 +38,10 @@ export const DataTable = styled.table<{ theme: Theme }>`
         text-align: right;
         font-weight: 400;
         font-size: 0.8em;
+
+        &.wrap {
+            white-space: wrap;
+        }
     }
 
     .tableValue {
