@@ -21,8 +21,6 @@ import { Theme } from '../../../page/theme.js';
 import { LexTileBase } from '../lexCommon/style.js';
 import { getLexTheme } from '../lexCommon/theme.js';
 
-const asscLemmaColor = 'rgb(108, 116, 240)';
-
 // ---------------- <MeaningTileView /> --------------------------------------
 
 export const MeaningTileView = styled(LexTileBase)<{ theme: Theme }>`
@@ -203,12 +201,9 @@ export const MeaningBody = styled.div`
 
 // ---------------- <ASSCStyle /> --------------------------------------
 
-export const ASSCStyle = styled.div`
-    .heslo,
-    .souslovi {
-        a {
-            color: ${asscLemmaColor};
-        }
+export const ASSCStyle = styled.div<{ theme: Theme }>`
+    a {
+        color: ${(props) => getLexTheme(props.theme).lemmaColor} !important;
     }
 
     // -------- ASSC original styles -------
@@ -498,7 +493,7 @@ export const ASSCStyle = styled.div`
 
 export const SSCStyle = styled.div<{ theme: Theme }>`
     .lemma {
-        color: ${asscLemmaColor};
+        color: ${(props) => getLexTheme(props.theme).lemmaColor};
     }
 
     // SSC original styles
