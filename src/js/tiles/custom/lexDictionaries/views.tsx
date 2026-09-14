@@ -39,6 +39,7 @@ export function init(
     const lexComponents = initLexComponents(dispatcher, ut);
 
     const TabButton: React.FC<{
+        id: number;
         label: string;
         onClick: () => void;
         selected?: boolean;
@@ -49,7 +50,7 @@ export function init(
         if (props.selected) classes.push('current');
 
         return (
-            <S.TabButton>
+            <S.TabButton key={props.id}>
                 <span className={classes.join(' ')}>
                     {
                         <a
@@ -148,9 +149,15 @@ export function init(
                             (item, i) => (
                                 <>
                                     {i > 0 ? (
-                                        <span className="separator">|</span>
+                                        <span
+                                            key={`sep${i}`}
+                                            className="separator"
+                                        >
+                                            |
+                                        </span>
                                     ) : null}
                                     <TabButton
+                                        id={i}
                                         label={ut.translate(
                                             `lex_dictionaries__short_label_${item.type}`
                                         )}

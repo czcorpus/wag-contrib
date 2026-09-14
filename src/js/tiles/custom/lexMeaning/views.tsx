@@ -260,7 +260,7 @@ export function init(
                     {List.map(
                         (item, i) => (
                             <>
-                                {i > 0 ? <hr className="itemDivider" /> : null}
+                                {i > 0 ? <hr key={`hr${i}`} className="itemDivider" /> : null}
                                 {
                                     <S.MeaningItem key={i}>
                                         <S.SSCStyle
