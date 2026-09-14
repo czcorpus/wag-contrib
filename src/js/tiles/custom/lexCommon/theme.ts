@@ -23,6 +23,7 @@ interface LexTheme {
     subtileBorderRadius: string;
     overlayBorderRadius: string;
     overlayColor: string;
+    lemmaColor: string;
     sourceColors: Partial<Record<Source, string>>;
 }
 
@@ -33,6 +34,7 @@ function isLexTheme(theme: Theme): theme is Theme<LexTheme> {
         ('overlayColor' in theme.extraTheme ||
             'subtileBorderRadius' in theme.extraTheme ||
             'overlayBorderRadius' in theme.extraTheme ||
+            'lemmaColor' in theme.extraTheme ||
             ('sourceColors' in theme.extraTheme &&
                 typeof theme.extraTheme.sourceColors === 'object'))
     );
@@ -43,6 +45,7 @@ export function getLexTheme(theme: Theme): LexTheme {
         subtileBorderRadius: '0.5em',
         overlayBorderRadius: '0.25em',
         overlayColor: '#0000000e',
+        lemmaColor: '#6c74f0',
         sourceColors: {
             [Source.ASSC]: '#d4e2f4',
             [Source.SSC]: '#dae8f6',

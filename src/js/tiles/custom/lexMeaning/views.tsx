@@ -260,7 +260,7 @@ export function init(
                     {List.map(
                         (item, i) => (
                             <>
-                                {i > 0 ? <hr className="itemDivider" /> : null}
+                                {i > 0 ? <hr key={`hr${i}`} className="itemDivider" /> : null}
                                 {
                                     <S.MeaningItem key={i}>
                                         <S.SSCStyle
@@ -379,17 +379,20 @@ export function init(
             );
         };
 
+        const hasValidData = !List.empty(state.data[state.usedSource]);
+        const hasErrors = Dict.some((v) => !List.empty(v), state.sourceErrors);
         const renderData = (usedSource: string) => {
-            switch (usedSource) {
-                case Source.ASSC:
-                    return <ASSCLexSubtile tileId={props.tileId} />;
-                case Source.IJP:
-                    return <IJPLexSubtile tileId={props.tileId} />;
-                case Source.SSC:
-                    return <SSCLexSubtile tileId={props.tileId} />;
-                default:
-                    return null;
+            if (hasValidData) {
+                switch (usedSource) {
+                    case Source.ASSC:
+                        return <ASSCLexSubtile tileId={props.tileId} />;
+                    case Source.IJP:
+                        return <IJPLexSubtile tileId={props.tileId} />;
+                    case Source.SSC:
+                        return <SSCLexSubtile tileId={props.tileId} />;
+                }
             }
+            return null;
         };
 
         return (
@@ -405,10 +408,7 @@ export function init(
                 <globalComponents.Subtile
                     tileId={props.tileId}
                     isBusy={state.isBusy}
-                    hasData={
-                        !List.empty(state.data[state.usedSource]) ||
-                        Dict.some((v) => !List.empty(v), state.sourceErrors)
-                    }
+                    hasData={hasValidData || hasErrors}
                     setMaxHeight={true}
                 >
                     {props.tileHeader}
