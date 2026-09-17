@@ -20,6 +20,83 @@ import { Theme } from '../../../page/theme.js';
 import { styled } from 'styled-components';
 import { LexTileBase } from '../lexCommon/style.js';
 
+// ---------------- <LexDictionariesTileView /> --------------------------------------
+
+export const LexDictionariesTileView = styled(LexTileBase)`
+    position: relative;
+    height: 100%;
+    width: 100%;
+    min-height: 25em;
+`;
+
+// ---------------- <Stretcher /> --------------------------------------
+
+export const Stretcher = styled.div`
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    display: flex;
+    flex-direction: column;
+`;
+
+// ---------------- <Scroller /> --------------------------------------
+
+export const Scroller = styled.div`
+    margin-top: 1em;
+    padding-right: 0.5em; 
+    flex-grow: 1;
+    overflow-y: auto;
+`;
+
+// ---------------- <Tabs /> --------------------------------------
+
+export const Tabs = styled.div<{ theme: Theme }>`
+    .separator {
+        margin: 0 5px;
+        font-size: 1.5em;
+        color: ${(props) => props.theme.colorLogoBlue};
+    }
+`;
+
+// ---------------- <TabButton /> --------------------------------------
+
+export const TabButton = styled.span<{ theme: Theme }>`
+    color: ${(props) => props.theme.colorDefaultText};
+
+    span.item {
+        margin: 0 5px;
+        padding: 0 3px;
+
+        a {
+            text-decoration: none;
+            color: ${(props) => props.theme.colorDefaultText};
+        }
+    }
+
+    span.item.current {
+        border-bottom: 2px solid ${(props) => props.theme.colorLogoBlue};
+    }
+
+    span.item.disabled {
+        opacity: 0.5;
+        cursor: default;
+
+        a:hover {
+            text-decoration: none;
+            cursor: default;
+        }
+    }
+
+    span.item:not(.disabled) a:hover {
+        text-decoration: none;
+        color: ${(props) => props.theme.colorLogoBlue};
+        cursor: pointer;
+    }
+`;
+
 // ---------------- <SSJCEntry /> --------------------------------------
 
 export const SSJCEntry = styled.li`
@@ -167,53 +244,3 @@ export const PSJCEntry = styled.li`
         font-weight: bold;
     }
 `;
-
-// ---------------- <Tabs /> --------------------------------------
-
-export const Tabs = styled.div<{ theme: Theme }>`
-    .separator {
-        margin: 0 5px;
-        font-size: 1.5em;
-        color: ${(props) => props.theme.colorLogoBlue};
-    }
-`;
-
-// ---------------- <TabButton /> --------------------------------------
-
-export const TabButton = styled.span<{ theme: Theme }>`
-    color: ${(props) => props.theme.colorDefaultText};
-
-    span.item {
-        margin: 0 5px;
-        padding: 0 3px;
-
-        a {
-            text-decoration: none;
-            color: ${(props) => props.theme.colorDefaultText};
-        }
-    }
-
-    span.item.current {
-        border-bottom: 2px solid ${(props) => props.theme.colorLogoBlue};
-    }
-
-    span.item.disabled {
-        opacity: 0.5;
-        cursor: default;
-
-        a:hover {
-            text-decoration: none;
-            cursor: default;
-        }
-    }
-
-    span.item:not(.disabled) a:hover {
-        text-decoration: none;
-        color: ${(props) => props.theme.colorLogoBlue};
-        cursor: pointer;
-    }
-`;
-
-// ---------------- <LexDictionariesTileView /> --------------------------------------
-
-export const LexDictionariesTileView = styled(LexTileBase)``;
