@@ -260,7 +260,12 @@ export function init(
                     {List.map(
                         (item, i) => (
                             <>
-                                {i > 0 ? <hr key={`hr${i}`} className="itemDivider" /> : null}
+                                {i > 0 ? (
+                                    <hr
+                                        key={`hr${i}`}
+                                        className="itemDivider"
+                                    />
+                                ) : null}
                                 {
                                     <S.MeaningItem key={i}>
                                         <S.SSCStyle
@@ -359,6 +364,18 @@ export function init(
         const renderErrors = () => {
             return pipe(
                 state.sourcePriority,
+                // display only IJP, ASSC errors (notes)
+                // or errors of sources with higer priority than used source
+                List.filter(
+                    (source, i) =>
+                        source === Source.IJP ||
+                        source === Source.ASSC ||
+                        i <
+                            List.findIndex(
+                                (v) => v === state.usedSource,
+                                state.sourcePriority
+                            )
+                ),
                 List.flatMap(
                     (source) =>
                         (state.sourceErrors[source] || []) as Array<
@@ -412,7 +429,6 @@ export function init(
                     setMaxHeight={true}
                 >
                     {props.tileHeader}
-
                     <S.MeaningTileView>
                         <div className="stretch">
                             {renderData(state.usedSource)}
