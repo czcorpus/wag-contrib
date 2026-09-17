@@ -415,8 +415,8 @@ export function init(
 
                     <S.MeaningTileView>
                         <div className="stretch">
-                            {renderErrors()}
                             {renderData(state.usedSource)}
+                            {renderErrors()}
                         </div>
                     </S.MeaningTileView>
                 </globalComponents.Subtile>
