@@ -144,40 +144,44 @@ export function init(
                 sourceIdent={source}
             >
                 <S.LexDictionariesTileView>
-                    <S.Tabs>
-                        {List.map(
-                            (item, i) => (
-                                <>
-                                    {i > 0 ? (
-                                        <span
-                                            key={`sep${i}`}
-                                            className="separator"
-                                        >
-                                            |
-                                        </span>
-                                    ) : null}
-                                    <TabButton
-                                        id={i}
-                                        label={ut.translate(
-                                            `lex_dictionaries__short_label_${item.type}`
-                                        )}
-                                        onClick={() => tabOnClick(i)}
-                                        selected={i === tabIdx}
-                                        disabled={item.data === null}
-                                    />
-                                </>
-                            ),
-                            state.sources
-                        )}
-                    </S.Tabs>
+                    <S.Stretcher>
+                        <S.Tabs>
+                            {List.map(
+                                (item, i) => (
+                                    <>
+                                        {i > 0 ? (
+                                            <span
+                                                key={`sep${i}`}
+                                                className="separator"
+                                            >
+                                                |
+                                            </span>
+                                        ) : null}
+                                        <TabButton
+                                            id={i}
+                                            label={ut.translate(
+                                                `lex_dictionaries__short_label_${item.type}`
+                                            )}
+                                            onClick={() => tabOnClick(i)}
+                                            selected={i === tabIdx}
+                                            disabled={item.data === null}
+                                        />
+                                    </>
+                                ),
+                                state.sources
+                            )}
+                        </S.Tabs>
 
-                    {current && current.data !== null ? (
-                        isPSJCDataStructure(current.type, current.data) ? (
-                            <PSJCDataView data={current.data} />
-                        ) : isSSJCDataStructure(current.type, current.data) ? (
-                            <SSJCDataView data={current.data} />
-                        ) : null
-                    ) : null}
+                        <S.Scroller>
+                            {current && current.data !== null ? (
+                                isPSJCDataStructure(current.type, current.data) ? (
+                                    <PSJCDataView data={current.data} />
+                                ) : isSSJCDataStructure(current.type, current.data) ? (
+                                    <SSJCDataView data={current.data} />
+                                ) : null
+                            ) : null}
+                        </S.Scroller>
+                    </S.Stretcher>
                 </S.LexDictionariesTileView>
             </globalComponents.TileWrapper>
         );

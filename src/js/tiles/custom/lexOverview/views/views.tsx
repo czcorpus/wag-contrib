@@ -435,21 +435,6 @@ export function init(
                         variants={state.variants}
                         queryMatches={state.availQueryMatches}
                     />
-                    {pipe(
-                        [state.sourceData.assc, state.sourceData.ijp],
-                        List.filter((v) => isAsscError(v) || isIjpError(v)),
-                        List.map((v, i) => (
-                            <lexComponents.MessageSubtile
-                                key={i}
-                                systemMessageType={SystemMessageType.ERROR}
-                            >
-                                {List.map(
-                                    (msg) => ut.translate(msg),
-                                    getErrorMessage(v)
-                                )}
-                            </lexComponents.MessageSubtile>
-                        ))
-                    )}
                     {selectedVariant.posSource ? (
                         <LexOverviewBasics
                             tileId={props.tileId}
@@ -495,6 +480,21 @@ export function init(
                             origin={asscVariantData.origin}
                         />
                     ) : null}
+                    {pipe(
+                        [state.sourceData.assc, state.sourceData.ijp],
+                        List.filter((v) => isAsscError(v) || isIjpError(v)),
+                        List.map((v, i) => (
+                            <lexComponents.MessageSubtile
+                                key={i}
+                                systemMessageType={SystemMessageType.ERROR}
+                            >
+                                {List.map(
+                                    (msg) => ut.translate(msg),
+                                    getErrorMessage(v)
+                                )}
+                            </lexComponents.MessageSubtile>
+                        ))
+                    )}
                 </S.LexOverviewTileView>
             </globalComponents.TileWrapper>
         );
