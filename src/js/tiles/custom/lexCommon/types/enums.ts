@@ -27,6 +27,21 @@ export enum Source {
     Corpus = 'cnc',
 }
 
+export function isValidSource(
+    value: string
+): value is Source {
+    return (
+        value === Source.ASSC ||
+        value === Source.IJP ||
+        value === Source.SSJC ||
+        value === Source.PSJC ||
+        value === Source.SJC ||
+        value === Source.DJD ||
+        value === Source.SSC ||
+        value === Source.Corpus
+    );
+}
+
 export enum Type {
     ASSCRaw = 'raw',
     ASSCHTML = 'html',
