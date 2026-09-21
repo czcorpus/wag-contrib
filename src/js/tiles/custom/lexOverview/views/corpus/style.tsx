@@ -27,7 +27,28 @@ export const Stars = styled.span<{ theme: Theme }>`
     display: block;
     white-space: nowrap;
 
-    img {
+    .star {
+        vertical-align: sub;
+        margin-right: 0.1em;
+        display: inline-block;
         width: 1em;
+        height: 1em;
     }
+
+    .star.empty {
+        background-color: ${(props) => props.theme.colorLightText};
+    }
+
+    .star.full {
+        background-color: ${(props) => props.theme.colorDefaultText};
+    }
+`;
+
+// ------------ <SVGMask /> ----------------------------
+
+export const SVGMask = styled.div<{ theme: Theme; src: string }>`
+    mask-image: url(${(props) => props.src});
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
 `;

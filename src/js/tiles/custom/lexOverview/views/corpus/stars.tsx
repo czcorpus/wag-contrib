@@ -34,16 +34,13 @@ export function init(
         return (
             <S.Stars>
                 {[1, 2, 3, 4, 5].map((v) => (
-                    <img
-                        className="filtered"
+                    <S.SVGMask
                         key={`${v}`}
+                        className={
+                            'star' + (v <= props.freqBand ? ' full' : ' empty')
+                        }
                         src={ut.createStaticUrl(
                             `star${v <= props.freqBand ? '' : '_grey'}.svg`
-                        )}
-                        alt={ut.translate(
-                            v <= props.freqBand
-                                ? 'global__img_alt_star_icon'
-                                : 'global__img_alt_star_icon_grey'
                         )}
                     />
                 ))}

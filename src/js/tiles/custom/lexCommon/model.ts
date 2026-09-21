@@ -26,7 +26,8 @@ import { LexApi, LexArgs } from './api.js';
 import { List, pipe } from 'cnc-tskit';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { TileStatelessModel } from '../../../models/tiles/base.js';
-import { Source } from './types/enums.js';
+import { isValidSource, Source } from './types/enums.js';
+import { map } from 'rxjs';
 
 export interface LexCommonModelState {
     currQueryMatch: QueryMatch;
@@ -111,47 +112,54 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
                         this.appServices.getISO639UILang(),
                         action.payload.corpusId // todo change to sourceId
                     )
-                    .subscribe({
-                        next: (data) => {
-                            const variant = getCurrentVariant(
-                                state.currQueryMatch
-                            );
-                            if (
-                                variant &&
-                                this.lexApi.isBacklinkSupported(
-                                    action.payload.corpusId as Source
-                                )
-                            ) {
-                                data.backlink = {
-                                    key:
-                                        List.size(
+                    .pipe(
+                        map((data) => {
+                            if (isValidSource(action.payload.corpusId)) {
+                                const variant = getCurrentVariant(
+                                    state.currQueryMatch
+                                );
+                                if (
+                                    variant &&
+                                    this.lexApi.isBacklinkSupported(
+                                        action.payload.corpusId
+                                    )
+                                ) {
+                                    data.backlink = {
+                                        key:
+                                            List.size(
+                                                variant.sources[
+                                                    action.payload.corpusId
+                                                ]
+                                            ) > 1
+                                                ? this.appServices.translate(
+                                                      'lex_common__terms'
+                                                  )
+                                                : this.appServices.translate(
+                                                      'lex_common__term'
+                                                  ),
+                                        links: List.map(
+                                            (sourceItem) => ({
+                                                label: `${variant.key.lemma} ${this.homonymToGreek(sourceItem.homonym)}`,
+                                                url: this.lexApi
+                                                    .getBacklinkURL(
+                                                        action.payload
+                                                            .corpusId as Source,
+                                                        sourceItem.id
+                                                    )
+                                                    .toString(),
+                                            }),
                                             variant.sources[
                                                 action.payload.corpusId
-                                            ]
-                                        ) > 1
-                                            ? this.appServices.translate(
-                                                  'lex_common__terms'
-                                              )
-                                            : this.appServices.translate(
-                                                  'lex_common__term'
-                                              ),
-                                    links: List.map(
-                                        (sourceItem) => ({
-                                            label: `${variant.key.lemma} ${this.homonymToGreek(sourceItem.homonym)}`,
-                                            url: this.lexApi
-                                                .getBacklinkURL(
-                                                    action.payload
-                                                        .corpusId as Source,
-                                                    sourceItem.id
-                                                )
-                                                .toString(),
-                                        }),
-                                        variant.sources[
-                                            action.payload.corpusId
-                                        ] || []
-                                    ),
-                                };
+                                            ] || []
+                                        ),
+                                    };
+                                }
                             }
+                            return data;
+                        })
+                    )
+                    .subscribe({
+                        next: (data) => {
                             dispatch({
                                 name: GlobalActions.GetSourceInfoDone.name,
                                 payload: {

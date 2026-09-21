@@ -212,18 +212,6 @@ export class LexOverviewModel extends TileStatelessModel<LexOverviewModelState> 
                             (isAsscData(resp) || isAsscError(resp)) &&
                             !data.done.assc
                         ) {
-                            if (isAsscData(resp)) {
-                                dispatch<typeof Actions.TilePartialDataLoaded>({
-                                    name: Actions.TilePartialDataLoaded.name,
-                                    payload: {
-                                        tileId: this.tileId,
-                                        resp,
-                                    },
-                                });
-                                data.hasData = true;
-                                data.done.assc = true;
-                                return data;
-                            }
                             dispatch<typeof Actions.TilePartialDataLoaded>({
                                 name: Actions.TilePartialDataLoaded.name,
                                 payload: {
@@ -237,7 +225,6 @@ export class LexOverviewModel extends TileStatelessModel<LexOverviewModelState> 
                             (isIjpData(resp) || isIjpError(resp)) &&
                             !data.done.ijp
                         ) {
-                            // dispatch only first ijp data
                             dispatch<typeof Actions.TilePartialDataLoaded>({
                                 name: Actions.TilePartialDataLoaded.name,
                                 payload: {

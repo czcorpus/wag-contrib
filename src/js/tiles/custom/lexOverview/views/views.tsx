@@ -450,9 +450,10 @@ export function init(
                             data={state.sourceData.ijp.data}
                         />
                     ) : null}
-                    {asscVariantData &&
-                    !List.empty(asscVariantData.forms) &&
-                    !ijpHasForms() ? (
+                    {!state.isBusy &&
+                    !ijpHasForms() &&
+                    asscVariantData &&
+                    !List.empty(asscVariantData.forms) ? (
                         <asscViews.Subtile
                             tileId={props.tileId}
                             variant={asscVariantData}
