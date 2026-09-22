@@ -306,6 +306,25 @@ export class LexApi implements ResourceApi<LexArgs, LexResponse> {
                         href: null,
                     });
 
+                case Source.CES:
+                    return rxOf({
+                        tileId,
+                        title: this.apiServices.importExternalMessage({
+                            'cs-CZ':
+                                'Jiří Rejzek: Český etymologický slovník, 2. vydání. Leda: Praha 2015.',
+                            'en-US':
+                                'Jiří Rejzek: Český etymologický slovník, 2. vydání. Leda: Praha 2015. UNTRANSLATED',
+                        }),
+                        description: this.apiServices.importExternalMessage({
+                            'cs-CZ':
+                                'Český etymologický slovník je etymologický slovník češtiny sestavený lingvistou Jiřím Rejzkem a vydaný v roce 2001 (opakovaně pak 2012 a 2015). Obsahuje cca 11 000 základních hesel, přibližně 21 000 odvozených slov a téměř 64 000 odkazů na slova jiných jazyků. Slovník je koncipován pro použití širokou veřejností, vzhledem ke své obsáhlosti a erudici je také vhodným zdrojem pro odbornou jazykovou obec.',
+                            'en-US':
+                                'Český etymologický slovník je etymologický slovník češtiny sestavený lingvistou Jiřím Rejzkem a vydaný v roce 2001 (opakovaně pak 2012 a 2015). Obsahuje cca 11 000 základních hesel, přibližně 21 000 odvozených slov a téměř 64 000 odkazů na slova jiných jazyků. Slovník je koncipován pro použití širokou veřejností, vzhledem ke své obsáhlosti a erudici je také vhodným zdrojem pro odbornou jazykovou obec. UNTRANSLATED',
+                        }),
+                        author: 'Jiří Rejzek: Český etymologický slovník, 2. vydání. Leda: Praha 2015.',
+                        href: 'https://leda.cz/Titul-detailni-info.php?i=623',
+                    });
+
                 default:
                     return rxOf({
                         tileId,

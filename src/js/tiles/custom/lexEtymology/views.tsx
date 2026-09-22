@@ -23,6 +23,7 @@ import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
 import { LexEtymologyModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
+import { Source } from '../lexCommon/types/enums.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -43,6 +44,10 @@ export function init(
                 isBusy={state.isBusy}
                 error={state.error}
                 hasData={!!state.data}
+                sourceIdent={{
+                    label: ut.translate('lex_common__source_ces'),
+                    corp: Source.CES,
+                }}
                 supportsTileReload={props.supportsReloadOnError}
                 isSubtileContainer={props.isSubtileContainer}
                 issueReportingUrl={props.issueReportingUrl}
