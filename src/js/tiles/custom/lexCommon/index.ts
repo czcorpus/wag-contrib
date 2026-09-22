@@ -47,6 +47,8 @@ export interface LexCommonTileConf extends TileConf {
 export class LexCommonTile implements ITileProvider {
     private readonly tileId: number;
 
+    private readonly label: string;
+
     private readonly dispatcher: IActionDispatcher;
 
     private readonly appServices: IAppServices;
@@ -87,6 +89,9 @@ export class LexCommonTile implements ITileProvider {
             appServices,
             conf.backlinkConf
         );
+        this.label = appServices.importExternalMessage(
+            conf.label || 'lex_dictionaries__main_label'
+        );
 
         this.model = new LexCommonModel({
             dispatcher,
@@ -107,7 +112,7 @@ export class LexCommonTile implements ITileProvider {
     }
 
     getLabel(): string {
-        return null;
+        return this.label;
     }
 
     getView(): TileComponent {
