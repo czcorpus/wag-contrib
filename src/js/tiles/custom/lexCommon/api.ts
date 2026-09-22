@@ -317,9 +317,9 @@ export class LexApi implements ResourceApi<LexArgs, LexResponse> {
                         }),
                         description: this.apiServices.importExternalMessage({
                             'cs-CZ':
-                                'Český etymologický slovník je etymologický slovník češtiny sestavený lingvistou Jiřím Rejzkem a vydaný v roce 2001 (opakovaně pak 2012 a 2015). Obsahuje cca 11 000 základních hesel, přibližně 21 000 odvozených slov a téměř 64 000 odkazů na slova jiných jazyků. Slovník je koncipován pro použití širokou veřejností, vzhledem ke své obsáhlosti a erudici je také vhodným zdrojem pro odbornou jazykovou obec.',
+                                'Nejnovější etymologický slovník českého jazyka přináší více než 11 000 základních hesel zaměřených jak na běžnou slovní zásobu, tak na slova nově přejatá i nespisovná, přibližně 21 000 odvozených slov a téměř 64 000 odkazů na slova jiných jazyků, přehled nejdůležitějších hláskových změn od indoevropského prajazyka až k češtině a příbuzenskou klasifikaci jazyků celého světa.',
                             'en-US':
-                                'Český etymologický slovník je etymologický slovník češtiny sestavený lingvistou Jiřím Rejzkem a vydaný v roce 2001 (opakovaně pak 2012 a 2015). Obsahuje cca 11 000 základních hesel, přibližně 21 000 odvozených slov a téměř 64 000 odkazů na slova jiných jazyků. Slovník je koncipován pro použití širokou veřejností, vzhledem ke své obsáhlosti a erudici je také vhodným zdrojem pro odbornou jazykovou obec. UNTRANSLATED',
+                                'Nejnovější etymologický slovník českého jazyka přináší více než 11 000 základních hesel zaměřených jak na běžnou slovní zásobu, tak na slova nově přejatá i nespisovná, přibližně 21 000 odvozených slov a téměř 64 000 odkazů na slova jiných jazyků, přehled nejdůležitějších hláskových změn od indoevropského prajazyka až k češtině a příbuzenskou klasifikaci jazyků celého světa. UNTRANSLATED',
                         }),
                         author: 'Jiří Rejzek: Český etymologický slovník, 2. vydání. Leda: Praha 2015.',
                         href: 'https://leda.cz/Titul-detailni-info.php?i=623',
