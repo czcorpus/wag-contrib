@@ -339,7 +339,15 @@ export function init(
         tileId: number;
         source: Source;
         origin: string;
+        variantData: VariantData;
     }> = (props) => {
+        const scrollToEtymology = () => {
+            const groupElem = document.getElementById('tile-15');
+            if (groupElem) {
+                groupElem.scrollIntoView({ behavior: 'smooth' });
+            }
+        };
+
         return (
             <lexComponents.Subtile tileId={props.tileId} source={props.source}>
                 <SubtileRow>
@@ -348,6 +356,16 @@ export function init(
                     </span>
                     <span className="value">{props.origin}</span>
                 </SubtileRow>
+                {props.variantData && props.variantData.key === 'banka' ? (
+                    <SubtileRow>
+                        <span className="key">více:</span>
+                        <span className="value">
+                            <a onClick={scrollToEtymology}>
+                                {ut.translate('lex_common__source_ces')}
+                            </a>
+                        </span>
+                    </SubtileRow>
+                ) : null}
             </lexComponents.Subtile>
         );
     };
@@ -479,6 +497,7 @@ export function init(
                             tileId={props.tileId}
                             source={Source.ASSC}
                             origin={asscVariantData.origin}
+                            variantData={asscVariantData}
                         />
                     ) : null}
                     {pipe(

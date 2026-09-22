@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 import { IActionDispatcher } from 'kombo';
-import { List } from 'cnc-tskit';
 
 import { IAppServices } from '../../../appServices.js';
 import {
@@ -24,44 +23,39 @@ import {
     LemmatizationLevel,
     QueryType,
 } from '../../../query/index.js';
+import { init as viewInit } from './views.js';
 import {
     TileConf,
     ITileProvider,
     TileComponent,
     TileFactory,
     TileFactoryArgs,
-    DEFAULT_ALT_VIEW_ICON,
     ITileReloader,
+    DEFAULT_ALT_VIEW_ICON,
     AltViewIconProps,
     lemLevelSupport,
 } from '../../../page/tile.js';
-import { LexCommonModel } from './model.js';
-import { LexApi } from './api.js';
-import { Source } from './types/enums.js';
+import { LexEtymologyModel } from './model.js';
+import { List } from 'cnc-tskit';
 
-export interface LexCommonTileConf extends TileConf {
-    apiURL: string;
-    backlinkConf: Partial<Record<Source, { url: string }>>;
-}
+export interface LexEtymologyTileConf extends TileConf {}
 
-export class LexCommonTile implements ITileProvider {
+export class LexEtymologyTile implements ITileProvider {
     private readonly tileId: number;
-
-    private readonly label: string;
 
     private readonly dispatcher: IActionDispatcher;
 
     private readonly appServices: IAppServices;
 
-    private readonly model: LexCommonModel;
+    private readonly model: LexEtymologyModel;
 
     private readonly widthFract: number;
 
-    private readonly lexApi: LexApi;
+    private readonly label: string;
 
     private view: TileComponent;
 
-    private readonly dependentTiles: Array<number>;
+    private readonly readDataFromTile: number;
 
     private readonly configuredLemLevels: Array<LemmatizationLevel>;
 
@@ -74,37 +68,36 @@ export class LexCommonTile implements ITileProvider {
         widthFract,
         conf,
         isBusy,
-        queryMatches,
+        readDataFromTile,
         dependentTiles,
-    }: TileFactoryArgs<LexCommonTileConf>) {
+        queryMatches,
+    }: TileFactoryArgs<LexEtymologyTileConf>) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
         this.widthFract = widthFract;
-        this.dependentTiles = dependentTiles;
         this.configuredLemLevels = conf.lemmatizationLevels || [];
-        this.lexApi = new LexApi(
-            conf.apiURL,
-            conf.srcInfoURL,
-            appServices,
-            conf.backlinkConf
-        );
-        this.label = appServices.importExternalMessage(
-            conf.label || 'lex_dictionaries__main_label'
-        );
 
-        this.model = new LexCommonModel({
+        this.model = new LexEtymologyModel({
             dispatcher,
             appServices,
             tileId,
+            readDataFromTile:
+                typeof readDataFromTile === 'number' ? readDataFromTile : null,
             dependentTiles,
             lemLevelSupport: this.configuredLemLevels,
-            lexApi: this.lexApi,
             initState: {
+                isBusy: isBusy,
+                data: null,
+                error: null,
+                backlink: null,
                 currQueryMatch: List.map(findCurrQueryMatch, queryMatches)[0],
             },
         });
-        this.view = () => null;
+        this.label = appServices.importExternalMessage(
+            conf.label || 'lex_etymology__main_label'
+        );
+        this.view = viewInit(this.dispatcher, ut, theme, this.model);
     }
 
     getIdent(): number {
@@ -151,6 +144,10 @@ export class LexCommonTile implements ITileProvider {
         return false;
     }
 
+    getAltViewIcon(): AltViewIconProps {
+        return DEFAULT_ALT_VIEW_ICON;
+    }
+
     registerReloadModel(model: ITileReloader): boolean {
         model.registerModel(this, this.model);
         return true;
@@ -168,12 +165,8 @@ export class LexCommonTile implements ITileProvider {
         return null;
     }
 
-    getAltViewIcon(): AltViewIconProps {
-        return DEFAULT_ALT_VIEW_ICON;
-    }
-
     getReadDataFrom(): number | null {
-        return null;
+        return this.readDataFromTile;
     }
 
     hideOnNoData(): boolean {
@@ -189,8 +182,8 @@ export class LexCommonTile implements ITileProvider {
     }
 }
 
-export const init: TileFactory<LexCommonTileConf> = {
+export const init: TileFactory<LexEtymologyTileConf> = {
     sanityCheck: (args) => [],
 
-    create: (args) => new LexCommonTile(args),
+    create: (args) => new LexEtymologyTile(args),
 };

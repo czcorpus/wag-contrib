@@ -1,5 +1,6 @@
 {
     "cs-CZ": {
+        "lex_common__main_label": "Slovoskop",
         "lex_common__term": "Heslo",
         "lex_common__terms": "Hesla",
         "lex_common__source": "Zdroj",
@@ -10,6 +11,7 @@
         "lex_common__source_ssc": "Slovník spisovné češtiny",
         "lex_common__source_kla": "Kartotéka lexikálního archivu",
         "lex_common__source_djd": "Dotazy z jazykové poradny",
+        "lex_common__source_ces": "Český etymologický slovník",
         "lex_common__pos_A": "přídavné jméno",
         "lex_common__pos_B": "zkratka",
         "lex_common__pos_C": "číslovka",
@@ -80,6 +82,7 @@
         "lex_common__ssc_not_found": "Položka nebyla nalezena v Slovníku spisovné češtiny"
     },
     "en-US": {
+        "lex_common__main_label": "Wordscope",
         "lex_common__term": "Term",
         "lex_common__terms": "Terms",
         "lex_common__source": "Source",
@@ -90,6 +93,7 @@
         "lex_common__source_ssc": "Slovník spisovné češtiny UNTRANSLATED",
         "lex_common__source_kla": "Lexical Archive Card Catalog",
         "lex_common__source_djd": "Dotazy z jazykové poradny UNTRANSLATED",
+        "lex_common__source_ces": "Český etymologický slovník UNTRANSLATED",
         "lex_common__pos_A": "adjective",
         "lex_common__pos_B": "abbreviation",
         "lex_common__pos_C": "numeral",

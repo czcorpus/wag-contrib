@@ -24,22 +24,12 @@ export enum Source {
     SJC = 'sjc',
     DJD = 'djd',
     SSC = 'ssc',
+    CES = 'ces',
     Corpus = 'cnc',
 }
 
-export function isValidSource(
-    value: string
-): value is Source {
-    return (
-        value === Source.ASSC ||
-        value === Source.IJP ||
-        value === Source.SSJC ||
-        value === Source.PSJC ||
-        value === Source.SJC ||
-        value === Source.DJD ||
-        value === Source.SSC ||
-        value === Source.Corpus
-    );
+export function isValidSource(value: string): value is Source {
+    return Object.values(Source).includes(value as Source);
 }
 
 export enum Type {
