@@ -146,10 +146,10 @@ export const PlayerIcon = styled.a<{
     mask-repeat: no-repeat;
     mask-position: center;
     mask-size: contain;
-    background-color: ${(props) => props.theme.colorLogoBlue};
+    background-color: ${(props) => props.theme.colorDefaultText};
 
     &:hover {
-        background-color: ${(props) => props.theme.colorLogoBlueShining};
+        background-color: ${(props) => props.theme.colorLightText};
     }
 
     &.animate {

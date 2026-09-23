@@ -23,16 +23,3 @@ export const HexTileView = styled.div`
 // here comes the style
 
 `;
-
-export const Controls = styled.form`
-    margin-bottom: 0.7em;
-
-    fieldset {
-        border: none;
-    }
-
-    label {
-        margin-right: 0.7em;
-        display: inline-block;
-    }
-`;
