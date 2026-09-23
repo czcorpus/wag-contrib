@@ -26,6 +26,8 @@ export function init(
     dispatcher: IActionDispatcher,
     ut: ViewUtils<GlobalComponents>
 ) {
+    const globalComponents = ut.getComponents();
+
     // -------------------- <Stars /> -----------------------------------------------
 
     const Stars: React.FC<{
@@ -34,8 +36,8 @@ export function init(
         return (
             <S.Stars>
                 {[1, 2, 3, 4, 5].map((v) => (
-                    <S.SVGMask
-                        key={`${v}`}
+                    <globalComponents.SVGMaskIcon
+                        key={v}
                         className={
                             'star' + (v <= props.freqBand ? ' full' : ' empty')
                         }

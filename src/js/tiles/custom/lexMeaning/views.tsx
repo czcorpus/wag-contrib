@@ -95,7 +95,7 @@ export function init(
                                             </span>
                                         ) : null}
                                         <S.MeaningItem
-                                            key={i}
+                                            key={`${i}-${j}`}
                                             className={isParent ? 'parent' : ''}
                                         >
                                             <S.MeaningHead>
