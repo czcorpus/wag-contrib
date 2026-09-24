@@ -233,7 +233,7 @@ export function init(
                 props.variants[0].key.plurality !== Plurality.UNKNOWN &&
                 props.variants[0].key.plurality !== undefined);
         return (
-            <S.Header source={props.source} width={itemWidth}>
+            <S.Header $source={props.source} $width={itemWidth}>
                 <h2>{props.selectedVariant.key.lemma}</h2>
                 {displayGrid ? (
                     <div className="variant-grid">

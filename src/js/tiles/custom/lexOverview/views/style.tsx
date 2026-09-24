@@ -70,8 +70,8 @@ export const DataTable = styled.table<{ theme: Theme }>`
 
 export const Header = styled.div<{
     theme: Theme;
-    source?: string;
-    width?: string;
+    $source?: string;
+    $width?: string;
 }>`
     h2 {
         width: 100%;
@@ -87,7 +87,7 @@ export const Header = styled.div<{
 
         .variant {
             flex: 1;
-            flex-basis: ${(props) => props.width || 'auto'};
+            flex-basis: ${(props) => props.$width || 'auto'};
             margin: 0;
             padding: 0.2em 1em;
             white-space: nowrap;
@@ -96,7 +96,7 @@ export const Header = styled.div<{
                 getLexTheme(props.theme).subtileBorderRadius};
             border: 1px solid
                 ${(props) =>
-                    getLexTheme(props.theme).sourceColors[props.source]};
+                    getLexTheme(props.theme).sourceColors[props.$source]};
             cursor: pointer;
 
             .morphology {
@@ -118,13 +118,13 @@ export const Header = styled.div<{
 
         .selected {
             background-color: ${(props) =>
-                getLexTheme(props.theme).sourceColors[props.source]};
+                getLexTheme(props.theme).sourceColors[props.$source]};
             cursor: default;
         }
 
         .variant:not(.selected):hover {
             background-color: ${(props) =>
-                getLexTheme(props.theme).sourceColors[props.source]}44;
+                getLexTheme(props.theme).sourceColors[props.$source]}44;
             // the 44 adds transparency to base color in hex format
         }
     }
