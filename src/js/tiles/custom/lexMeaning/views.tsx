@@ -421,6 +421,7 @@ export function init(
                 supportsTileReload={props.supportsReloadOnError}
                 isSubtileContainer={props.isSubtileContainer}
                 issueReportingUrl={props.issueReportingUrl}
+                errorSubtileContainerLabel={props.tileLabel}
             >
                 <globalComponents.Subtile
                     tileId={props.tileId}

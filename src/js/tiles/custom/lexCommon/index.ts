@@ -90,7 +90,7 @@ export class LexCommonTile implements ITileProvider {
             conf.backlinkConf
         );
         this.label = appServices.importExternalMessage(
-            conf.label || 'lex_dictionaries__main_label'
+            conf.label || 'lex_common__main_label'
         );
 
         this.model = new LexCommonModel({
@@ -161,7 +161,7 @@ export class LexCommonTile implements ITileProvider {
     }
 
     supportsMultiWordQueries(): boolean {
-        return false;
+        return true;
     }
 
     getIssueReportingUrl(): null {
