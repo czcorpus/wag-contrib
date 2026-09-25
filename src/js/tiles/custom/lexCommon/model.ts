@@ -137,9 +137,12 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
                                                 : this.appServices.translate(
                                                       'lex_common__term'
                                                   ),
-                                        links: List.map(
-                                            (sourceItem) => ({
-                                                label: `${variant.key.lemma} ${this.homonymToGreek(sourceItem.homonym)}`,
+                                        links: List.map((sourceItem) => {
+                                            const greek = this.homonymToGreek(
+                                                sourceItem.homonym
+                                            );
+                                            return {
+                                                label: `${variant.key.lemma}${greek ? ' ' + greek : ''}`,
                                                 url: this.lexApi
                                                     .getBacklinkURL(
                                                         action.payload
@@ -147,11 +150,10 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
                                                         sourceItem.id
                                                     )
                                                     .toString(),
-                                            }),
-                                            variant.sources[
-                                                action.payload.corpusId
-                                            ] || []
-                                        ),
+                                            };
+                                        }, variant.sources[
+                                            action.payload.corpusId
+                                        ] || []),
                                     };
                                 }
                             }
