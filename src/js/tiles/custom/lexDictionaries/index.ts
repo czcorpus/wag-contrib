@@ -112,7 +112,7 @@ export class LexDictionariesTile implements ITileProvider {
                 ),
                 activeDictTab: -1,
                 error: null,
-                currQueryMatch: findCurrQueryMatch(List.head(queryMatches))
+                currQueryMatch: findCurrQueryMatch(List.head(queryMatches)),
             },
         });
         this.label = appServices.importExternalMessage(
@@ -179,7 +179,7 @@ export class LexDictionariesTile implements ITileProvider {
     }
 
     supportsMultiWordQueries(): boolean {
-        return false;
+        return true;
     }
 
     getIssueReportingUrl(): null {

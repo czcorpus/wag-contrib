@@ -233,7 +233,7 @@ export function init(
                 props.variants[0].key.plurality !== Plurality.UNKNOWN &&
                 props.variants[0].key.plurality !== undefined);
         return (
-            <S.Header source={props.source} width={itemWidth}>
+            <S.Header $source={props.source} $width={itemWidth}>
                 <h2>{props.selectedVariant.key.lemma}</h2>
                 {displayGrid ? (
                     <div className="variant-grid">
@@ -341,31 +341,35 @@ export function init(
         origin: string;
         variantData: VariantData;
     }> = (props) => {
-        const scrollToEtymology = () => {
-            const groupElem = document.getElementById('tile-15');
-            if (groupElem) {
-                groupElem.scrollIntoView({ behavior: 'smooth' });
+        const scrollToEtymology = (e) => {
+            e.preventDefault();
+            const targetId = '#tile-15';
+            const targetElem = document.querySelector('#tile-15');
+            if (targetElem) {
+                targetElem.scrollIntoView({ behavior: 'smooth' });
+                history.pushState(null, null, targetId);
             }
         };
 
         return (
-            <lexComponents.Subtile tileId={props.tileId} source={props.source}>
+            <lexComponents.Subtile
+                tileId={props.tileId}
+                source={props.source}
+                more={
+                    props.variantData && props.variantData.key === 'banka'
+                        ? {
+                              label: ut.translate('lex_common__source_ces'),
+                              onclick: scrollToEtymology,
+                          }
+                        : undefined
+                }
+            >
                 <SubtileRow>
                     <span className="key">
                         {ut.translate('lex_overview__origin')}:
                     </span>
                     <span className="value">{props.origin}</span>
                 </SubtileRow>
-                {props.variantData && props.variantData.key === 'banka' ? (
-                    <SubtileRow>
-                        <span className="key">více:</span>
-                        <span className="value">
-                            <a onClick={scrollToEtymology}>
-                                {ut.translate('lex_common__source_ces')}
-                            </a>
-                        </span>
-                    </SubtileRow>
-                ) : null}
             </lexComponents.Subtile>
         );
     };

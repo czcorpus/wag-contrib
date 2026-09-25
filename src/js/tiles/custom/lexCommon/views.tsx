@@ -32,6 +32,7 @@ export function initLexComponents(
         React.PropsWithChildren<{
             tileId: number;
             source: string | Array<string>;
+            more?: { label: string; url?: string; onclick?: (e) => void };
             corpname?: string;
             className?: string;
         }>
@@ -50,6 +51,7 @@ export function initLexComponents(
         React.PropsWithChildren<{
             tileId: number;
             source: string | Array<string>;
+            more?: { label: string; url?: string; onclick?: (e) => void };
             corpname?: string;
             className?: string;
         }>
@@ -100,6 +102,21 @@ export function initLexComponents(
                                     )}
                                 </a>
                             )}
+                        </span>
+                    </S.SubtileRow>
+                ) : null}
+                {props.more ? (
+                    <S.SubtileRow className="footer">
+                        <span className="key">
+                            {ut.translate('lex_common__more')}:
+                        </span>
+                        <span className="value">
+                            <a
+                                onClick={props.more.onclick}
+                                href={props.more.url}
+                            >
+                                {props.more.label}
+                            </a>
                         </span>
                     </S.SubtileRow>
                 ) : null}

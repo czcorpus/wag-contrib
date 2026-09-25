@@ -19,6 +19,7 @@
 import { Theme } from '../../../page/theme.js';
 import { styled } from 'styled-components';
 import { LexTileBase } from '../lexCommon/style.js';
+import { getLexTheme } from '../lexCommon/theme.js';
 
 // ---------------- <LexDictionariesTileView /> --------------------------------------
 
@@ -46,7 +47,7 @@ export const Stretcher = styled.div`
 
 export const Scroller = styled.div`
     margin-top: 1em;
-    padding-right: 0.5em; 
+    padding-right: 0.5em;
     flex-grow: 1;
     overflow-y: auto;
 `;
@@ -99,7 +100,13 @@ export const TabButton = styled.span<{ theme: Theme }>`
 
 // ---------------- <SSJCEntry /> --------------------------------------
 
-export const SSJCEntry = styled.li`
+export const SSJCEntry = styled.li<{ theme: Theme }>`
+    .hw {
+        color: ${(props) => getLexTheme(props.theme).lemmaColor} !important;
+    }
+
+    // --------------- original styles ----------------------------
+
     /* OdstavcovĂ© elementy */
     div {
         font-family: 'Times New Roman', serif;
@@ -163,7 +170,13 @@ export const SSJCEntry = styled.li`
 
 // ---------------- <PSJCEntry /> --------------------------------------
 
-export const PSJCEntry = styled.li`
+export const PSJCEntry = styled.li<{ theme: Theme }>`
+    .hw {
+        color: ${(props) => getLexTheme(props.theme).lemmaColor} !important;
+    }
+
+    // --------------- original styles ----------------------------
+
     .e {
         font-size: 12pt;
         width: 320px;

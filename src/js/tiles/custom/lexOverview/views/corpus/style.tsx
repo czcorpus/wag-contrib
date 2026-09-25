@@ -43,12 +43,3 @@ export const Stars = styled.span<{ theme: Theme }>`
         background-color: ${(props) => props.theme.colorDefaultText};
     }
 `;
-
-// ------------ <SVGMask /> ----------------------------
-
-export const SVGMask = styled.div<{ theme: Theme; src: string }>`
-    mask-image: url(${(props) => props.src});
-    mask-repeat: no-repeat;
-    mask-position: center;
-    mask-size: contain;
-`;

@@ -95,7 +95,7 @@ export function init(
                                             </span>
                                         ) : null}
                                         <S.MeaningItem
-                                            key={i}
+                                            key={`${i}-${j}`}
                                             className={isParent ? 'parent' : ''}
                                         >
                                             <S.MeaningHead>
@@ -421,6 +421,7 @@ export function init(
                 supportsTileReload={props.supportsReloadOnError}
                 isSubtileContainer={props.isSubtileContainer}
                 issueReportingUrl={props.issueReportingUrl}
+                errorSubtileContainerLabel={props.tileLabel}
             >
                 <globalComponents.Subtile
                     tileId={props.tileId}

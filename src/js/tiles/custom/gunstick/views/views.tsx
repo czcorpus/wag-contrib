@@ -404,16 +404,18 @@ export function init(
                     ) : null}
 
                     {state.isTweakMode ? (
-                        <div className="tweak-box">
-                            <globalComponents.Paginator
-                                page={state.page}
-                                numPages={numPages}
-                                onNext={handleNextPage}
-                                onPrev={handlePrevPage}
-                            />
-                            <FreqTypeSelector value={state.freqType} tileId={props.tileId} />
+                        <globalComponents.TweakBox>
+                            <div className="tweak-box">
+                                <globalComponents.Paginator
+                                    page={state.page}
+                                    numPages={numPages}
+                                    onNext={handleNextPage}
+                                    onPrev={handlePrevPage}
+                                />
+                                <FreqTypeSelector value={state.freqType} tileId={props.tileId} />
 
-                        </div>
+                            </div>
+                        </globalComponents.TweakBox>
                     ) : null}
                     {state.isAltViewMode ? (
                         <Table
