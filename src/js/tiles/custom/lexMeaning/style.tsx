@@ -202,7 +202,16 @@ export const MeaningBody = styled.div`
 // ---------------- <ASSCStyle /> --------------------------------------
 
 export const ASSCStyle = styled.div<{ theme: Theme }>`
-    .heslo, .heslo a, .souslovi a, .synonymum a, .viceslovne a, .frazem a {
+    a {
+        color: ${(props) => props.theme.colorDefaultText} !important;
+    }
+
+    .heslo,
+    .heslo a,
+    .souslovi a,
+    .synonymum a,
+    .viceslovne a,
+    .frazem a {
         color: ${(props) => getLexTheme(props.theme).lemmaColor} !important;
     }
 

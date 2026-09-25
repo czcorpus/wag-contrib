@@ -288,9 +288,16 @@ export function init(
         selectedVariant: LexItem;
         basicOverview: BasicOverviewData;
         playingAudio: boolean;
+        corpname: string;
     }> = (props) => {
         return (
-            <lexComponents.Subtile tileId={props.tileId} source={props.source}>
+            <lexComponents.Subtile
+                tileId={props.tileId}
+                source={props.source}
+                corpname={
+                    props.source === Source.Corpus ? props.corpname : null
+                }
+            >
                 {props.basicOverview.pronunciation ? (
                     <SubtileRow>
                         <span className="key">
@@ -464,6 +471,7 @@ export function init(
                             selectedVariant={selectedVariant}
                             basicOverview={basicOverview}
                             playingAudio={state.playingAudio}
+                            corpname={state.referenceCorpus}
                         />
                     ) : null}
                     {isIjpData(state.sourceData.ijp) ? (
