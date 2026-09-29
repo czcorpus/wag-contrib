@@ -24,7 +24,11 @@ interface LexTheme {
     overlayBorderRadius: string;
     overlayColor: string;
     lemmaColor: string;
-    sourceColors: Partial<Record<Source, string>>;
+    sourceColors: {
+        [Source.IJP]: string;
+        [Source.Corpus]: string;
+        dicts: string;
+    };
 }
 
 function isLexTheme(theme: Theme): theme is Theme<LexTheme> {
@@ -47,8 +51,7 @@ export function getLexTheme(theme: Theme): LexTheme {
         overlayColor: '#0000000e',
         lemmaColor: '#6c74f0',
         sourceColors: {
-            [Source.ASSC]: '#d4e2f4',
-            [Source.SSC]: '#dae8f6',
+            dicts: '#d4e2f4',
             [Source.IJP]: '#e5eef8',
             [Source.Corpus]: '#fae9da',
         },

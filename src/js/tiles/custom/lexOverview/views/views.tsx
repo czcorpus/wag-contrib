@@ -129,7 +129,6 @@ export function init(
 
     const LexOverviewHeader: React.FC<{
         tileId: number;
-        source: string;
         selectedVariantIdx: number;
         selectedVariant: LexItem;
         variants: Array<LexItem>;
@@ -233,7 +232,7 @@ export function init(
                 props.variants[0].key.plurality !== Plurality.UNKNOWN &&
                 props.variants[0].key.plurality !== undefined);
         return (
-            <S.Header $source={props.source} $width={itemWidth}>
+            <S.Header $width={itemWidth}>
                 <h2>{props.selectedVariant.key.lemma}</h2>
                 {displayGrid ? (
                     <div className="variant-grid">
@@ -460,7 +459,6 @@ export function init(
                         tileId={props.tileId}
                         selectedVariantIdx={state.selectedVariantIdx}
                         selectedVariant={selectedVariant}
-                        source={state.variantSource}
                         variants={state.variants}
                         queryMatches={state.availQueryMatches}
                     />
