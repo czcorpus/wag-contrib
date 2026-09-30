@@ -16,12 +16,19 @@
  * limitations under the License.
  */
 
+import { QueryMatch } from '../../../../query/index.js';
 import { ResourceApi } from '../../../../types.js';
 import { Source } from '../../lexCommon/types/enums.js';
-import { SSJCDataStructure, PSJCDataStructure } from './basicApi.js';
+import {
+    SSJCDataStructure,
+    PSJCDataStructure,
+    UjcBasicArgs,
+} from './basicApi.js';
 
 export interface LexDictApi<U = any, V = any> extends ResourceApi<U, V> {
     getBacklinkURL(term: string): URL;
+
+    getArgsFromQueryMatch(queryMatch: QueryMatch): UjcBasicArgs;
 }
 
 export function isSSJCDataStructure(
@@ -36,4 +43,11 @@ export function isPSJCDataStructure(
     data: any
 ): data is PSJCDataStructure {
     return type === Source.PSJC;
+}
+
+export function isSSCDataStructure(
+    type: Source,
+    data: any
+): data is SSJCDataStructure {
+    return type === Source.SSC;
 }
