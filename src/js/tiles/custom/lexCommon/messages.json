@@ -49,6 +49,7 @@
         "lex_common__gender_M": "rodu mužského životného",
         "lex_common__gender_I": "rodu mužského neživotného",
         "lex_common__gender_B": "rodu mužského životného i neživotného",
+        "lex_common__gender_MX": "rodu mužského",
         "lex_common__gender_F": "rodu ženského",
         "lex_common__gender_N": "rodu středního",
         "lex_common__gender_short_M": "m. živ.",
