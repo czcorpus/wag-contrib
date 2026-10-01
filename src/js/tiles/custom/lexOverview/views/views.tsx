@@ -160,27 +160,15 @@ export function init(
                             {translatePlurality(lexKey, true)}{' '}
                         </span>
                     ) : null}
-                    {clickHandler ? (
-                        <a>
-                            {lexKey.lemma}
-                            {!List.empty(info) ? (
-                                <span className="morphology">
-                                    {' '}
-                                    ({info.join(' ')})
-                                </span>
-                            ) : null}
-                        </a>
-                    ) : (
-                        <span>
-                            {lexKey.lemma}
-                            {!List.empty(info) ? (
-                                <span className="morphology">
-                                    {' '}
-                                    ({info.join(' ')})
-                                </span>
-                            ) : null}
-                        </span>
-                    )}
+                    <span>
+                        {lexKey.lemma}
+                        {!List.empty(info) ? (
+                            <span className="morphology">
+                                {' '}
+                                ({info.join(' ')})
+                            </span>
+                        ) : null}
+                    </span>
                 </h4>
             );
         };

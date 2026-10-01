@@ -93,8 +93,8 @@ export const Header = styled.div<{
             text-align: center;
             border-radius: ${(props) =>
                 getLexTheme(props.theme).subtileBorderRadius};
-            border: 1px solid ${(props) => props.theme.colorLogoBlue};
-            cursor: pointer;
+            border: 1px solid
+                ${(props) => getLexTheme(props.theme).sourceColors.dicts};
 
             .morphology {
                 font-size: 0.8em;
@@ -105,24 +105,21 @@ export const Header = styled.div<{
                 font-size: 0.6em;
                 font-style: bold;
             }
-
-            a {
-                width: 100%;
-                text-decoration: none;
-                color: ${(props) => props.theme.colorDefaultText};
-                cursor: pointer;
-            }
         }
 
         .selected {
-            background-color: ${(props) => props.theme.colorLogoBlue};
-            color: ${(props) => props.theme.colorInvertText};
+            background-color: ${(props) =>
+                getLexTheme(props.theme).sourceColors.dicts};
             cursor: default;
         }
 
+        .variant:not(.selected) {
+            cursor: pointer;
+        }
+
         .variant:not(.selected):hover {
-            background-color: ${(props) => props.theme.colorLogoBlue}44;
-            // the 44 adds transparency to base color in hex format
+            background-color: ${(props) =>
+                getLexTheme(props.theme).sourceColors.dicts}44;
         }
     }
 `;
