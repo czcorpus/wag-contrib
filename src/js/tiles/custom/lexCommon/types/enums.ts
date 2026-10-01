@@ -26,6 +26,7 @@ export enum Source {
     SSC = 'ssc',
     CES = 'ces',
     Corpus = 'cnc',
+    Empty = '---',
 }
 
 export function isValidSource(value: string): value is Source {

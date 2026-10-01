@@ -462,7 +462,8 @@ export function init(
                         variants={state.variants}
                         queryMatches={state.availQueryMatches}
                     />
-                    {selectedVariant.posSource ? (
+                    {selectedVariant.posSource &&
+                    selectedVariant.posSource !== Source.Empty ? (
                         <LexOverviewBasics
                             tileId={props.tileId}
                             source={selectedVariant.posSource}
