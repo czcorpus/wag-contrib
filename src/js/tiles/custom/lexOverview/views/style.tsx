@@ -94,7 +94,7 @@ export const Header = styled.div<{
             border-radius: ${(props) =>
                 getLexTheme(props.theme).subtileBorderRadius};
             border: 1px solid
-                ${(props) => getLexTheme(props.theme).sourceColors.dicts};
+                ${(props) => getLexTheme(props.theme).variantButtonColor};
 
             .morphology {
                 font-size: 0.8em;
@@ -109,7 +109,7 @@ export const Header = styled.div<{
 
         .selected {
             background-color: ${(props) =>
-                getLexTheme(props.theme).sourceColors.dicts};
+                getLexTheme(props.theme).variantButtonColor};
             cursor: default;
         }
 
@@ -119,7 +119,7 @@ export const Header = styled.div<{
 
         .variant:not(.selected):hover {
             background-color: ${(props) =>
-                getLexTheme(props.theme).sourceColors.dicts}44;
+                getLexTheme(props.theme).variantButtonColor}44;
         }
     }
 `;
