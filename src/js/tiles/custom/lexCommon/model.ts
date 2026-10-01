@@ -22,7 +22,7 @@ import { LemmatizationLevel, QueryMatch } from '../../../query/index.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { getCurrentVariant } from './types/dictionary.js';
-import { LexApi, LexArgs } from './api.js';
+import { isValidIjpId, LexApi, LexArgs } from './api.js';
 import { List, pipe } from 'cnc-tskit';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { TileStatelessModel } from '../../../models/tiles/base.js';
@@ -103,6 +103,7 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
                 ),
             null,
             (state, action, dispatch) => {
+                const sourceId = action.payload.corpusId; // todo change to sourceId
                 this.lexApi
                     .getSourceDescription(
                         this.appServices
@@ -110,26 +111,22 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
                             .startNewSubgroup(this.tileId),
                         this.tileId,
                         this.appServices.getISO639UILang(),
-                        action.payload.corpusId // todo change to sourceId
+                        sourceId // todo change to sourceId
                     )
                     .pipe(
                         map((data) => {
-                            if (isValidSource(action.payload.corpusId)) {
+                            if (isValidSource(sourceId)) {
                                 const variant = getCurrentVariant(
                                     state.currQueryMatch
                                 );
                                 if (
                                     variant &&
-                                    this.lexApi.isBacklinkSupported(
-                                        action.payload.corpusId
-                                    )
+                                    this.lexApi.isBacklinkSupported(sourceId)
                                 ) {
                                     data.backlink = {
                                         key:
                                             List.size(
-                                                variant.sources[
-                                                    action.payload.corpusId
-                                                ]
+                                                variant.sources[sourceId]
                                             ) > 1
                                                 ? this.appServices.translate(
                                                       'lex_common__terms'
@@ -145,15 +142,12 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
                                                 label: `${variant.key.lemma}${greek ? ' ' + greek : ''}`,
                                                 url: this.lexApi
                                                     .getBacklinkURL(
-                                                        action.payload
-                                                            .corpusId as Source,
+                                                        sourceId as Source,
                                                         sourceItem.id
                                                     )
                                                     .toString(),
                                             };
-                                        }, variant.sources[
-                                            action.payload.corpusId
-                                        ] || []),
+                                        }, variant.sources[sourceId] || []),
                                     };
                                 }
                             }
@@ -180,14 +174,6 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
                     });
             }
         );
-    }
-
-    private isValidIjpId(id: string): boolean {
-        const valid = !id.startsWith('__');
-        if (!valid) {
-            console.warn('Ignoring IJP item', id);
-        }
-        return valid;
     }
 
     private loadData(
@@ -217,7 +203,7 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
                               (acc, curr, i) => List.addUnique(curr, acc),
                               []
                           ),
-                          List.filter((id) => this.isValidIjpId(id))
+                          List.filter((id) => isValidIjpId(id))
                       )
                     : [],
             sscIds:

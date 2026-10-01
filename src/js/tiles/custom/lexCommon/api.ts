@@ -160,6 +160,18 @@ export function getErrorMessage(
     }
 }
 
+export function isValidIjpId(id: string): boolean {
+    const valid = !id.startsWith('__');
+    if (!valid) {
+        console.warn('Ignoring IJP item', id);
+    }
+    return valid;
+}
+
+export function getValidIjpId(id: string): string {
+    return id.split('_').at(-1) ?? id;
+}
+
 export class LexApi implements ResourceApi<LexArgs, LexResponse> {
     private readonly apiURL: string;
 
@@ -358,6 +370,9 @@ export class LexApi implements ResourceApi<LexArgs, LexResponse> {
     }
 
     getBacklinkURL(source: Source, id: string): URL {
+        if (source === Source.IJP && !isValidIjpId(id)) {
+            id = getValidIjpId(id);
+        }
         const url = new URL(
             this.backlinkConf[source].url.replace(
                 '{id}',
