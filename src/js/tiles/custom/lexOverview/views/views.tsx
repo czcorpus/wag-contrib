@@ -34,7 +34,7 @@ import { List, pipe } from 'cnc-tskit';
 import { initLexComponents } from '../../lexCommon/views.js';
 import { LexItem, LexKey, LexID } from '../../lexCommon/types/dictionary.js';
 import { SubtileRow } from '../../lexCommon/style.js';
-import { Plurality, Source } from '../../lexCommon/types/enums.js';
+import { Plurality, Source, Uninflected } from '../../lexCommon/types/enums.js';
 import { VariantData } from '../../lexCommon/types/assc.js';
 import { Actions } from '../actions.js';
 import { SystemMessageType } from '../../../../types.js';
@@ -145,7 +145,7 @@ export function init(
             if (withInfo) {
                 info.push(translateMorfology(lexKey, withPosInfo, true));
             }
-            if (lexKey.uninflected) {
+            if (lexKey.uninflected === Uninflected.TRUE) {
                 info.push(ut.translate('lex_common__uninflected_short'));
             }
             return (
