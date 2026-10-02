@@ -26,6 +26,7 @@ export enum Source {
     SSC = 'ssc',
     CES = 'ces',
     Corpus = 'cnc',
+    Empty = '---',
 }
 
 export function isValidSource(value: string): value is Source {
@@ -67,6 +68,12 @@ export enum Aspect {
     PERF = 'P',
     IMPERF = 'I',
     BOTH = 'B',
+}
+
+export enum Uninflected {
+    FALSE = 0,
+    TRUE = 1,
+    UNKNOWN = 2,
 }
 
 export enum Plurality {

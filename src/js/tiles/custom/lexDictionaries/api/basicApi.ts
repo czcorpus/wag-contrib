@@ -24,6 +24,9 @@ import { SourceDetails, HTTPHeaders } from '../../../../types.js';
 import { Backlink } from '../../../../page/tile.js';
 import { IDataStreaming } from '../../../../page/streaming.js';
 import { LexDictApi } from './types.js';
+import { Source } from '../../lexCommon/types/enums.js';
+import { QueryMatch } from '../../../../query/index.js';
+import { getCurrentVariant } from '../../lexCommon/types/dictionary.js';
 
 export interface PSJCDataStructure {
     entries: Array<string>;
@@ -36,6 +39,13 @@ export interface SSJCDataStructure {
         payload: string;
     }>;
     query: string;
+}
+
+export interface SSCDataStructure {
+    entries: Array<{
+        id: string;
+        payload: string;
+    }>;
 }
 
 export interface UjcBasicArgs {
@@ -107,6 +117,15 @@ class UjcBasicApi<T> implements LexDictApi<UjcBasicArgs, T> {
     getBacklinkURL(term: string): URL {
         throw new Error('Method not implemented.');
     }
+
+    getArgsFromQueryMatch(queryMatch: QueryMatch): UjcBasicArgs {
+        const variant = getCurrentVariant(queryMatch);
+        if (variant) {
+            return { q: variant.key.lemma };
+        } else {
+            return { q: queryMatch.lemma || queryMatch.word };
+        }
+    }
 }
 
 export class UjcPSJCApi extends UjcBasicApi<PSJCDataStructure> {
@@ -177,5 +196,50 @@ export class UjcSSJCApi extends UjcBasicApi<SSJCDataStructure> {
         backlinkUrl.searchParams.set('where', 'hesla');
         backlinkUrl.searchParams.set('hsubstr', 'no');
         return backlinkUrl;
+    }
+}
+
+export class UjcSSCApi extends UjcBasicApi<SSCDataStructure> {
+    getSourceDescription(
+        streaming: IDataStreaming,
+        tileId: number,
+        lang: string,
+        corpname: string
+    ): Observable<SourceDetails> {
+        return rxOf({
+            tileId,
+            title: this.apiServices.importExternalMessage({
+                'cs-CZ': 'Slovník spisovné češtiny pro školu a veřejnost',
+                'en-US':
+                    'Slovník spisovné češtiny pro školu a veřejnost UNTRANSLATED',
+            }),
+            description: this.apiServices.importExternalMessage({
+                'cs-CZ':
+                    'Slovník spisovné češtiny pro školu a veřejnost, zkratka SSČ, je normativní výkladový slovník českého jazyka zpracovaný a průběžně aktualizovaný Ústavem pro jazyk český Akademie věd České republiky a vydávaný nakladatelstvím Academia. Slovník zahrnuje téměř 50 000 hesel současné češtiny.',
+                'en-US':
+                    'Slovník spisovné češtiny pro školu a veřejnost, zkratka SSČ, je normativní výkladový slovník českého jazyka zpracovaný a průběžně aktualizovaný Ústavem pro jazyk český Akademie věd České republiky a vydávaný nakladatelstvím Academia. Slovník zahrnuje téměř 50 000 hesel současné češtiny. UNTRANSLATED',
+            }),
+            author: 'Ústav pro jazyk český AV ČR',
+            href: null,
+        });
+    }
+
+    getBacklink(queryId: number, subqueryId?: number): Backlink | null {
+        return null;
+    }
+
+    getBacklinkURL(term: string): URL {
+        return null;
+    }
+
+    getArgsFromQueryMatch(queryMatch: QueryMatch): UjcBasicArgs {
+        const variant = getCurrentVariant(queryMatch);
+        if (variant) {
+            return {
+                q: List.map((v) => v.id, variant.sources[Source.SSC] || []),
+            };
+        } else {
+            return { q: [] };
+        }
     }
 }

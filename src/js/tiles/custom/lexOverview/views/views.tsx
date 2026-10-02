@@ -34,7 +34,7 @@ import { List, pipe } from 'cnc-tskit';
 import { initLexComponents } from '../../lexCommon/views.js';
 import { LexItem, LexKey, LexID } from '../../lexCommon/types/dictionary.js';
 import { SubtileRow } from '../../lexCommon/style.js';
-import { Plurality, Source } from '../../lexCommon/types/enums.js';
+import { Plurality, Source, Uninflected } from '../../lexCommon/types/enums.js';
 import { VariantData } from '../../lexCommon/types/assc.js';
 import { Actions } from '../actions.js';
 import { SystemMessageType } from '../../../../types.js';
@@ -44,6 +44,7 @@ import {
     isAsscError,
     isIjpData,
     isIjpError,
+    isValidIjpId,
 } from '../../lexCommon/api.js';
 import { QueryMatch } from '../../../../query/index.js';
 
@@ -129,26 +130,10 @@ export function init(
 
     const LexOverviewHeader: React.FC<{
         tileId: number;
-        source: string;
         selectedVariantIdx: number;
-        selectedVariant: LexItem;
         variants: Array<LexItem>;
-        queryMatches: Array<QueryMatch>;
+        handleVariantChange: (variantIdx: number) => void;
     }> = (props) => {
-        const handleVariantClick = (variantIdx: number) => {
-            dispatcher.dispatch<typeof GlobalActions.UpdateQueryMatches>({
-                name: GlobalActions.UpdateQueryMatches.name,
-                payload: {
-                    newQueryMatches: [
-                        {
-                            ...props.queryMatches[variantIdx],
-                            isCurrent: true,
-                        },
-                    ],
-                },
-            });
-        };
-
         const renderVariant = (
             key: number,
             lexKey: LexKey,
@@ -160,7 +145,7 @@ export function init(
             if (withInfo) {
                 info.push(translateMorfology(lexKey, withPosInfo, true));
             }
-            if (lexKey.uninflected) {
+            if (lexKey.uninflected === Uninflected.TRUE) {
                 info.push(ut.translate('lex_common__uninflected_short'));
             }
             return (
@@ -175,27 +160,15 @@ export function init(
                             {translatePlurality(lexKey, true)}{' '}
                         </span>
                     ) : null}
-                    {clickHandler ? (
-                        <a>
-                            {lexKey.lemma}
-                            {!List.empty(info) ? (
-                                <span className="morphology">
-                                    {' '}
-                                    ({info.join(' ')})
-                                </span>
-                            ) : null}
-                        </a>
-                    ) : (
-                        <span>
-                            {lexKey.lemma}
-                            {!List.empty(info) ? (
-                                <span className="morphology">
-                                    {' '}
-                                    ({info.join(' ')})
-                                </span>
-                            ) : null}
-                        </span>
-                    )}
+                    <span>
+                        {lexKey.lemma}
+                        {!List.empty(info) ? (
+                            <span className="morphology">
+                                {' '}
+                                ({info.join(' ')})
+                            </span>
+                        ) : null}
+                    </span>
                 </h4>
             );
         };
@@ -233,8 +206,8 @@ export function init(
                 props.variants[0].key.plurality !== Plurality.UNKNOWN &&
                 props.variants[0].key.plurality !== undefined);
         return (
-            <S.Header $source={props.source} $width={itemWidth}>
-                <h2>{props.selectedVariant.key.lemma}</h2>
+            <S.Header $width={itemWidth}>
+                <h2>{props.variants[props.selectedVariantIdx].key.lemma}</h2>
                 {displayGrid ? (
                     <div className="variant-grid">
                         {pipe(
@@ -246,7 +219,7 @@ export function init(
                                     hasSameLemmaVariant(variant.key),
                                     !hasSamePosVariant(variant.key),
                                     i !== props.selectedVariantIdx
-                                        ? () => handleVariantClick(i)
+                                        ? () => props.handleVariantChange(i)
                                         : undefined
                                 )
                             )
@@ -444,6 +417,22 @@ export function init(
                 }
                 break;
         }
+        const asscHasForms =
+            asscVariantData && !List.empty(asscVariantData.forms);
+
+        const handleVariantChange = (variantIdx: number) => {
+            dispatcher.dispatch<typeof GlobalActions.UpdateQueryMatches>({
+                name: GlobalActions.UpdateQueryMatches.name,
+                payload: {
+                    newQueryMatches: [
+                        {
+                            ...state.availQueryMatches[variantIdx],
+                            isCurrent: true,
+                        },
+                    ],
+                },
+            });
+        };
 
         return (
             <globalComponents.TileWrapper
@@ -459,12 +448,12 @@ export function init(
                     <LexOverviewHeader
                         tileId={props.tileId}
                         selectedVariantIdx={state.selectedVariantIdx}
-                        selectedVariant={selectedVariant}
-                        source={state.variantSource}
                         variants={state.variants}
-                        queryMatches={state.availQueryMatches}
+                        handleVariantChange={handleVariantChange}
                     />
-                    {selectedVariant.posSource ? (
+
+                    {selectedVariant.posSource &&
+                    selectedVariant.posSource !== Source.Empty ? (
                         <LexOverviewBasics
                             tileId={props.tileId}
                             source={selectedVariant.posSource}
@@ -474,21 +463,32 @@ export function init(
                             corpname={state.referenceCorpus}
                         />
                     ) : null}
+
                     {isIjpData(state.sourceData.ijp) ? (
                         <ijpViews.Subtile
                             tileId={props.tileId}
                             data={state.sourceData.ijp.data}
                         />
                     ) : null}
-                    {!state.isBusy &&
-                    !ijpHasForms() &&
-                    asscVariantData &&
-                    !List.empty(asscVariantData.forms) ? (
+                    {!state.isBusy && !ijpHasForms() && asscHasForms ? (
                         <asscViews.Subtile
                             tileId={props.tileId}
                             variant={asscVariantData}
                         />
                     ) : null}
+                    {!state.isBusy &&
+                    !ijpHasForms() &&
+                    !asscHasForms &&
+                    !List.empty(selectedVariant.sources[Source.IJP] || []) &&
+                    !isValidIjpId(selectedVariant.sources[Source.IJP][0].id) ? (
+                        <ijpViews.Reference
+                            tileId={props.tileId}
+                            ijpId={selectedVariant.sources[Source.IJP][0].id}
+                            variants={state.variants}
+                            handleVariantChange={handleVariantChange}
+                        />
+                    ) : null}
+
                     {selectedQueryMatch ? (
                         <corpusViews.Subtile
                             tileId={props.tileId}
@@ -504,6 +504,7 @@ export function init(
                             corpname={state.referenceCorpus}
                         />
                     )}
+
                     {asscVariantData && asscVariantData.origin ? (
                         <LexOverviewOrigin
                             tileId={props.tileId}

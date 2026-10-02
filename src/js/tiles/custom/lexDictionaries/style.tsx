@@ -257,3 +257,123 @@ export const PSJCEntry = styled.li<{ theme: Theme }>`
         font-weight: bold;
     }
 `;
+
+// ---------------- <SSCEntry /> --------------------------------------
+
+export const SSCEntry = styled.li<{ theme: Theme }>`
+    .lemma {
+        color: ${(props) => getLexTheme(props.theme).lemmaColor} !important;
+    }
+
+    // --------------- original styles ----------------------------
+
+    .entry,
+    .page-number,
+    .footnotes-container {
+        font-family: 'Times New Roman', Times, serif;
+    }
+
+    .bold {
+        font-weight: bold;
+    }
+
+    .italic {
+        font-style: italic;
+    }
+
+    .entry {
+        display: block;
+        padding-left: 0.7cm;
+        text-indent: -0.7cm;
+    }
+
+    .entry,
+    .page-number {
+        margin: 16px 0;
+        line-height: 1.5;
+    }
+
+    .page-number {
+        text-align: center;
+        width: 5rem; /* originally: 10% */
+    }
+
+    .cs-x-transcr {
+        font-size: 95%;
+        font-style: italic;
+    }
+
+    .reader-search-result-match {
+        font-weight: bold;
+    }
+
+    .itj-pb {
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+    .tooltip {
+        display: none;
+    }
+
+    span.corr {
+        font-style: italic;
+        margin-right: 1px;
+    }
+
+    .note-ref {
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+    a[id^='footnote-'] {
+        text-decoration: none;
+    }
+
+    div.footnote {
+        display: flex;
+    }
+
+    div.footnote p {
+        margin: 0;
+        text-indent: 0 !important;
+        line-height: 1.2 !important;
+        break-inside: avoid-column;
+        text-align: left;
+    }
+
+    div.footnote .note-ref-container {
+        display: block;
+        min-width: 2.5em;
+        text-align: right;
+        margin-right: 0.5em;
+    }
+
+    .footnotes-container::before {
+        content: '';
+        border-top: 1px solid black;
+        display: block;
+        width: 30%;
+    }
+
+    .footnotes {
+        column-count: 2;
+        column-fill: balance;
+        margin-top: 10px;
+        margin-bottom: 20px;
+        gap: 30px;
+    }
+
+    .single-note {
+        column-count: 1;
+    }
+
+    .entries {
+        display: flex;
+        flex-flow: wrap;
+    }
+
+    .entries > :not(.page-number) {
+        width: calc(100% - 5rem); /* originally: 90% */
+    }
+`;

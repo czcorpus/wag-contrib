@@ -45,7 +45,10 @@ export const SubtileWrapper = styled.div<{
     }
     padding: 0.8em 1em;
     background-color: ${(props) =>
-        getLexTheme(props.theme).sourceColors[props.$source]};
+        props.$source
+            ? getLexTheme(props.theme).sourceColors[props.$source] ||
+              getLexTheme(props.theme).sourceColors.dicts
+            : null};
     border: ${(props) =>
         props.$systemMessageType
             ? `2px solid ${getMessageColor(props.$systemMessageType)}`

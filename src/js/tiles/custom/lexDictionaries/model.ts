@@ -28,11 +28,12 @@ import {
     isSSJCDataStructure,
     isPSJCDataStructure,
     LexDictApi,
+    isSSCDataStructure,
 } from './api/types.js';
 import {
     PSJCDataStructure,
+    SSCDataStructure,
     SSJCDataStructure,
-    UjcBasicArgs,
 } from './api/basicApi.js';
 import { forkJoin, tap } from 'rxjs';
 import { getCurrentVariant } from '../lexCommon/types/dictionary.js';
@@ -44,7 +45,7 @@ export interface LexDictionariesModelState {
     sources: Array<{
         type: Source;
         loaded: boolean;
-        data: SSJCDataStructure | PSJCDataStructure;
+        data: SSJCDataStructure | PSJCDataStructure | SSCDataStructure;
         backlink: Backlink;
     }>;
     activeDictTab: number;
@@ -103,15 +104,7 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
                 state.activeDictTab = -1;
             },
             (state, action, dispatch, ds) => {
-                var searchTerm: string;
-                const variant = getCurrentVariant(state.currQueryMatch);
-                if (variant) {
-                    searchTerm = variant.key.lemma;
-                } else {
-                    searchTerm =
-                        state.currQueryMatch.lemma || state.currQueryMatch.word;
-                }
-                this.loadData(ds, dispatch, searchTerm);
+                this.loadData(ds, dispatch, state.currQueryMatch);
             }
         );
 
@@ -151,6 +144,18 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
                     ].getBacklink(action.payload.queryId);
                 } else if (
                     isPSJCDataStructure(
+                        state.sources[action.payload.queryId].type,
+                        action.payload.data
+                    ) &&
+                    !List.empty(action.payload.data.entries)
+                ) {
+                    state.sources[action.payload.queryId].data =
+                        action.payload.data;
+                    state.sources[action.payload.queryId].backlink = this.apis[
+                        action.payload.queryId
+                    ].getBacklink(action.payload.queryId);
+                } else if (
+                    isSSCDataStructure(
                         state.sources[action.payload.queryId].type,
                         action.payload.data
                     ) &&
@@ -234,26 +239,30 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
     private loadData(
         streaming: IDataStreaming,
         dispatch: SEDispatcher,
-        query: string
+        queryMatch: QueryMatch
     ) {
-        const args: UjcBasicArgs = {
-            q: query,
-        };
         forkJoin(
             List.map(
                 (api, i) =>
-                    api.call(streaming, this.tileId, i, args).pipe(
-                        tap((data) => {
-                            dispatch<typeof Actions.PartialTileDataLoaded>({
-                                name: Actions.PartialTileDataLoaded.name,
-                                payload: {
-                                    tileId: this.tileId,
-                                    queryId: i,
-                                    data: data,
-                                },
-                            });
-                        })
-                    ),
+                    api
+                        .call(
+                            streaming,
+                            this.tileId,
+                            i,
+                            api.getArgsFromQueryMatch(queryMatch)
+                        )
+                        .pipe(
+                            tap((data) => {
+                                dispatch<typeof Actions.PartialTileDataLoaded>({
+                                    name: Actions.PartialTileDataLoaded.name,
+                                    payload: {
+                                        tileId: this.tileId,
+                                        queryId: i,
+                                        data: data,
+                                    },
+                                });
+                            })
+                        ),
                 this.apis
             )
         ).subscribe({

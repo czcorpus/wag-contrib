@@ -20,6 +20,7 @@ import { Dict, List, pipe } from 'cnc-tskit';
 import { IActionDispatcher, ViewUtils } from 'kombo';
 import * as React from 'react';
 import { GlobalComponents } from '../../../../../views/common/index.js';
+import { Actions as GlobalActions } from '../../../../../models/actions.js';
 import {
     CaseData,
     ComparisonData,
@@ -30,6 +31,9 @@ import { IJPData } from '../../../lexCommon/types/ijp.js';
 import { initLexComponents } from '../../../lexCommon/views.js';
 import { SubtileRow } from '../../../lexCommon/style.js';
 import { Source } from '../../../lexCommon/types/enums.js';
+import { QueryMatch } from '../../../../../query/index.js';
+import { getValidIjpId } from '../../../lexCommon/api.js';
+import { LexItem } from '../../../lexCommon/types/dictionary.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -38,6 +42,12 @@ export function init(
     Subtile: React.FC<{
         tileId: number;
         data: IJPData;
+    }>;
+    Reference: React.FC<{
+        tileId: number;
+        ijpId: string;
+        variants: Array<LexItem>;
+        handleVariantChange: (variantIdx: number) => void;
     }>;
 } {
     const lexComponents = initLexComponents(dispatcher, ut);
@@ -395,7 +405,44 @@ export function init(
         );
     };
 
+    // -------------------- <IjpSubtileView /> -----------------------------------------------
+
+    const IjpReferenceView: React.FC<{
+        tileId: number;
+        ijpId: string;
+        variants: Array<LexItem>;
+        handleVariantChange: (variantIdx: number) => void;
+    }> = (props) => {
+        const validId = getValidIjpId(props.ijpId);
+        const variantIdx = props.variants.findIndex((variant) => {
+            return variant.sources[Source.IJP]?.some(
+                (sourceItem) => sourceItem.id === validId
+            );
+        });
+
+        return (
+            <lexComponents.Subtile tileId={props.tileId} source={Source.IJP}>
+                <SubtileRow>
+                    <span className="key">
+                        {ut.translate('lex_overview__ijp_reference_key')}:
+                    </span>
+                    <span className="value">
+                        {ut.translate('lex_overview__ijp_reference_value')}{' '}
+                        <a
+                            onClick={() =>
+                                props.handleVariantChange(variantIdx)
+                            }
+                        >
+                            {props.variants[variantIdx].key.lemma}
+                        </a>
+                    </span>
+                </SubtileRow>
+            </lexComponents.Subtile>
+        );
+    };
+
     return {
         Subtile: IjpSubtileView,
+        Reference: IjpReferenceView,
     };
 }

@@ -24,8 +24,16 @@ import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
 import { LexDictionariesModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
-import { PSJCDataStructure, SSJCDataStructure } from './api/basicApi.js';
-import { isPSJCDataStructure, isSSJCDataStructure } from './api/types.js';
+import {
+    PSJCDataStructure,
+    SSCDataStructure,
+    SSJCDataStructure,
+} from './api/basicApi.js';
+import {
+    isPSJCDataStructure,
+    isSSCDataStructure,
+    isSSJCDataStructure,
+} from './api/types.js';
 import { Actions } from './actions.js';
 import { initLexComponents } from '../lexCommon/views.js';
 
@@ -102,6 +110,24 @@ export function init(
         );
     };
 
+    // -------------------- <SSCDataView /> -----------------------------------------------
+
+    const SSCDataView: React.FC<{ data: SSCDataStructure }> = (props) => {
+        return (
+            <ul>
+                {List.map(
+                    (entry, i) => (
+                        <S.SSCEntry
+                            key={i}
+                            dangerouslySetInnerHTML={{ __html: entry.payload }}
+                        />
+                    ),
+                    props.data.entries
+                )}
+            </ul>
+        );
+    };
+
     // -------------------- <LexDictionariesTileView /> -----------------------------------------------
 
     const LexDictionariesTileView: React.FC<CoreTileComponentProps> = (
@@ -128,7 +154,7 @@ export function init(
         }
         const current = state.sources[tabIdx];
         const source = current
-            ? { corp: ut.translate(`lex_dictionaries__label_${current.type}`) }
+            ? { corp: ut.translate(`lex_common__source_${current.type}`) }
             : null;
         return (
             <globalComponents.TileWrapper
@@ -174,10 +200,21 @@ export function init(
 
                         <S.Scroller>
                             {current && current.data !== null ? (
-                                isPSJCDataStructure(current.type, current.data) ? (
+                                isPSJCDataStructure(
+                                    current.type,
+                                    current.data
+                                ) ? (
                                     <PSJCDataView data={current.data} />
-                                ) : isSSJCDataStructure(current.type, current.data) ? (
+                                ) : isSSJCDataStructure(
+                                      current.type,
+                                      current.data
+                                  ) ? (
                                     <SSJCDataView data={current.data} />
+                                ) : isSSCDataStructure(
+                                      current.type,
+                                      current.data
+                                  ) ? (
+                                    <SSCDataView data={current.data} />
                                 ) : null
                             ) : null}
                         </S.Scroller>

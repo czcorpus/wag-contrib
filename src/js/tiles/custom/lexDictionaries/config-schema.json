@@ -61,6 +61,18 @@
             "items": {
                 "type": "string"
             }
+        },
+        "lemmatizationLevels": {
+            "description": "In case a tile supports only some of the lemmatization levels,\nit should be configured. If empty, WaG assumes the tile supports\nall the types.",
+            "type": "array",
+            "items": {
+                "enum": [
+                    "form",
+                    "lemma",
+                    "sublemma"
+                ],
+                "type": "string"
+            }
         }
     },
     "required": [
@@ -72,7 +84,7 @@
             "type": "object",
             "properties": {
                 "type": {
-                    "$ref": "#/definitions/ApiType"
+                    "$ref": "#/definitions/Source"
                 },
                 "apiURL": {
                     "type": "string"
@@ -83,9 +95,16 @@
                 "type"
             ]
         },
-        "ApiType": {
+        "Source": {
             "enum": [
+                "assc",
+                "ces",
+                "cnc",
+                "djd",
+                "ijp",
                 "psjc",
+                "sjc",
+                "ssc",
                 "ssjc"
             ],
             "type": "string"

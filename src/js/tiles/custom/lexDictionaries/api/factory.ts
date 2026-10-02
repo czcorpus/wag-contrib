@@ -18,7 +18,7 @@
 
 import { IApiServices } from '../../../../appServices.js';
 import { Source } from '../../lexCommon/types/enums.js';
-import { UjcSSJCApi, UjcPSJCApi } from './basicApi.js';
+import { UjcSSJCApi, UjcPSJCApi, UjcSSCApi } from './basicApi.js';
 import { LexDictApi } from './types.js';
 
 export function createApiInstance(
@@ -31,6 +31,8 @@ export function createApiInstance(
             return new UjcSSJCApi(url, apiServices);
         case Source.PSJC:
             return new UjcPSJCApi(url, apiServices);
+        case Source.SSC:
+            return new UjcSSCApi(url, apiServices);
         default:
             throw new Error(`Unsupported API type: ${apiType}`);
     }

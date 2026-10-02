@@ -70,7 +70,6 @@ export const DataTable = styled.table<{ theme: Theme }>`
 
 export const Header = styled.div<{
     theme: Theme;
-    $source?: string;
     $width?: string;
 }>`
     h2 {
@@ -95,9 +94,7 @@ export const Header = styled.div<{
             border-radius: ${(props) =>
                 getLexTheme(props.theme).subtileBorderRadius};
             border: 1px solid
-                ${(props) =>
-                    getLexTheme(props.theme).sourceColors[props.$source]};
-            cursor: pointer;
+                ${(props) => getLexTheme(props.theme).variantButtonColor};
 
             .morphology {
                 font-size: 0.8em;
@@ -108,24 +105,21 @@ export const Header = styled.div<{
                 font-size: 0.6em;
                 font-style: bold;
             }
-
-            a {
-                width: 100%;
-                text-decoration: none;
-                cursor: pointer;
-            }
         }
 
         .selected {
             background-color: ${(props) =>
-                getLexTheme(props.theme).sourceColors[props.$source]};
+                getLexTheme(props.theme).variantButtonColor};
             cursor: default;
+        }
+
+        .variant:not(.selected) {
+            cursor: pointer;
         }
 
         .variant:not(.selected):hover {
             background-color: ${(props) =>
-                getLexTheme(props.theme).sourceColors[props.$source]}44;
-            // the 44 adds transparency to base color in hex format
+                getLexTheme(props.theme).variantButtonColor}44;
         }
     }
 `;
