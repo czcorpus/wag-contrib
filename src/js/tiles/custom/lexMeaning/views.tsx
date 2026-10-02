@@ -79,7 +79,7 @@ export function init(
                 source={Source.ASSC}
                 className="data-box"
             >
-                <SubtileRow className="scroller">
+                <S.Scroller>
                     {List.flatMap(
                         (blocks, i) =>
                             List.map((block, j) => {
@@ -160,7 +160,7 @@ export function init(
                             }, blocks.data),
                         state.data.assc
                     )}
-                </SubtileRow>
+                </S.Scroller>
             </lexComponents.Subtile>
         );
     };
@@ -176,7 +176,7 @@ export function init(
                 source={Source.IJP}
                 className="data-box"
             >
-                <SubtileRow className="scroller">
+                <S.Scroller>
                     {List.map(
                         (item, i) => (
                             <>
@@ -240,7 +240,7 @@ export function init(
                         ),
                         state.data.ijp
                     )}
-                </SubtileRow>
+                </S.Scroller>
             </lexComponents.Subtile>
         );
     };
@@ -256,7 +256,7 @@ export function init(
                 source={Source.SSC}
                 className="data-box"
             >
-                <SubtileRow className="scroller">
+                <S.Scroller>
                     {List.map(
                         (item, i) => (
                             <>
@@ -279,7 +279,7 @@ export function init(
                         ),
                         state.data.ssc
                     )}
-                </SubtileRow>
+                </S.Scroller>
             </lexComponents.Subtile>
         );
     };
@@ -431,10 +431,10 @@ export function init(
                 >
                     {props.tileHeader}
                     <S.MeaningTileView>
-                        <div className="stretch">
+                        <S.Stretcher>
                             {renderData(state.usedSource)}
                             {renderErrors()}
-                        </div>
+                        </S.Stretcher>
                     </S.MeaningTileView>
                 </globalComponents.Subtile>
 
