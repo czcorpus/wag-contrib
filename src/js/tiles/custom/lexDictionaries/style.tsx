@@ -28,11 +28,15 @@ export const LexDictionariesTileView = styled(LexTileBase)`
     height: 100%;
     width: 100%;
     min-height: 25em;
+
+    ${(props) => props.theme.cssMobileScreen} {
+        min-height: 0em;
+    }
 `;
 
 // ---------------- <Stretcher /> --------------------------------------
 
-export const Stretcher = styled.div`
+export const Stretcher = styled.div<{ theme: Theme }>`
     position: absolute;
     top: 0;
     left: 0;
@@ -41,6 +45,11 @@ export const Stretcher = styled.div`
 
     display: flex;
     flex-direction: column;
+
+    ${(props) => props.theme.cssMobileScreen} {
+        position: static;
+        max-height: 75vh;
+    }
 `;
 
 // ---------------- <Scroller /> --------------------------------------

@@ -27,35 +27,19 @@ export const MeaningTileView = styled(LexTileBase)<{ theme: Theme }>`
     position: relative;
     height: 100%;
     width: 100%;
+    min-height: 25em;
 
-    .stretch {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+    .error-box {
+    }
 
-        display: flex;
-        flex-direction: column;
+    .data-box {
+        flex-grow: 1;
+        overflow-y: hidden;
 
-        .error-box {
-        }
-
-        .data-box {
-            flex-grow: 1;
-            overflow-y: hidden;
-
-            .scroller {
-                padding: 0.5em;
-                overflow-y: auto;
-
-                hr.itemDivider {
-                    height: 2px;
-                    background-color: ${(props) =>
-                        props.theme.tileBackgroundColor};
-                    border-radius: 2px;
-                }
-            }
+        hr.itemDivider {
+            height: 2px;
+            background-color: ${(props) => props.theme.tileBackgroundColor};
+            border-radius: 2px;
         }
     }
 
@@ -64,10 +48,41 @@ export const MeaningTileView = styled(LexTileBase)<{ theme: Theme }>`
         font-size: 11px;
     }
 
-    min-height: 25em;
+    ${(props) => props.theme.cssMobileScreen} {
+        min-height: 0em;
+    }
 `;
 
+// ---------------- <UsageNotesTileView /> --------------------------------------
+
 export const UsageNotesTileView = styled(LexTileBase)``;
+
+// ---------------- <Stretcher /> --------------------------------------
+
+export const Stretcher = styled.div<{ theme: Theme }>`
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    ${(props) => props.theme.cssMobileScreen} {
+        position: static;
+        max-height: 75vh;
+    }
+`;
+
+// ---------------- <Scroller /> --------------------------------------
+
+export const Scroller = styled.div`
+    padding: 0.5em;
+    overflow-y: auto;
+`;
+
+// ---------------- <MeaningItem /> --------------------------------------
 
 export const MeaningItem = styled.div<{ theme: Theme }>`
     margin-bottom: 1em;
@@ -88,6 +103,8 @@ export const MeaningItem = styled.div<{ theme: Theme }>`
         display: none;
     }
 `;
+
+// ---------------- <MeaningHead /> --------------------------------------
 
 export const MeaningHead = styled.div`
     margin-bottom: 25px;
