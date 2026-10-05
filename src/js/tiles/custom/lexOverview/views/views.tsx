@@ -34,7 +34,11 @@ import { List, pipe } from 'cnc-tskit';
 import { initLexComponents } from '../../lexCommon/views.js';
 import { LexItem, LexKey, LexID } from '../../lexCommon/types/dictionary.js';
 import { SubtileRow } from '../../lexCommon/style.js';
-import { Plurality, Source, Uninflected } from '../../lexCommon/types/enums.js';
+import {
+    Plurality,
+    Source,
+    Uninflected,
+} from '../../lexCommon/types/enums.js';
 import { VariantData } from '../../lexCommon/types/assc.js';
 import { Actions } from '../actions.js';
 import { SystemMessageType } from '../../../../types.js';
@@ -46,7 +50,6 @@ import {
     isIjpError,
     isValidIjpId,
 } from '../../lexCommon/api.js';
-import { QueryMatch } from '../../../../query/index.js';
 
 interface BasicOverviewData {
     pronunciation?: string;

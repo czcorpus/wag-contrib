@@ -60,6 +60,7 @@ export enum Gender {
     MASCULINE_ANIM = 'M',
     MASCULINE_INAN = 'I',
     MASCULINE_ANIM_INAN = 'MI',
+    MASCULINE = 'MX',
     FEMININE = 'F',
     NEUTER = 'N',
 }
