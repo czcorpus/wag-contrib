@@ -192,6 +192,10 @@ export const MeaningBody = styled.div`
     // -------- ASSC adjusted styles -------
 
     // hide souslovi meanings and examples
+    .style_souslovi:has(+ .style_souslovi) {
+        margin-bottom: 0 !important;
+    }
+
     .style_souslovi {
         .varianta_h2_rel {
             font-weight: 400 !important;
@@ -211,7 +215,8 @@ export const MeaningBody = styled.div`
     }
 
     .vskipBig,
-    .vskipMedium {
+    .vskipMedium,
+    .vskipTiny {
         display: none;
     }
 `;
