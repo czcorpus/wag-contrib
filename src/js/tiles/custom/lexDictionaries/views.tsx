@@ -162,7 +162,7 @@ export function init(
                 isBusy={state.isBusy}
                 error={state.error}
                 hasData={List.some((d) => d.data !== null, state.sources)}
-                noDataMessage={ut.translate('lex_common__not_found')}
+                noDataMessage={ut.translate('lex_dictionaries__not_found')}
                 backlink={current ? current.backlink : null}
                 supportsTileReload={props.supportsReloadOnError}
                 isSubtileContainer={props.isSubtileContainer}

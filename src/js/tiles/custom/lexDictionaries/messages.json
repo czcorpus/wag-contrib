@@ -3,12 +3,14 @@
         "lex_dictionaries__main_label": "Slovníky",
         "lex_dictionaries__short_label_ssjc": "SSJČ",
         "lex_dictionaries__short_label_psjc": "PSJČ",
-        "lex_dictionaries__short_label_ssc": "SSČ"
+        "lex_dictionaries__short_label_ssc": "SSČ",
+        "lex_dictionaries__not_found": "Litujeme, v žádném z použitých slovníků se hledaný výraz nevyskytuje"
     },
     "en-US": {
         "lex_dictionaries__main_label": "Dictionaries",
         "lex_dictionaries__short_label_ssjc": "SSJČ",
         "lex_dictionaries__short_label_psjc": "PSJČ",
-        "lex_dictionaries__short_label_ssc": "SSČ"
+        "lex_dictionaries__short_label_ssc": "SSČ",
+        "lex_dictionaries__not_found": "Our apologies, the searched term does not occur in any of the used dictionaries"
     }
 }
