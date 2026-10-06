@@ -20,7 +20,6 @@ import { Dict, List, pipe } from 'cnc-tskit';
 import { IActionDispatcher, ViewUtils } from 'kombo';
 import * as React from 'react';
 import { GlobalComponents } from '../../../../../views/common/index.js';
-import { Actions as GlobalActions } from '../../../../../models/actions.js';
 import {
     CaseData,
     ComparisonData,
@@ -31,7 +30,6 @@ import { IJPData } from '../../../lexCommon/types/ijp.js';
 import { initLexComponents } from '../../../lexCommon/views.js';
 import { SubtileRow } from '../../../lexCommon/style.js';
 import { Source } from '../../../lexCommon/types/enums.js';
-import { QueryMatch } from '../../../../../query/index.js';
 import { getValidIjpId } from '../../../lexCommon/api.js';
 import { LexItem } from '../../../lexCommon/types/dictionary.js';
 

@@ -34,11 +34,7 @@ import { List, pipe } from 'cnc-tskit';
 import { initLexComponents } from '../../lexCommon/views.js';
 import { LexItem, LexKey, LexID } from '../../lexCommon/types/dictionary.js';
 import { SubtileRow } from '../../lexCommon/style.js';
-import {
-    Plurality,
-    Source,
-    Uninflected,
-} from '../../lexCommon/types/enums.js';
+import { Plurality, Source, Uninflected } from '../../lexCommon/types/enums.js';
 import { VariantData } from '../../lexCommon/types/assc.js';
 import { Actions } from '../actions.js';
 import { SystemMessageType } from '../../../../types.js';
@@ -79,29 +75,36 @@ export function init(
 
     const translateMorfology = (
         lexKey: LexKey,
-        withPosInfo: boolean,
+        renderPos: boolean,
+        renderSpecifier: boolean,
         short: boolean
     ) => {
         const parts = [];
-        if (withPosInfo) {
+        if (renderPos) {
             parts.push(
                 short
                     ? ut.translate(`lex_common__pos_short_${lexKey.pos}`)
                     : ut.translate(`lex_common__pos_${lexKey.pos}`)
             );
         }
-        if (lexKey.gender) {
-            parts.push(
-                short
-                    ? ut.translate(`lex_common__gender_short_${lexKey.gender}`)
-                    : ut.translate(`lex_common__gender_${lexKey.gender}`)
-            );
-        } else if (lexKey.aspect) {
-            parts.push(
-                short
-                    ? ut.translate(`lex_common__aspect_short_${lexKey.aspect}`)
-                    : ut.translate(`lex_common__aspect_${lexKey.aspect}`)
-            );
+        if (renderSpecifier) {
+            if (lexKey.gender) {
+                parts.push(
+                    short
+                        ? ut.translate(
+                              `lex_common__gender_short_${lexKey.gender}`
+                          )
+                        : ut.translate(`lex_common__gender_${lexKey.gender}`)
+                );
+            } else if (lexKey.aspect) {
+                parts.push(
+                    short
+                        ? ut.translate(
+                              `lex_common__aspect_short_${lexKey.aspect}`
+                          )
+                        : ut.translate(`lex_common__aspect_${lexKey.aspect}`)
+                );
+            }
         }
         return parts.join(' ');
     };
@@ -140,13 +143,15 @@ export function init(
         const renderVariant = (
             key: number,
             lexKey: LexKey,
-            withInfo: boolean,
-            withPosInfo: boolean,
+            renderPos: boolean,
+            renderSpecifier: boolean,
             clickHandler?: () => void
         ) => {
             const info = [];
-            if (withInfo) {
-                info.push(translateMorfology(lexKey, withPosInfo, true));
+            if (renderPos || renderSpecifier) {
+                info.push(
+                    translateMorfology(lexKey, renderPos, renderSpecifier, true)
+                );
             }
             if (lexKey.uninflected === Uninflected.TRUE) {
                 info.push(ut.translate('lex_common__uninflected_short'));
@@ -176,20 +181,17 @@ export function init(
             );
         };
 
-        const hasSameLemmaVariant = (key: LexKey) => {
+        const sameLemmaNotPosExists = (key: LexKey) => {
             return (
                 List.findIndex(
                     (v, i) =>
-                        v.key.lemma === key.lemma &&
-                        (v.key.pos !== key.pos ||
-                            v.key.gender !== key.gender ||
-                            v.key.aspect !== key.aspect),
+                        v.key.lemma === key.lemma && v.key.pos !== key.pos,
                     props.variants
                 ) !== -1
             );
         };
 
-        const hasSamePosVariant = (key: LexKey) => {
+        const sameLemmaAndPosNotSpecifierExists = (key: LexKey) => {
             return (
                 List.findIndex(
                     (v, i) =>
@@ -200,6 +202,15 @@ export function init(
                     props.variants
                 ) !== -1
             );
+        };
+
+        const someHomonymyExists = () => {
+            for (const v of props.variants) {
+                if (sameLemmaNotPosExists(v.key)) {
+                    return true;
+                }
+            }
+            return false;
         };
 
         const itemWidth = List.size(props.variants) === 4 ? '35%' : undefined;
@@ -219,8 +230,10 @@ export function init(
                                 renderVariant(
                                     i,
                                     variant.key,
-                                    hasSameLemmaVariant(variant.key),
-                                    !hasSamePosVariant(variant.key),
+                                    someHomonymyExists(),
+                                    sameLemmaAndPosNotSpecifierExists(
+                                        variant.key
+                                    ),
                                     i !== props.selectedVariantIdx
                                         ? () => props.handleVariantChange(i)
                                         : undefined
@@ -307,6 +320,7 @@ export function init(
                               )
                             : translateMorfology(
                                   props.selectedVariant.key,
+                                  true,
                                   true,
                                   false
                               )}
