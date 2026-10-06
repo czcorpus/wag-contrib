@@ -169,7 +169,8 @@ export function isValidIjpId(id: string): boolean {
 }
 
 export function getValidIjpId(id: string): string {
-    return id.split('_').at(-1) ?? id;
+    const parts = id.replace('__', '').split('_');
+    return parts.length >= 3 ? parts.slice(2).join('_') : id;
 }
 
 export class LexApi implements ResourceApi<LexArgs, LexResponse> {
