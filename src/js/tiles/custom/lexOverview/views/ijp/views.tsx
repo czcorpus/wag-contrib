@@ -419,7 +419,9 @@ export function init(
                 (sourceItem) => sourceItem.id === validId
             );
         });
-
+        if (variantIdx === -1) {
+            return null;
+        }
         return (
             <lexComponents.Subtile tileId={props.tileId} source={Source.IJP}>
                 <SubtileRow>
