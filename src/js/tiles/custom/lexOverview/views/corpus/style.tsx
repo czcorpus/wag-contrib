@@ -20,26 +20,27 @@
 
 import { styled } from 'styled-components';
 import { Theme } from '../../../../../page/theme.js';
+import { getLexTheme } from '../../../lexCommon/theme.js';
 
-// ------------- <Stars /> -----------------------------
+// ------------- <FreqBand /> -----------------------------
 
-export const Stars = styled.span<{ theme: Theme }>`
-    display: block;
-    white-space: nowrap;
+export const FreqBand = styled.span<{ theme: Theme }>`
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    font-size: 1.4em;
+`;
 
-    .star {
-        vertical-align: sub;
-        margin-right: 0.1em;
-        display: inline-block;
-        width: 1em;
-        height: 1em;
+export const FreqBlock = styled.span<{ theme: Theme; $height: number }>`
+    margin-right: 0.2em;
+    width: 1.1em;
+    height: ${(props) => props.$height}em;
+
+    &.empty {
+        background-color: ${(props) => getLexTheme(props.theme).overlayColor};
     }
 
-    .star.empty {
-        background-color: ${(props) => props.theme.colorLightText};
-    }
-
-    .star.full {
+    &.full {
         background-color: ${(props) => props.theme.colorDefaultText};
     }
 `;
