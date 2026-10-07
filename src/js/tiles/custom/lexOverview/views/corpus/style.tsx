@@ -29,18 +29,25 @@ export const FreqBand = styled.span<{ theme: Theme }>`
     flex-wrap: nowrap;
     align-items: flex-end;
     font-size: 1.4em;
+    margin: 0.5em 0;
 `;
 
-export const FreqBlock = styled.span<{ theme: Theme; $height: number }>`
+export const FreqBlock = styled.span<{
+    theme: Theme;
+    $height: number;
+    $opacity: number;
+}>`
     margin-right: 0.2em;
     width: 1.1em;
     height: ${(props) => props.$height}em;
+    filter: opacity(${(props) => props.$opacity});
 
-    &.empty {
+    &.empty-block {
         background-color: ${(props) => getLexTheme(props.theme).overlayColor};
+        border: solid 1px ${(props) => props.theme.colorDefaultText}22;
     }
 
-    &.full {
+    &.full-block {
         background-color: ${(props) => props.theme.colorDefaultText};
     }
 `;

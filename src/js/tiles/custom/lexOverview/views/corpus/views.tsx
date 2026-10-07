@@ -61,8 +61,11 @@ export function init(
                 {[1, 2, 3, 4, 5, 6, 7].map((v) => (
                     <S.FreqBlock
                         key={v}
-                        className={`block ${v <= freqBand ? 'full' : 'empty'}`}
+                        className={`block ${v <= freqBand ? 'full-block' : 'empty-block'}`}
                         $height={v / 7}
+                        $opacity={
+                            v <= freqBand ? 0.6 * (v / freqBand) + 0.4 : 1
+                        }
                     />
                 ))}
             </S.FreqBand>
