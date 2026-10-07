@@ -91,6 +91,7 @@ export const MeaningItem = styled.div<{ theme: Theme }>`
 
     &.parent {
         margin: 0 1em;
+        margin-top: 1em;
         padding: 0.5em 1em;
         background-color: ${(props) => getLexTheme(props.theme).overlayColor};
         border-radius: ${(props) =>

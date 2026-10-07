@@ -44,7 +44,7 @@ export const FreqBlock = styled.span<{
 
     &.empty-block {
         background-color: ${(props) => getLexTheme(props.theme).overlayColor};
-        border: solid 1px ${(props) => props.theme.colorDefaultText}22;
+        border: solid 1px ${(props) => props.theme.colorDefaultText}11;
     }
 
     &.full-block {
