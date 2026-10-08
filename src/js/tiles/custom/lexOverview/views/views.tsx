@@ -64,10 +64,18 @@ export function init(
     const ijpViews = initIjpViews(dispatcher, ut);
     const corpusViews = initCorpusViews(dispatcher, ut);
 
+    const samePos = (sourceData: Array<LexID>): boolean => {
+        if (sourceData.length === 0) {
+            return true;
+        }
+        const firstPos = sourceData[0].key.pos;
+        return sourceData.every((item) => item.key.pos === firstPos);
+    };
+
     const translatePoSFromSource = (sourceData: Array<LexID>) => {
         const posList = pipe(
             sourceData,
-            List.reduce((acc, v, i) => List.addUnique(v.pos, acc), []),
+            List.reduce((acc, v, i) => List.addUnique(v.key.pos, acc), []),
             List.map((v) => ut.translate(`lex_common__pos_${v}`))
         );
         return posList.join(', ');
@@ -312,14 +320,23 @@ export function init(
                         {ut.translate('lex_overview__overview_part_of_speech')}:
                     </span>
                     <span className="value">
-                        {props.selectedVariant.key.pos.length > 1
+                        {props.selectedVariant.sources[
+                            props.selectedVariant.posSource
+                        ]?.length > 0 &&
+                        !samePos(
+                            props.selectedVariant.sources[
+                                props.selectedVariant.posSource
+                            ]
+                        )
                             ? translatePoSFromSource(
                                   props.selectedVariant.sources[
                                       props.selectedVariant.posSource
                                   ]
                               )
                             : translateMorfology(
-                                  props.selectedVariant.key,
+                                  props.selectedVariant.sources[
+                                      props.selectedVariant.posSource
+                                  ][0].key,
                                   true,
                                   true,
                                   false
