@@ -64,7 +64,7 @@ export function init(
                         className={`block ${v <= freqBand ? 'full-block' : 'empty-block'}`}
                         $height={v / 7}
                         $opacity={
-                            v <= freqBand ? 0.6 * (v / freqBand) + 0.4 : 1
+                            v < freqBand ? 1 - (0.6 * (freqBand - v)) / 7 : 1
                         }
                     />
                 ))}
