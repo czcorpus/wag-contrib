@@ -25,13 +25,14 @@ import {
     ComparisonData,
     ConjugationData,
 } from '../../../lexCommon/types/ijp.js';
-import * as S from '../style.js';
+import * as LS from '../style.js';
 import { IJPData } from '../../../lexCommon/types/ijp.js';
 import { initLexComponents } from '../../../lexCommon/views.js';
 import { SubtileRow } from '../../../lexCommon/style.js';
 import { Source } from '../../../lexCommon/types/enums.js';
 import { getValidIjpId } from '../../../lexCommon/api.js';
 import { LexItem } from '../../../lexCommon/types/dictionary.js';
+import * as S from './style.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -57,7 +58,7 @@ export function init(
         comparisonData: ComparisonData;
     }> = (props) => {
         return (
-            <S.DataTable>
+            <LS.DataTable>
                 <thead>
                     <tr>
                         <th>
@@ -82,7 +83,7 @@ export function init(
                         <td>{props.comparisonData.superlative}</td>
                     </tr>
                 </tbody>
-            </S.DataTable>
+            </LS.DataTable>
         );
     };
 
@@ -99,7 +100,7 @@ export function init(
             )
         ) {
             return (
-                <S.DataTable>
+                <LS.DataTable>
                     <thead>
                         <tr>
                             <th className="tableKey">
@@ -124,11 +125,11 @@ export function init(
                             ))
                         )}
                     </tbody>
-                </S.DataTable>
+                </LS.DataTable>
             );
         }
         return (
-            <S.DataTable>
+            <LS.DataTable>
                 <thead>
                     <tr>
                         <th className="tableKey">
@@ -151,7 +152,7 @@ export function init(
                         ))
                     )}
                 </tbody>
-            </S.DataTable>
+            </LS.DataTable>
         );
     };
 
@@ -161,7 +162,7 @@ export function init(
         conjugationData: ConjugationData;
     }> = (props) => {
         return (
-            <S.DataTable>
+            <LS.DataTable>
                 <thead>
                     <tr>
                         <th className="tableKey"></th>
@@ -323,7 +324,7 @@ export function init(
                         </tr>
                     ) : null}
                 </tbody>
-            </S.DataTable>
+            </LS.DataTable>
         );
     };
 
@@ -428,13 +429,13 @@ export function init(
                     </span>
                     <span className="value">
                         {ut.translate('lex_overview__ijp_reference_value')}{' '}
-                        <a
+                        <S.IJPReference
                             onClick={() =>
                                 props.handleVariantChange(variantIdx)
                             }
                         >
                             {props.variants[variantIdx].key.lemma}
-                        </a>
+                        </S.IJPReference>
                     </span>
                 </SubtileRow>
             </lexComponents.Subtile>
