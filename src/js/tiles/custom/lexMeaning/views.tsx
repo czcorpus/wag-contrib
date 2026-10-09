@@ -24,7 +24,6 @@ import { CoreTileComponentProps, TileComponent } from '../../../page/tile.js';
 import { LexMeaningModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
-import { HTMLBlock } from '../lexCommon/types/assc.js';
 import { SubtileRow } from '../lexCommon/style.js';
 import { Source } from '../lexCommon/types/enums.js';
 import { initLexComponents } from '../lexCommon/views.js';
@@ -188,8 +187,13 @@ export function init(
                                             <S.ASSCStyle
                                                 className={'header-line'}
                                             >
-                                                <span className="heslo">
-                                                    {item.data.heading}
+                                                <span className="lineNoSpace">
+                                                    <span className="heslo">
+                                                        <span className="mainVar">
+                                                            {item.data.heading}
+                                                            &nbsp;
+                                                        </span>
+                                                    </span>
                                                 </span>
                                                 <span className="sl_druh">
                                                     {item.data.gender}

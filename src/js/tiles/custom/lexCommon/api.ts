@@ -161,6 +161,9 @@ export function getErrorMessage(
 }
 
 export function isValidIjpId(id: string): boolean {
+    if (!id) {
+        return false;
+    }
     const valid = !id.startsWith('__');
     if (!valid) {
         console.warn('Ignoring IJP item', id);

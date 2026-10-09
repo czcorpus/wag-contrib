@@ -513,6 +513,7 @@ export function init(
                     {!state.isBusy &&
                     !ijpHasForms() &&
                     !asscHasForms &&
+                    selectedVariant.sources &&
                     !List.empty(selectedVariant.sources[Source.IJP] || []) &&
                     !isValidIjpId(selectedVariant.sources[Source.IJP][0].id) ? (
                         <ijpViews.Reference
