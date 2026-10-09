@@ -91,6 +91,7 @@ export const MeaningItem = styled.div<{ theme: Theme }>`
 
     &.parent {
         margin: 0 1em;
+        margin-top: 1em;
         padding: 0.5em 1em;
         background-color: ${(props) => getLexTheme(props.theme).overlayColor};
         border-radius: ${(props) =>
@@ -126,15 +127,11 @@ export const MeaningHead = styled.div`
         }
 
         > span {
-            display: inline-block !important;
+            display: inline !important;
         }
 
-        > span:first-child {
-            margin: 0 3px 0 0 !important;
-        }
-
-        > span:not(:first-child):not(.semicolon) {
-            margin: 0 0 0 3px !important;
+        > span.semicolon {
+            margin: 0 0 0 -3px !important;
         }
 
         // ---- [+] toggle for vyslovnost and druhyRadek.tvCh ----
@@ -224,7 +221,7 @@ export const MeaningBody = styled.div`
 // ---------------- <ASSCStyle /> --------------------------------------
 
 export const ASSCStyle = styled.div<{ theme: Theme }>`
-    a {
+    a, .stylKvalPred {
         color: ${(props) => props.theme.colorDefaultText} !important;
     }
 

@@ -50,6 +50,7 @@ export function init(
             if (
                 target instanceof HTMLElement &&
                 (target.closest('.vyslovnost') ||
+                    target.closest('.puvod') ||
                     target.closest('.tvCh') ||
                     target.closest('.tvChSl') ||
                     target.closest('.expand'))
