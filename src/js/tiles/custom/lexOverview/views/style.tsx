@@ -122,6 +122,10 @@ export const Header = styled.div<{
                 getLexTheme(props.theme).variantButtonColor}44;
         }
     }
+
+    .variant-grid ~ .variant-grid {
+        margin-top: 0.5em;
+    }
 `;
 
 export const PlayerIcon = styled.a<{

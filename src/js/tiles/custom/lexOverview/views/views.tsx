@@ -30,7 +30,7 @@ import { init as initAsscViews } from './assc/views.js';
 import { init as initIjpViews } from './ijp/views.js';
 import { init as initCorpusViews } from './corpus/views.js';
 import * as S from './style.js';
-import { List, pipe } from 'cnc-tskit';
+import { List, pipe, tuple } from 'cnc-tskit';
 import { initLexComponents } from '../../lexCommon/views.js';
 import { LexItem, LexKey, LexID } from '../../lexCommon/types/dictionary.js';
 import { SubtileRow } from '../../lexCommon/style.js';
@@ -148,6 +148,26 @@ export function init(
         variants: Array<LexItem>;
         handleVariantChange: (variantIdx: number) => void;
     }> = (props) => {
+        let groups = pipe(
+            props.variants,
+            List.map((v, i) => tuple(i, v)),
+            List.groupBy((v) => `${v[1].group}`)
+        );
+        if (
+            List.size(groups) < 2 ||
+            List.every(([_, group]) => List.size(group) < 2, groups)
+        ) {
+            groups = [
+                [
+                    '1',
+                    pipe(
+                        props.variants,
+                        List.map((v, i) => tuple(i, v))
+                    ),
+                ],
+            ];
+        }
+
         const renderVariant = (
             key: number,
             lexKey: LexKey,
@@ -230,26 +250,35 @@ export function init(
         return (
             <S.Header $width={itemWidth}>
                 <h2>{props.variants[props.selectedVariantIdx].key.lemma}</h2>
-                {displayGrid ? (
-                    <div className="variant-grid">
-                        {pipe(
-                            props.variants,
-                            List.map((variant, i) =>
-                                renderVariant(
-                                    i,
-                                    variant.key,
-                                    someHomonymyExists(),
-                                    sameLemmaAndPosNotSpecifierExists(
-                                        variant.key
-                                    ),
-                                    i !== props.selectedVariantIdx
-                                        ? () => props.handleVariantChange(i)
-                                        : undefined
-                                )
-                            )
-                        )}
-                    </div>
-                ) : null}
+                {displayGrid
+                    ? List.map(
+                          ([groupId, group]) => (
+                              <div className="variant-grid">
+                                  {pipe(
+                                      group,
+                                      List.map(([variantIdx, variant], i) =>
+                                          renderVariant(
+                                              variantIdx,
+                                              variant.key,
+                                              someHomonymyExists(),
+                                              sameLemmaAndPosNotSpecifierExists(
+                                                  variant.key
+                                              ),
+                                              variantIdx !==
+                                                  props.selectedVariantIdx
+                                                  ? () =>
+                                                        props.handleVariantChange(
+                                                            variantIdx
+                                                        )
+                                                  : undefined
+                                          )
+                                      )
+                                  )}
+                              </div>
+                          ),
+                          groups
+                      )
+                    : null}
             </S.Header>
         );
     };
