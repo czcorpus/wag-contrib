@@ -241,7 +241,10 @@ export function init(
             return false;
         };
 
-        const itemWidth = List.size(props.variants) === 4 ? '35%' : undefined;
+        const itemWidth =
+            List.size(groups) === 1 && List.size(props.variants) === 4
+                ? '35%'
+                : undefined;
         const displayGrid =
             List.size(props.variants) > 1 ||
             (props.variants[0].key.plurality !== Plurality.NONE &&

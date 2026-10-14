@@ -82,18 +82,23 @@ export const Header = styled.div<{
         flex-direction: row;
         flex-wrap: wrap;
         margin-top: 1em;
-        gap: 2px;
+
+        border-radius: ${(props) =>
+            getLexTheme(props.theme).subtileBorderRadius};
+        border: 1px solid
+            ${(props) => getLexTheme(props.theme).variantButtonColor};
+        overflow: hidden;
 
         .variant {
             flex: 1;
             flex-basis: ${(props) => props.$width || 'auto'};
-            margin: 0;
+            margin: 0 -1px -1px 0;
             padding: 0.2em 1em;
             white-space: nowrap;
             text-align: center;
-            border-radius: ${(props) =>
-                getLexTheme(props.theme).subtileBorderRadius};
-            border: 1px solid
+            border-right: 1px solid
+                ${(props) => getLexTheme(props.theme).variantButtonColor};
+            border-bottom: 1px solid
                 ${(props) => getLexTheme(props.theme).variantButtonColor};
 
             .morphology {
