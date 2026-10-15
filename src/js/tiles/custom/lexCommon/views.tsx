@@ -37,6 +37,11 @@ export function initLexComponents(
             className?: string;
         }>
     >;
+    SubtileFooter: React.FC<{
+        tileId: number;
+        source: string | Array<string>;
+        corpname?: string;
+    }>;
     MessageSubtile: React.FC<
         React.PropsWithChildren<{
             systemMessageType: SystemMessageType;
@@ -46,7 +51,56 @@ export function initLexComponents(
 } {
     const components = ut.getComponents();
 
+    // -------------------- <SubtileFooter /> ---------------------------------------------------
+
+    const SubtileFooter: React.FC<{
+        tileId: number;
+        source: string | Array<string>;
+        corpname?: string;
+    }> = (props) => {
+        const handleSourceInfo = (source: string) => () => {
+            dispatcher.dispatch(GlobalActions.GetSourceInfo, {
+                tileId: props.tileId,
+                corpusId: source,
+            });
+        };
+
+        return props.source || props.corpname ? (
+            <S.SubtileRow className="footer">
+                <span className="key">
+                    {ut.translate('lex_common__source')}:
+                </span>
+                <span className="value">
+                    {props.corpname ? (
+                        <a onClick={handleSourceInfo(props.corpname)}>
+                            {props.corpname}
+                        </a>
+                    ) : Array.isArray(props.source) ? (
+                        List.map(
+                            (v, i) => (
+                                <>
+                                    {i > 0 ? ', ' : null}
+                                    <a onClick={handleSourceInfo(v)}>
+                                        {ut.translate(
+                                            `lex_common__source_${v}`
+                                        )}
+                                    </a>
+                                </>
+                            ),
+                            props.source
+                        )
+                    ) : (
+                        <a onClick={handleSourceInfo(props.source)}>
+                            {ut.translate(`lex_common__source_${props.source}`)}
+                        </a>
+                    )}
+                </span>
+            </S.SubtileRow>
+        ) : null;
+    };
+
     // -------------------- <Subtile /> ---------------------------------------------------
+
     const Subtile: React.FC<
         React.PropsWithChildren<{
             tileId: number;
@@ -71,40 +125,11 @@ export function initLexComponents(
                 }
             >
                 {props.children}
-                {props.source || props.corpname ? (
-                    <S.SubtileRow className="footer">
-                        <span className="key">
-                            {ut.translate('lex_common__source')}:
-                        </span>
-                        <span className="value">
-                            {props.corpname ? (
-                                <a onClick={handleSourceInfo(props.corpname)}>
-                                    {props.corpname}
-                                </a>
-                            ) : Array.isArray(props.source) ? (
-                                List.map(
-                                    (v, i) => (
-                                        <>
-                                            {i > 0 ? ', ' : null}
-                                            <a onClick={handleSourceInfo(v)}>
-                                                {ut.translate(
-                                                    `lex_common__source_${v}`
-                                                )}
-                                            </a>
-                                        </>
-                                    ),
-                                    props.source
-                                )
-                            ) : (
-                                <a onClick={handleSourceInfo(props.source)}>
-                                    {ut.translate(
-                                        `lex_common__source_${props.source}`
-                                    )}
-                                </a>
-                            )}
-                        </span>
-                    </S.SubtileRow>
-                ) : null}
+                <SubtileFooter
+                    tileId={props.tileId}
+                    source={props.source}
+                    corpname={props.corpname}
+                />
                 {props.more ? (
                     <S.SubtileRow className="footer">
                         <span className="key">
@@ -147,5 +172,5 @@ export function initLexComponents(
         );
     };
 
-    return { Subtile, MessageSubtile };
+    return { SubtileFooter, Subtile, MessageSubtile };
 }

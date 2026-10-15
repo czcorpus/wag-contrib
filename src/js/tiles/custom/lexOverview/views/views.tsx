@@ -424,6 +424,17 @@ export function init(
 
     const LexOverviewTileView: React.FC<CoreTileComponentProps> = (props) => {
         const state = useModel(model);
+        const selectedQueryMatch =
+            state.availQueryMatches[state.selectedVariantIdx];
+        const selectedVariant = state.variants[state.selectedVariantIdx]
+            ? state.variants[state.selectedVariantIdx]
+            : ({
+                  key: {
+                      lemma: selectedQueryMatch.lemma,
+                      pos: selectedQueryMatch.pos[0].value,
+                  },
+                  posSource: Source.Corpus,
+              } as LexItem);
 
         const ijpHasForms = () => {
             if (isIjpData(state.sourceData.ijp)) {
@@ -436,20 +447,13 @@ export function init(
             return false;
         };
 
-        const basicOverview = {} as BasicOverviewData;
-        const selectedQueryMatch =
-            state.availQueryMatches[state.selectedVariantIdx];
-        const selectedVariant = state.variants[state.selectedVariantIdx]
-            ? state.variants[state.selectedVariantIdx]
-            : ({
-                  key: {
-                      lemma: selectedQueryMatch.lemma,
-                      pos: selectedQueryMatch.pos[0].value,
-                  },
-                  posSource: Source.Corpus,
-              } as LexItem);
-        let asscVariantData: VariantData;
+        const ijpHasReference = () =>
+            selectedVariant.sources &&
+            !List.empty(selectedVariant.sources[Source.IJP] || []) &&
+            !isValidIjpId(selectedVariant.sources[Source.IJP][0].id);
 
+        const basicOverview = {} as BasicOverviewData;
+        let asscVariantData: VariantData;
         switch (state.variantSource) {
             case Source.ASSC:
                 if (
@@ -530,7 +534,7 @@ export function init(
                         />
                     ) : null}
 
-                    {isIjpData(state.sourceData.ijp) ? (
+                    {isIjpData(state.sourceData.ijp) && ijpHasForms() ? (
                         <ijpViews.Subtile
                             tileId={props.tileId}
                             data={state.sourceData.ijp.data}
@@ -540,14 +544,33 @@ export function init(
                         <asscViews.Subtile
                             tileId={props.tileId}
                             variant={asscVariantData}
-                        />
+                        >
+                            {ijpHasReference() ? (
+                                <>
+                                    <ijpViews.ReferenceRow
+                                        ijpId={
+                                            selectedVariant.sources[
+                                                Source.IJP
+                                            ][0].id
+                                        }
+                                        variants={state.variants}
+                                        handleVariantChange={
+                                            handleVariantChange
+                                        }
+                                        syllabificationOnly={true}
+                                    />
+                                    <lexComponents.SubtileFooter
+                                        tileId={props.tileId}
+                                        source={Source.IJP}
+                                    />
+                                </>
+                            ) : null}
+                        </asscViews.Subtile>
                     ) : null}
                     {!state.isBusy &&
                     !ijpHasForms() &&
                     !asscHasForms &&
-                    selectedVariant.sources &&
-                    !List.empty(selectedVariant.sources[Source.IJP] || []) &&
-                    !isValidIjpId(selectedVariant.sources[Source.IJP][0].id) ? (
+                    ijpHasReference() ? (
                         <ijpViews.Reference
                             tileId={props.tileId}
                             ijpId={selectedVariant.sources[Source.IJP][0].id}

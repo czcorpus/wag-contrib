@@ -30,10 +30,13 @@ export function init(
     dispatcher: IActionDispatcher,
     ut: ViewUtils<GlobalComponents>
 ): {
-    Subtile: React.FC<{
-        tileId: number;
-        variant: VariantData;
-    }>;
+    Subtile: React.FC<
+        React.PropsWithChildren<{
+            tileId: number;
+            variant: VariantData;
+            ijpReference?: React.FC;
+        }>
+    >;
 } {
     const lexComponents = initLexComponents(dispatcher, ut);
 
@@ -89,12 +92,15 @@ export function init(
 
     // -------------------- <AsscSubtileView /> -----------------------------------------------
 
-    const AsscSubtileView: React.FC<{
-        tileId: number;
-        variant: VariantData;
-    }> = (props) => {
+    const AsscSubtileView: React.FC<
+        React.PropsWithChildren<{
+            tileId: number;
+            variant: VariantData;
+        }>
+    > = (props) => {
         return (
             <lexComponents.Subtile tileId={props.tileId} source={Source.ASSC}>
+                {props.children}
                 {!List.empty(props.variant.forms) ? (
                     <SubtileRow>
                         <span className="key">
