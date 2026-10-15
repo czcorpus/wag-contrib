@@ -72,6 +72,20 @@ export function init(
 
     const ASSCLexSubtile: React.FC<{ tileId: number }> = (props) => {
         const state = useModel(model);
+        const [hasScrollableContent, setHasScrollableContent] =
+            React.useState(false);
+
+        React.useEffect(() => {
+            const scroller = document.getElementById('scroller');
+            if (!scroller) {
+                setHasScrollableContent(false);
+                return;
+            }
+
+            setHasScrollableContent(
+                scroller.scrollHeight > scroller.clientHeight
+            );
+        }, [state.data.assc]);
 
         return (
             <lexComponents.Subtile
@@ -79,7 +93,10 @@ export function init(
                 source={Source.ASSC}
                 className="data-box"
             >
-                <S.Scroller>
+                <S.Scroller
+                    id="scroller"
+                    className={hasScrollableContent ? 'scrollable' : null}
+                >
                     {List.flatMap(
                         (blocks, i) =>
                             List.map((block, j) => {
@@ -169,6 +186,20 @@ export function init(
 
     const IJPLexSubtile: React.FC<{ tileId: number }> = (props) => {
         const state = useModel(model);
+        const [hasScrollableContent, setHasScrollableContent] =
+            React.useState(false);
+
+        React.useEffect(() => {
+            const scroller = document.getElementById('scroller');
+            if (!scroller) {
+                setHasScrollableContent(false);
+                return;
+            }
+
+            setHasScrollableContent(
+                scroller.scrollHeight > scroller.clientHeight
+            );
+        }, [state.data.ijp]);
 
         return (
             <lexComponents.Subtile
@@ -176,7 +207,10 @@ export function init(
                 source={Source.IJP}
                 className="data-box"
             >
-                <S.Scroller>
+                <S.Scroller
+                    id="scroller"
+                    className={hasScrollableContent ? 'scrollable' : null}
+                >
                     {List.map(
                         (item, i) => (
                             <>
@@ -254,6 +288,20 @@ export function init(
 
     const SSCLexSubtile: React.FC<{ tileId: number }> = (props) => {
         const state = useModel(model);
+        const [hasScrollableContent, setHasScrollableContent] =
+            React.useState(false);
+
+        React.useEffect(() => {
+            const scroller = document.getElementById('scroller');
+            if (!scroller) {
+                setHasScrollableContent(false);
+                return;
+            }
+
+            setHasScrollableContent(
+                scroller.scrollHeight > scroller.clientHeight
+            );
+        }, [state.data.ssc]);
 
         return (
             <lexComponents.Subtile
@@ -261,7 +309,10 @@ export function init(
                 source={Source.SSC}
                 className="data-box"
             >
-                <S.Scroller>
+                <S.Scroller
+                    id="scroller"
+                    className={hasScrollableContent ? 'scrollable' : null}
+                >
                     {List.map(
                         (item, i) => (
                             <>
