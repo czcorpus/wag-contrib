@@ -436,18 +436,13 @@ export function init(
                   posSource: Source.Corpus,
               } as LexItem);
 
-        const ijpHasForms = () => {
-            if (isIjpData(state.sourceData.ijp)) {
-                return (
-                    !!state.sourceData.ijp.data.grammarCase ||
-                    !!state.sourceData.ijp.data.conjugation ||
-                    !!state.sourceData.ijp.data.comparison
-                );
-            }
-            return false;
-        };
+        const ijpHasForms = isIjpData(state.sourceData.ijp)
+            ? !!state.sourceData.ijp.data.grammarCase ||
+              !!state.sourceData.ijp.data.conjugation ||
+              !!state.sourceData.ijp.data.comparison
+            : false;
 
-        const ijpHasReference = () =>
+        const ijpHasReference =
             selectedVariant.sources &&
             !List.empty(selectedVariant.sources[Source.IJP] || []) &&
             !isValidIjpId(selectedVariant.sources[Source.IJP][0].id);
@@ -534,18 +529,18 @@ export function init(
                         />
                     ) : null}
 
-                    {isIjpData(state.sourceData.ijp) && ijpHasForms() ? (
+                    {isIjpData(state.sourceData.ijp) && ijpHasForms ? (
                         <ijpViews.Subtile
                             tileId={props.tileId}
                             data={state.sourceData.ijp.data}
                         />
                     ) : null}
-                    {!state.isBusy && !ijpHasForms() && asscHasForms ? (
+                    {!state.isBusy && !ijpHasForms && asscHasForms ? (
                         <asscViews.Subtile
                             tileId={props.tileId}
                             variant={asscVariantData}
                         >
-                            {ijpHasReference() ? (
+                            {ijpHasReference ? (
                                 <>
                                     <ijpViews.ReferenceRow
                                         ijpId={
@@ -568,9 +563,9 @@ export function init(
                         </asscViews.Subtile>
                     ) : null}
                     {!state.isBusy &&
-                    !ijpHasForms() &&
+                    !ijpHasForms &&
                     !asscHasForms &&
-                    ijpHasReference() ? (
+                    ijpHasReference ? (
                         <ijpViews.Reference
                             tileId={props.tileId}
                             ijpId={selectedVariant.sources[Source.IJP][0].id}

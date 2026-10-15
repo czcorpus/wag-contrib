@@ -399,7 +399,7 @@ export function init(
                 {props.data.conjugation ? (
                     <SubtileRow>
                         <span className="key">
-                            {ut.translate('lex_overview__conjugation')}:
+                            {ut.translate('lex_overview__forms')}:
                         </span>
                         <ConjugationTable
                             conjugationData={props.data.conjugation}
