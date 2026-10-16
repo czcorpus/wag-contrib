@@ -115,7 +115,7 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
                 state.isBusy = false;
                 if (state.activeDictTab === -1) {
                     if (
-                        getCurrentVariant(state.currQueryMatch).posSource ===
+                        getCurrentVariant(state.currQueryMatch)?.posSource ===
                         Source.SSC
                     ) {
                         state.activeDictTab = List.findIndex(

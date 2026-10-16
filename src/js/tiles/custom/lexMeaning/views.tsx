@@ -71,7 +71,7 @@ export function init(
 
     // -------------------- <ASSCHeader /> -----------------------------------------------
 
-    const ASSCHeader: React.FC<{ i: number; line: string }> = (props) => {
+    const ASSCHeader: React.FC<{ line: string }> = (props) => {
         const [collapsed, setCollapsed] = React.useState(true);
 
         const onClick = (ev: React.MouseEvent<HTMLDivElement>) => {
@@ -90,7 +90,6 @@ export function init(
 
         return (
             <S.ASSCStyle
-                key={props.i}
                 className={'header-line' + (collapsed ? ' collapsed' : '')}
                 onClick={onClick}
                 dangerouslySetInnerHTML={{ __html: props.line }}
@@ -112,27 +111,26 @@ export function init(
                 <Scroller data={state.data.assc}>
                     {List.flatMap(
                         (blocks, i) =>
-                            List.map((block, j) => {
-                                const isParent = j > 0;
-                                return (
-                                    <>
+                            List.map(
+                                (block, j) => (
+                                    <React.Fragment key={j}>
                                         {i > 0 && j === 0 ? (
                                             <hr className="itemDivider" />
                                         ) : null}
-                                        {isParent ? (
+                                        {j > 0 ? (
                                             <span className="ke-slovu">
                                                 ke slovu
                                             </span>
                                         ) : null}
                                         <S.MeaningItem
                                             key={`${i}-${j}`}
-                                            className={isParent ? 'parent' : ''}
+                                            className={j > 0 ? 'parent' : ''}
                                         >
                                             <S.MeaningHead>
                                                 {List.map(
                                                     (line, i) => (
                                                         <ASSCHeader
-                                                            i={i}
+                                                            key={i}
                                                             line={line}
                                                         />
                                                     ),
@@ -185,9 +183,10 @@ export function init(
                                                 )}
                                             </S.MeaningBody>
                                         </S.MeaningItem>
-                                    </>
-                                );
-                            }, blocks.data),
+                                    </React.Fragment>
+                                ),
+                                blocks.data
+                            ),
                         state.data.assc
                     )}
                 </Scroller>

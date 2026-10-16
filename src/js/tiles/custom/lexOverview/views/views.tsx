@@ -256,7 +256,7 @@ export function init(
                 {displayGrid
                     ? List.map(
                           ([groupId, group]) => (
-                              <div className="variant-grid">
+                              <div key={groupId} className="variant-grid">
                                   {pipe(
                                       group,
                                       List.map(([variantIdx, variant], i) =>
@@ -529,48 +529,27 @@ export function init(
                         />
                     ) : null}
 
-                    {isIjpData(state.sourceData.ijp) && ijpHasForms ? (
+                    {isIjpData(state.sourceData.ijp) && !ijpHasReference ? (
                         <ijpViews.Subtile
                             tileId={props.tileId}
                             data={state.sourceData.ijp.data}
                         />
                     ) : null}
-                    {!state.isBusy && !ijpHasForms && asscHasForms ? (
-                        <asscViews.Subtile
-                            tileId={props.tileId}
-                            variant={asscVariantData}
-                        >
-                            {ijpHasReference ? (
-                                <>
-                                    <ijpViews.ReferenceRow
-                                        ijpId={
-                                            selectedVariant.sources[
-                                                Source.IJP
-                                            ][0].id
-                                        }
-                                        variants={state.variants}
-                                        handleVariantChange={
-                                            handleVariantChange
-                                        }
-                                        syllabificationOnly={true}
-                                    />
-                                    <lexComponents.SubtileFooter
-                                        tileId={props.tileId}
-                                        source={Source.IJP}
-                                    />
-                                </>
-                            ) : null}
-                        </asscViews.Subtile>
-                    ) : null}
-                    {!state.isBusy &&
-                    !ijpHasForms &&
-                    !asscHasForms &&
-                    ijpHasReference ? (
+
+                    {ijpHasReference ? (
                         <ijpViews.Reference
                             tileId={props.tileId}
                             ijpId={selectedVariant.sources[Source.IJP][0].id}
                             variants={state.variants}
                             handleVariantChange={handleVariantChange}
+                            syllabificationOnly={asscHasForms}
+                        />
+                    ) : null}
+
+                    {!state.isBusy && !ijpHasForms && asscHasForms ? (
+                        <asscViews.Subtile
+                            tileId={props.tileId}
+                            variant={asscVariantData}
                         />
                     ) : null}
 

@@ -47,6 +47,7 @@ export function init(
         ijpId: string;
         variants: Array<LexItem>;
         handleVariantChange: (variantIdx: number) => void;
+        syllabificationOnly?: boolean;
     }>;
     ReferenceRow: React.FC<{
         ijpId: string;
@@ -454,6 +455,7 @@ export function init(
         ijpId: string;
         variants: Array<LexItem>;
         handleVariantChange: (variantIdx: number) => void;
+        syllabificationOnly?: boolean;
     }> = (props) => {
         const validId = getValidIjpId(props.ijpId);
         const variantIdx = props.variants.findIndex((variant) => {
@@ -470,6 +472,7 @@ export function init(
                     ijpId={props.ijpId}
                     variants={props.variants}
                     handleVariantChange={props.handleVariantChange}
+                    syllabificationOnly={props.syllabificationOnly}
                 />
             </lexComponents.Subtile>
         );
