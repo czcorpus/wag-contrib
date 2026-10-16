@@ -48,6 +48,12 @@ export function init(
         variants: Array<LexItem>;
         handleVariantChange: (variantIdx: number) => void;
     }>;
+    ReferenceRow: React.FC<{
+        ijpId: string;
+        variants: Array<LexItem>;
+        handleVariantChange: (variantIdx: number) => void;
+        syllabificationOnly?: boolean;
+    }>;
 } {
     const lexComponents = initLexComponents(dispatcher, ut);
 
@@ -393,7 +399,7 @@ export function init(
                 {props.data.conjugation ? (
                     <SubtileRow>
                         <span className="key">
-                            {ut.translate('lex_overview__conjugation')}:
+                            {ut.translate('lex_overview__forms')}:
                         </span>
                         <ConjugationTable
                             conjugationData={props.data.conjugation}
@@ -404,9 +410,46 @@ export function init(
         );
     };
 
-    // -------------------- <IjpSubtileView /> -----------------------------------------------
+    // -------------------- <IjpReferenceSubtileRow /> -----------------------------------------------
 
-    const IjpReferenceView: React.FC<{
+    const IjpReferenceSubtileRow: React.FC<{
+        ijpId: string;
+        variants: Array<LexItem>;
+        handleVariantChange: (variantIdx: number) => void;
+        syllabificationOnly?: boolean;
+    }> = (props) => {
+        const validId = getValidIjpId(props.ijpId);
+        const variantIdx = props.variants.findIndex((variant) => {
+            return variant.sources[Source.IJP]?.some(
+                (sourceItem) => sourceItem.id === validId
+            );
+        });
+        if (variantIdx === -1) {
+            return null;
+        }
+        return (
+            <SubtileRow>
+                <span className="key">
+                    {props.syllabificationOnly
+                        ? ut.translate('lex_overview__overview_syllabification')
+                        : ut.translate('lex_overview__ijp_reference_key')}
+                    :
+                </span>
+                <span className="value">
+                    {ut.translate('lex_overview__ijp_reference_value')}{' '}
+                    <S.IJPReference
+                        onClick={() => props.handleVariantChange(variantIdx)}
+                    >
+                        {props.variants[variantIdx].key.lemma}
+                    </S.IJPReference>
+                </span>
+            </SubtileRow>
+        );
+    };
+
+    // -------------------- <IjpReferenceSubtile /> -----------------------------------------------
+
+    const IjpReferenceSubtile: React.FC<{
         tileId: number;
         ijpId: string;
         variants: Array<LexItem>;
@@ -423,27 +466,18 @@ export function init(
         }
         return (
             <lexComponents.Subtile tileId={props.tileId} source={Source.IJP}>
-                <SubtileRow>
-                    <span className="key">
-                        {ut.translate('lex_overview__ijp_reference_key')}:
-                    </span>
-                    <span className="value">
-                        {ut.translate('lex_overview__ijp_reference_value')}{' '}
-                        <S.IJPReference
-                            onClick={() =>
-                                props.handleVariantChange(variantIdx)
-                            }
-                        >
-                            {props.variants[variantIdx].key.lemma}
-                        </S.IJPReference>
-                    </span>
-                </SubtileRow>
+                <IjpReferenceSubtileRow
+                    ijpId={props.ijpId}
+                    variants={props.variants}
+                    handleVariantChange={props.handleVariantChange}
+                />
             </lexComponents.Subtile>
         );
     };
 
     return {
         Subtile: IjpSubtileView,
-        Reference: IjpReferenceView,
+        Reference: IjpReferenceSubtile,
+        ReferenceRow: IjpReferenceSubtileRow,
     };
 }

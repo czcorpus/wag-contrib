@@ -39,6 +39,36 @@ export function init(
     const globalComponents = ut.getComponents();
     const lexComponents = initLexComponents(dispatcher, ut);
 
+    // -------------------- <Scroller /> -----------------------------------------------
+
+    const Scroller: React.FC<React.PropsWithChildren<{ data: any }>> = (
+        props
+    ) => {
+        const [hasScrollableContent, setHasScrollableContent] =
+            React.useState(false);
+
+        React.useEffect(() => {
+            const scroller = document.getElementById('scroller');
+            if (!scroller) {
+                setHasScrollableContent(false);
+                return;
+            }
+
+            setHasScrollableContent(
+                scroller.scrollHeight > scroller.clientHeight
+            );
+        }, [props.data]);
+
+        return (
+            <S.Scroller
+                id="scroller"
+                className={hasScrollableContent ? 'scrollable' : null}
+            >
+                {props.children}
+            </S.Scroller>
+        );
+    };
+
     // -------------------- <ASSCHeader /> -----------------------------------------------
 
     const ASSCHeader: React.FC<{ i: number; line: string }> = (props) => {
@@ -79,7 +109,7 @@ export function init(
                 source={Source.ASSC}
                 className="data-box"
             >
-                <S.Scroller>
+                <Scroller data={state.data.assc}>
                     {List.flatMap(
                         (blocks, i) =>
                             List.map((block, j) => {
@@ -160,7 +190,7 @@ export function init(
                             }, blocks.data),
                         state.data.assc
                     )}
-                </S.Scroller>
+                </Scroller>
             </lexComponents.Subtile>
         );
     };
@@ -176,7 +206,7 @@ export function init(
                 source={Source.IJP}
                 className="data-box"
             >
-                <S.Scroller>
+                <Scroller data={state.data.ijp}>
                     {List.map(
                         (item, i) => (
                             <>
@@ -245,7 +275,7 @@ export function init(
                         ),
                         state.data.ijp
                     )}
-                </S.Scroller>
+                </Scroller>
             </lexComponents.Subtile>
         );
     };
@@ -261,7 +291,7 @@ export function init(
                 source={Source.SSC}
                 className="data-box"
             >
-                <S.Scroller>
+                <Scroller data={state.data.ssc}>
                     {List.map(
                         (item, i) => (
                             <>
@@ -284,7 +314,7 @@ export function init(
                         ),
                         state.data.ssc
                     )}
-                </S.Scroller>
+                </Scroller>
             </lexComponents.Subtile>
         );
     };

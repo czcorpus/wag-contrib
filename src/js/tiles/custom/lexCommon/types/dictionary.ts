@@ -29,6 +29,7 @@ import {
 export interface LexID {
     id: string;
     parentId?: string;
+    groupId: string;
     groupOrder: number;
     homonym: number;
     key: LexKey;
@@ -47,6 +48,7 @@ export interface LexItem {
     key: LexKey;
     posSource: Source;
     sources: { [source: string]: Array<LexID> };
+    group: number;
 }
 
 export interface LexExtraData {

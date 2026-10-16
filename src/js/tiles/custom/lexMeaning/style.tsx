@@ -77,9 +77,14 @@ export const Stretcher = styled.div<{ theme: Theme }>`
 
 // ---------------- <Scroller /> --------------------------------------
 
-export const Scroller = styled.div`
+export const Scroller = styled.div<{ theme: Theme }>`
     padding: 0.5em;
     overflow-y: auto;
+
+    &.scrollable {
+        border-bottom: 1px solid
+            ${(props) => getLexTheme(props.theme).overlayColor};
+    }
 `;
 
 // ---------------- <MeaningItem /> --------------------------------------
@@ -221,7 +226,8 @@ export const MeaningBody = styled.div`
 // ---------------- <ASSCStyle /> --------------------------------------
 
 export const ASSCStyle = styled.div<{ theme: Theme }>`
-    a, .stylKvalPred {
+    a,
+    .stylKvalPred {
         color: ${(props) => props.theme.colorDefaultText} !important;
     }
 

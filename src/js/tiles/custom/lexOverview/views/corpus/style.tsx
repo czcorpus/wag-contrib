@@ -41,13 +41,10 @@ export const FreqBlock = styled.span<{
     width: 1.1em;
     height: ${(props) => props.$height}em;
     filter: opacity(${(props) => props.$opacity});
+    background-color: ${(props) => props.theme.colorDefaultText};
 
     &.empty-block {
-        background-color: ${(props) => getLexTheme(props.theme).overlayColor};
-        border: solid 1px ${(props) => props.theme.colorDefaultText}11;
-    }
-
-    &.full-block {
-        background-color: ${(props) => props.theme.colorDefaultText};
+        background-color: ${(props) => props.theme.colorDefaultText}16;
+        border: solid 1px ${(props) => props.theme.colorDefaultText}16;
     }
 `;

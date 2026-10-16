@@ -114,10 +114,23 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
             (state, action) => {
                 state.isBusy = false;
                 if (state.activeDictTab === -1) {
-                    state.activeDictTab = List.findIndex(
-                        (source) => source.data !== null,
-                        state.sources
-                    );
+                    if (
+                        getCurrentVariant(state.currQueryMatch).posSource ===
+                        Source.SSC
+                    ) {
+                        state.activeDictTab = List.findIndex(
+                            (source) =>
+                                source.data !== null &&
+                                source.type !== Source.SSC,
+                            state.sources
+                        );
+                    }
+                    if (state.activeDictTab === -1) {
+                        state.activeDictTab = List.findIndex(
+                            (source) => source.data !== null,
+                            state.sources
+                        );
+                    }
                 }
                 if (action.error) {
                     state.error = action.error.message;
