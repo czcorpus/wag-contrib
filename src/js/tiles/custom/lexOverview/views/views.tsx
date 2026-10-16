@@ -256,7 +256,7 @@ export function init(
                 {displayGrid
                     ? List.map(
                           ([groupId, group]) => (
-                              <div className="variant-grid">
+                              <div key={groupId} className="variant-grid">
                                   {pipe(
                                       group,
                                       List.map(([variantIdx, variant], i) =>
