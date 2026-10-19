@@ -134,7 +134,8 @@ export function init(
                                                             line={line}
                                                         />
                                                     ),
-                                                    block.formattedVariants
+                                                    block.formattedVariants ||
+                                                        []
                                                 )}
                                             </S.MeaningHead>
                                             <S.MeaningBody>
@@ -155,7 +156,7 @@ export function init(
                                                             }}
                                                         />
                                                     ),
-                                                    block.meanings
+                                                    block.meanings || []
                                                 )}
                                                 {List.map(
                                                     (nest, i) => (
@@ -167,7 +168,7 @@ export function init(
                                                             }}
                                                         />
                                                     ),
-                                                    block.nestedVariants
+                                                    block.nestedVariants || []
                                                 )}
                                                 {List.map(
                                                     (links, i) => (
@@ -179,13 +180,13 @@ export function init(
                                                             }}
                                                         />
                                                     ),
-                                                    block.links
+                                                    block.links || []
                                                 )}
                                             </S.MeaningBody>
                                         </S.MeaningItem>
                                     </React.Fragment>
                                 ),
-                                blocks.data
+                                blocks.data || []
                             ),
                         state.data.assc
                     )}
@@ -243,7 +244,10 @@ export function init(
                                                         </span>
                                                         <span className="exeplifikace">
                                                             {List.map(
-                                                                (example, exampleIndex) => (
+                                                                (
+                                                                    example,
+                                                                    exampleIndex
+                                                                ) => (
                                                                     <React.Fragment
                                                                         key={`ijp-example-${exampleIndex}`}
                                                                     >
