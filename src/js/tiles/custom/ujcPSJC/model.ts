@@ -24,36 +24,57 @@ import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
 import { UjcPSJCArgs, UjcPSJCApi } from './api.js';
-import { findCurrQueryMatch, LemmatizationLevel, RecognizedQueries } from '../../../query/index.js';
+import {
+    findCurrQueryMatch,
+    LemmatizationLevel,
+    RecognizedQueries,
+} from '../../../query/index.js';
 import { TileStatelessModel } from '../../../models/tiles/base.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 
-
 export interface UjcPSJCModelState {
-    isBusy:boolean;
-    queries:Array<string>;
-    data:DataStructure;
-    error:string;
-    backlink:Backlink;
+    isBusy: boolean;
+    queries: Array<string>;
+    data: DataStructure;
+    error: string;
+    backlink: Backlink;
 }
 
 export interface UjcPSJCModelArgs {
-    dispatcher:IActionQueue;
-    initState:UjcPSJCModelState;
-    tileId:number;
-    api:UjcPSJCApi,
-    appServices:IAppServices;
-    queryMatches:RecognizedQueries;
-    lemLevelSupport:Array<LemmatizationLevel>;
-    dependentTiles:Array<number>;
+    dispatcher: IActionQueue;
+    initState: UjcPSJCModelState;
+    tileId: number;
+    api: UjcPSJCApi;
+    appServices: IAppServices;
+    queryMatches: RecognizedQueries;
+    lemLevelSupport: Array<LemmatizationLevel>;
+    multiWordSupport: boolean;
+    dependentTiles: Array<number>;
 }
 
 export class UjcPSJCModel extends TileStatelessModel<UjcPSJCModelState> {
+    private readonly api: UjcPSJCApi;
 
-    private readonly api:UjcPSJCApi;
-
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, dependentTiles, lemLevelSupport}:UjcPSJCModelArgs) {
-        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
+    constructor({
+        dispatcher,
+        initState,
+        api,
+        tileId,
+        appServices,
+        queryMatches,
+        dependentTiles,
+        lemLevelSupport,
+        multiWordSupport,
+    }: UjcPSJCModelArgs) {
+        super({
+            dispatcher,
+            initState,
+            tileId,
+            appServices,
+            dependentTiles,
+            lemLevelSupport,
+            multiWordSupport,
+        });
         this.api = api;
 
         this.addSearchActionHandler(
@@ -67,8 +88,7 @@ export class UjcPSJCModel extends TileStatelessModel<UjcPSJCModelState> {
                 */
                 state.isBusy = true;
                 state.error = null;
-                state.data = createEmptyData(),
-                state.backlink = null;
+                ((state.data = createEmptyData()), (state.backlink = null));
             },
             (state, action, dispatch, ds) => {
                 this.loadData(dispatch, state, ds);
@@ -77,12 +97,11 @@ export class UjcPSJCModel extends TileStatelessModel<UjcPSJCModelState> {
 
         this.addActionSubtypeHandler(
             Actions.TileDataLoaded,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             (state, action) => {
                 state.isBusy = false;
                 if (action.error) {
                     state.error = action.error.message;
-
                 } else {
                     state.data = action.payload.data;
                     state.backlink = this.api.getBacklink(0);
@@ -92,41 +111,44 @@ export class UjcPSJCModel extends TileStatelessModel<UjcPSJCModelState> {
 
         this.addActionSubtypeHandler(
             GlobalActions.GetSourceInfo,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
-                this.api.getSourceDescription(
-                    this.appServices.dataStreaming(),
-                    this.tileId,
-                    this.appServices.getISO639UILang(),
-                    ''
-                ).subscribe({
-                    next: (data) => {
-                        dispatch({
-                            name: GlobalActions.GetSourceInfoDone.name,
-                            payload: {
-                                data: data
-                            }
-                        });
-                    },
-                    error: (err) => {
-                        console.error(err);
-                        dispatch({
-                            name: GlobalActions.GetSourceInfoDone.name,
-                            error: err
-
-                        });
-                    }
-                });
+                this.api
+                    .getSourceDescription(
+                        this.appServices.dataStreaming(),
+                        this.tileId,
+                        this.appServices.getISO639UILang(),
+                        ''
+                    )
+                    .subscribe({
+                        next: (data) => {
+                            dispatch({
+                                name: GlobalActions.GetSourceInfoDone.name,
+                                payload: {
+                                    data: data,
+                                },
+                            });
+                        },
+                        error: (err) => {
+                            console.error(err);
+                            dispatch({
+                                name: GlobalActions.GetSourceInfoDone.name,
+                                error: err,
+                            });
+                        },
+                    });
             }
         );
 
         this.addActionSubtypeHandler(
             GlobalActions.FollowBacklink,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
-                const backlinkUrl = new URL('https://psjc.ujc.cas.cz/search.php');
+                const backlinkUrl = new URL(
+                    'https://psjc.ujc.cas.cz/search.php'
+                );
                 backlinkUrl.searchParams.set('hledej', 'Hledej');
                 backlinkUrl.searchParams.set('heslo', state.queries[0]);
                 backlinkUrl.searchParams.set('where', 'hesla');
@@ -137,22 +159,26 @@ export class UjcPSJCModel extends TileStatelessModel<UjcPSJCModelState> {
         );
     }
 
-    private loadData(dispatch:SEDispatcher, state:UjcPSJCModelState, ds:IDataStreaming) {
-        const args:UjcPSJCArgs = {
-            q: state.queries
+    private loadData(
+        dispatch: SEDispatcher,
+        state: UjcPSJCModelState,
+        ds: IDataStreaming
+    ) {
+        const args: UjcPSJCArgs = {
+            q: state.queries,
         };
         this.api.call(ds, this.tileId, 0, args).subscribe({
-            next: data => {
+            next: (data) => {
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
                     payload: {
                         tileId: this.tileId,
                         isEmpty: false,
-                        data
-                    }
+                        data,
+                    },
                 });
             },
-            error: error => {
+            error: (error) => {
                 console.error(error);
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
@@ -161,10 +187,9 @@ export class UjcPSJCModel extends TileStatelessModel<UjcPSJCModelState> {
                         tileId: this.tileId,
                         isEmpty: true,
                         data: createEmptyData(),
-                    }
+                    },
                 });
-            }
+            },
         });
     }
-
 }

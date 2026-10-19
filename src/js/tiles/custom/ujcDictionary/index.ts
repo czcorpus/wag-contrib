@@ -21,8 +21,16 @@ import { IAppServices } from '../../../appServices.js';
 import { LemmatizationLevel, QueryType } from '../../../query/index.js';
 import { init as viewInit } from './views.js';
 import {
-    TileConf, ITileProvider, TileComponent, TileFactory,
-    TileFactoryArgs, ITileReloader, DEFAULT_ALT_VIEW_ICON, AltViewIconProps, lemLevelSupport } from '../../../page/tile.js';
+    TileConf,
+    ITileProvider,
+    TileComponent,
+    TileFactory,
+    TileFactoryArgs,
+    ITileReloader,
+    DEFAULT_ALT_VIEW_ICON,
+    AltViewIconProps,
+    lemLevelSupport,
+} from '../../../page/tile.js';
 import { UjcDictionaryModel } from './model.js';
 import { UjcDictionaryApi } from './api.js';
 import { createEmptyData } from './common.js';
@@ -49,7 +57,7 @@ export class UjcDictionaryTile implements ITileProvider {
 
     private view: TileComponent;
 
-    private readonly configuredLemLevels:Array<LemmatizationLevel>;
+    private readonly configuredLemLevels: Array<LemmatizationLevel>;
 
     constructor({
         tileId,
@@ -77,6 +85,7 @@ export class UjcDictionaryTile implements ITileProvider {
             tileId,
             dependentTiles,
             lemLevelSupport: this.configuredLemLevels,
+            multiWordSupport: this.supportsMultiWordQueries(),
             initState: {
                 isBusy: isBusy,
                 queries: [],
@@ -108,7 +117,11 @@ export class UjcDictionaryTile implements ITileProvider {
         return null;
     }
 
-    supportsQueryType(qt:QueryType, domain1:string, domain2?:string):boolean {
+    supportsQueryType(
+        qt: QueryType,
+        domain1: string,
+        domain2?: string
+    ): boolean {
         return qt === 'single';
     }
 
@@ -157,11 +170,11 @@ export class UjcDictionaryTile implements ITileProvider {
         return null;
     }
 
-    hideOnNoData():boolean {
+    hideOnNoData(): boolean {
         return false;
     }
 
-    supportsLemmatizationLevel(ll:LemmatizationLevel):boolean {
+    supportsLemmatizationLevel(ll: LemmatizationLevel): boolean {
         return lemLevelSupport(this.configuredLemLevels, ll);
     }
 

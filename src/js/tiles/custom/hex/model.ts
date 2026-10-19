@@ -20,7 +20,12 @@ import { IActionQueue } from 'kombo';
 import { Dict, List } from 'cnc-tskit';
 
 import { IAppServices } from '../../../appServices.js';
-import { QueryMatch, testIsDictMatch, LemmatizationLevel } from '../../../query/index.js';
+import {
+    QueryMatch,
+    testIsDictMatch,
+    LemmatizationLevel,
+    testIsMultiWordMatch,
+} from '../../../query/index.js';
 import { Data, mkEmptyData } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
@@ -28,25 +33,25 @@ import { PoSValues } from '../../../postag.js';
 import { HexKspApi, KSPRequestArgs } from './api.js';
 import { TileStatelessModel } from '../../../models/tiles/base.js';
 
-
 export interface HexModelState {
-    isBusy:boolean;
-    error:string;
-    data:Data;
-    isAltViewMode:boolean;
-    isTweakMode:boolean;
-    word:string;
-    serviceInfoUrl:string;
+    isBusy: boolean;
+    error: string;
+    data: Data;
+    isAltViewMode: boolean;
+    isTweakMode: boolean;
+    word: string;
+    serviceInfoUrl: string;
     currQueryMatches: Array<QueryMatch>;
 }
 
 export interface HexModelArgs {
-    dispatcher:IActionQueue;
-    initState:HexModelState;
-    tileId:number;
-    api:HexKspApi,
-    appServices:IAppServices;
+    dispatcher: IActionQueue;
+    initState: HexModelState;
+    tileId: number;
+    api: HexKspApi;
+    appServices: IAppServices;
     lemLevelSupport: Array<LemmatizationLevel>;
+    multiWordSupport: boolean;
     dependentTiles: Array<number>;
 }
 
@@ -60,27 +65,22 @@ const posArgMapping = {
     [PoSValues.PREPOSITION]: 'pos[7]',
     [PoSValues.CONJUNCTION]: 'pos[8]',
     [PoSValues.PARTICLE]: 'pos[9]',
-    [PoSValues.INTERJECTION]: 'pos[10]'
+    [PoSValues.INTERJECTION]: 'pos[10]',
 };
 
-function exportPosArgs(args:KSPRequestArgs, match:QueryMatch):void {
+function exportPosArgs(args: KSPRequestArgs, match: QueryMatch): void {
     const wordPos = match.pos[0];
     if (wordPos === undefined) {
-        Dict.forEach(
-            (v, _) => {
-                args[v] = 'on';
-            },
-            posArgMapping
-        );
-
+        Dict.forEach((v, _) => {
+            args[v] = 'on';
+        }, posArgMapping);
     } else {
         args[posArgMapping[wordPos.value]] = 'on';
     }
 }
 
 export class HexModel extends TileStatelessModel<HexModelState> {
-
-    private readonly api:HexKspApi;
+    private readonly api: HexKspApi;
 
     constructor({
         dispatcher,
@@ -89,9 +89,18 @@ export class HexModel extends TileStatelessModel<HexModelState> {
         tileId,
         appServices,
         lemLevelSupport,
+        multiWordSupport,
         dependentTiles,
-    }:HexModelArgs) {
-        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
+    }: HexModelArgs) {
+        super({
+            dispatcher,
+            initState,
+            tileId,
+            appServices,
+            dependentTiles,
+            lemLevelSupport,
+            multiWordSupport,
+        });
         this.api = api;
 
         this.addSearchActionHandler(
@@ -103,58 +112,58 @@ export class HexModel extends TileStatelessModel<HexModelState> {
             },
             (state, action, dispatch, ds) => {
                 const match = state.currQueryMatches[0];
-                const args:KSPRequestArgs = {
+                const args: KSPRequestArgs = {
                     q: match.lemma,
                     sort: 'a',
                     src: 'all',
                     met: 'kw',
                     min: 3, // TODO user configurable
                     alpha: 100, // TODO user configurable
-                    lang: 'cz'
+                    lang: 'cz',
                 };
                 exportPosArgs(args, match);
                 const currMatch = state.currQueryMatches[0];
-                this.api.call(
-                    ds,
-                    this.tileId,
-                    0,
-                    testIsDictMatch(currMatch) ? args : null
-
-                ).subscribe({
-                    next: data => {
-                        dispatch<typeof Actions.TileDataLoaded>({
-                            name: Actions.TileDataLoaded.name,
-                            payload: {
-                                tileId: this.tileId,
-                                isEmpty: false,
-                                data: data
-                            }
-                        });
-                    },
-                    error: error => {
-                        console.error(error);
-                        dispatch<typeof Actions.TileDataLoaded>({
-                            name: Actions.TileDataLoaded.name,
-                            error,
-                            payload: {
-                                tileId: this.tileId,
-                                isEmpty: true,
-                                data: mkEmptyData()
-                            }
-                        });
-                    }
-                });
+                this.api
+                    .call(
+                        ds,
+                        this.tileId,
+                        0,
+                        this.isSupportedQueryMatch(currMatch) ? args : null
+                    )
+                    .subscribe({
+                        next: (data) => {
+                            dispatch<typeof Actions.TileDataLoaded>({
+                                name: Actions.TileDataLoaded.name,
+                                payload: {
+                                    tileId: this.tileId,
+                                    isEmpty: false,
+                                    data: data,
+                                },
+                            });
+                        },
+                        error: (error) => {
+                            console.error(error);
+                            dispatch<typeof Actions.TileDataLoaded>({
+                                name: Actions.TileDataLoaded.name,
+                                error,
+                                payload: {
+                                    tileId: this.tileId,
+                                    isEmpty: true,
+                                    data: mkEmptyData(),
+                                },
+                            });
+                        },
+                    });
             }
         );
         this.addActionSubtypeHandler<typeof Actions.TileDataLoaded>(
             Actions.TileDataLoaded.name,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             (state, action) => {
                 state.isBusy = false;
                 state.word = state.currQueryMatches[0].word;
                 if (action.error) {
                     state.error = action.error.message;
-
                 } else {
                     state.data = action.payload.data;
                 }
@@ -177,5 +186,12 @@ export class HexModel extends TileStatelessModel<HexModelState> {
                 }
             }
         );
+    }
+
+    private isSupportedQueryMatch(cm: QueryMatch): boolean {
+        if (testIsMultiWordMatch(cm) && !this.multiWordSupport) {
+            return false;
+        }
+        return testIsDictMatch(cm);
     }
 }

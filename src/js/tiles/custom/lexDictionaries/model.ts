@@ -60,6 +60,7 @@ export interface LexDictionariesModelArgs {
     apis: Array<LexDictApi>;
     appServices: IAppServices;
     lemLevelSupport: Array<LemmatizationLevel>;
+    multiWordSupport: boolean;
     dependentTiles: Array<number>;
 }
 
@@ -74,6 +75,7 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
         appServices,
         dependentTiles,
         lemLevelSupport,
+        multiWordSupport,
     }: LexDictionariesModelArgs) {
         super({
             dispatcher,
@@ -82,6 +84,7 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
             appServices,
             dependentTiles,
             lemLevelSupport,
+            multiWordSupport,
         });
         this.apis = apis;
 

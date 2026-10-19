@@ -101,6 +101,7 @@ export class LexOverviewTile implements ITileProvider {
                 typeof readDataFromTile === 'number' ? readDataFromTile : null,
             dependentTiles,
             lemLevelSupport: this.configuredLemLevels,
+            multiWordSupport: this.supportsMultiWordQueries(),
             initState: {
                 isBusy: isBusy,
                 availQueryMatches: queryMatches[0],

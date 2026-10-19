@@ -99,6 +99,7 @@ export class LexCommonTile implements ITileProvider {
             tileId,
             dependentTiles,
             lemLevelSupport: this.configuredLemLevels,
+            multiWordSupport: this.supportsMultiWordQueries(),
             lexApi: this.lexApi,
             initState: {
                 currQueryMatch: List.map(findCurrQueryMatch, queryMatches)[0],

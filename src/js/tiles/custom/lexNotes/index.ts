@@ -80,6 +80,7 @@ export class LexNotesTile implements ITileProvider {
                 typeof readDataFromTile === 'number' ? readDataFromTile : null,
             dependentTiles,
             lemLevelSupport: this.configuredLemLevels,
+            multiWordSupport: this.supportsMultiWordQueries(),
             initState: {
                 isBusy: isBusy,
                 data: {

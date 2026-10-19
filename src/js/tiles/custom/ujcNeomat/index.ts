@@ -84,6 +84,7 @@ export class UjcNeomatTile implements ITileProvider {
             tileId,
             dependentTiles,
             lemLevelSupport: this.configuredLemLevels,
+            multiWordSupport: this.supportsMultiWordQueries(),
             initState: {
                 isBusy: isBusy,
                 ident: '',

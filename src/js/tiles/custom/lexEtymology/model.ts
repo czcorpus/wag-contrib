@@ -40,6 +40,7 @@ export interface LexEtymologyModelArgs {
     appServices: IAppServices;
     readDataFromTile: number | null;
     lemLevelSupport: Array<LemmatizationLevel>;
+    multiWordSupport: boolean;
     dependentTiles: Array<number>;
 }
 
@@ -52,6 +53,7 @@ export class LexEtymologyModel extends TileStatelessModel<LexEtymologyModelState
         readDataFromTile,
         dependentTiles,
         lemLevelSupport,
+        multiWordSupport,
     }: LexEtymologyModelArgs) {
         super({
             dispatcher,
@@ -61,6 +63,7 @@ export class LexEtymologyModel extends TileStatelessModel<LexEtymologyModelState
             dependentTiles,
             lemLevelSupport,
             readDataFromTile,
+            multiWordSupport,
         });
 
         this.addSearchActionHandler(

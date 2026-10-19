@@ -69,6 +69,7 @@ export interface LexMeaningModelArgs {
     appServices: IAppServices;
     readDataFromTile: number | null;
     lemLevelSupport: Array<LemmatizationLevel>;
+    multiWordSupport: boolean;
     dependentTiles: Array<number>;
 }
 
@@ -81,6 +82,7 @@ export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
         readDataFromTile,
         dependentTiles,
         lemLevelSupport,
+        multiWordSupport,
     }: LexMeaningModelArgs) {
         super({
             dispatcher,
@@ -90,6 +92,7 @@ export class LexMeaningModel extends TileStatelessModel<LexMeaningModelState> {
             dependentTiles,
             lemLevelSupport,
             readDataFromTile,
+            multiWordSupport,
         });
 
         this.addSearchActionHandler(

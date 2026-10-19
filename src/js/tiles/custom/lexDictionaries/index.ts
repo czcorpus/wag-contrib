@@ -99,6 +99,7 @@ export class LexDictionariesTile implements ITileProvider {
             tileId,
             dependentTiles,
             lemLevelSupport: this.configuredLemLevels,
+            multiWordSupport: this.supportsMultiWordQueries(),
             initState: {
                 isBusy: isBusy,
                 sources: List.map(

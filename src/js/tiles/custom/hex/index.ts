@@ -19,22 +19,32 @@ import { IActionDispatcher } from 'kombo';
 import { List } from 'cnc-tskit';
 
 import { IAppServices } from '../../../appServices.js';
-import { findCurrQueryMatch, LemmatizationLevel, QueryType } from '../../../query/index.js';
+import {
+    findCurrQueryMatch,
+    LemmatizationLevel,
+    QueryType,
+} from '../../../query/index.js';
 import { init as viewInit } from './views.js';
 import {
-    TileConf, ITileProvider, TileComponent, TileFactory,
-    TileFactoryArgs, DEFAULT_ALT_VIEW_ICON, ITileReloader,
-    AltViewIconProps, lemLevelSupport } from '../../../page/tile.js';
+    TileConf,
+    ITileProvider,
+    TileComponent,
+    TileFactory,
+    TileFactoryArgs,
+    DEFAULT_ALT_VIEW_ICON,
+    ITileReloader,
+    AltViewIconProps,
+    lemLevelSupport,
+} from '../../../page/tile.js';
 import { HexModel } from './model.js';
 import { mkEmptyData } from './common.js';
 import { HexKspApi } from './api.js';
 import { LocalizedConfMsg } from '../../../types.js';
 
-
 export interface HexTileConf extends TileConf {
-    apiURL:string;
-    serviceInfoUrl:LocalizedConfMsg;
-    pageSize:number;
+    apiURL: string;
+    serviceInfoUrl: LocalizedConfMsg;
+    pageSize: number;
 }
 
 /**
@@ -43,29 +53,36 @@ export interface HexTileConf extends TileConf {
  * services.
  */
 export class HexTile implements ITileProvider {
+    private readonly tileId: number;
 
-    private readonly tileId:number;
+    private readonly dispatcher: IActionDispatcher;
 
-    private readonly dispatcher:IActionDispatcher;
+    private readonly appServices: IAppServices;
 
-    private readonly appServices:IAppServices;
+    private readonly model: HexModel;
 
-    private readonly model:HexModel;
+    private readonly widthFract: number;
 
-    private readonly widthFract:number;
+    private readonly label: string;
 
-    private readonly label:string;
+    private readonly api: HexKspApi;
 
-    private readonly api:HexKspApi;
+    private view: TileComponent;
 
-    private view:TileComponent;
-
-    private readonly configuredLemLevels:Array<LemmatizationLevel>;
+    private readonly configuredLemLevels: Array<LemmatizationLevel>;
 
     constructor({
-        tileId, dispatcher, appServices, ut, theme, widthFract, conf, isBusy,
-        queryMatches, dependentTiles}:TileFactoryArgs<HexTileConf>
-    ) {
+        tileId,
+        dispatcher,
+        appServices,
+        ut,
+        theme,
+        widthFract,
+        conf,
+        isBusy,
+        queryMatches,
+        dependentTiles,
+    }: TileFactoryArgs<HexTileConf>) {
         this.tileId = tileId;
         this.dispatcher = dispatcher;
         this.appServices = appServices;
@@ -79,6 +96,7 @@ export class HexTile implements ITileProvider {
             tileId,
             dependentTiles,
             lemLevelSupport: this.configuredLemLevels,
+            multiWordSupport: this.supportsMultiWordQueries(),
             initState: {
                 isBusy: isBusy,
                 data: mkEmptyData(),
@@ -86,85 +104,88 @@ export class HexTile implements ITileProvider {
                 error: null,
                 isAltViewMode: false,
                 isTweakMode: false,
-                serviceInfoUrl: appServices.importExternalMessage(conf.serviceInfoUrl),
+                serviceInfoUrl: appServices.importExternalMessage(
+                    conf.serviceInfoUrl
+                ),
                 currQueryMatches: List.map(findCurrQueryMatch, queryMatches),
-            }
+            },
         });
-        this.label = appServices.importExternalMessage(conf.label || 'html__main_label');
-        this.view = viewInit(
-            this.dispatcher,
-            ut,
-            theme,
-            this.model
+        this.label = appServices.importExternalMessage(
+            conf.label || 'html__main_label'
         );
+        this.view = viewInit(this.dispatcher, ut, theme, this.model);
     }
 
-    getIdent():number {
+    getIdent(): number {
         return this.tileId;
     }
 
-    getLabel():string {
+    getLabel(): string {
         return this.label;
     }
 
-    getView():TileComponent {
+    getView(): TileComponent {
         return this.view;
     }
 
-    getSourceInfoComponent():null {
+    getSourceInfoComponent(): null {
         return null;
     }
 
-    supportsQueryType(qt:QueryType, domain1:string, domain2?:string):boolean {
+    supportsQueryType(
+        qt: QueryType,
+        domain1: string,
+        domain2?: string
+    ): boolean {
         return qt === 'single' || qt === 'translat';
     }
 
-    disable():void {
-        this.model.waitForAction({}, (_, syncData)=>syncData);
+    disable(): void {
+        this.model.waitForAction({}, (_, syncData) => syncData);
     }
 
-    getWidthFract():number {
+    getWidthFract(): number {
         return this.widthFract;
     }
 
-    supportsTweakMode():boolean {
+    supportsTweakMode(): boolean {
         return false;
     }
 
-    supportsAltView():boolean {
+    supportsAltView(): boolean {
         return true;
     }
 
-    supportsSVGFigureSave():boolean {
+    supportsSVGFigureSave(): boolean {
         return false;
     }
 
-    getAltViewIcon():AltViewIconProps {
+    getAltViewIcon(): AltViewIconProps {
         return DEFAULT_ALT_VIEW_ICON;
     }
 
-    registerReloadModel(model:ITileReloader):boolean {
+    registerReloadModel(model: ITileReloader): boolean {
         model.registerModel(this, this.model);
         return true;
     }
 
-    supportsMultiWordQueries():boolean {
+    supportsMultiWordQueries(): boolean {
         return false;
     }
 
-    getIssueReportingUrl():null {
+    getIssueReportingUrl(): null {
         return null;
     }
 
-    getReadDataFrom():number|null {
+    getReadDataFrom(): number | null {
         return null;
     }
 
-    hideOnNoData():boolean {
+    hideOnNoData(): boolean {
         return false;
     }
 
-    supportsLemmatizationLevel(ll:LemmatizationLevel):boolean {
+    supportsLemmatizationLevel(ll: LemmatizationLevel): boolean {
         return lemLevelSupport(this.configuredLemLevels, ll);
     }
 
@@ -173,9 +194,8 @@ export class HexTile implements ITileProvider {
     }
 }
 
-export const init:TileFactory<HexTileConf> = {
-
+export const init: TileFactory<HexTileConf> = {
     sanityCheck: (args) => [],
 
-    create: (args) => new HexTile(args)
+    create: (args) => new HexTile(args),
 };

@@ -51,6 +51,7 @@ export interface UjcNeomatModelArgs {
     appServices: IAppServices;
     queryMatches: RecognizedQueries;
     lemLevelSupport: Array<LemmatizationLevel>;
+    multiWordSupport: boolean;
     dependentTiles: Array<number>;
 }
 
@@ -66,6 +67,7 @@ export class UjcNeomatModel extends TileStatelessModel<UjcNeomatModelState> {
         queryMatches,
         dependentTiles,
         lemLevelSupport,
+        multiWordSupport,
     }: UjcNeomatModelArgs) {
         super({
             dispatcher,
@@ -74,6 +76,7 @@ export class UjcNeomatModel extends TileStatelessModel<UjcNeomatModelState> {
             appServices,
             dependentTiles,
             lemLevelSupport,
+            multiWordSupport,
         });
         this.api = api;
 

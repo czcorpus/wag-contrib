@@ -24,6 +24,7 @@ import {
     QueryMatch,
     RecognizedQueries,
     testIsDictMatch,
+    testIsMultiWordMatch,
 } from '../../../query/index.js';
 import { KSPRequestArgs } from './api.js';
 import { Data, mkEmptyData } from './common.js';
@@ -58,11 +59,11 @@ export interface GunstickModelArgs {
     api: DataApi<KSPRequestArgs, Data>;
     appServices: IAppServices;
     lemLevelSupport: Array<LemmatizationLevel>;
+    multiWordSupport: boolean;
     dependentTiles: Array<number>;
 }
 
 export class GunstickModel extends TileStatelessModel<GunstickModelState> {
-
     private readonly api: DataApi<KSPRequestArgs, Data>;
 
     constructor({
@@ -73,8 +74,17 @@ export class GunstickModel extends TileStatelessModel<GunstickModelState> {
         appServices,
         dependentTiles,
         lemLevelSupport,
+        multiWordSupport,
     }: GunstickModelArgs) {
-        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
+        super({
+            dispatcher,
+            initState,
+            tileId,
+            appServices,
+            dependentTiles,
+            lemLevelSupport,
+            multiWordSupport,
+        });
         this.api = api;
 
         this.addSearchActionHandler(
@@ -89,7 +99,7 @@ export class GunstickModel extends TileStatelessModel<GunstickModelState> {
                         ds,
                         this.tileId,
                         0,
-                        testIsDictMatch(state.currMatch)
+                        this.isSupportedQueryMatch(state.currMatch)
                             ? {
                                   q: state.currMatch.lemma,
                                   unit: 'lemma',
@@ -212,10 +222,17 @@ export class GunstickModel extends TileStatelessModel<GunstickModelState> {
 
         this.addActionSubtypeHandler(
             Actions.SetFreqType,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             (state, action) => {
                 state.freqType = action.payload.ftype;
             }
         );
+    }
+
+    private isSupportedQueryMatch(cm: QueryMatch): boolean {
+        if (testIsMultiWordMatch(cm) && !this.multiWordSupport) {
+            return false;
+        }
+        return testIsDictMatch(cm);
     }
 }

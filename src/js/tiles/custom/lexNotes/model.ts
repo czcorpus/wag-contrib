@@ -55,6 +55,7 @@ export interface LexNotesModelArgs {
     appServices: IAppServices;
     readDataFromTile: number | null;
     lemLevelSupport: Array<LemmatizationLevel>;
+    multiWordSupport: boolean;
     dependentTiles: Array<number>;
 }
 
@@ -67,6 +68,7 @@ export class LexNotesModel extends TileStatelessModel<LexNotesModelState> {
         readDataFromTile,
         dependentTiles,
         lemLevelSupport,
+        multiWordSupport,
     }: LexNotesModelArgs) {
         super({
             dispatcher,
@@ -75,6 +77,7 @@ export class LexNotesModel extends TileStatelessModel<LexNotesModelState> {
             appServices,
             dependentTiles,
             lemLevelSupport,
+            multiWordSupport,
             readDataFromTile,
         });
 

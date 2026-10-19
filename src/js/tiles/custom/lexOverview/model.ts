@@ -65,6 +65,7 @@ export interface LexOverviewModelArgs {
     appServices: IAppServices;
     readDataFromTile: number | null;
     lemLevelSupport: Array<LemmatizationLevel>;
+    multiWordSupport: boolean;
     dependentTiles: Array<number>;
 }
 
@@ -77,6 +78,7 @@ export class LexOverviewModel extends TileStatelessModel<LexOverviewModelState> 
         readDataFromTile,
         dependentTiles,
         lemLevelSupport,
+        multiWordSupport,
     }: LexOverviewModelArgs) {
         super({
             dispatcher,
@@ -85,6 +87,7 @@ export class LexOverviewModel extends TileStatelessModel<LexOverviewModelState> 
             appServices,
             dependentTiles,
             lemLevelSupport,
+            multiWordSupport,
             readDataFromTile,
         });
 
