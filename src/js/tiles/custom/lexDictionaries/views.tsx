@@ -174,7 +174,7 @@ export function init(
                         <S.Tabs>
                             {List.map(
                                 (item, i) => (
-                                    <>
+                                    <React.Fragment key={`tab-${i}`}>
                                         {i > 0 ? (
                                             <span
                                                 key={`sep${i}`}
@@ -192,7 +192,7 @@ export function init(
                                             selected={i === tabIdx}
                                             disabled={item.data === null}
                                         />
-                                    </>
+                                    </React.Fragment>
                                 ),
                                 state.sources
                             )}
