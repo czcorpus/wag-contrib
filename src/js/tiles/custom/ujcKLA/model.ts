@@ -51,6 +51,7 @@ export interface UjcKLAModelArgs {
     appServices: IAppServices;
     queryMatches: RecognizedQueries;
     lemLevelSupport: Array<LemmatizationLevel>;
+    multiWordSupport: boolean;
     dependentTiles: Array<number>;
 }
 
@@ -66,6 +67,7 @@ export class UjcKLAModel extends TileStatelessModel<UjcKLAModelState> {
         queryMatches,
         dependentTiles,
         lemLevelSupport,
+        multiWordSupport,
     }: UjcKLAModelArgs) {
         super({
             dispatcher,
@@ -74,6 +76,7 @@ export class UjcKLAModel extends TileStatelessModel<UjcKLAModelState> {
             appServices,
             dependentTiles,
             lemLevelSupport,
+            multiWordSupport,
         });
         this.api = api;
 

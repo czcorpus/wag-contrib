@@ -24,51 +24,64 @@ import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
 import { UjcDictionaryArgs, UjcDictionaryApi } from './api.js';
-import { findCurrQueryMatch, LemmatizationLevel, RecognizedQueries } from '../../../query/index.js';
+import {
+    findCurrQueryMatch,
+    LemmatizationLevel,
+    RecognizedQueries,
+} from '../../../query/index.js';
 import { TileStatelessModel } from '../../../models/tiles/base.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 
-
 export interface UjcDictionaryModelState {
-    isBusy:boolean;
-    queries:Array<string>;
-    data:DataStructure;
-    maxItems:number;
-    error:string;
-    backlink:Backlink;
+    isBusy: boolean;
+    queries: Array<string>;
+    data: DataStructure;
+    maxItems: number;
+    error: string;
+    backlink: Backlink;
 }
 
 export interface UjcDictionaryModelArgs {
-    dispatcher:IActionQueue;
-    initState:UjcDictionaryModelState;
-    tileId:number;
-    api:UjcDictionaryApi,
-    appServices:IAppServices;
-    queryMatches:RecognizedQueries;
-    lemLevelSupport:Array<LemmatizationLevel>;
-    dependentTiles:Array<number>;
+    dispatcher: IActionQueue;
+    initState: UjcDictionaryModelState;
+    tileId: number;
+    api: UjcDictionaryApi;
+    appServices: IAppServices;
+    queryMatches: RecognizedQueries;
+    lemLevelSupport: Array<LemmatizationLevel>;
+    multiWordSupport: boolean;
+    dependentTiles: Array<number>;
 }
 
 export class UjcDictionaryModel extends TileStatelessModel<UjcDictionaryModelState> {
-
-    private readonly api:UjcDictionaryApi;
+    private readonly api: UjcDictionaryApi;
 
     constructor({
         dispatcher,
         initState,
-        api, tileId,
+        api,
+        tileId,
         appServices,
         queryMatches,
         dependentTiles,
-        lemLevelSupport
-    }:UjcDictionaryModelArgs) {
-        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
+        lemLevelSupport,
+        multiWordSupport,
+    }: UjcDictionaryModelArgs) {
+        super({
+            dispatcher,
+            initState,
+            tileId,
+            appServices,
+            dependentTiles,
+            lemLevelSupport,
+            multiWordSupport,
+        });
         this.api = api;
 
         this.addSearchActionHandler(
             (state, action) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
-                state.queries = [match.lemma||match.word];
+                state.queries = [match.lemma || match.word];
                 state.isBusy = true;
                 state.error = null;
                 state.data = createEmptyData();
@@ -81,12 +94,11 @@ export class UjcDictionaryModel extends TileStatelessModel<UjcDictionaryModelSta
 
         this.addActionSubtypeHandler(
             Actions.TileDataLoaded,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             (state, action) => {
                 state.isBusy = false;
                 if (action.error) {
                     state.error = action.error.message;
-
                 } else {
                     state.data = action.payload.data;
                     state.backlink = this.api.getBacklink(0);
@@ -96,61 +108,69 @@ export class UjcDictionaryModel extends TileStatelessModel<UjcDictionaryModelSta
 
         this.addActionSubtypeHandler(
             GlobalActions.GetSourceInfo,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
-                this.api.getSourceDescription(
-                    this.appServices.dataStreaming(),
-                    this.tileId,
-                    this.appServices.getISO639UILang(),
-                    ''
-                ).subscribe({
-                    next: (data) => {
-                        dispatch({
-                            name: GlobalActions.GetSourceInfoDone.name,
-                            payload: {
-                                data: data
-                            }
-                        });
-                    },
-                    error: (err) => {
-                        console.error(err);
-                        dispatch({
-                            name: GlobalActions.GetSourceInfoDone.name,
-                            error: err
-
-                        });
-                    }
-                });
+                this.api
+                    .getSourceDescription(
+                        this.appServices.dataStreaming(),
+                        this.tileId,
+                        this.appServices.getISO639UILang(),
+                        ''
+                    )
+                    .subscribe({
+                        next: (data) => {
+                            dispatch({
+                                name: GlobalActions.GetSourceInfoDone.name,
+                                payload: {
+                                    data: data,
+                                },
+                            });
+                        },
+                        error: (err) => {
+                            console.error(err);
+                            dispatch({
+                                name: GlobalActions.GetSourceInfoDone.name,
+                                error: err,
+                            });
+                        },
+                    });
             }
         );
 
         this.addActionSubtypeHandler(
             GlobalActions.FollowBacklink,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
-                window.open(`https://slovnikcestiny.cz/heslo/${state.data.query}/`, '_blank');
+                window.open(
+                    `https://slovnikcestiny.cz/heslo/${state.data.query}/`,
+                    '_blank'
+                );
             }
         );
     }
 
-    private loadData(dispatch:SEDispatcher, state:UjcDictionaryModelState, ds:IDataStreaming) {
-        const args:UjcDictionaryArgs = {
-            q: state.queries
+    private loadData(
+        dispatch: SEDispatcher,
+        state: UjcDictionaryModelState,
+        ds: IDataStreaming
+    ) {
+        const args: UjcDictionaryArgs = {
+            q: state.queries,
         };
         this.api.call(ds, this.tileId, 0, args).subscribe({
-            next: data => {
+            next: (data) => {
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
                     payload: {
                         tileId: this.tileId,
                         isEmpty: false,
-                        data
-                    }
+                        data,
+                    },
                 });
             },
-            error: error => {
+            error: (error) => {
                 console.error(error);
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
@@ -159,10 +179,9 @@ export class UjcDictionaryModel extends TileStatelessModel<UjcDictionaryModelSta
                         tileId: this.tileId,
                         isEmpty: true,
                         data: createEmptyData(),
-                    }
+                    },
                 });
-            }
+            },
         });
     }
-
 }

@@ -24,36 +24,57 @@ import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
 import { UjcCJAArgs, UjcCJAApi } from './api.js';
-import { findCurrQueryMatch, LemmatizationLevel, RecognizedQueries } from '../../../query/index.js';
+import {
+    findCurrQueryMatch,
+    LemmatizationLevel,
+    RecognizedQueries,
+} from '../../../query/index.js';
 import { TileStatelessModel } from '../../../models/tiles/base.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 
-
 export interface UjcCJAModelState {
-    isBusy:boolean;
-    ident:string;
-    data:DataStructure;
-    error:string;
-    backlink:Backlink;
+    isBusy: boolean;
+    ident: string;
+    data: DataStructure;
+    error: string;
+    backlink: Backlink;
 }
 
 export interface UjcCJAModelArgs {
-    dispatcher:IActionQueue;
-    initState:UjcCJAModelState;
-    tileId:number;
-    api:UjcCJAApi,
-    appServices:IAppServices;
-    queryMatches:RecognizedQueries;
+    dispatcher: IActionQueue;
+    initState: UjcCJAModelState;
+    tileId: number;
+    api: UjcCJAApi;
+    appServices: IAppServices;
+    queryMatches: RecognizedQueries;
     lemLevelSupport: Array<LemmatizationLevel>;
+    multiWordSupport: boolean;
     dependentTiles: Array<number>;
 }
 
 export class UjcCJAModel extends TileStatelessModel<UjcCJAModelState> {
+    private readonly api: UjcCJAApi;
 
-    private readonly api:UjcCJAApi;
-
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, dependentTiles, lemLevelSupport}:UjcCJAModelArgs) {
-        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
+    constructor({
+        dispatcher,
+        initState,
+        api,
+        tileId,
+        appServices,
+        queryMatches,
+        dependentTiles,
+        lemLevelSupport,
+        multiWordSupport,
+    }: UjcCJAModelArgs) {
+        super({
+            dispatcher,
+            initState,
+            tileId,
+            appServices,
+            dependentTiles,
+            lemLevelSupport,
+            multiWordSupport,
+        });
         this.api = api;
 
         this.addSearchActionHandler(
@@ -72,12 +93,11 @@ export class UjcCJAModel extends TileStatelessModel<UjcCJAModelState> {
 
         this.addActionSubtypeHandler(
             Actions.TileDataLoaded,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             (state, action) => {
                 state.isBusy = false;
                 if (action.error) {
                     state.error = action.error.message;
-
                 } else {
                     state.data = action.payload.data;
                     state.backlink = this.api.getBacklink(0);
@@ -87,37 +107,39 @@ export class UjcCJAModel extends TileStatelessModel<UjcCJAModelState> {
 
         this.addActionSubtypeHandler(
             GlobalActions.GetSourceInfo,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
-                this.api.getSourceDescription(
-                    this.appServices.dataStreaming(),
-                    this.tileId,
-                    this.appServices.getISO639UILang(),
-                    '',
-                ).subscribe({
-                    next: (data) => {
-                        dispatch({
-                            name: GlobalActions.GetSourceInfoDone.name,
-                            payload: {
-                                data: data
-                            }
-                        });
-                    },
-                    error: (err) => {
-                        console.error(err);
-                        dispatch({
-                            name: GlobalActions.GetSourceInfoDone.name,
-                            error: err
-                        });
-                    }
-                });
+                this.api
+                    .getSourceDescription(
+                        this.appServices.dataStreaming(),
+                        this.tileId,
+                        this.appServices.getISO639UILang(),
+                        ''
+                    )
+                    .subscribe({
+                        next: (data) => {
+                            dispatch({
+                                name: GlobalActions.GetSourceInfoDone.name,
+                                payload: {
+                                    data: data,
+                                },
+                            });
+                        },
+                        error: (err) => {
+                            console.error(err);
+                            dispatch({
+                                name: GlobalActions.GetSourceInfoDone.name,
+                                error: err,
+                            });
+                        },
+                    });
             }
         );
 
         this.addActionSubtypeHandler(
             GlobalActions.FollowBacklink,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
                 const backlinkUrl = URL.parse(state.data.backlink);
@@ -132,22 +154,26 @@ export class UjcCJAModel extends TileStatelessModel<UjcCJAModelState> {
         );
     }
 
-    private loadData(dispatch:SEDispatcher, state:UjcCJAModelState, ds:IDataStreaming) {
-        const args:UjcCJAArgs = {
+    private loadData(
+        dispatch: SEDispatcher,
+        state: UjcCJAModelState,
+        ds: IDataStreaming
+    ) {
+        const args: UjcCJAArgs = {
             q: state.ident,
         };
         this.api.call(ds, this.tileId, 0, args).subscribe({
-            next: data => {
+            next: (data) => {
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
                     payload: {
                         tileId: this.tileId,
                         isEmpty: false,
-                        data
-                    }
+                        data,
+                    },
                 });
             },
-            error: error => {
+            error: (error) => {
                 console.error(error);
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
@@ -156,9 +182,9 @@ export class UjcCJAModel extends TileStatelessModel<UjcCJAModelState> {
                         tileId: this.tileId,
                         isEmpty: true,
                         data: createEmptyData(),
-                    }
+                    },
                 });
-            }
+            },
         });
     }
 }

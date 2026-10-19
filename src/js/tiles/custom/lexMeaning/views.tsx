@@ -208,7 +208,7 @@ export function init(
                 <Scroller data={state.data.ijp}>
                     {List.map(
                         (item, i) => (
-                            <>
+                            <React.Fragment key={`ijp-${i}`}>
                                 {i > 0 ? <hr className="itemDivider" /> : null}
                                 {
                                     <S.MeaningItem key={i}>
@@ -243,8 +243,10 @@ export function init(
                                                         </span>
                                                         <span className="exeplifikace">
                                                             {List.map(
-                                                                (example) => (
-                                                                    <>
+                                                                (example, exampleIndex) => (
+                                                                    <React.Fragment
+                                                                        key={`ijp-example-${exampleIndex}`}
+                                                                    >
                                                                         <br />
                                                                         <span
                                                                             style={{
@@ -258,7 +260,7 @@ export function init(
                                                                                 }
                                                                             </span>
                                                                         </span>
-                                                                    </>
+                                                                    </React.Fragment>
                                                                 ),
                                                                 item.data
                                                                     .examples
@@ -270,7 +272,7 @@ export function init(
                                         </S.MeaningBody>
                                     </S.MeaningItem>
                                 }
-                            </>
+                            </React.Fragment>
                         ),
                         state.data.ijp
                     )}
@@ -293,7 +295,7 @@ export function init(
                 <Scroller data={state.data.ssc}>
                     {List.map(
                         (item, i) => (
-                            <>
+                            <React.Fragment key={`ssc-${i}`}>
                                 {i > 0 ? (
                                     <hr
                                         key={`hr${i}`}
@@ -309,7 +311,7 @@ export function init(
                                         />
                                     </S.MeaningItem>
                                 }
-                            </>
+                            </React.Fragment>
                         ),
                         state.data.ssc
                     )}

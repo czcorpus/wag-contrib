@@ -39,6 +39,7 @@ export interface LexCommonModelArgs {
     tileId: number;
     appServices: IAppServices;
     lemLevelSupport: Array<LemmatizationLevel>;
+    multiWordSupport: boolean;
     dependentTiles: Array<number>;
     lexApi: LexApi;
 }
@@ -54,6 +55,7 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
         lexApi,
         dependentTiles,
         lemLevelSupport,
+        multiWordSupport,
     }: LexCommonModelArgs) {
         super({
             dispatcher,
@@ -62,6 +64,7 @@ export class LexCommonModel extends TileStatelessModel<LexCommonModelState> {
             appServices,
             dependentTiles,
             lemLevelSupport,
+            multiWordSupport,
         });
         this.lexApi = lexApi;
 

@@ -92,6 +92,7 @@ export class LexMeaningTile implements ITileProvider {
                 typeof readDataFromTile === 'number' ? readDataFromTile : null,
             dependentTiles,
             lemLevelSupport: this.configuredLemLevels,
+            multiWordSupport: this.supportsMultiWordQueries(),
             initState: {
                 isBusy: isBusy,
                 currQueryMatch: List.map(findCurrQueryMatch, queryMatches)[0],

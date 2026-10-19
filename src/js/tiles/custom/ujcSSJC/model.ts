@@ -24,37 +24,57 @@ import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
 import { UjcSSJCArgs, UjcSSJCApi } from './api.js';
-import { findCurrQueryMatch, LemmatizationLevel, RecognizedQueries } from '../../../query/index.js';
+import {
+    findCurrQueryMatch,
+    LemmatizationLevel,
+    RecognizedQueries,
+} from '../../../query/index.js';
 import { TileStatelessModel } from '../../../models/tiles/base.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 
-
 export interface UjcSSJCModelState {
-    isBusy:boolean;
-    queries:Array<string>;
-    data:DataStructure;
-    error:string;
-    backlink:Backlink;
+    isBusy: boolean;
+    queries: Array<string>;
+    data: DataStructure;
+    error: string;
+    backlink: Backlink;
 }
 
 export interface UjcSSJCModelArgs {
-    dispatcher:IActionQueue;
-    initState:UjcSSJCModelState;
-    tileId:number;
-    api:UjcSSJCApi,
-    appServices:IAppServices;
-    queryMatches:RecognizedQueries;
-    lemLevelSupport:Array<LemmatizationLevel>;
-    dependentTiles:Array<number>;
+    dispatcher: IActionQueue;
+    initState: UjcSSJCModelState;
+    tileId: number;
+    api: UjcSSJCApi;
+    appServices: IAppServices;
+    queryMatches: RecognizedQueries;
+    lemLevelSupport: Array<LemmatizationLevel>;
+    multiWordSupport: boolean;
+    dependentTiles: Array<number>;
 }
 
 export class UjcSSJCModel extends TileStatelessModel<UjcSSJCModelState> {
+    private readonly api: UjcSSJCApi;
 
-    private readonly api:UjcSSJCApi;
-
-
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, dependentTiles, lemLevelSupport}:UjcSSJCModelArgs) {
-        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
+    constructor({
+        dispatcher,
+        initState,
+        api,
+        tileId,
+        appServices,
+        queryMatches,
+        dependentTiles,
+        lemLevelSupport,
+        multiWordSupport,
+    }: UjcSSJCModelArgs) {
+        super({
+            dispatcher,
+            initState,
+            tileId,
+            appServices,
+            dependentTiles,
+            lemLevelSupport,
+            multiWordSupport,
+        });
         this.api = api;
 
         this.addSearchActionHandler(
@@ -78,12 +98,11 @@ export class UjcSSJCModel extends TileStatelessModel<UjcSSJCModelState> {
 
         this.addActionSubtypeHandler(
             Actions.TileDataLoaded,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             (state, action) => {
                 state.isBusy = false;
                 if (action.error) {
                     state.error = action.error.message;
-
                 } else {
                     state.data = action.payload.data;
                     state.backlink = this.api.getBacklink(0);
@@ -93,41 +112,44 @@ export class UjcSSJCModel extends TileStatelessModel<UjcSSJCModelState> {
 
         this.addActionSubtypeHandler(
             GlobalActions.GetSourceInfo,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
-                this.api.getSourceDescription(
-                    this.appServices.dataStreaming(),
-                    this.tileId,
-                    this.appServices.getISO639UILang(),
-                    ''
-                ).subscribe({
-                    next: (data) => {
-                        dispatch({
-                            name: GlobalActions.GetSourceInfoDone.name,
-                            payload: {
-                                data: data
-                            }
-                        });
-                    },
-                    error: (err) => {
-                        console.error(err);
-                        dispatch({
-                            name: GlobalActions.GetSourceInfoDone.name,
-                            error: err
-
-                        });
-                    }
-                });
+                this.api
+                    .getSourceDescription(
+                        this.appServices.dataStreaming(),
+                        this.tileId,
+                        this.appServices.getISO639UILang(),
+                        ''
+                    )
+                    .subscribe({
+                        next: (data) => {
+                            dispatch({
+                                name: GlobalActions.GetSourceInfoDone.name,
+                                payload: {
+                                    data: data,
+                                },
+                            });
+                        },
+                        error: (err) => {
+                            console.error(err);
+                            dispatch({
+                                name: GlobalActions.GetSourceInfoDone.name,
+                                error: err,
+                            });
+                        },
+                    });
             }
         );
 
         this.addActionSubtypeHandler(
             GlobalActions.FollowBacklink,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
-                const backlinkUrl = new URL('https://ssjc.ujc.cas.cz/search.php');
+                const backlinkUrl = new URL(
+                    'https://ssjc.ujc.cas.cz/search.php'
+                );
                 backlinkUrl.searchParams.set('hledej', 'Hledat');
                 backlinkUrl.searchParams.set('heslo', state.data.query);
                 backlinkUrl.searchParams.set('where', 'hesla');
@@ -137,22 +159,26 @@ export class UjcSSJCModel extends TileStatelessModel<UjcSSJCModelState> {
         );
     }
 
-    private loadData(dispatch:SEDispatcher, state:UjcSSJCModelState, ds:IDataStreaming) {
-        const args:UjcSSJCArgs = {
-            q: state.queries
+    private loadData(
+        dispatch: SEDispatcher,
+        state: UjcSSJCModelState,
+        ds: IDataStreaming
+    ) {
+        const args: UjcSSJCArgs = {
+            q: state.queries,
         };
         this.api.call(ds, this.tileId, 0, args).subscribe({
-            next: data => {
+            next: (data) => {
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
                     payload: {
                         tileId: this.tileId,
                         isEmpty: false,
-                        data
-                    }
+                        data,
+                    },
                 });
             },
-            error: error => {
+            error: (error) => {
                 console.error(error);
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
@@ -161,10 +187,9 @@ export class UjcSSJCModel extends TileStatelessModel<UjcSSJCModelState> {
                         tileId: this.tileId,
                         isEmpty: true,
                         data: createEmptyData(),
-                    }
+                    },
                 });
-            }
+            },
         });
     }
-
 }

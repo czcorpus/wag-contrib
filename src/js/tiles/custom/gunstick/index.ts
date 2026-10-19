@@ -18,7 +18,11 @@
 import { IActionDispatcher } from 'kombo';
 
 import { IAppServices } from '../../../appServices.js';
-import { findCurrQueryMatch, LemmatizationLevel, QueryType } from '../../../query/index.js';
+import {
+    findCurrQueryMatch,
+    LemmatizationLevel,
+    QueryType,
+} from '../../../query/index.js';
 import { init as viewInit } from './views/views.js';
 import {
     TileConf,
@@ -94,6 +98,7 @@ export class GunstickTile implements ITileProvider {
             tileId,
             dependentTiles,
             lemLevelSupport: this.configuredLemLevels,
+            multiWordSupport: this.supportsMultiWordQueries(),
             initState: {
                 isBusy: isBusy,
                 currMatch: findCurrQueryMatch(List.head(queryMatches)),
@@ -109,7 +114,7 @@ export class GunstickTile implements ITileProvider {
                 y1: conf.y1,
                 y2: conf.y2,
                 exampleWindowData: undefined,
-                freqType: 'rel'
+                freqType: 'rel',
             },
         });
         this.label = appServices.importExternalMessage(

@@ -19,7 +19,11 @@
 import { IActionQueue, SEDispatcher } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
 import { Backlink } from '../../../page/tile.js';
-import { findCurrQueryMatch, LemmatizationLevel, RecognizedQueries } from '../../../query/index.js';
+import {
+    findCurrQueryMatch,
+    LemmatizationLevel,
+    RecognizedQueries,
+} from '../../../query/index.js';
 import { DataStructure, mkEmptyData } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
@@ -28,31 +32,48 @@ import { UjcLGuideApi, UjcLGuideRequestArgs } from './api.js';
 import { TileStatelessModel } from '../../../models/tiles/base.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 
-
 export interface UjcLGuideModelState {
-    isBusy:boolean;
-    data:DataStructure;
-    error:string;
-    backlink:Backlink;
+    isBusy: boolean;
+    data: DataStructure;
+    error: string;
+    backlink: Backlink;
 }
 
 export interface UjcLGuideModelArgs {
-    dispatcher:IActionQueue;
-    initState:UjcLGuideModelState;
-    tileId:number;
-    api:UjcLGuideApi,
-    appServices:IAppServices;
-    queryMatches:RecognizedQueries;
-    lemLevelSupport:Array<LemmatizationLevel>;
-    dependentTiles:Array<number>;
+    dispatcher: IActionQueue;
+    initState: UjcLGuideModelState;
+    tileId: number;
+    api: UjcLGuideApi;
+    appServices: IAppServices;
+    queryMatches: RecognizedQueries;
+    lemLevelSupport: Array<LemmatizationLevel>;
+    multiWordSupport: boolean;
+    dependentTiles: Array<number>;
 }
 
 export class UjcLGuideModel extends TileStatelessModel<UjcLGuideModelState> {
+    private readonly api: UjcLGuideApi;
 
-    private readonly api:UjcLGuideApi;
-
-    constructor({dispatcher, initState, api, tileId, appServices, queryMatches, dependentTiles, lemLevelSupport}:UjcLGuideModelArgs) {
-        super({dispatcher, initState, tileId, appServices, dependentTiles, lemLevelSupport});
+    constructor({
+        dispatcher,
+        initState,
+        api,
+        tileId,
+        appServices,
+        queryMatches,
+        dependentTiles,
+        lemLevelSupport,
+        multiWordSupport,
+    }: UjcLGuideModelArgs) {
+        super({
+            dispatcher,
+            initState,
+            tileId,
+            appServices,
+            dependentTiles,
+            lemLevelSupport,
+            multiWordSupport,
+        });
         this.api = api;
 
         this.addSearchActionHandler(
@@ -60,12 +81,21 @@ export class UjcLGuideModel extends TileStatelessModel<UjcLGuideModelState> {
                 const match = findCurrQueryMatch(List.head(queryMatches));
                 state.isBusy = true;
                 state.error = null;
-                state.data = {...mkEmptyData(), rawQuery: match.lemma || match.word};
+                state.data = {
+                    ...mkEmptyData(),
+                    rawQuery: match.lemma || match.word,
+                };
                 state.backlink = null;
             },
             (state, action, dispatch, ds) => {
                 const match = findCurrQueryMatch(List.head(queryMatches));
-                this.loadData(dispatch, state, match.lemma || match.word, false, ds);
+                this.loadData(
+                    dispatch,
+                    state,
+                    match.lemma || match.word,
+                    false,
+                    ds
+                );
             }
         );
 
@@ -77,22 +107,27 @@ export class UjcLGuideModel extends TileStatelessModel<UjcLGuideModelState> {
                 state.data = {
                     ...mkEmptyData(),
                     rawQuery: action.payload.id,
-                    alternatives: state.data.alternatives
+                    alternatives: state.data.alternatives,
                 };
             },
             (state, action, dispatch) => {
-                this.loadData(dispatch, state, action.payload.id, true, this.appServices.dataStreaming());
+                this.loadData(
+                    dispatch,
+                    state,
+                    action.payload.id,
+                    true,
+                    this.appServices.dataStreaming()
+                );
             }
         );
 
         this.addActionSubtypeHandler(
             Actions.TileDataLoaded,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             (state, action) => {
                 state.isBusy = false;
                 if (action.error) {
                     state.error = action.error.message;
-
                 } else {
                     state.data = action.payload.data;
                     state.backlink = this.api.getBacklink(0);
@@ -102,38 +137,39 @@ export class UjcLGuideModel extends TileStatelessModel<UjcLGuideModelState> {
 
         this.addActionSubtypeHandler(
             GlobalActions.GetSourceInfo,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
-                this.api.getSourceDescription(
-                    this.appServices.dataStreaming(),
-                    this.tileId,
-                    this.appServices.getISO639UILang(),
-                    ''
-                ).subscribe({
-                    next: (data) => {
-                        dispatch({
-                            name: GlobalActions.GetSourceInfoDone.name,
-                            payload: {
-                                data: data
-                            }
-                        });
-                    },
-                    error: (err) => {
-                        console.error(err);
-                        dispatch({
-                            name: GlobalActions.GetSourceInfoDone.name,
-                            error: err
-
-                        });
-                    }
-                });
+                this.api
+                    .getSourceDescription(
+                        this.appServices.dataStreaming(),
+                        this.tileId,
+                        this.appServices.getISO639UILang(),
+                        ''
+                    )
+                    .subscribe({
+                        next: (data) => {
+                            dispatch({
+                                name: GlobalActions.GetSourceInfoDone.name,
+                                payload: {
+                                    data: data,
+                                },
+                            });
+                        },
+                        error: (err) => {
+                            console.error(err);
+                            dispatch({
+                                name: GlobalActions.GetSourceInfoDone.name,
+                                error: err,
+                            });
+                        },
+                    });
             }
         );
 
         this.addActionSubtypeHandler(
             GlobalActions.FollowBacklink,
-            action => action.payload.tileId === this.tileId,
+            (action) => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
                 const backlinkUrl = new URL('https://prirucka.ujc.cas.cz/');
@@ -147,13 +183,19 @@ export class UjcLGuideModel extends TileStatelessModel<UjcLGuideModelState> {
         );
     }
 
-    private loadData(dispatch:SEDispatcher, state:UjcLGuideModelState, q:string, direct:boolean, ds:IDataStreaming) {
-        const args:UjcLGuideRequestArgs = {
+    private loadData(
+        dispatch: SEDispatcher,
+        state: UjcLGuideModelState,
+        q: string,
+        direct: boolean,
+        ds: IDataStreaming
+    ) {
+        const args: UjcLGuideRequestArgs = {
             q,
-            direct: direct ? 1 : 0
+            direct: direct ? 1 : 0,
         };
         this.api.call(ds, this.tileId, 0, args).subscribe({
-            next: data => {
+            next: (data) => {
                 if (direct) {
                     data.alternatives = state.data.alternatives;
                 }
@@ -165,11 +207,11 @@ export class UjcLGuideModel extends TileStatelessModel<UjcLGuideModelState> {
                     payload: {
                         tileId: this.tileId,
                         isEmpty: false,
-                        data
-                    }
+                        data,
+                    },
                 });
             },
-            error: error => {
+            error: (error) => {
                 console.error(error);
                 dispatch<typeof Actions.TileDataLoaded>({
                     name: Actions.TileDataLoaded.name,
@@ -180,12 +222,11 @@ export class UjcLGuideModel extends TileStatelessModel<UjcLGuideModelState> {
                         data: {
                             ...mkEmptyData(),
                             isDirect: true,
-                            rawQuery: q
+                            rawQuery: q,
                         },
-                    }
+                    },
                 });
-            }
+            },
         });
     }
-
 }
