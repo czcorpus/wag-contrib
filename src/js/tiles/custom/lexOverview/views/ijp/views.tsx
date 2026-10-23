@@ -379,7 +379,7 @@ export function init(
                 {props.data.comparison ? (
                     <SubtileRow>
                         <span className="key">
-                            {ut.translate('lex_overview__comparison')}
+                            {ut.translate('lex_overview__forms')}:
                         </span>
                         <ComparisonTable
                             positive={props.data.heading}

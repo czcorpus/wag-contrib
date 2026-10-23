@@ -113,9 +113,14 @@ export function init(
                         (blocks, i) =>
                             List.map(
                                 (block, j) => (
-                                    <React.Fragment key={j}>
+                                    <React.Fragment
+                                        key={`assc-block-${i}-${j}`}
+                                    >
                                         {i > 0 && j === 0 ? (
-                                            <hr className="itemDivider" />
+                                            <hr
+                                                key={`assc-divider-${i}-${j}`}
+                                                className="itemDivider"
+                                            />
                                         ) : null}
                                         {j > 0 ? (
                                             <span className="ke-slovu">
@@ -123,7 +128,7 @@ export function init(
                                             </span>
                                         ) : null}
                                         <S.MeaningItem
-                                            key={`${i}-${j}`}
+                                            key={`assc-item-${i}-${j}`}
                                             className={j > 0 ? 'parent' : ''}
                                         >
                                             <S.MeaningHead>
@@ -134,7 +139,8 @@ export function init(
                                                             line={line}
                                                         />
                                                     ),
-                                                    block.formattedVariants
+                                                    block.formattedVariants ||
+                                                        []
                                                 )}
                                             </S.MeaningHead>
                                             <S.MeaningBody>
@@ -155,7 +161,7 @@ export function init(
                                                             }}
                                                         />
                                                     ),
-                                                    block.meanings
+                                                    block.meanings || []
                                                 )}
                                                 {List.map(
                                                     (nest, i) => (
@@ -167,7 +173,7 @@ export function init(
                                                             }}
                                                         />
                                                     ),
-                                                    block.nestedVariants
+                                                    block.nestedVariants || []
                                                 )}
                                                 {List.map(
                                                     (links, i) => (
@@ -179,13 +185,13 @@ export function init(
                                                             }}
                                                         />
                                                     ),
-                                                    block.links
+                                                    block.links || []
                                                 )}
                                             </S.MeaningBody>
                                         </S.MeaningItem>
                                     </React.Fragment>
                                 ),
-                                blocks.data
+                                blocks.data || []
                             ),
                         state.data.assc
                     )}
@@ -209,9 +215,14 @@ export function init(
                     {List.map(
                         (item, i) => (
                             <React.Fragment key={`ijp-${i}`}>
-                                {i > 0 ? <hr className="itemDivider" /> : null}
+                                {i > 0 ? (
+                                    <hr
+                                        key={`ijp-divider-${i}`}
+                                        className="itemDivider"
+                                    />
+                                ) : null}
                                 {
-                                    <S.MeaningItem key={i}>
+                                    <S.MeaningItem key={`ijp-item-${i}`}>
                                         <S.MeaningHead>
                                             <S.ASSCStyle
                                                 className={'header-line'}
@@ -243,7 +254,10 @@ export function init(
                                                         </span>
                                                         <span className="exeplifikace">
                                                             {List.map(
-                                                                (example, exampleIndex) => (
+                                                                (
+                                                                    example,
+                                                                    exampleIndex
+                                                                ) => (
                                                                     <React.Fragment
                                                                         key={`ijp-example-${exampleIndex}`}
                                                                     >
@@ -298,19 +312,17 @@ export function init(
                             <React.Fragment key={`ssc-${i}`}>
                                 {i > 0 ? (
                                     <hr
-                                        key={`hr${i}`}
+                                        key={`ssc-hr-${i}`}
                                         className="itemDivider"
                                     />
                                 ) : null}
-                                {
-                                    <S.MeaningItem key={i}>
-                                        <S.SSCStyle
-                                            dangerouslySetInnerHTML={{
-                                                __html: item.data.html_content,
-                                            }}
-                                        />
-                                    </S.MeaningItem>
-                                }
+                                <S.MeaningItem key={`ssc-item-${i}`}>
+                                    <S.SSCStyle
+                                        dangerouslySetInnerHTML={{
+                                            __html: item.data.html_content,
+                                        }}
+                                    />
+                                </S.MeaningItem>
                             </React.Fragment>
                         ),
                         state.data.ssc
@@ -360,6 +372,7 @@ export function init(
                             {List.map(
                                 (note, i) => (
                                     <SubtileRow
+                                        key={`ijp-note-${i}`}
                                         dangerouslySetInnerHTML={{
                                             __html: note,
                                         }}
@@ -378,6 +391,7 @@ export function init(
                             {List.map(
                                 (note, i) => (
                                     <SubtileRow
+                                        key={`assc-note-${i}`}
                                         dangerouslySetInnerHTML={{
                                             __html: note,
                                         }}
@@ -418,13 +432,20 @@ export function init(
                             LexResponse<string>
                         >
                 ),
-                List.map((errResp) => (
+                List.map((errResp, index) => (
                     <lexComponents.MessageSubtile
+                        key={`error-${index}`}
                         systemMessageType={SystemMessageType.ERROR}
                         className="error-box"
                     >
                         {List.map(
-                            (msg) => ut.translate(msg),
+                            (msg, msgIndex) => (
+                                <React.Fragment
+                                    key={`error-${index}-msg-${msgIndex}`}
+                                >
+                                    {ut.translate(msg)}
+                                </React.Fragment>
+                            ),
                             getErrorMessage(errResp)
                         )}
                     </lexComponents.MessageSubtile>
