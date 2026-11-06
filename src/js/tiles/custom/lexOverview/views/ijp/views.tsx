@@ -182,7 +182,7 @@ export function init(
                         props.conjugationData.person,
                         Dict.toEntries(),
                         List.map((data) => (
-                            <tr>
+                            <tr key={`person-${data[0]}`}>
                                 <td className="tableKey wrap">
                                     {ut.translate(
                                         `lex_overview__conjugation_person_${data[0]}`
