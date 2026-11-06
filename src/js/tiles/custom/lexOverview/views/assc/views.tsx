@@ -56,8 +56,8 @@ export function init(
                         <td className="tableValue">{props.basicForm}</td>
                     </tr>
                     {List.map(
-                        (item) => (
-                            <tr>
+                        (item, index) => (
+                            <tr key={`${item.key}-${index}`}>
                                 <td className="tableKey">
                                     {List.empty(item.values) ? null : item.key}
                                 </td>
@@ -65,18 +65,18 @@ export function init(
                                     {List.empty(item.values)
                                         ? item.key
                                         : List.map(
-                                              (item, i) => (
-                                                  <>
+                                              (value, i) => (
+                                                  <React.Fragment
+                                                      key={`${item.key}-${i}-${value.value}-${value.comment ?? ''}`}
+                                                  >
                                                       {i > 0 ? ', ' : null}
-                                                      {item.comment ? (
+                                                      {value.comment ? (
                                                           <span className="comment">
-                                                              {
-                                                                  item.comment
-                                                              }{' '}
+                                                              {value.comment}{' '}
                                                           </span>
                                                       ) : null}
-                                                      {item.value}
-                                                  </>
+                                                      {value.value}
+                                                  </React.Fragment>
                                               ),
                                               item.values
                                           )}

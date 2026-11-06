@@ -26,7 +26,6 @@ interface LexTheme {
     lemmaColor: string;
     variantButtonColor: string;
     sourceColors: {
-        [Source.IJP]: string;
         [Source.Corpus]: string;
         dicts: string;
     };
@@ -54,9 +53,8 @@ export function getLexTheme(theme: Theme): LexTheme {
         lemmaColor: '#6c74f0',
         variantButtonColor: '#d4e2f4',
         sourceColors: {
-            dicts: '#d4e2f4',
-            [Source.IJP]: '#e5eef8',
-            [Source.Corpus]: '#fae9da',
+            dicts: '#ebeff4',
+            [Source.Corpus]: '#feecef',
         },
     };
 

@@ -20,6 +20,7 @@ import { Theme } from '../../../../page/theme.js';
 import { styled } from 'styled-components';
 import { LexTileBase } from '../../lexCommon/style.js';
 import { getLexTheme } from '../../lexCommon/theme.js';
+import { Source } from '../../lexCommon/types/enums.js';
 
 export const LexOverviewTileView = styled(LexTileBase)`
     display: flex;
@@ -125,6 +126,30 @@ export const Header = styled.div<{
         .variant:not(.selected):hover {
             background-color: ${(props) =>
                 getLexTheme(props.theme).variantButtonColor}44;
+        }
+    }
+
+    .variant-grid.cnc-variants {
+        border: 1px solid
+            ${(props) => getLexTheme(props.theme).sourceColors[Source.Corpus]};
+
+        .variant {
+            border-right: 1px solid
+                ${(props) =>
+                    getLexTheme(props.theme).sourceColors[Source.Corpus]};
+            border-bottom: 1px solid
+                ${(props) =>
+                    getLexTheme(props.theme).sourceColors[Source.Corpus]};
+        }
+
+        .selected {
+            background-color: ${(props) =>
+                getLexTheme(props.theme).sourceColors[Source.Corpus]};
+        }
+
+        .variant:not(.selected):hover {
+            background-color: ${(props) =>
+                getLexTheme(props.theme).sourceColors[Source.Corpus]}44;
         }
     }
 

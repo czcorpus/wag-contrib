@@ -154,8 +154,12 @@ export function init(
             List.groupBy((v) => `${v[1].group}`)
         );
         if (
-            List.size(groups) < 2 ||
-            List.every(([_, group]) => List.size(group) < 2, groups)
+            (List.size(groups) < 2 ||
+                List.every(([_, group]) => List.size(group) < 2, groups)) &&
+            List.every(
+                ([_, group]) => group[0][1].variantSource !== Source.Corpus,
+                groups
+            )
         ) {
             groups = [
                 [
@@ -256,7 +260,16 @@ export function init(
                 {displayGrid
                     ? List.map(
                           ([groupId, group]) => (
-                              <div key={groupId} className="variant-grid">
+                              <div
+                                  key={groupId}
+                                  className={
+                                      'variant-grid' +
+                                      (group[0][1].variantSource ===
+                                      Source.Corpus
+                                          ? ' cnc-variants'
+                                          : '')
+                                  }
+                              >
                                   {pipe(
                                       group,
                                       List.map(([variantIdx, variant], i) =>
@@ -434,6 +447,7 @@ export function init(
                       pos: selectedQueryMatch.pos[0].value,
                   },
                   posSource: Source.Corpus,
+                  variantSource: Source.Corpus,
               } as LexItem);
 
         const ijpHasForms = isIjpData(state.sourceData.ijp)
@@ -449,7 +463,7 @@ export function init(
 
         const basicOverview = {} as BasicOverviewData;
         let asscVariantData: VariantData;
-        switch (state.variantSource) {
+        switch (selectedVariant.variantSource) {
             case Source.ASSC:
                 if (
                     isAsscData(state.sourceData.assc) &&
