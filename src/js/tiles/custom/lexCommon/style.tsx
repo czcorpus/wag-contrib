@@ -46,8 +46,8 @@ export const SubtileWrapper = styled.div<{
     padding: 0.8em 1em;
     background-color: ${(props) =>
         props.$source
-            ? getLexTheme(props.theme).sourceColors[props.$source] ||
-              getLexTheme(props.theme).sourceColors.dicts
+            ? getLexTheme(props.theme).subtileColors[props.$source] ||
+              getLexTheme(props.theme).subtileColors.dicts
             : null};
     border: ${(props) =>
         props.$systemMessageType
@@ -57,6 +57,7 @@ export const SubtileWrapper = styled.div<{
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    row-gap: 0.25em;
 
     a:hover {
         text-decoration: none;
@@ -64,11 +65,7 @@ export const SubtileWrapper = styled.div<{
     }
 `;
 
-export const SubtileRow = styled.div<{ theme: Theme }>`
-    &:not(:first-child) {
-        margin-top: 0.25em;
-    }
-
+export const SubtileRow = styled.div<{ theme: Theme; $source?: string }>`
     .key {
         color: ${(props) => props.theme.colorLightText};
         font-family: ${(props) => props.theme.condensedFontFamily};
@@ -83,8 +80,19 @@ export const SubtileRow = styled.div<{ theme: Theme }>`
     }
 
     &.footer {
-        margin-top: 0.5em;
         font-size: 0.9em;
         text-align: right;
+        margin-top: 0.5em;
+
+        .footer-box {
+            display: inline-block;
+            width: fit-content;
+            ${(props) => props.theme.tileFooterStyle};
+            background-color: ${(props) =>
+                props.$source
+                    ? getLexTheme(props.theme).sourceColors[props.$source] ||
+                      getLexTheme(props.theme).sourceColors.dicts
+                    : null} !important;
+        }
     }
 `;
