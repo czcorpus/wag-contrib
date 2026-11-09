@@ -37,11 +37,6 @@ export function initLexComponents(
             className?: string;
         }>
     >;
-    SubtileFooter: React.FC<{
-        tileId: number;
-        source: string | Array<string>;
-        corpname?: string;
-    }>;
     MessageSubtile: React.FC<
         React.PropsWithChildren<{
             systemMessageType: SystemMessageType;
@@ -51,9 +46,9 @@ export function initLexComponents(
 } {
     const components = ut.getComponents();
 
-    // -------------------- <SubtileFooter /> ---------------------------------------------------
+    // -------------------- <SourceFooter /> ---------------------------------------------------
 
-    const SubtileFooter: React.FC<{
+    const SourceFooter: React.FC<{
         tileId: number;
         source: string | Array<string>;
         corpname?: string;
@@ -66,7 +61,7 @@ export function initLexComponents(
         };
 
         return props.source || props.corpname ? (
-            <S.SubtileRow className="footer">
+            <>
                 <span className="key">
                     {ut.translate('lex_common__source')}:
                 </span>
@@ -95,7 +90,24 @@ export function initLexComponents(
                         </a>
                     )}
                 </span>
-            </S.SubtileRow>
+            </>
+        ) : null;
+    };
+
+    // -------------------- <MoreFooter /> ---------------------------------------------------
+
+    const MoreFooter: React.FC<{
+        more?: { label: string; url?: string; onclick?: (e) => void };
+    }> = (props) => {
+        return props.more ? (
+            <div>
+                <span className="key">{ut.translate('lex_common__more')}:</span>
+                <span className="value">
+                    <a onClick={props.more.onclick} href={props.more.url}>
+                        {props.more.label}
+                    </a>
+                </span>
+            </div>
         ) : null;
     };
 
@@ -110,41 +122,22 @@ export function initLexComponents(
             className?: string;
         }>
     > = (props) => {
-        const handleSourceInfo = (source: string) => () => {
-            dispatcher.dispatch(GlobalActions.GetSourceInfo, {
-                tileId: props.tileId,
-                corpusId: source,
-            });
-        };
-
+        const usedSource = Array.isArray(props.source)
+            ? props.source[0]
+            : props.source;
         return (
-            <S.SubtileWrapper
-                className={props.className}
-                $source={
-                    Array.isArray(props.source) ? props.source[0] : props.source
-                }
-            >
+            <S.SubtileWrapper className={props.className} $source={usedSource}>
                 {props.children}
-                <SubtileFooter
-                    tileId={props.tileId}
-                    source={props.source}
-                    corpname={props.corpname}
-                />
-                {props.more ? (
-                    <S.SubtileRow className="footer">
-                        <span className="key">
-                            {ut.translate('lex_common__more')}:
-                        </span>
-                        <span className="value">
-                            <a
-                                onClick={props.more.onclick}
-                                href={props.more.url}
-                            >
-                                {props.more.label}
-                            </a>
-                        </span>
-                    </S.SubtileRow>
-                ) : null}
+                <S.SubtileRow className="footer" $source={usedSource}>
+                    <div className="footer-box">
+                        <SourceFooter
+                            tileId={props.tileId}
+                            source={props.source}
+                            corpname={props.corpname}
+                        />
+                        <MoreFooter more={props.more} />
+                    </div>
+                </S.SubtileRow>
             </S.SubtileWrapper>
         );
     };
@@ -172,5 +165,5 @@ export function initLexComponents(
         );
     };
 
-    return { SubtileFooter, Subtile, MessageSubtile };
+    return { Subtile, MessageSubtile };
 }

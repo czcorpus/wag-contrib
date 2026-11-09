@@ -25,6 +25,10 @@ interface LexTheme {
     overlayColor: string;
     lemmaColor: string;
     variantButtonColor: string;
+    subtileColors: {
+        [Source.Corpus]: string;
+        dicts: string;
+    };
     sourceColors: {
         [Source.Corpus]: string;
         dicts: string;
@@ -40,6 +44,8 @@ function isLexTheme(theme: Theme): theme is Theme<LexTheme> {
             'overlayBorderRadius' in theme.extraTheme ||
             'lemmaColor' in theme.extraTheme ||
             'variantButtonColor' in theme.extraTheme ||
+            ('subtileColors' in theme.extraTheme &&
+                typeof theme.extraTheme.subtileColors === 'object') ||
             ('sourceColors' in theme.extraTheme &&
                 typeof theme.extraTheme.sourceColors === 'object'))
     );
@@ -52,9 +58,13 @@ export function getLexTheme(theme: Theme): LexTheme {
         overlayColor: '#0000000e',
         lemmaColor: '#6c74f0',
         variantButtonColor: '#d4e2f4',
-        sourceColors: {
+        subtileColors: {
             dicts: '#ebeff4',
             [Source.Corpus]: '#feecef',
+        },
+        sourceColors: {
+            dicts: '#CED8E4',
+            [Source.Corpus]: '#FECFD7',
         },
     };
 
@@ -62,6 +72,10 @@ export function getLexTheme(theme: Theme): LexTheme {
         return {
             ...defaultTheme,
             ...theme.extraTheme,
+            subtileColors: {
+                ...defaultTheme.subtileColors,
+                ...theme.extraTheme.subtileColors,
+            },
             sourceColors: {
                 ...defaultTheme.sourceColors,
                 ...theme.extraTheme.sourceColors,
