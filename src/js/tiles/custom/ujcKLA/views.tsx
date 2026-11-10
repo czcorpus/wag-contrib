@@ -25,6 +25,7 @@ import { UjcKLAModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
 import { initLexComponents } from '../lexCommon/views.js';
+import { overrideFooterStyle } from '../lexCommon/theme.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -52,6 +53,7 @@ export function init(
                 isSubtileContainer={props.isSubtileContainer}
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={{ corp: 'UJC' }}
+                extraStyle={overrideFooterStyle(theme)}
             >
                 <S.UjcKLATileView>
                     {List.map(

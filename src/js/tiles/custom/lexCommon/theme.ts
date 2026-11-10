@@ -84,3 +84,16 @@ export function getLexTheme(theme: Theme): LexTheme {
     }
     return defaultTheme;
 }
+
+export function overrideFooterStyle(
+    theme: Theme,
+    source?: Source
+): string | undefined {
+    if (theme.tileFooterStyle.includes('background-color')) {
+        const sourceColor = getLexTheme(theme).sourceColors[source || 'dicts'];
+        if (sourceColor) {
+            return `.footer-box { background-color: ${sourceColor} !important }`;
+        }
+    }
+    return undefined;
+}

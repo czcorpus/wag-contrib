@@ -36,6 +36,7 @@ import {
 } from './api/types.js';
 import { Actions } from './actions.js';
 import { initLexComponents } from '../lexCommon/views.js';
+import { overrideFooterStyle } from '../lexCommon/theme.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -168,6 +169,7 @@ export function init(
                 isSubtileContainer={props.isSubtileContainer}
                 issueReportingUrl={props.issueReportingUrl}
                 sourceIdent={source}
+                extraStyle={overrideFooterStyle(theme)}
             >
                 <S.LexDictionariesTileView>
                     <S.Stretcher>

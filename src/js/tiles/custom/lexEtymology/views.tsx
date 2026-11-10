@@ -24,6 +24,7 @@ import { LexEtymologyModel } from './model.js';
 import * as S from './style.js';
 import { GlobalComponents } from '../../../views/common/index.js';
 import { Source } from '../lexCommon/types/enums.js';
+import { overrideFooterStyle } from '../lexCommon/theme.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -51,6 +52,7 @@ export function init(
                 supportsTileReload={props.supportsReloadOnError}
                 isSubtileContainer={props.isSubtileContainer}
                 issueReportingUrl={props.issueReportingUrl}
+                extraStyle={overrideFooterStyle(theme)}
             >
                 <S.EtymologyTileView>
                     <p
