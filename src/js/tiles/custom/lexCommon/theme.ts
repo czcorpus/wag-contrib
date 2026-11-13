@@ -89,7 +89,8 @@ export function overrideFooterStyle(
     theme: Theme,
     source?: Source
 ): string | undefined {
-    if (theme.tileFooterStyle.includes('background-color')) {
+    const footerStyle = [].concat(theme.tileFooterStyle).join('');
+    if (footerStyle.includes('background-color')) {
         const sourceColor = getLexTheme(theme).sourceColors[source || 'dicts'];
         if (sourceColor) {
             return `.footer-box { background-color: ${sourceColor} !important }`;
