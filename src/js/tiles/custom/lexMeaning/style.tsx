@@ -127,6 +127,18 @@ export const MeaningHead = styled.div`
             margin: 0 0 0 -3px !important;
         }
 
+        // hide trailing semicolon (no visible sibling follows it)
+        > span.semicolon:not(:has(~ :not(.mainVarSign, .vyz_count, .expand))) {
+            display: none !important;
+        }
+
+        &.collapsed
+            > span.semicolon:not(
+                :has(~ :not(.mainVarSign, .vyz_count, .vyslovnost, .puvod))
+            ) {
+            display: none !important;
+        }
+
         // ---- [+] toggle for vyslovnost and druhyRadek.tvCh ----
 
         .vyslovnost,
