@@ -32,6 +32,10 @@ export const LexDictionariesTileView = styled(LexTileBase)`
     ${(props) => props.theme.cssMobileScreen} {
         min-height: 0em;
     }
+
+    ul {
+        padding: 0 1em;
+    }
 `;
 
 // ---------------- <Stretcher /> --------------------------------------
