@@ -23,6 +23,7 @@ import { Actions as GlobalActions } from '../../../models/actions.js';
 import * as S from './style.js';
 import { List } from 'cnc-tskit';
 import { SystemMessageType } from '../../../types.js';
+import { useShrinkToText } from '../../../page/hooks.js';
 
 export function initLexComponents(
     dispatcher: IActionDispatcher,
@@ -122,6 +123,9 @@ export function initLexComponents(
             className?: string;
         }>
     > = (props) => {
+        const footerBoxRef = React.useRef<HTMLDivElement>(null);
+        useShrinkToText(footerBoxRef);
+
         const usedSource = Array.isArray(props.source)
             ? props.source[0]
             : props.source;
@@ -129,7 +133,7 @@ export function initLexComponents(
             <S.SubtileWrapper className={props.className} $source={usedSource}>
                 {props.children}
                 <S.SubtileRow className="footer" $source={usedSource}>
-                    <div className="footer-box">
+                    <div className="footer-box" ref={footerBoxRef}>
                         <SourceFooter
                             tileId={props.tileId}
                             source={props.source}
