@@ -39,183 +39,6 @@ export function init(
     const globalComponents = ut.getComponents();
     const lexComponents = initLexComponents(dispatcher, ut);
 
-    // -------------------- <Scroller /> -----------------------------------------------
-
-    const Scroller: React.FC<React.PropsWithChildren<{ data: any }>> = (
-        props
-    ) => {
-        const MIN_THUMB_PX = 20;
-        const scrollerRef = React.useRef<HTMLDivElement>(null);
-        const contentRef = React.useRef<HTMLDivElement>(null);
-        const trackRef = React.useRef<HTMLDivElement>(null);
-        const dragRef = React.useRef<{
-            startY: number;
-            startScrollTop: number;
-        } | null>(null);
-        const [thumb, setThumb] = React.useState<{
-            top: number;
-            height: number;
-        } | null>(null);
-        const [dragging, setDragging] = React.useState(false);
-        const [fadeTop, setFadeTop] = React.useState(false);
-        const [fadeBottom, setFadeBottom] = React.useState(false);
-
-        const update = React.useCallback(() => {
-            const scroller = scrollerRef.current;
-            if (!scroller) {
-                setThumb(null);
-                setFadeTop(false);
-                setFadeBottom(false);
-                return;
-            }
-            const { scrollHeight, clientHeight, scrollTop } = scroller;
-            if (scrollHeight <= clientHeight + 1) {
-                setThumb(null);
-                setFadeTop(false);
-                setFadeBottom(false);
-                return;
-            }
-            setFadeTop(scrollTop > 1);
-            setFadeBottom(scrollTop + clientHeight < scrollHeight - 1);
-            const trackHeight = trackRef.current
-                ? trackRef.current.clientHeight
-                : clientHeight;
-            const height = Math.max(
-                MIN_THUMB_PX,
-                (trackHeight * clientHeight) / scrollHeight
-            );
-            const top =
-                (scrollTop / (scrollHeight - clientHeight)) *
-                (trackHeight - height);
-            setThumb((prev) =>
-                prev && prev.top === top && prev.height === height
-                    ? prev
-                    : { top, height }
-            );
-        }, []);
-
-        // observe both the viewport and the content so that the scrollbar
-        // reacts to tile resizing and to expanding/collapsing items
-        React.useEffect(() => {
-            update();
-            if (typeof ResizeObserver === 'undefined') {
-                return;
-            }
-            const observer = new ResizeObserver(() => update());
-            if (scrollerRef.current) {
-                observer.observe(scrollerRef.current);
-            }
-            if (contentRef.current) {
-                observer.observe(contentRef.current);
-            }
-            return () => observer.disconnect();
-        }, [props.data, update]);
-
-        // the track is mounted only once content is known to be scrollable,
-        // so recompute with its real height
-        const isScrollable = thumb !== null;
-        React.useEffect(() => {
-            if (isScrollable) {
-                update();
-            }
-        }, [isScrollable, update]);
-
-        const handleThumbPointerDown = (e: React.PointerEvent) => {
-            if (!scrollerRef.current) {
-                return;
-            }
-            e.preventDefault();
-            e.currentTarget.setPointerCapture(e.pointerId);
-            dragRef.current = {
-                startY: e.clientY,
-                startScrollTop: scrollerRef.current.scrollTop,
-            };
-            setDragging(true);
-        };
-
-        const handleThumbPointerMove = (e: React.PointerEvent) => {
-            const scroller = scrollerRef.current;
-            const track = trackRef.current;
-            if (!dragRef.current || !scroller || !track || !thumb) {
-                return;
-            }
-            const scrollRange = scroller.scrollHeight - scroller.clientHeight;
-            const thumbRange = track.clientHeight - thumb.height;
-            if (thumbRange > 0) {
-                scroller.scrollTop =
-                    dragRef.current.startScrollTop +
-                    ((e.clientY - dragRef.current.startY) * scrollRange) /
-                        thumbRange;
-            }
-        };
-
-        const handleThumbPointerUp = (e: React.PointerEvent) => {
-            dragRef.current = null;
-            setDragging(false);
-            if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-                e.currentTarget.releasePointerCapture(e.pointerId);
-            }
-        };
-
-        const handleTrackClick = (e: React.MouseEvent<HTMLDivElement>) => {
-            const scroller = scrollerRef.current;
-            if (!scroller || !thumb || e.target !== e.currentTarget) {
-                return;
-            }
-            const offsetY =
-                e.clientY - e.currentTarget.getBoundingClientRect().top;
-            scroller.scrollBy({
-                top:
-                    (offsetY < thumb.top ? -1 : 1) *
-                    scroller.clientHeight *
-                    0.9,
-                behavior: 'smooth',
-            });
-        };
-
-        return (
-            <S.ScrollerWrapper>
-                <S.Scroller
-                    ref={scrollerRef}
-                    onScroll={update}
-                    className={
-                        [
-                            isScrollable ? 'scrollable' : '',
-                            fadeTop ? 'fade-top' : '',
-                            fadeBottom ? 'fade-bottom' : '',
-                        ]
-                            .filter(Boolean)
-                            .join(' ') || undefined
-                    }
-                >
-                    <div ref={contentRef}>{props.children}</div>
-                </S.Scroller>
-                {isScrollable ? (
-                    <div
-                        className="scrollbar-track"
-                        ref={trackRef}
-                        onClick={handleTrackClick}
-                    >
-                        <div
-                            className={
-                                'scrollbar-thumb' +
-                                (dragging ? ' dragging' : '')
-                            }
-                            style={{
-                                top: `${thumb.top}px`,
-                                height: `${thumb.height}px`,
-                            }}
-                            onPointerDown={handleThumbPointerDown}
-                            onPointerMove={handleThumbPointerMove}
-                            onPointerUp={handleThumbPointerUp}
-                            onPointerCancel={handleThumbPointerUp}
-                        />
-                    </div>
-                ) : null}
-            </S.ScrollerWrapper>
-        );
-    };
-
     // -------------------- <ASSCHeader /> -----------------------------------------------
 
     const ASSCHeader: React.FC<{ line: string }> = (props) => {
@@ -255,7 +78,7 @@ export function init(
                 source={Source.ASSC}
                 className="data-box"
             >
-                <Scroller data={state.data.assc}>
+                <lexComponents.Scroller resetKey={state.data.assc}>
                     {List.flatMap(
                         (blocks, i) =>
                             List.map(
@@ -342,7 +165,7 @@ export function init(
                             ),
                         state.data.assc
                     )}
-                </Scroller>
+                </lexComponents.Scroller>
             </lexComponents.Subtile>
         );
     };
@@ -358,7 +181,7 @@ export function init(
                 source={Source.IJP}
                 className="data-box"
             >
-                <Scroller data={state.data.ijp}>
+                <lexComponents.Scroller resetKey={state.data.ijp}>
                     {List.map(
                         (item, i) => (
                             <React.Fragment key={`ijp-${i}`}>
@@ -437,7 +260,7 @@ export function init(
                         ),
                         state.data.ijp
                     )}
-                </Scroller>
+                </lexComponents.Scroller>
             </lexComponents.Subtile>
         );
     };
@@ -453,7 +276,7 @@ export function init(
                 source={Source.SSC}
                 className="data-box"
             >
-                <Scroller data={state.data.ssc}>
+                <lexComponents.Scroller resetKey={state.data.ssc}>
                     {List.map(
                         (item, i) => (
                             <React.Fragment key={`ssc-${i}`}>
@@ -474,7 +297,7 @@ export function init(
                         ),
                         state.data.ssc
                     )}
-                </Scroller>
+                </lexComponents.Scroller>
             </lexComponents.Subtile>
         );
     };

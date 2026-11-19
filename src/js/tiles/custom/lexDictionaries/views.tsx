@@ -200,7 +200,10 @@ export function init(
                             )}
                         </S.Tabs>
 
-                        <S.Scroller>
+                        <lexComponents.Scroller
+                            className="dict-scroller"
+                            resetKey={tabIdx}
+                        >
                             {current && current.data !== null ? (
                                 isPSJCDataStructure(
                                     current.type,
@@ -219,7 +222,7 @@ export function init(
                                     <SSCDataView data={current.data} />
                                 ) : null
                             ) : null}
-                        </S.Scroller>
+                        </lexComponents.Scroller>
                     </S.Stretcher>
                 </S.LexDictionariesTileView>
             </globalComponents.TileWrapper>
