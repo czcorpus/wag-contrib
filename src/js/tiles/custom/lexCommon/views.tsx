@@ -80,14 +80,14 @@ export function initLexComponents(
                     ) : Array.isArray(props.source) ? (
                         List.map(
                             (v, i) => (
-                                <>
+                                <React.Fragment key={`${v}:${i}`}>
                                     {i > 0 ? ', ' : null}
                                     <a onClick={handleSourceInfo(v)}>
                                         {ut.translate(
                                             `lex_common__source_${v}`
                                         )}
                                     </a>
-                                </>
+                                </React.Fragment>
                             ),
                             props.source
                         )
