@@ -52,7 +52,7 @@ export function init(
                 supportsTileReload={props.supportsReloadOnError}
                 isSubtileContainer={props.isSubtileContainer}
                 issueReportingUrl={props.issueReportingUrl}
-                sourceIdent={{ corp: 'UJC' }}
+                sourceIdent={{ corp: ut.translate("ujc_kla__main_label") }}
                 extraStyle={overrideFooterStyle(theme)}
             >
                 <S.UjcKLATileView>

@@ -101,7 +101,10 @@ export class UjcKLAApi implements ResourceApi<UjcKLAArgs, DataStructure> {
     getBacklink(queryId:number, subqueryId?:number):Backlink|null {
         return {
             queryId,
-            label: 'heslo v Kartotéce lexikálního archivu',
+            label: this.apiServices.importExternalMessage({
+                'cs-CZ': 'zde',
+                'en-US': 'here'
+            }),
         };
     }
 }

@@ -99,8 +99,8 @@ class UjcBasicApi<T> implements LexDictApi<UjcBasicArgs, T> {
         return {
             queryId,
             label: this.apiServices.importExternalMessage({
-                'cs-CZ': 'slovo ve slovníku',
-                'en-US': 'word in dictionary',
+                'cs-CZ': 'zde',
+                'en-US': 'here',
             }),
         };
     }

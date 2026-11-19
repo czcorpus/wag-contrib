@@ -52,7 +52,7 @@ export function init(
                 supportsTileReload={props.supportsReloadOnError}
                 isSubtileContainer={props.isSubtileContainer}
                 issueReportingUrl={props.issueReportingUrl}
-                sourceIdent={{ corp: 'UJC' }}
+                sourceIdent={{ corp: 'Neomat' }}
                 extraStyle={overrideFooterStyle(theme)}
             >
                 <S.UjcNeomatTileView>
