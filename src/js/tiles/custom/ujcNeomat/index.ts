@@ -93,7 +93,6 @@ export class UjcNeomatTile implements ITileProvider {
                     entries: [],
                 },
                 error: null,
-                backlink: null,
             },
         });
         this.label = appServices.importExternalMessage(

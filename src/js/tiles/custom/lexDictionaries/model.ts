@@ -18,7 +18,6 @@
 
 import { IActionQueue, SEDispatcher } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
-import { Backlink } from '../../../page/tile.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
@@ -35,7 +34,7 @@ import {
     SSCDataStructure,
     SSJCDataStructure,
 } from './api/basicApi.js';
-import { forkJoin, tap } from 'rxjs';
+import { forkJoin, map, tap } from 'rxjs';
 import { getCurrentVariant } from '../lexCommon/types/dictionary.js';
 import { IDataStreaming } from '../../../page/streaming.js';
 import { Source } from '../lexCommon/types/enums.js';
@@ -46,7 +45,6 @@ export interface LexDictionariesModelState {
         type: Source;
         loaded: boolean;
         data: SSJCDataStructure | PSJCDataStructure | SSCDataStructure;
-        backlink: Backlink;
     }>;
     activeDictTab: number;
     currQueryMatch: QueryMatch;
@@ -100,7 +98,6 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
                         data: null,
                         loaded: false,
                         empty: true,
-                        backlink: null,
                     }),
                     state.sources
                 );
@@ -155,9 +152,6 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
                 ) {
                     state.sources[action.payload.queryId].data =
                         action.payload.data;
-                    state.sources[action.payload.queryId].backlink = this.apis[
-                        action.payload.queryId
-                    ].getBacklink(action.payload.queryId);
                 } else if (
                     isPSJCDataStructure(
                         state.sources[action.payload.queryId].type,
@@ -167,9 +161,6 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
                 ) {
                     state.sources[action.payload.queryId].data =
                         action.payload.data;
-                    state.sources[action.payload.queryId].backlink = this.apis[
-                        action.payload.queryId
-                    ].getBacklink(action.payload.queryId);
                 } else if (
                     isSSCDataStructure(
                         state.sources[action.payload.queryId].type,
@@ -179,9 +170,6 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
                 ) {
                     state.sources[action.payload.queryId].data =
                         action.payload.data;
-                    state.sources[action.payload.queryId].backlink = this.apis[
-                        action.payload.queryId
-                    ].getBacklink(action.payload.queryId);
                 }
 
                 if (List.every((d) => d.loaded, state.sources)) {
@@ -203,18 +191,41 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
             (action) => action.payload.tileId === this.tileId,
             null,
             (state, action, dispatch) => {
-                this.apis[state.activeDictTab]
-                    .getSourceDescription(
-                        this.appServices.dataStreaming(),
-                        this.tileId,
-                        this.appServices.getISO639UILang(),
-                        ''
+                const api = this.apis[state.activeDictTab];
+                api.getSourceDescription(
+                    this.appServices.dataStreaming(),
+                    this.tileId,
+                    this.appServices.getISO639UILang(),
+                    ''
+                )
+                    .pipe(
+                        map((data) => {
+                            const searchTerm = this.getSearchTerm(
+                                state.currQueryMatch
+                            );
+                            const url = api.getBacklinkURL(searchTerm);
+                            if (url) {
+                                data.backlink = {
+                                    key: this.appServices.translate(
+                                        'lex_common__term'
+                                    ),
+                                    links: [
+                                        {
+                                            label: searchTerm,
+                                            url: url.toString(),
+                                        },
+                                    ],
+                                };
+                            }
+                            return data;
+                        })
                     )
                     .subscribe({
                         next: (data) => {
                             dispatch({
                                 name: GlobalActions.GetSourceInfoDone.name,
                                 payload: {
+                                    tileId: this.tileId,
                                     data: data,
                                 },
                             });
@@ -229,27 +240,11 @@ export class LexDictionariesModel extends TileStatelessModel<LexDictionariesMode
                     });
             }
         );
+    }
 
-        this.addActionSubtypeHandler(
-            GlobalActions.FollowBacklink,
-            (action) => action.payload.tileId === this.tileId,
-            null,
-            (state, action, dispatch) => {
-                var searchTerm: string;
-                const variant = getCurrentVariant(state.currQueryMatch);
-                if (variant) {
-                    searchTerm = variant.key.lemma;
-                } else {
-                    searchTerm =
-                        state.currQueryMatch.lemma || state.currQueryMatch.word;
-                }
-                const url =
-                    this.apis[action.payload.backlink.queryId].getBacklinkURL(
-                        searchTerm
-                    );
-                window.open(url.toString(), '_blank');
-            }
-        );
+    private getSearchTerm(queryMatch: QueryMatch): string {
+        const variant = getCurrentVariant(queryMatch);
+        return variant ? variant.key.lemma : queryMatch.lemma || queryMatch.word;
     }
 
     private loadData(

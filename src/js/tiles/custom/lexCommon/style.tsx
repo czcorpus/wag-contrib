@@ -86,7 +86,6 @@ export const SubtileRow = styled.div<{ theme: Theme; $source?: string }>`
 
         .footer-box {
             display: inline-block;
-            width: fit-content;
             ${(props) => props.theme.tileFooterStyle};
             background-color: ${(props) =>
                 props.$source
