@@ -78,7 +78,7 @@ export function init(
                 source={Source.ASSC}
                 className="data-box"
             >
-                <lexComponents.Scroller resetKey={state.data.assc}>
+                <globalComponents.Scroller resetKey={state.data.assc}>
                     {List.flatMap(
                         (blocks, i) =>
                             List.map(
@@ -165,7 +165,7 @@ export function init(
                             ),
                         state.data.assc
                     )}
-                </lexComponents.Scroller>
+                </globalComponents.Scroller>
             </lexComponents.Subtile>
         );
     };
@@ -181,7 +181,7 @@ export function init(
                 source={Source.IJP}
                 className="data-box"
             >
-                <lexComponents.Scroller resetKey={state.data.ijp}>
+                <globalComponents.Scroller resetKey={state.data.ijp}>
                     {List.map(
                         (item, i) => (
                             <React.Fragment key={`ijp-${i}`}>
@@ -260,7 +260,7 @@ export function init(
                         ),
                         state.data.ijp
                     )}
-                </lexComponents.Scroller>
+                </globalComponents.Scroller>
             </lexComponents.Subtile>
         );
     };
@@ -276,7 +276,7 @@ export function init(
                 source={Source.SSC}
                 className="data-box"
             >
-                <lexComponents.Scroller resetKey={state.data.ssc}>
+                <globalComponents.Scroller resetKey={state.data.ssc}>
                     {List.map(
                         (item, i) => (
                             <React.Fragment key={`ssc-${i}`}>
@@ -297,7 +297,7 @@ export function init(
                         ),
                         state.data.ssc
                     )}
-                </lexComponents.Scroller>
+                </globalComponents.Scroller>
             </lexComponents.Subtile>
         );
     };

@@ -35,7 +35,6 @@ import {
     isSSJCDataStructure,
 } from './api/types.js';
 import { Actions } from './actions.js';
-import { initLexComponents } from '../lexCommon/views.js';
 import { overrideFooterStyle } from '../lexCommon/theme.js';
 
 export function init(
@@ -45,7 +44,6 @@ export function init(
     model: LexDictionariesModel
 ): TileComponent {
     const globalComponents = ut.getComponents();
-    const lexComponents = initLexComponents(dispatcher, ut);
 
     const TabButton: React.FC<{
         id: number;
@@ -199,7 +197,7 @@ export function init(
                             )}
                         </S.Tabs>
 
-                        <lexComponents.Scroller
+                        <globalComponents.Scroller
                             className="dict-scroller"
                             resetKey={tabIdx}
                         >
@@ -221,7 +219,7 @@ export function init(
                                     <SSCDataView data={current.data} />
                                 ) : null
                             ) : null}
-                        </lexComponents.Scroller>
+                        </globalComponents.Scroller>
                     </S.Stretcher>
                 </S.LexDictionariesTileView>
             </globalComponents.TileWrapper>
