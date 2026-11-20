@@ -164,7 +164,6 @@ export function init(
                 error={state.error}
                 hasData={List.some((d) => d.data !== null, state.sources)}
                 noDataMessage={ut.translate('lex_dictionaries__not_found')}
-                backlink={current ? current.backlink : null}
                 supportsTileReload={props.supportsReloadOnError}
                 isSubtileContainer={props.isSubtileContainer}
                 issueReportingUrl={props.issueReportingUrl}

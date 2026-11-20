@@ -96,13 +96,7 @@ class UjcBasicApi<T> implements LexDictApi<UjcBasicArgs, T> {
     }
 
     getBacklink(queryId: number, subqueryId?: number): Backlink | null {
-        return {
-            queryId,
-            label: this.apiServices.importExternalMessage({
-                'cs-CZ': 'zde',
-                'en-US': 'here',
-            }),
-        };
+        return null;
     }
 
     getSourceDescription(
@@ -222,10 +216,6 @@ export class UjcSSCApi extends UjcBasicApi<SSCDataStructure> {
             author: 'Ústav pro jazyk český AV ČR',
             href: null,
         });
-    }
-
-    getBacklink(queryId: number, subqueryId?: number): Backlink | null {
-        return null;
     }
 
     getBacklinkURL(term: string): URL {

@@ -92,7 +92,6 @@ export class UjcKLATile implements ITileProvider {
                 maxImages: conf.maxItems || 2,
                 data: createEmptyData(),
                 error: null,
-                backlink: null,
             },
         });
         this.label = appServices.importExternalMessage(

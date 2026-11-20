@@ -99,12 +99,6 @@ export class UjcKLAApi implements ResourceApi<UjcKLAArgs, DataStructure> {
     }
 
     getBacklink(queryId:number, subqueryId?:number):Backlink|null {
-        return {
-            queryId,
-            label: this.apiServices.importExternalMessage({
-                'cs-CZ': 'zde',
-                'en-US': 'here'
-            }),
-        };
+        return null;
     }
 }
