@@ -48,11 +48,10 @@ export function init(
                 error={state.error}
                 hasData={!List.empty(state.data.entries)}
                 noDataMessage={ut.translate('lex_common__not_found')}
-                backlink={state.backlink}
                 supportsTileReload={props.supportsReloadOnError}
                 isSubtileContainer={props.isSubtileContainer}
                 issueReportingUrl={props.issueReportingUrl}
-                sourceIdent={{ corp: 'UJC' }}
+                sourceIdent={{ corp: 'Neomat' }}
                 extraStyle={overrideFooterStyle(theme)}
             >
                 <S.UjcNeomatTileView>

@@ -18,11 +18,11 @@
 
 import { IActionQueue, SEDispatcher } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
-import { Backlink } from '../../../page/tile.js';
 import { createEmptyData, DataStructure } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
+import { map } from 'rxjs';
 import { UjcKLAArgs, UjcKLAApi } from './api.js';
 import {
     findCurrQueryMatch,
@@ -40,7 +40,6 @@ export interface UjcKLAModelState {
     maxImages: number;
     data: DataStructure;
     error: string;
-    backlink: Backlink;
 }
 
 export interface UjcKLAModelArgs {
@@ -98,7 +97,6 @@ export class UjcKLAModel extends TileStatelessModel<UjcKLAModelState> {
                 state.isBusy = true;
                 state.error = null;
                 state.data = createEmptyData();
-                state.backlink = null;
             },
             (state, action, dispatch, ds) => {
                 this.loadData(ds, dispatch, state);
@@ -114,7 +112,6 @@ export class UjcKLAModel extends TileStatelessModel<UjcKLAModelState> {
                     state.error = action.error.message;
                 } else {
                     state.data = action.payload.data;
-                    state.backlink = this.api.getBacklink(0);
                 }
             }
         );
@@ -131,11 +128,34 @@ export class UjcKLAModel extends TileStatelessModel<UjcKLAModelState> {
                         appServices.getISO639UILang(),
                         ''
                     )
+                    .pipe(
+                        map((data) => {
+                            const term =
+                                state.data.query || List.head(state.queries);
+                            if (term) {
+                                data.backlink = {
+                                    key: appServices.translate(
+                                        'lex_common__term'
+                                    ),
+                                    links: [
+                                        {
+                                            label: term,
+                                            url: this.getBacklinkURL(
+                                                term
+                                            ).toString(),
+                                        },
+                                    ],
+                                };
+                            }
+                            return data;
+                        })
+                    )
                     .subscribe({
                         next: (data) => {
                             dispatch({
                                 name: GlobalActions.GetSourceInfoDone.name,
                                 payload: {
+                                    tileId: this.tileId,
                                     data: data,
                                 },
                             });
@@ -150,23 +170,16 @@ export class UjcKLAModel extends TileStatelessModel<UjcKLAModelState> {
                     });
             }
         );
+    }
 
-        this.addActionSubtypeHandler(
-            GlobalActions.FollowBacklink,
-            (action) => action.payload.tileId === this.tileId,
-            null,
-            (state, action, dispatch) => {
-                const backlinkUrl = new URL(
-                    'https://psjc.ujc.cas.cz/search.php'
-                );
-                backlinkUrl.searchParams.set('hledej', 'Hledej');
-                backlinkUrl.searchParams.set('heslo', state.data.query);
-                backlinkUrl.searchParams.set('where', 'hesla');
-                backlinkUrl.searchParams.set('zobraz_cards', 'cards');
-                backlinkUrl.searchParams.set('not_initial', '1');
-                window.open(backlinkUrl.toString(), '_blank');
-            }
-        );
+    private getBacklinkURL(term: string): URL {
+        const url = new URL('https://psjc.ujc.cas.cz/search.php');
+        url.searchParams.set('hledej', 'Hledej');
+        url.searchParams.set('heslo', term);
+        url.searchParams.set('where', 'hesla');
+        url.searchParams.set('zobraz_cards', 'cards');
+        url.searchParams.set('not_initial', '1');
+        return url;
     }
 
     private loadData(

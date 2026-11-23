@@ -18,11 +18,11 @@
 
 import { IActionQueue, SEDispatcher } from 'kombo';
 import { IAppServices } from '../../../appServices.js';
-import { Backlink } from '../../../page/tile.js';
 import { DataStructure } from './common.js';
 import { Actions as GlobalActions } from '../../../models/actions.js';
 import { Actions } from './actions.js';
 import { List } from 'cnc-tskit';
+import { map } from 'rxjs';
 import { UjcNeomatArgs, UjcNeomatApi } from './api.js';
 import {
     findCurrQueryMatch,
@@ -40,7 +40,6 @@ export interface UjcNeomatModelState {
     maxItems: number;
     data: DataStructure;
     error: string;
-    backlink: Backlink;
 }
 
 export interface UjcNeomatModelArgs {
@@ -99,7 +98,6 @@ export class UjcNeomatModel extends TileStatelessModel<UjcNeomatModelState> {
                 state.data = {
                     entries: [],
                 };
-                state.backlink = null;
             },
             (state, action, dispatch, ds) => {
                 this.loadData(ds, dispatch, state);
@@ -115,7 +113,6 @@ export class UjcNeomatModel extends TileStatelessModel<UjcNeomatModelState> {
                     state.error = action.error.message;
                 } else {
                     state.data = action.payload.data;
-                    state.backlink = this.api.getBacklink(0);
                 }
             }
         );
@@ -132,11 +129,33 @@ export class UjcNeomatModel extends TileStatelessModel<UjcNeomatModelState> {
                         appServices.getISO639UILang(),
                         ''
                     )
+                    .pipe(
+                        map((data) => {
+                            const term = state.ident;
+                            if (term) {
+                                data.backlink = {
+                                    key: appServices.translate(
+                                        'lex_common__term'
+                                    ),
+                                    links: [
+                                        {
+                                            label: term,
+                                            url: this.getBacklinkURL(
+                                                term
+                                            ).toString(),
+                                        },
+                                    ],
+                                };
+                            }
+                            return data;
+                        })
+                    )
                     .subscribe({
                         next: (data) => {
                             dispatch({
                                 name: GlobalActions.GetSourceInfoDone.name,
                                 payload: {
+                                    tileId: this.tileId,
                                     data: data,
                                 },
                             });
@@ -151,22 +170,15 @@ export class UjcNeomatModel extends TileStatelessModel<UjcNeomatModelState> {
                     });
             }
         );
+    }
 
-        this.addActionSubtypeHandler(
-            GlobalActions.FollowBacklink,
-            (action) => action.payload.tileId === this.tileId,
-            null,
-            (state, action, dispatch) => {
-                const backlinkUrl = new URL(
-                    'http://www.neologismy.cz/index.php'
-                );
-                backlinkUrl.searchParams.set('retezec', state.ident);
-                backlinkUrl.searchParams.set('nove_hledani', '1');
-                backlinkUrl.searchParams.set('button', 'Hledat');
-                backlinkUrl.searchParams.set('prijimam', '1');
-                window.open(backlinkUrl.toString(), '_blank');
-            }
-        );
+    private getBacklinkURL(term: string): URL {
+        const url = new URL('http://www.neologismy.cz/index.php');
+        url.searchParams.set('retezec', term);
+        url.searchParams.set('nove_hledani', '1');
+        url.searchParams.set('button', 'Hledat');
+        url.searchParams.set('prijimam', '1');
+        return url;
     }
 
     private loadData(

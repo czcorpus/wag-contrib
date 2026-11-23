@@ -99,9 +99,6 @@ export class UjcNeomatApi implements ResourceApi<UjcNeomatArgs, DataStructure> {
     }
 
     getBacklink(queryId:number, subqueryId?:number):Backlink|null {
-        return {
-            queryId,
-            label: 'heslo v databázi Neomat',
-        };
+        return null;
     }
 }
