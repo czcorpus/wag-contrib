@@ -107,8 +107,6 @@ export const MeaningHead = styled.div`
         font-size: 11px;
     }
 
-    // -------- ASSC adjusted styles -------
-
     .header-line {
         .mainVar {
             font-size: 15px !important;
@@ -121,10 +119,6 @@ export const MeaningHead = styled.div`
 
         > span {
             display: inline !important;
-        }
-
-        > span.semicolon {
-            margin: 0 0 0 -3px !important;
         }
 
         // hide trailing semicolon (no visible sibling follows it)

@@ -43,6 +43,36 @@ export function init(
 
     const ASSCHeader: React.FC<{ line: string }> = (props) => {
         const [collapsed, setCollapsed] = React.useState(true);
+        const ref = React.useRef<HTMLDivElement>(null);
+        // stable object identity - otherwise React resets innerHTML on every
+        // re-render (e.g. collapse toggle) and drops the inserted [+]
+        const html = React.useMemo(() => ({ __html: props.line }), [props.line]);
+
+        // insert [+] toggle right after the top-level element holding mainVarSign,
+        // but only if there is some collapsible content (see MeaningHead style);
+        // runs after every render, the guard below keeps it idempotent
+        React.useLayoutEffect(() => {
+            const container = ref.current;
+            if (
+                !container ||
+                container.querySelector(':scope > .expand') ||
+                !container.querySelector(
+                    '.vyslovnost, .druhyRadek .tvCh, .druhyRadek .tvChSl, .puvod'
+                )
+            ) {
+                return;
+            }
+            let anchor = container.querySelector('.mainVarSign');
+            while (anchor && anchor.parentElement !== container) {
+                anchor = anchor.parentElement;
+            }
+            if (anchor) {
+                const expand = document.createElement('span');
+                expand.className = 'expand';
+                expand.textContent = '[+]';
+                anchor.after(expand);
+            }
+        });
 
         const onClick = (ev: React.MouseEvent<HTMLDivElement>) => {
             const target = ev.target;
@@ -60,9 +90,10 @@ export function init(
 
         return (
             <S.ASSCStyle
+                ref={ref}
                 className={'header-line' + (collapsed ? ' collapsed' : '')}
                 onClick={onClick}
-                dangerouslySetInnerHTML={{ __html: props.line }}
+                dangerouslySetInnerHTML={html}
             />
         );
     };
