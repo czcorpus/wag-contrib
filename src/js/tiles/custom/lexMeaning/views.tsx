@@ -29,6 +29,7 @@ import { Source } from '../lexCommon/types/enums.js';
 import { initLexComponents } from '../lexCommon/views.js';
 import { getErrorMessage, LexResponse } from '../lexCommon/api.js';
 import { SystemMessageType } from '../../../types.js';
+import { useIsomorphicLayoutEffect } from '../../../page/hooks.js';
 
 export function init(
     dispatcher: IActionDispatcher,
@@ -39,6 +40,17 @@ export function init(
     const globalComponents = ut.getComponents();
     const lexComponents = initLexComponents(dispatcher, ut);
 
+    /**
+     * If the content overflows the tile by at most this fraction
+     * of the tile height, the tile is stretched instead of scrolling.
+     */
+    const MAX_STRETCH_RATIO = 0.15;
+
+    type SubtileProps = {
+        tileId: number;
+        onOverflowChange: (overflowPx: number) => void;
+    };
+
     // -------------------- <ASSCHeader /> -----------------------------------------------
 
     const ASSCHeader: React.FC<{ line: string }> = (props) => {
@@ -46,7 +58,10 @@ export function init(
         const ref = React.useRef<HTMLDivElement>(null);
         // stable object identity - otherwise React resets innerHTML on every
         // re-render (e.g. collapse toggle) and drops the inserted [+]
-        const html = React.useMemo(() => ({ __html: props.line }), [props.line]);
+        const html = React.useMemo(
+            () => ({ __html: props.line }),
+            [props.line]
+        );
 
         // insert [+] toggle right after the top-level element holding mainVarSign,
         // but only if there is some collapsible content (see MeaningHead style);
@@ -100,7 +115,7 @@ export function init(
 
     // -------------------- <ASSCLexSubtile /> -----------------------------------
 
-    const ASSCLexSubtile: React.FC<{ tileId: number }> = (props) => {
+    const ASSCLexSubtile: React.FC<SubtileProps> = (props) => {
         const state = useModel(model);
 
         return (
@@ -109,7 +124,10 @@ export function init(
                 source={Source.ASSC}
                 className="data-box"
             >
-                <globalComponents.Scroller resetKey={state.data.assc}>
+                <globalComponents.Scroller
+                    resetKey={state.data.assc}
+                    onOverflowChange={props.onOverflowChange}
+                >
                     {List.flatMap(
                         (blocks, i) =>
                             List.map(
@@ -203,7 +221,7 @@ export function init(
 
     // -------------------- <IJPLexSubtile /> -----------------------------------
 
-    const IJPLexSubtile: React.FC<{ tileId: number }> = (props) => {
+    const IJPLexSubtile: React.FC<SubtileProps> = (props) => {
         const state = useModel(model);
 
         return (
@@ -212,7 +230,10 @@ export function init(
                 source={Source.IJP}
                 className="data-box"
             >
-                <globalComponents.Scroller resetKey={state.data.ijp}>
+                <globalComponents.Scroller
+                    resetKey={state.data.ijp}
+                    onOverflowChange={props.onOverflowChange}
+                >
                     {List.map(
                         (item, i) => (
                             <React.Fragment key={`ijp-${i}`}>
@@ -298,7 +319,7 @@ export function init(
 
     // -------------------- <SSCLexSubtile /> -----------------------------------
 
-    const SSCLexSubtile: React.FC<{ tileId: number }> = (props) => {
+    const SSCLexSubtile: React.FC<SubtileProps> = (props) => {
         const state = useModel(model);
 
         return (
@@ -307,7 +328,10 @@ export function init(
                 source={Source.SSC}
                 className="data-box"
             >
-                <globalComponents.Scroller resetKey={state.data.ssc}>
+                <globalComponents.Scroller
+                    resetKey={state.data.ssc}
+                    onOverflowChange={props.onOverflowChange}
+                >
                     {List.map(
                         (item, i) => (
                             <React.Fragment key={`ssc-${i}`}>
@@ -412,6 +436,57 @@ export function init(
     const LexMeaningTileView: React.FC<CoreTileComponentProps> = (props) => {
         const state = useModel(model);
 
+        // -------- stretching the tile slightly instead of scrolling --------
+        const tileViewRef = React.useRef<HTMLDivElement>(null);
+        // tile height without stretching (measured when not stretched)
+        const naturalHeightRef = React.useRef(0);
+        const [stretch, setStretch] = React.useState(0);
+        const stretchRef = React.useRef(0);
+
+        // the last reported overflow - on the first render, the Scroller
+        // reports it (from its layout effect) before tileViewRef is attached,
+        // so it is evaluated again in the layout effect below
+        const lastOverflowRef = React.useRef<number | null>(null);
+
+        const handleOverflowChange = React.useCallback((overflow: number) => {
+            lastOverflowRef.current = overflow;
+            const tileView = tileViewRef.current;
+            if (!tileView) {
+                return;
+            }
+            if (stretchRef.current === 0) {
+                naturalHeightRef.current = tileView.offsetHeight;
+            }
+            // overflow as it would be without any stretching
+            const baseOverflow = overflow + stretchRef.current;
+            const newStretch =
+                baseOverflow > 0 &&
+                baseOverflow <= naturalHeightRef.current * MAX_STRETCH_RATIO
+                    ? baseOverflow
+                    : 0;
+            if (
+                Math.abs(newStretch - stretchRef.current) > 1 ||
+                newStretch === 0
+            ) {
+                stretchRef.current = newStretch;
+                setStretch(newStretch);
+            }
+        }, []);
+
+        useIsomorphicLayoutEffect(() => {
+            if (lastOverflowRef.current !== null) {
+                handleOverflowChange(lastOverflowRef.current);
+            }
+        }, [handleOverflowChange]);
+
+        const tileViewStyle: React.CSSProperties & Record<string, string> =
+            stretch > 0
+                ? {
+                      minHeight: `${naturalHeightRef.current + stretch}px`,
+                      '--lex-meaning-stretch': `${stretch}px`,
+                  }
+                : {};
+
         const renderErrors = () => {
             return pipe(
                 state.sourcePriority,
@@ -460,11 +535,26 @@ export function init(
             if (hasValidData) {
                 switch (usedSource) {
                     case Source.ASSC:
-                        return <ASSCLexSubtile tileId={props.tileId} />;
+                        return (
+                            <ASSCLexSubtile
+                                tileId={props.tileId}
+                                onOverflowChange={handleOverflowChange}
+                            />
+                        );
                     case Source.IJP:
-                        return <IJPLexSubtile tileId={props.tileId} />;
+                        return (
+                            <IJPLexSubtile
+                                tileId={props.tileId}
+                                onOverflowChange={handleOverflowChange}
+                            />
+                        );
                     case Source.SSC:
-                        return <SSCLexSubtile tileId={props.tileId} />;
+                        return (
+                            <SSCLexSubtile
+                                tileId={props.tileId}
+                                onOverflowChange={handleOverflowChange}
+                            />
+                        );
                 }
             }
             return null;
@@ -488,7 +578,7 @@ export function init(
                     setMaxHeight={true}
                 >
                     {props.tileHeader}
-                    <S.MeaningTileView>
+                    <S.MeaningTileView ref={tileViewRef} style={tileViewStyle}>
                         <S.Stretcher>
                             {renderData(state.usedSource)}
                             {renderErrors()}
