@@ -71,7 +71,7 @@ export const Stretcher = styled.div<{ theme: Theme }>`
 
     ${(props) => props.theme.cssMobileScreen} {
         position: static;
-        max-height: 75vh;
+        max-height: 66vh;
     }
 `;
 
