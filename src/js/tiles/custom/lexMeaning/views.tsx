@@ -464,10 +464,7 @@ export function init(
                 baseOverflow <= naturalHeightRef.current * MAX_STRETCH_RATIO
                     ? baseOverflow
                     : 0;
-            if (
-                Math.abs(newStretch - stretchRef.current) > 1 ||
-                newStretch === 0
-            ) {
+            if (newStretch !== stretchRef.current) {
                 stretchRef.current = newStretch;
                 setStretch(newStretch);
             }
