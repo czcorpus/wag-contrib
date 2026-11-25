@@ -335,13 +335,21 @@ export function init(
                     {List.map(
                         (item, i) => (
                             <React.Fragment key={`ssc-${i}`}>
-                                {i > 0 ? (
+                                {i > 0 && !item.data.is_parent ? (
                                     <hr
                                         key={`ssc-hr-${i}`}
                                         className="itemDivider"
                                     />
                                 ) : null}
-                                <S.MeaningItem key={`ssc-item-${i}`}>
+                                {item.data.is_parent ? (
+                                    <span className="ke-slovu">ke slovu</span>
+                                ) : null}
+                                <S.MeaningItem
+                                    key={`ssc-item-${i}`}
+                                    className={
+                                        item.data.is_parent ? 'parent' : ''
+                                    }
+                                >
                                     <S.SSCStyle
                                         dangerouslySetInnerHTML={{
                                             __html: item.data.html_content,

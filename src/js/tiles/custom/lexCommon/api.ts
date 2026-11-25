@@ -28,6 +28,7 @@ import { IJPData as IJPData } from './types/ijp.js';
 import { isValidSource, Source, Type } from './types/enums.js';
 import { CorpusInfoAPI } from '../../../api/vendor/mquery/corpusInfo.js';
 import { SSCData } from './types/ssc.js';
+import { LexID } from './types/dictionary.js';
 
 export interface LexArgs {
     asscIds: string[];
@@ -174,6 +175,10 @@ export function isValidIjpId(id: string): boolean {
 export function getValidIjpId(id: string): string {
     const parts = id.replace('__', '').split('_');
     return parts.length >= 3 ? parts.slice(2).join('_') : id;
+}
+
+export function getIdWithParent(lexId: LexID): string {
+    return lexId.parentId ? `${lexId.id}~${lexId.parentId}` : lexId.id;
 }
 
 export class LexApi implements ResourceApi<LexArgs, LexResponse> {
