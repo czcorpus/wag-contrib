@@ -531,9 +531,9 @@ export const SSCStyle = styled.div<{ theme: Theme }>`
     }
 
     /* NOTE: higher specificity than .entry we need to override */
-    body.like-assc .entry {
-        padding-left: 0;
-        text-indent: 0;
+    .entry {
+        padding-left: 0 !important;
+        text-indent: 0 !important;
 
         /* TODO: let the portal provide this (common) styling for us */
         font-family:
