@@ -455,9 +455,25 @@ export function init(
         // reports it (from its layout effect) before tileViewRef is attached,
         // so it is evaluated again in the layout effect below
         const lastOverflowRef = React.useRef<number | null>(null);
+        // in the mobile layout (determined by CSS media query, not by
+        // props.isMobile which only detects touch devices), the Stretcher
+        // is static with a max-height limit and stretching the tile would
+        // only alternate with that limit
+        const stretcherRef = React.useRef<HTMLDivElement>(null);
+        const isStretchable = () =>
+            !!stretcherRef.current &&
+            window.getComputedStyle(stretcherRef.current).position ===
+                'absolute';
 
         const handleOverflowChange = React.useCallback((overflow: number) => {
             lastOverflowRef.current = overflow;
+            if (!isStretchable()) {
+                if (stretchRef.current !== 0) {
+                    stretchRef.current = 0;
+                    setStretch(0);
+                }
+                return;
+            }
             const tileView = tileViewRef.current;
             if (!tileView) {
                 return;
@@ -484,12 +500,9 @@ export function init(
             }
         }, [handleOverflowChange]);
 
-        const tileViewStyle: React.CSSProperties & Record<string, string> =
+        const tileViewStyle: React.CSSProperties =
             stretch > 0
-                ? {
-                      minHeight: `${naturalHeightRef.current + stretch}px`,
-                      '--lex-meaning-stretch': `${stretch}px`,
-                  }
+                ? { minHeight: `${naturalHeightRef.current + stretch}px` }
                 : {};
 
         const renderErrors = () => {
@@ -584,7 +597,7 @@ export function init(
                 >
                     {props.tileHeader}
                     <S.MeaningTileView ref={tileViewRef} style={tileViewStyle}>
-                        <S.Stretcher>
+                        <S.Stretcher ref={stretcherRef}>
                             {renderData(state.usedSource)}
                             {renderErrors()}
                         </S.Stretcher>
