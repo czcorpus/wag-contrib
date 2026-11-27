@@ -44,7 +44,7 @@ export function init(
      * If the content overflows the tile by at most this fraction
      * of the tile height, the tile is stretched instead of scrolling.
      */
-    const MAX_STRETCH_RATIO = 0.15;
+    const MAX_STRETCH_RATIO = 0.18;
 
     type SubtileProps = {
         tileId: number;
