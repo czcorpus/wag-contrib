@@ -71,14 +71,16 @@ export const Stretcher = styled.div<{ theme: Theme }>`
 
     ${(props) => props.theme.cssMobileScreen} {
         position: static;
-        max-height: 75vh;
+        max-height: 66vh;
     }
 `;
 
 // ---------------- <MeaningItem /> --------------------------------------
 
 export const MeaningItem = styled.div<{ theme: Theme }>`
-    margin-bottom: 1em;
+    &:not(:last-child) {
+        margin-bottom: 1em;
+    }
 
     // -------- parent meaning indentation --------
 
@@ -107,8 +109,6 @@ export const MeaningHead = styled.div`
         font-size: 11px;
     }
 
-    // -------- ASSC adjusted styles -------
-
     .header-line {
         .mainVar {
             font-size: 15px !important;
@@ -121,10 +121,6 @@ export const MeaningHead = styled.div`
 
         > span {
             display: inline !important;
-        }
-
-        > span.semicolon {
-            margin: 0 0 0 -3px !important;
         }
 
         // hide trailing semicolon (no visible sibling follows it)
@@ -530,6 +526,46 @@ export const SSCStyle = styled.div<{ theme: Theme }>`
         color: ${(props) => getLexTheme(props.theme).lemmaColor};
     }
 
+    .entry:last-child {
+        margin: 0 !important;
+    }
+
+    /* NOTE: higher specificity than .entry we need to override */
+    .entry {
+        padding-left: 0 !important;
+        text-indent: 0 !important;
+
+        /* TODO: let the portal provide this (common) styling for us */
+        font-family:
+            Roboto,
+            Segoe UI,
+            Arial,
+            sans-serif;
+    }
+
+    .sense {
+        display: block;
+        margin-top: 25px;
+    }
+
+    /* TODO: tei4u: drop rendition="#italic" from SSČ>TEI */
+    .def.italic {
+        font-style: normal;
+
+        display: block;
+        font-weight: bold;
+    }
+
+    /* FIXME: tei4u: text_to_quote needs a rename and better targeting */
+    .example {
+        font-style: italic;
+    }
+
+    /* (questionable): Disable UA (user agent) emphasis. */
+    abbr[title] {
+        text-decoration: none;
+    }
+
     // SSC original styles
 
     html,
@@ -555,7 +591,7 @@ export const SSCStyle = styled.div<{ theme: Theme }>`
 
     .entry,
     .page-number {
-        // margin: 16px 0;
+        margin: 16px 0;
         line-height: 1.5;
     }
 
@@ -621,12 +657,6 @@ export const SSCStyle = styled.div<{ theme: Theme }>`
 
     div.footnote {
         display: flex;
-        /* NOPE: hopefully this margin makes column-spanning paragraphs live better
-                in Firefox: even if not just one but two lines break across the two
-                columns the last one’s line height is half of what it should be!
-            XXX: again, it only improved a little in some cases; luckily, break-inside:
-                avoid-column exists to save the day */
-        /* margin-bottom: 3px; */
     }
 
     div.footnote p {
@@ -695,4 +725,8 @@ export const SSCStyle = styled.div<{ theme: Theme }>`
         width: 10%;
     }
     */
+
+    .small {
+        font-size: small;
+    }
 `;

@@ -18,4 +18,5 @@
 
 export interface SSCData {
     html_content: string;
+    is_parent: boolean;
 }
